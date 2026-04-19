@@ -139,46 +139,77 @@ export class BingoComponent {
     this.router.navigate(['/']);
   }
 
-  get state() {
-    return this.bingoState.state;
+
+  get board() {
+    return this.bingoState.state.board;
   }
+
+  get mode() {
+    return this.bingoState.state.mode;
+  }
+
 
   isCellInBingo(index: number) {
     return this.bingoState.isCellInBingo(index);
   }
 
+
   toggle(index: number) {
-    this.bingoState.toggle(index);
-  }
-
-  reset() {
-    this.bingoState.reset();
-  }
-
-  shuffle() {
-    this.bingoState.shuffle();
-  }
-
-  dragStart(index: number) {
-    this.bingoDrag.dragStart(index);
-  }
-
-  dragOver(index: number) {
-    this.bingoDrag.dragOver(index);
-  }
-
-  dragLeave(index: number) {
-    this.bingoDrag.dragLeave(index);
-  }
-
-  drop(index: number) {
-    const result = this.bingoDrag.drop(index, this.state.projects, this.state.done);
-    if (result) {
-      this.bingoState.setProjectsAndDone(result.projects, result.done);
+    if (this.mode === 'play') {
+      this.bingoState.toggle(index);
     }
   }
 
+
+  reset() {
+    if (this.mode === 'edit' || this.mode === 'play') {
+      this.bingoState.reset();
+    }
+  }
+
+
+  shuffle() {
+    if (this.mode === 'edit') {
+      this.bingoState.shuffle();
+    }
+  }
+
+
+  dragStart(index: number) {
+    if (this.mode === 'edit') {
+      this.bingoDrag.dragStart(index);
+    }
+  }
+
+  dragOver(index: number) {
+    if (this.mode === 'edit') {
+      this.bingoDrag.dragOver(index);
+    }
+  }
+
+  dragLeave(index: number) {
+    if (this.mode === 'edit') {
+      this.bingoDrag.dragLeave(index);
+    }
+  }
+
+  drop(index: number) {
+    if (this.mode === 'edit') {
+      const result = this.bingoDrag.drop(index, this.board.getProjects(), this.board.getDone());
+      if (result) {
+        this.bingoState.setProjectsAndDone(result.projects, result.done);
+      }
+    }
+  }
+
+
   get dragTargetIndex() {
-    return this.bingoDrag.getDragTargetIndex();
+    return this.mode === 'edit' ? this.bingoDrag.getDragTargetIndex() : null;
+  }
+
+  startGame() {
+    if (this.mode === 'edit') {
+      this.bingoState.startGame();
+    }
   }
 }

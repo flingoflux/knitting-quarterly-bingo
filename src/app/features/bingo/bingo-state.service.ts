@@ -1,18 +1,20 @@
 import { Injectable } from '@angular/core';
 import { BingoService, Project } from './bingo';
+import { IBingoBoard, EditableBingoBoard, PlayableBingoBoard } from './bingo-board';
+
+
+export type BingoBoardMode = 'edit' | 'play';
 
 export interface BingoBoardState {
-  projects: Project[];
-  done: boolean[];
-  bingoLines: number[][];
+  board: IBingoBoard;
+  mode: BingoBoardMode;
 }
 
 @Injectable({ providedIn: 'root' })
 export class BingoStateService {
   state: BingoBoardState = {
-    projects: [],
-    done: [],
-    bingoLines: []
+    board: new EditableBingoBoard([], [], []),
+    mode: 'edit'
   };
 
 
@@ -20,10 +22,13 @@ export class BingoStateService {
    * Setzt Projekte und Done-Status neu (z.B. nach Drag & Drop) und aktualisiert Bingo-Lines & Persistenz
    */
   setProjectsAndDone(projects: Project[], done: boolean[]) {
-    this.state.projects = projects;
-    this.state.done = done;
-    this.updateBingoLines();
-    this.save();
+    if (this.state.mode !== 'edit') return;
+    if (this.state.board instanceof EditableBingoBoard) {
+      this.state.board.setProjects(projects);
+      this.state.board.setDone(done);
+      this.updateBingoLines();
+      this.save();
+    }
   }
 
   constructor(private bingoService: BingoService) {
@@ -31,47 +36,84 @@ export class BingoStateService {
   }
 
   isCellInBingo(index: number): boolean {
-    return this.state.bingoLines.some(line => line.includes(index));
+    return this.state.board.getBingoLines().some(line => line.includes(index));
   }
 
   load() {
     const loaded = this.bingoService.load();
     if (loaded) {
-      this.state.projects = loaded.projects;
-      this.state.done = loaded.done;
+      this.state.board = new EditableBingoBoard(loaded.projects, loaded.done, this.bingoService.getBingoLines(loaded.done));
     } else {
-      this.state.projects = [];
-      this.state.done = [];
+      this.state.board = new EditableBingoBoard([], [], []);
     }
+    this.state.mode = 'edit';
     this.updateBingoLines();
   }
 
   toggle(index: number) {
-    this.state.done[index] = !this.state.done[index];
-    this.updateBingoLines();
-    this.save();
+    if (this.state.mode !== 'play') return;
+    if (this.state.board instanceof PlayableBingoBoard) {
+      this.state.board.toggle(index);
+      this.updateBingoLines();
+      this.save();
+    }
   }
 
   reset() {
-    this.state.done.fill(false);
-    this.updateBingoLines();
-    this.save();
+    if (this.state.mode === 'edit' && this.state.board instanceof EditableBingoBoard) {
+      this.state.board.setDone(new Array(this.state.board.getProjects().length).fill(false));
+      this.updateBingoLines();
+      this.save();
+    }
+    if (this.state.mode === 'play' && this.state.board instanceof PlayableBingoBoard) {
+      this.state.board = new PlayableBingoBoard(
+        this.state.board.getProjects(),
+        new Array(this.state.board.getProjects().length).fill(false),
+        []
+      );
+      this.updateBingoLines();
+      this.save();
+    }
   }
 
   shuffle() {
+    if (this.state.mode !== 'edit') return;
     const newState = this.bingoService.shuffleBoard();
-    this.state.projects = newState.projects;
-    this.state.done = newState.done;
-    this.updateBingoLines();
-    this.save();
+    if (this.state.board instanceof EditableBingoBoard) {
+      this.state.board.setProjects(newState.projects);
+      this.state.board.setDone(newState.done);
+      this.updateBingoLines();
+      this.save();
+    }
   }
 
   private updateBingoLines() {
-    this.state.bingoLines = this.bingoService.getBingoLines(this.state.done);
+    const done = this.state.board.getDone();
+    const bingoLines = this.bingoService.getBingoLines(done);
+    if (this.state.board instanceof EditableBingoBoard) {
+      this.state.board.setBingoLines(bingoLines);
+    } else if (this.state.board instanceof PlayableBingoBoard) {
+      // PlayableBingoBoard bekommt neue BingoLines
+      (this.state.board as PlayableBingoBoard)["bingoLines"] = bingoLines;
+    }
   }
 
   private save() {
-    this.bingoService.save({ projects: this.state.projects, done: this.state.done });
+    this.bingoService.save({ projects: this.state.board.getProjects(), done: this.state.board.getDone() });
+  }
+
+  startGame() {
+    if (this.state.mode === 'edit' && this.state.board instanceof EditableBingoBoard) {
+      this.state = {
+        board: new PlayableBingoBoard(
+          this.state.board.getProjects(),
+          this.state.board.getDone(),
+          this.state.board.getBingoLines()
+        ),
+        mode: 'play'
+      };
+      this.save();
+    }
   }
 
   // Drag & Drop Logik entfernt – bitte in Komponenten oder separatem UI-Service verwenden

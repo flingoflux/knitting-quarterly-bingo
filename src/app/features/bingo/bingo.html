@@ -6,14 +6,15 @@
   <h2>Knitting Bingo</h2>
 </div>
 
+
 <div class="grid">
-  <div 
-    *ngFor="let p of state.projects; let i = index"
+  <div
+    *ngFor="let p of board.getProjects(); let i = index"
     class="cell"
-    [class.done]="state.done[i]"
+    [class.done]="board.getDone()[i]"
     [class.drag-target]="dragTargetIndex === i"
     [class.bingo-cell]="isCellInBingo(i)"
-    draggable="true"
+    [draggable]="mode === 'edit'"
     (click)="toggle(i)"
     (dragstart)="dragStart(i)"
     (dragover)="$event.preventDefault(); dragOver(i)"
@@ -29,8 +30,10 @@
 </div>
 
 <div class="actions">
-  <button (click)="reset()">Zurücksetzen</button>
-  <button (click)="shuffle()">Felder würfeln</button>
+  <button *ngIf="mode === 'edit'" (click)="reset()">Zurücksetzen</button>
+  <button *ngIf="mode === 'edit'" (click)="shuffle()">Felder würfeln</button>
+  <button *ngIf="mode === 'edit'" (click)="startGame()">Bingo spielen</button>
+  <button *ngIf="mode === 'play'" (click)="reset()">Zurücksetzen</button>
 </div>
 <style>
 .board-header {
