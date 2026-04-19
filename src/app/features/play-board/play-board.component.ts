@@ -21,9 +21,9 @@ import { BoardCell } from '../../shared/domain/board-cell';
       </div>
 
       <div class="play-board-header">
-        <p class="eyebrow">Bingo Runde</p>
-        <h2>Knitting Quarterly Bingo spielen</h2>
-        <p class="subtitle">Klicke auf die Felder, um erledigte Projekte abzuhaken und deine Bingo-Linien sichtbar zu machen.</p>
+        <p class="eyebrow">Knitting Quarterly - Bingo</p>
+        <h2>Happy crafting</h2>
+        <p class="subtitle">Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen.</p>
       </div>
 
       <app-playable-board

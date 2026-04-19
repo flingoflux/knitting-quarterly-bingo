@@ -107,8 +107,7 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       font-size: 1.02rem;
     }
     .cell:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 16px 30px rgba(96, 58, 30, 0.16);
+      box-shadow: 0 0 0 3px rgba(196, 110, 53, 0.2), 0 12px 26px rgba(96, 58, 30, 0.14);
       border-color: #c79362;
     }
     .cell.drag-target {
@@ -144,20 +143,20 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       padding-bottom: 0.2rem;
     }
     .cat {
-      font-size: 0.72rem;
-      color: #5b4436;
+      font-size: 0.52rem;
+      color: #fff;
       border-radius: 999px;
-      border: 1px solid #d7b899;
-      background: #fff3e2;
-      padding: 0.15rem 0.55rem;
-      letter-spacing: 0.05em;
+      border: none;
+      background: #888;
+      padding: 0.1rem 0.45rem;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
       font-weight: 700;
     }
-    .cat-basics { background: #f5eadc; }
-    .cat-technik { background: #ede8ff; }
-    .cat-challenge { background: #ffe6dc; }
-    .cat-accessoire { background: #e6f4ec; }
+    .cat-basics { background: #ffa600; }
+    .cat-technik { background: #1cb3f4; }
+    .cat-challenge { background: #c44020; }
+    .cat-accessoire { background: #5aaa2a; }
     .edit-btn {
       position: absolute;
       right: 8px;
@@ -209,12 +208,12 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       padding: 0 0.25rem 0.2rem;
     }
     .chip {
-      font-size: 0.68rem;
+      font-size: 0.52rem;
       border-radius: 999px;
       border: 1px solid #d0ab86;
       background: #fffaf2;
       color: #a07850;
-      padding: 0.15rem 0.5rem;
+      padding: 0.1rem 0.45rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       font-weight: 700;
@@ -226,24 +225,24 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       color: #7b4a20;
     }
     .chip.chip-active.chip-basics {
-      background: #f5eadc;
-      border-color: #c4a06a;
-      color: #5a3e1b;
+      background: #ffa600;
+      border-color: #ffa600;
+      color: #fff;
     }
     .chip.chip-active.chip-technik {
-      background: #ede8ff;
-      border-color: #9b85e8;
-      color: #3d2d8a;
+      background: #1cb3f4;
+      border-color: #1cb3f4;
+      color: #fff;
     }
     .chip.chip-active.chip-challenge {
-      background: #ffe6dc;
-      border-color: #e8907a;
-      color: #7a2d1b;
+      background: #c44020;
+      border-color: #c44020;
+      color: #fff;
     }
     .chip.chip-active.chip-accessoire {
-      background: #e6f4ec;
-      border-color: #6da07d;
-      color: #1b4f2d;
+      background: #5aaa2a;
+      border-color: #5aaa2a;
+      color: #fff;
     }
     @media (max-width: 960px) {
       .grid.editable {

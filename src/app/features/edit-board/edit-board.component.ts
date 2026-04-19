@@ -34,8 +34,8 @@ import { Router } from '@angular/router';
       </div>
 
       <div class="edit-board-header">
-        <p class="eyebrow">Board Studio</p>
-        <h2>Knitting Quarterly Bingo planen</h2>
+        <p class="eyebrow">Knitting Quarterly - Board Studio</p>
+        <h2>Challenges und Projekte planen</h2>
         <p class="subtitle">Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden.</p>
       </div>
 
