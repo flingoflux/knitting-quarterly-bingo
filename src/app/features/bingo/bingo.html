@@ -1,0 +1,30 @@
+<h2>Knitting Bingo</h2>
+
+
+
+<div *ngIf="bingoLines.length" class="banner">
+  BINGO! 🎉 ({{bingoLines.length}})
+</div>
+
+<div class="grid">
+  <div 
+    *ngFor="let p of projects; let i = index"
+    class="cell"
+    [class.done]="done[i]"
+    draggable="true"
+    (click)="toggle(i)"
+    (dragstart)="dragStart(i)"
+    (dragover)="$event.preventDefault()"
+    (drop)="drop(i)"
+  >
+    <div>{{p.title}}</div>
+    <div class="cat" [ngClass]="'cat-' + p.catKey">
+      {{p.cat}}
+    </div>
+  </div>
+</div>
+
+<div class="actions">
+  <button (click)="reset()">Zurücksetzen</button>
+  <button (click)="shuffle()">Felder würfeln</button>
+</div>

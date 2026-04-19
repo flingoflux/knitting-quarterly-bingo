@@ -1,0 +1,32 @@
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+
+.cell{
+  border:1px solid #ccc;
+  padding:10px;
+  min-height:80px;
+  text-align:center;
+  cursor:pointer;
+}
+
+.cell.done{ background:#d4edda }
+
+.cat{
+  font-size:10px;
+  margin-top:5px;
+}
+
+.cat-basics{color:#3B6D11}
+.cat-technik{color:#185FA5}
+.cat-accessoire{color:#854F0B}
+.cat-challenge{color:#993556}
+
+.banner{
+  background:#d4edda;
+  padding:8px;
+  margin-bottom:10px;
+  text-align:center;
+}
