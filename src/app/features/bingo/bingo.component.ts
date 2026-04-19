@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BingoStateService } from './bingo-state.service';
+import { BingoDragService } from './bingo-drag.service';
 
 @Component({
   selector: 'app-bingo',
@@ -116,6 +117,7 @@ import { BingoStateService } from './bingo-state.service';
 })
 export class BingoComponent {
   bingoState = inject(BingoStateService);
+  bingoDrag = inject(BingoDragService);
 
   get state() {
     return this.bingoState.state;
@@ -138,22 +140,28 @@ export class BingoComponent {
   }
 
   dragStart(index: number) {
-    this.bingoState.dragStart(index);
+    this.bingoDrag.dragStart(index);
   }
 
   dragOver(index: number) {
-    this.bingoState.dragOver(index);
+    this.bingoDrag.dragOver(index);
   }
 
   dragLeave(index: number) {
-    this.bingoState.dragLeave(index);
+    this.bingoDrag.dragLeave(index);
   }
 
   drop(index: number) {
-    this.bingoState.drop(index);
+    const result = this.bingoDrag.drop(index, this.state.projects, this.state.done);
+    if (result) {
+      this.state.projects = result.projects;
+      this.state.done = result.done;
+      this.bingoState["updateBingoLines"]();
+      this.bingoState["save"]();
+    }
   }
 
   get dragTargetIndex() {
-    return this.bingoState.dragTargetIndex;
+    return this.bingoDrag.getDragTargetIndex();
   }
 }

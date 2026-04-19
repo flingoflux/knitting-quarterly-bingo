@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BingoService, Project } from './bingo';
-import { BingoDragService } from './bingo-drag.service';
 
 @Injectable({ providedIn: 'root' })
 export class BingoStateService {
@@ -11,8 +10,7 @@ export class BingoStateService {
   };
 
   constructor(
-    private bingoService: BingoService,
-    private bingoDragService: BingoDragService
+    private bingoService: BingoService
   ) {
     this.load();
   }
@@ -56,29 +54,5 @@ export class BingoStateService {
     this.bingoService.save({ projects: this.state.projects, done: this.state.done });
   }
 
-  dragStart(index: number) {
-    this.bingoDragService.dragStart(index);
-  }
-
-  dragOver(index: number) {
-    this.bingoDragService.dragOver(index);
-  }
-
-  dragLeave(index: number) {
-    this.bingoDragService.dragLeave(index);
-  }
-
-  drop(index: number) {
-    const result = this.bingoDragService.drop(index, this.state.projects, this.state.done);
-    if (result) {
-      this.state.projects = result.projects;
-      this.state.done = result.done;
-      this.updateBingoLines();
-      this.save();
-    }
-  }
-
-  get dragTargetIndex() {
-    return this.bingoDragService.getDragTargetIndex();
-  }
+  // Drag & Drop Logik entfernt – bitte in Komponenten oder separatem UI-Service verwenden
 }
