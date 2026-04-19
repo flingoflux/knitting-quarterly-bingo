@@ -1,7 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BingoService, Project } from './bingo';
-import { BingoDragService } from './bingo-drag.service';
+import { BingoStateService } from './bingo-state.service';
 
 @Component({
   selector: 'app-bingo',
@@ -115,78 +114,46 @@ import { BingoDragService } from './bingo-drag.service';
     }
   `]
 })
-export class BingoComponent implements OnInit {
-  state = {
-    projects: [] as Project[],
-    done: [] as boolean[],
-    bingoLines: [] as number[][]
-  };
+export class BingoComponent {
+  bingoState = inject(BingoStateService);
 
-  bingoService = inject(BingoService);
-  bingoDragService = inject(BingoDragService);
-
-  public isCellInBingo(index: number): boolean {
-    return this.state.bingoLines.some(line => line.includes(index));
+  get state() {
+    return this.bingoState.state;
   }
 
-  ngOnInit() {
-    const loaded = this.bingoService.load();
-    this.state.projects = loaded.projects;
-    this.state.done = loaded.done;
-    this.updateBingoLines();
+  isCellInBingo(index: number) {
+    return this.bingoState.isCellInBingo(index);
   }
 
   toggle(index: number) {
-    this.state.done[index] = !this.state.done[index];
-    this.updateBingoLines();
-    this.save();
+    this.bingoState.toggle(index);
   }
 
   reset() {
-    this.state.done.fill(false);
-    this.updateBingoLines();
-    this.save();
+    this.bingoState.reset();
   }
 
   shuffle() {
-    const newState = this.bingoService.shuffleBoard();
-    this.state.projects = newState.projects;
-    this.state.done = newState.done;
-    this.updateBingoLines();
-    this.save();
-  }
-
-  private updateBingoLines() {
-    this.state.bingoLines = this.bingoService.getBingoLines(this.state.done);
-  }
-
-  private save() {
-    this.bingoService.save({ projects: this.state.projects, done: this.state.done });
+    this.bingoState.shuffle();
   }
 
   dragStart(index: number) {
-    this.bingoDragService.dragStart(index);
+    this.bingoState.dragStart(index);
   }
 
   dragOver(index: number) {
-    this.bingoDragService.dragOver(index);
+    this.bingoState.dragOver(index);
   }
 
   dragLeave(index: number) {
-    this.bingoDragService.dragLeave(index);
+    this.bingoState.dragLeave(index);
   }
 
   drop(index: number) {
-    const result = this.bingoDragService.drop(index, this.state.projects, this.state.done);
-    if (result) {
-      this.state.projects = result.projects;
-      this.state.done = result.done;
-      this.updateBingoLines();
-      this.save();
-    }
+    this.bingoState.drop(index);
   }
 
   get dragTargetIndex() {
-    return this.bingoDragService.getDragTargetIndex();
+    return this.bingoState.dragTargetIndex;
   }
 }
