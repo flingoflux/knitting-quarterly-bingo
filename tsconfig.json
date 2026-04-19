@@ -6,5 +6,7 @@
     "strict": true,
     "skipLibCheck": true
   },
+  "files": ["src/main.ts"],
+  "include": ["src/**/*.d.ts"],
   "exclude": ["src/**/*.spec.ts", "vitest.config.ts"]
 }
