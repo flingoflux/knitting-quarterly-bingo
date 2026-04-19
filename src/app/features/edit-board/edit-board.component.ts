@@ -4,6 +4,9 @@ import { EditableBoardComponent } from './components/editable-board.component';
 import { shuffleArray } from '../../shared/utils/array-utils';
 import { EditableProject } from './domain/editable-project';
 import { Router } from '@angular/router';
+import { PlayableBingoStateService } from '../play-board/state/playable-bingo-state.service';
+import { PlayableBingoBoard } from '../play-board/domain/playable-bingo-board';
+import { PlayableProject } from '../play-board/domain/playable-project';
 
 @Component({
   selector: 'app-edit-board-feature',
@@ -24,6 +27,12 @@ import { Router } from '@angular/router';
           <line x1="4" y1="20" x2="21" y2="3"/>
           <polyline points="21 16 21 21 16 21"/>
           <line x1="15" y1="15" x2="21" y2="21"/>
+        </svg>
+      </button>
+      <button class="icon-btn" (click)="playAsBingo()" title="Als Bingo spielen" aria-label="Als Bingo spielen">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <circle cx="12" cy="12" r="4"/>
         </svg>
       </button>
     </div>
@@ -125,6 +134,7 @@ import { Router } from '@angular/router';
 export class EditBoardFeatureComponent {
   state = inject(EditableBingoStateService);
   router = inject(Router);
+  playableState = inject(PlayableBingoStateService);
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
 
@@ -140,6 +150,17 @@ export class EditBoardFeatureComponent {
     const projects = this.board.getProjects();
     const shuffled = shuffleArray(projects);
     this.state.setProjects(shuffled as EditableProject[]);
+  }
+
+  playAsBingo() {
+    // Konvertiere Editable zu Playable
+    const editableProjects = this.board.getProjects();
+    const playableProjects = editableProjects.map(p => new PlayableProject(p.title, p.cat, p.catKey));
+    const done = new Array(playableProjects.length).fill(false);
+    const bingoLines: number[][] = [];
+    const playableBoard = new PlayableBingoBoard(playableProjects, done, bingoLines);
+    this.playableState.setBoard(playableBoard);
+    this.router.navigate(['/play']);
   }
 
   dragStart = (i: number) => {

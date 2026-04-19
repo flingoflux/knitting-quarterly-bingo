@@ -18,6 +18,10 @@ export class PlayableBingoStateService {
     return this.board;
   }
 
+  setBoard(board: PlayableBingoBoard) {
+    this.board = board;
+  }
+
   toggle(index: number) {
     this.board.toggle(index);
     // ggf. persistieren
