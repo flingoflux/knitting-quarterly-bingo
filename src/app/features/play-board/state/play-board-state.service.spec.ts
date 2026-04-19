@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BoardCell } from '../../../shared/domain/board-cell';
-import { BoardDefinitionRepositoryService, PersistedBoardDefinition } from '../../edit-board/state/board-definition-repository.service';
+import { PersistedBoardDefinition } from '../../edit-board/state/board-definition-repository.service';
+import { BoardDefinitionReader } from '../../../shared/ports/board-definition-reader';
 import { PlayBoardStateService } from './play-board-state.service';
 import { BingoGameRepositoryService } from './bingo-game-repository.service';
 import { BingoGameProgress, createBoardSignature } from '../domain/bingo-game';
@@ -43,7 +44,7 @@ function createState(
   bingoGameRepository: MockBingoGameRepository,
 ): PlayBoardStateService {
   return new PlayBoardStateService(
-    boardDefinitionRepository as unknown as BoardDefinitionRepositoryService,
+    boardDefinitionRepository as BoardDefinitionReader,
     bingoGameRepository as unknown as BingoGameRepositoryService,
   );
 }

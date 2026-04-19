@@ -1,6 +1,6 @@
-import { Injectable, Signal, computed, signal } from '@angular/core';
+import { Injectable, inject, Signal, computed, signal } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
-import { BoardDefinitionRepositoryService } from '../../edit-board/state/board-definition-repository.service';
+import { BOARD_DEFINITION_READER, BoardDefinitionReader } from '../../../shared/ports/board-definition-reader';
 import { BingoGameRepositoryService } from './bingo-game-repository.service';
 import { computeBingoCells, createBoardSignature, createEmptyDone, normalizeDone, toggleDone } from '../domain/bingo-game';
 
@@ -13,10 +13,15 @@ export class PlayBoardStateService {
   readonly done: Signal<boolean[]> = computed(() => this.doneState());
   readonly bingoCells: Signal<Set<number>> = computed(() => computeBingoCells(this.doneState()));
 
+  private readonly boardDefinitionRepository: BoardDefinitionReader;
+  private readonly bingoGameRepository: BingoGameRepositoryService;
+
   constructor(
-    private readonly boardDefinitionRepository: BoardDefinitionRepositoryService,
-    private readonly bingoGameRepository: BingoGameRepositoryService,
+    boardDefinitionRepository?: BoardDefinitionReader,
+    bingoGameRepository?: BingoGameRepositoryService,
   ) {
+    this.boardDefinitionRepository = boardDefinitionRepository ?? inject(BOARD_DEFINITION_READER);
+    this.bingoGameRepository = bingoGameRepository ?? inject(BingoGameRepositoryService);
     this.refreshFromDefinition();
   }
 
