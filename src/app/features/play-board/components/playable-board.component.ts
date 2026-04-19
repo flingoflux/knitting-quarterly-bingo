@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { PlayableBoard } from '../domain/playable-board';
 import { CommonModule } from '@angular/common';
 
@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
         class="cell"
         [class.done]="board.getDone()[i]"
         [class.bingo-cell]="isCellInBingo(i)"
-        (click)="toggle(i)"
+        (click)="onToggle(i)"
       >
         <div class="cell-content">
           <div class="title">{{p.title}}</div>
@@ -83,7 +83,11 @@ import { CommonModule } from '@angular/common';
 })
 export class PlayableBoardComponent implements OnInit {
   @Input() board!: PlayableBoard;
-  @Input() toggle!: (i: number) => void;
+  @Output() toggled = new EventEmitter<number>();
+
+  onToggle(i: number) {
+    this.toggled.emit(i);
+  }
 
   isCellInBingo(i: number): boolean {
     return this.board.getBingoCells().has(i);

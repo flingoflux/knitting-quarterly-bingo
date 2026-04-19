@@ -41,10 +41,10 @@ import { BoardTransferState } from '../../shared/navigation/board-transfer-state
     <app-editable-board
       [board]="board"
       [dragTargetIndex]="dragTargetIndex"
-      [dragStart]="dragStart"
-      [dragOver]="dragOver"
-      [dragLeave]="dragLeave"
-      [drop]="drop"
+      (dragStarted)="onDragStart($event)"
+      (dragOverCell)="onDragOver($event)"
+      (dragLeftCell)="onDragLeave($event)"
+      (droppedOnCell)="onDrop($event)"
     ></app-editable-board>
   `,
   styles: [`
@@ -156,24 +156,27 @@ export class EditBoardFeatureComponent {
     this.router.navigate(['/play'], { state });
   }
 
-  dragStart = (i: number) => {
+  onDragStart(i: number) {
     this.dragStartIndex = i;
     this.dragTargetIndex = i;
-  };
-  dragOver = (i: number) => {
+  }
+
+  onDragOver(i: number) {
     if (this.dragStartIndex !== null) {
       this.dragTargetIndex = i;
     }
-  };
-  dragLeave = (_i: number) => {
+  }
+
+  onDragLeave(_i: number) {
     this.dragTargetIndex = null;
-  };
-  drop = (i: number) => {
+  }
+
+  onDrop(i: number) {
     if (this.dragStartIndex !== null && this.dragStartIndex !== i) {
       this.board.swapProjects(this.dragStartIndex, i);
       this.state.setProjects([...this.board.getProjects()]);
     }
     this.dragStartIndex = null;
     this.dragTargetIndex = null;
-  };
+  }
 }

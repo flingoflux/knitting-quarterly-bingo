@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { EditableBoard } from '../domain/editable-board';
 import { CommonModule } from '@angular/common';
 
@@ -13,10 +13,10 @@ import { CommonModule } from '@angular/common';
         class="cell"
         [class.drag-target]="dragTargetIndex === i"
         draggable="true"
-        (dragstart)="dragStart(i)"
-        (dragover)="$event.preventDefault(); dragOver(i)"
-        (dragleave)="dragLeave(i)"
-        (drop)="drop(i)"
+        (dragstart)="onDragStart(i)"
+        (dragover)="$event.preventDefault(); onDragOver(i)"
+        (dragleave)="onDragLeave(i)"
+        (drop)="onDrop(i)"
       >
         <div class="cell-content">
           <div class="title">{{p.title}}</div>
@@ -74,10 +74,26 @@ import { CommonModule } from '@angular/common';
 export class EditableBoardComponent implements OnInit {
   @Input() board!: EditableBoard;
   @Input() dragTargetIndex!: number | null;
-  @Input() dragStart!: (i: number) => void;
-  @Input() dragOver!: (i: number) => void;
-  @Input() dragLeave!: (i: number) => void;
-  @Input() drop!: (i: number) => void;
+  @Output() dragStarted = new EventEmitter<number>();
+  @Output() dragOverCell = new EventEmitter<number>();
+  @Output() dragLeftCell = new EventEmitter<number>();
+  @Output() droppedOnCell = new EventEmitter<number>();
+
+  onDragStart(i: number) {
+    this.dragStarted.emit(i);
+  }
+
+  onDragOver(i: number) {
+    this.dragOverCell.emit(i);
+  }
+
+  onDragLeave(i: number) {
+    this.dragLeftCell.emit(i);
+  }
+
+  onDrop(i: number) {
+    this.droppedOnCell.emit(i);
+  }
 
   ngOnInit() {
     console.log('[EditableBoardComponent] Projekte:', this.board?.getProjects());

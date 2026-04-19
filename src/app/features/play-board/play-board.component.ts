@@ -22,7 +22,7 @@ import { BoardTransferState } from '../../shared/navigation/board-transfer-state
       <h2>Knitting Quarterly Bingo spielen</h2>
       <p class="subtitle">Klicke auf die Felder, um erledigte Projekte abzuhaken!</p>
     </div>
-    <app-playable-board [board]="board" [toggle]="toggle"></app-playable-board>
+    <app-playable-board [board]="board" (toggled)="onToggle($event)"></app-playable-board>
   `,
   styles: [
     `.home-btn {
@@ -75,7 +75,7 @@ export class PlayBoardFeatureComponent implements OnInit {
   get board() {
     return this.state.getBoard();
   }
-  toggle = (i: number) => {
+  onToggle(i: number) {
     this.state.toggle(i);
   }
   goHome() {
