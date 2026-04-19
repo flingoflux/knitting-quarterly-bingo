@@ -69,8 +69,8 @@ interface CardDetailOpenedEvent {
     .grid.playable {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 1.1rem;
-      max-width: 70rem;
+      gap: 0.65rem;
+      max-width: 52rem;
       margin: 1rem auto 0;
     }
     .cell {
@@ -173,19 +173,19 @@ interface CardDetailOpenedEvent {
     }
     .caption {
       background: #fff;
-      padding: 0.55rem 0.6rem 0.6rem;
+      padding: 0.38rem 0.45rem 0.45rem;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.3rem;
-      min-height: 78px;
+      gap: 0.22rem;
+      min-height: 60px;
       flex: 1;
     }
     .title {
       font-weight: 700;
       color: #4a2d1c;
-      font-size: 0.82rem;
-      line-height: 1.3;
+      font-size: 0.72rem;
+      line-height: 1.25;
       text-wrap: balance;
       text-align: center;
     }

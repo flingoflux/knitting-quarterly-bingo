@@ -130,12 +130,18 @@ export class PlayBingoFeatureComponent {
   }
 
   onCardDetailOpen(event: { index: number; project: BoardCell }) {
+    this._openCardIndex = event.index;
     this.detailDialog.open(event.project.imageId ?? null, event.project.title);
   }
 
   onImageChanged(event: ImageChangedEvent): void {
+    if (this._openCardIndex !== null) {
+      this.state.updateProjectImageId(this._openCardIndex, event.imageId ?? undefined);
+    }
     void this.playableBoardRef.refreshImage(event.imageId);
   }
+
+  private _openCardIndex: number | null = null;
 
   goHome() {
     this.router.navigate(['/']);

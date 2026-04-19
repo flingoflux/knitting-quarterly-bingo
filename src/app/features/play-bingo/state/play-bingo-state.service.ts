@@ -3,6 +3,7 @@ import { BoardCell } from '../../../shared/domain/board-cell';
 import { BOARD_DEFINITION_READER, BoardDefinitionReader } from '../../../shared/ports/board-definition-reader';
 import { BingoGameRepositoryService } from './bingo-game-repository.service';
 import { computeBingoCells, createBoardSignature, createEmptyDone, normalizeDone, toggleDone } from '../domain/bingo-game';
+import { BoardDefinitionRepositoryService } from '../../board-studio/state/board-definition-repository.service';
 
 @Injectable({ providedIn: 'root' })
 export class PlayBingoStateService {
@@ -14,6 +15,7 @@ export class PlayBingoStateService {
   readonly bingoCells: Signal<Set<number>> = computed(() => computeBingoCells(this.doneState()));
 
   private readonly boardDefinitionRepository = inject(BOARD_DEFINITION_READER);
+  private readonly boardDefinitionWriter = inject(BoardDefinitionRepositoryService);
   private readonly bingoGameRepository = inject(BingoGameRepositoryService);
 
   constructor() {
@@ -23,6 +25,14 @@ export class PlayBingoStateService {
   hasPlayableBoard(): boolean {
     this.refreshFromDefinition();
     return this.projectsState().length > 0;
+  }
+
+  updateProjectImageId(index: number, imageId: string | undefined): void {
+    const projects = [...this.projectsState()];
+    if (index < 0 || index >= projects.length) return;
+    projects[index] = { ...projects[index], imageId };
+    this.projectsState.set(projects);
+    this.boardDefinitionWriter.save({ projects });
   }
 
   resetProgress(): void {
