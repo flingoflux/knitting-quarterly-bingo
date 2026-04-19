@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { StorageService } from '../../core/services/storage.service';
 
 export interface Project {
   title: string;
@@ -9,6 +10,7 @@ export interface Project {
 @Injectable({ providedIn: 'root' })
 export class BingoService {
   STORAGE_KEY = 'bingo_state_angular';
+  constructor(private storage: StorageService) {}
 
   lines = [
     [0, 1, 2, 3],
@@ -43,16 +45,17 @@ export class BingoService {
   ];
 
   load() {
-    const s = localStorage.getItem(this.STORAGE_KEY);
-    if (s) return JSON.parse(s);
+    const loaded = this.storage.getItem<{ projects: Project[]; done: boolean[] }>(this.STORAGE_KEY);
+    if (loaded) return loaded;
     return {
       projects: [...this.defaultProjects],
       done: new Array(16).fill(false),
     };
   }
 
-  save(state: any) {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+  save(state: { projects: Project[]; done: boolean[] }) {
+    this.storage.setItem(this.STORAGE_KEY, state);
+  }
   }
 
   getBingoLines(done: boolean[]) {

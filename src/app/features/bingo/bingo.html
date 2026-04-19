@@ -1,10 +1,10 @@
 <h2>Knitting Bingo</h2>
 
 <div class="grid">
-  <div
-    *ngFor="let p of projects; let i = index"
+  <div 
+    *ngFor="let p of state.projects; let i = index"
     class="cell"
-    [class.done]="done[i]"
+    [class.done]="state.done[i]"
     [class.drag-target]="dragTargetIndex === i"
     [class.bingo-cell]="isCellInBingo(i)"
     draggable="true"
@@ -18,6 +18,8 @@
       <span *ngIf="isCellInBingo(i)" class="bingo-check">✔️</span>
       <div class="title">{{p.title}}</div>
       <div class="cat" [ngClass]="'cat-' + p.catKey">{{p.cat}}</div>
+    </div>
+  </div>
     </div>
   </div>
 </div>

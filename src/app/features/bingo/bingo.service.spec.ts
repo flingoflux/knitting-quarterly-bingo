@@ -1,10 +1,16 @@
-import { BingoService } from './bingo';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { BingoService, Project } from './bingo';
+import { StorageService } from '../../core/services/storage.service';
 
-describe('BingoService', () => {
   let service: BingoService;
+  let storageMock: StorageService;
 
   beforeEach(() => {
-    service = new BingoService();
+    storageMock = {
+      getItem: () => null,
+      setItem: () => {}
+    } as StorageService;
+    service = new BingoService(storageMock);
   });
 
   it('should create default state', () => {
@@ -25,4 +31,3 @@ describe('BingoService', () => {
     const lines = service.getBingoLines(done);
     expect(lines.length).toBeGreaterThan(0);
   });
-});
