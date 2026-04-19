@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Project } from './bingo';
 
 @Injectable({ providedIn: 'root' })
 export class BingoDragService {
@@ -19,7 +20,7 @@ export class BingoDragService {
     }
   }
 
-  drop(index: number, projects: any[], done: boolean[]): { projects: any[], done: boolean[] } | null {
+  drop(index: number, projects: Project[], done: boolean[]): { projects: Project[], done: boolean[] } | null {
     if (this.dragSourceIndex === null || this.dragSourceIndex === index) {
       this.dragTargetIndex = null;
       return null;
