@@ -10,7 +10,9 @@ export interface Project {
 @Injectable({ providedIn: 'root' })
 export class BingoService {
   STORAGE_KEY = 'bingo_state_angular';
-  constructor(private storage: StorageService) {}
+  storage = inject(StorageService);
+
+  constructor() {}
 
   lines = [
     [0, 1, 2, 3],

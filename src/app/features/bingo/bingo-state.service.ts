@@ -26,9 +26,9 @@ export class BingoStateService {
     this.save();
   }
 
-  constructor(
-    private bingoService: BingoService
-  ) {
+  bingoService = inject(BingoService);
+
+  constructor() {
     this.load();
   }
 
