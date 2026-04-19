@@ -7,6 +7,16 @@ export interface PersistedBoardDefinition {
   projects: BoardCell[];
 }
 
+function isValidBoardCell(cell: unknown): cell is BoardCell {
+  return (
+    typeof cell === 'object' &&
+    cell !== null &&
+    typeof (cell as BoardCell).title === 'string' &&
+    Array.isArray((cell as BoardCell).catKeys) &&
+    (cell as BoardCell).catKeys.every((k) => typeof k === 'string')
+  );
+}
+
 @Injectable({ providedIn: 'root' })
 export class BoardDefinitionRepositoryService implements BoardDefinitionReader {
   private readonly storageKey = 'kq-bingo-board-definition-v1';
@@ -14,7 +24,11 @@ export class BoardDefinitionRepositoryService implements BoardDefinitionReader {
   constructor(private readonly storage: StorageService) {}
 
   load(): PersistedBoardDefinition | null {
-    return this.storage.getItem<PersistedBoardDefinition>(this.storageKey);
+    const raw = this.storage.getItem<{ projects: unknown[] }>(this.storageKey);
+    if (raw === null || !Array.isArray(raw.projects) || !raw.projects.every(isValidBoardCell)) {
+      return null;
+    }
+    return { projects: raw.projects };
   }
 
   save(definition: PersistedBoardDefinition): void {

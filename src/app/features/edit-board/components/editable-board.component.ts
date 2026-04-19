@@ -57,21 +57,27 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
               (keydown.enter)="saveAndExit(i, p)"
             />
 
-            <select
-              class="cat-select"
-              (change)="onDraftCategoryChange(i, $event)"
-            >
-              <option
+            <div class="chips">
+              <button
                 *ngFor="let option of categoryOptions"
-                [value]="option.key"
-                [selected]="option.key === getDraftCatKey(i, p.catKey)"
-              >{{option.label}}</option>
-            </select>
+                type="button"
+                class="chip"
+                [class.chip-active]="isDraftCatKeySelected(i, p.catKeys, option.key)"
+                [ngClass]="'chip-' + option.key"
+                (click)="toggleDraftCategory(i, p.catKeys, option.key, $event)"
+              >{{option.label}}</button>
+            </div>
           </ng-container>
 
           <ng-template #readonlyView>
             <div class="title">{{p.title}}</div>
-            <div class="cat" [ngClass]="'cat-' + p.catKey">{{p.cat}}</div>
+            <div class="cats">
+              <span
+                *ngFor="let key of p.catKeys"
+                class="cat"
+                [ngClass]="'cat-' + key"
+              >{{getCategoryLabel(key)}}</span>
+            </div>
           </ng-template>
         </div>
       </div>
@@ -129,6 +135,14 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       line-height: 1.25;
       text-wrap: balance;
     }
+    .cats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      justify-content: center;
+      margin-top: auto;
+      padding-bottom: 0.2rem;
+    }
     .cat {
       font-size: 0.72rem;
       color: #5b4436;
@@ -139,20 +153,11 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       letter-spacing: 0.05em;
       text-transform: uppercase;
       font-weight: 700;
-      margin-top: auto;
     }
-    .cat-basics {
-      background: #f5eadc;
-    }
-    .cat-technik {
-      background: #ede8ff;
-    }
-    .cat-challenge {
-      background: #ffe6dc;
-    }
-    .cat-accessoire {
-      background: #e6f4ec;
-    }
+    .cat-basics { background: #f5eadc; }
+    .cat-technik { background: #ede8ff; }
+    .cat-challenge { background: #ffe6dc; }
+    .cat-accessoire { background: #e6f4ec; }
     .edit-btn {
       position: absolute;
       right: 8px;
@@ -180,8 +185,7 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       outline: 3px solid rgba(196, 110, 53, 0.3);
       outline-offset: 2px;
     }
-    .title-input,
-    .cat-select {
+    .title-input {
       width: calc(100% - 1rem);
       border: 1px solid #d0ab86;
       border-radius: 9px;
@@ -189,19 +193,57 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       font-size: 0.9rem;
       background: #fffdf9;
       color: #3f2a1d;
-    }
-    .title-input {
       margin-top: 2rem;
       text-align: center;
       font-weight: 600;
     }
-    .cat-select {
-      margin-bottom: 0.2rem;
-    }
-    .title-input:focus-visible,
-    .cat-select:focus-visible {
+    .title-input:focus-visible {
       outline: 3px solid rgba(196, 110, 53, 0.28);
       outline-offset: 1px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      justify-content: center;
+      padding: 0 0.25rem 0.2rem;
+    }
+    .chip {
+      font-size: 0.68rem;
+      border-radius: 999px;
+      border: 1px solid #d0ab86;
+      background: #fffaf2;
+      color: #a07850;
+      padding: 0.15rem 0.5rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .chip:hover {
+      border-color: #b87a45;
+      color: #7b4a20;
+    }
+    .chip.chip-active.chip-basics {
+      background: #f5eadc;
+      border-color: #c4a06a;
+      color: #5a3e1b;
+    }
+    .chip.chip-active.chip-technik {
+      background: #ede8ff;
+      border-color: #9b85e8;
+      color: #3d2d8a;
+    }
+    .chip.chip-active.chip-challenge {
+      background: #ffe6dc;
+      border-color: #e8907a;
+      color: #7a2d1b;
+    }
+    .chip.chip-active.chip-accessoire {
+      background: #e6f4ec;
+      border-color: #6da07d;
+      color: #1b4f2d;
     }
     @media (max-width: 960px) {
       .grid.editable {
@@ -231,14 +273,13 @@ export class EditableBoardComponent {
 
   editingIndex: number | null = null;
   private readonly draftTitles = new Map<number, string>();
-  private readonly draftCategoryKeys = new Map<number, string>();
+  private readonly draftCategoryKeys = new Map<number, string[]>();
 
   onDragStart(i: number, event: DragEvent) {
     if (this.editingIndex === i) {
       event.preventDefault();
       return;
     }
-
     this.dragStarted.emit(i);
   }
 
@@ -276,7 +317,7 @@ export class EditableBoardComponent {
     }
     this.editingIndex = i;
     this.draftTitles.set(i, project.title);
-    this.draftCategoryKeys.set(i, this.getCategoryForProject(project)?.key ?? CATEGORY_OPTIONS[0].key);
+    this.draftCategoryKeys.set(i, [...project.catKeys]);
   }
 
   onDraftTitleInput(i: number, event: Event): void {
@@ -284,9 +325,21 @@ export class EditableBoardComponent {
     this.draftTitles.set(i, target.value);
   }
 
-  onDraftCategoryChange(i: number, event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.draftCategoryKeys.set(i, target.value);
+  toggleDraftCategory(i: number, fallbackCatKeys: string[], key: string, event: MouseEvent): void {
+    event.stopPropagation();
+    const current = this.draftCategoryKeys.get(i) ?? [...fallbackCatKeys];
+    const idx = current.indexOf(key);
+    if (idx === -1) {
+      this.draftCategoryKeys.set(i, [...current, key]);
+    } else {
+      if (current.length === 1) return;
+      this.draftCategoryKeys.set(i, current.filter((k) => k !== key));
+    }
+  }
+
+  isDraftCatKeySelected(i: number, fallbackCatKeys: string[], key: string): boolean {
+    const keys = this.draftCategoryKeys.get(i) ?? fallbackCatKeys;
+    return keys.includes(key);
   }
 
   saveAndExit(i: number, project: BoardCell): void {
@@ -301,47 +354,30 @@ export class EditableBoardComponent {
 
     const draftTitle = this.getDraftTitle(i, project.title).trim();
     const title = draftTitle.length > 0 ? draftTitle : project.title;
-    const fallbackCategory = this.getCategoryForProject(project);
-    const draftCatKey = this.getDraftCatKey(i, fallbackCategory?.key ?? project.catKey);
-    const selectedCategory = this.getCategoryByKey(draftCatKey) ?? fallbackCategory;
-    const catKey = selectedCategory?.key ?? project.catKey;
-    const cat = selectedCategory?.label ?? project.cat;
-    const updatedProject: BoardCell = { title, cat, catKey };
+    const catKeys = this.draftCategoryKeys.get(i) ?? [...project.catKeys];
+    const updatedProject: BoardCell = { title, catKeys };
 
     if (!this.isSameProject(project, updatedProject)) {
-      this.projectEdited.emit({
-        index: i,
-        project: updatedProject,
-      });
+      this.projectEdited.emit({ index: i, project: updatedProject });
     }
 
     this.draftTitles.set(i, title);
-    this.draftCategoryKeys.set(i, catKey);
+    this.draftCategoryKeys.set(i, catKeys);
   }
 
   getDraftTitle(i: number, fallback: string): string {
     return this.draftTitles.get(i) ?? fallback;
   }
 
-  getDraftCatKey(i: number, fallback: string): string {
-    return this.draftCategoryKeys.get(i) ?? this.getCategoryByKey(fallback)?.key ?? CATEGORY_OPTIONS[0].key;
-  }
-
-  private getCategoryForProject(project: BoardCell): CategoryOption | undefined {
-    const byKey = this.getCategoryByKey(project.catKey);
-    if (byKey !== undefined) {
-      return byKey;
-    }
-
-    const normalizedCat = project.cat.trim().toLowerCase();
-    return this.categoryOptions.find((option) => option.label.toLowerCase() === normalizedCat);
-  }
-
-  private getCategoryByKey(key: string): CategoryOption | undefined {
-    return this.categoryOptions.find((option) => option.key === key);
+  getCategoryLabel(key: string): string {
+    return CATEGORY_OPTIONS.find((o) => o.key === key)?.label ?? key;
   }
 
   private isSameProject(first: BoardCell, second: BoardCell): boolean {
-    return first.title === second.title && first.cat === second.cat && first.catKey === second.catKey;
+    return (
+      first.title === second.title &&
+      first.catKeys.length === second.catKeys.length &&
+      first.catKeys.every((k) => second.catKeys.includes(k))
+    );
   }
 }

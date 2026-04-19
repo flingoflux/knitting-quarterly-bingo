@@ -8,8 +8,7 @@ export interface BingoGameProgress {
 export function createBoardSignature(projects: BoardCell[]): string {
   return JSON.stringify(projects.map(project => ({
     title: project.title,
-    cat: project.cat,
-    catKey: project.catKey,
+    catKeys: project.catKeys,
   })));
 }
 

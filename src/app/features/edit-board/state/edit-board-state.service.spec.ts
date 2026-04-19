@@ -23,8 +23,7 @@ class MockBoardDefinitionRepository {
 function createProjects(length = 16): BoardCell[] {
   return Array.from({ length }, (_, index) => ({
     title: `Project ${index}`,
-    cat: 'Cat',
-    catKey: 'cat',
+    catKeys: ['cat'],
   }));
 }
 
@@ -71,13 +70,11 @@ describe('EditBoardStateService', () => {
 
     state.updateProject(1, {
       title: 'Neues Projekt',
-      cat: 'Technik',
-      catKey: 'technik',
+      catKeys: ['technik'],
     });
 
     expect(state.projects()[1].title).toBe('Neues Projekt');
-    expect(state.projects()[1].cat).toBe('Technik');
-    expect(state.projects()[1].catKey).toBe('technik');
+    expect(state.projects()[1].catKeys).toEqual(['technik']);
     expect(repository.lastSavedDefinition?.projects[1].title).toBe('Neues Projekt');
   });
 });

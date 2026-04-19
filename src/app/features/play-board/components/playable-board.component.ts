@@ -17,7 +17,9 @@ import { BoardCell } from '../../../shared/domain/board-cell';
       >
         <div class="cell-content">
           <div class="title">{{p.title}}</div>
-          <div class="cat" [ngClass]="'cat-' + p.catKey">{{p.cat}}</div>
+          <div class="cats">
+            <span *ngFor="let key of p.catKeys" class="cat" [ngClass]="'cat-' + key">{{categoryLabels[key] ?? key}}</span>
+          </div>
           <span *ngIf="done[i]" class="done-check">✓</span>
         </div>
       </div>
@@ -90,6 +92,14 @@ import { BoardCell } from '../../../shared/domain/board-cell';
       font-weight: 700;
       margin-top: auto;
     }
+    .cats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      justify-content: center;
+      margin-top: auto;
+      padding-bottom: 0.1rem;
+    }
     .cat-basics {
       background: #f5eadc;
     }
@@ -135,6 +145,12 @@ import { BoardCell } from '../../../shared/domain/board-cell';
   `]
 })
 export class PlayableBoardComponent {
+  readonly categoryLabels: Record<string, string> = {
+    basics: 'Basics',
+    technik: 'Technik',
+    challenge: 'Challenge',
+    accessoire: 'Accessoire',
+  };
   @Input() projects: BoardCell[] = [];
   @Input() done: boolean[] = [];
   @Input() bingoCells: Set<number> = new Set<number>();
