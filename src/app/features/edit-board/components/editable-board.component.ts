@@ -60,11 +60,14 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
 
             <select
               class="cat-select"
-              [value]="getDraftCatKey(i, p.catKey)"
               (change)="onDraftCategoryChange(i, $event)"
               (blur)="saveProject(i, p)"
             >
-              <option *ngFor="let option of categoryOptions" [value]="option.key">{{option.label}}</option>
+              <option
+                *ngFor="let option of categoryOptions"
+                [value]="option.key"
+                [selected]="option.key === getDraftCatKey(i, p.catKey)"
+              >{{option.label}}</option>
             </select>
           </ng-container>
 
@@ -256,7 +259,7 @@ export class EditableBoardComponent {
     event.stopPropagation();
     this.editingIndex = i;
     this.draftTitles.set(i, project.title);
-    this.draftCategoryKeys.set(i, project.catKey);
+    this.draftCategoryKeys.set(i, this.getCategoryForProject(project)?.key ?? CATEGORY_OPTIONS[0].key);
   }
 
   onDraftTitleInput(i: number, event: Event): void {
@@ -291,8 +294,11 @@ export class EditableBoardComponent {
 
     const draftTitle = this.getDraftTitle(i, project.title).trim();
     const title = draftTitle.length > 0 ? draftTitle : project.title;
-    const catKey = this.getDraftCatKey(i, project.catKey);
-    const cat = this.getCategoryLabel(catKey) ?? project.cat;
+    const fallbackCategory = this.getCategoryForProject(project);
+    const draftCatKey = this.getDraftCatKey(i, fallbackCategory?.key ?? project.catKey);
+    const selectedCategory = this.getCategoryByKey(draftCatKey) ?? fallbackCategory;
+    const catKey = selectedCategory?.key ?? project.catKey;
+    const cat = selectedCategory?.label ?? project.cat;
     const updatedProject: BoardCell = { title, cat, catKey };
 
     if (!this.isSameProject(project, updatedProject)) {
@@ -311,11 +317,21 @@ export class EditableBoardComponent {
   }
 
   getDraftCatKey(i: number, fallback: string): string {
-    return this.draftCategoryKeys.get(i) ?? fallback;
+    return this.draftCategoryKeys.get(i) ?? this.getCategoryByKey(fallback)?.key ?? CATEGORY_OPTIONS[0].key;
   }
 
-  private getCategoryLabel(key: string): string | undefined {
-    return this.categoryOptions.find((option) => option.key === key)?.label;
+  private getCategoryForProject(project: BoardCell): CategoryOption | undefined {
+    const byKey = this.getCategoryByKey(project.catKey);
+    if (byKey !== undefined) {
+      return byKey;
+    }
+
+    const normalizedCat = project.cat.trim().toLowerCase();
+    return this.categoryOptions.find((option) => option.label.toLowerCase() === normalizedCat);
+  }
+
+  private getCategoryByKey(key: string): CategoryOption | undefined {
+    return this.categoryOptions.find((option) => option.key === key);
   }
 
   private isSameProject(first: BoardCell, second: BoardCell): boolean {
