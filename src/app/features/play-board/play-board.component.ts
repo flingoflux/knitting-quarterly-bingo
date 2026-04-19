@@ -1,7 +1,10 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { PlayableBingoStateService } from './state/playable-bingo-state.service';
 import { PlayableBoardComponent } from './components/playable-board.component';
 import { Router } from '@angular/router';
+import { PlayableBingoBoard } from './domain/playable-bingo-board';
+import { PlayableProject } from './domain/playable-project';
+import { BoardTransferState } from '../../shared/navigation/board-transfer-state';
 
 @Component({
   selector: 'app-play-board-feature',
@@ -56,9 +59,19 @@ import { Router } from '@angular/router';
     .play-board-header .subtitle { color: #666; font-size: 1.1rem; margin-top: 0.5rem; }
   `]
 })
-export class PlayBoardFeatureComponent {
+export class PlayBoardFeatureComponent implements OnInit {
   state = inject(PlayableBingoStateService);
   router = inject(Router);
+
+  ngOnInit() {
+    const navState = history.state as Partial<BoardTransferState>;
+    if (navState?.projects?.length) {
+      const projects = navState.projects.map(p => new PlayableProject(p.title, p.cat, p.catKey));
+      const done = new Array(projects.length).fill(false);
+      this.state.setBoard(new PlayableBingoBoard(projects, done, []));
+    }
+  }
+
   get board() {
     return this.state.getBoard();
   }

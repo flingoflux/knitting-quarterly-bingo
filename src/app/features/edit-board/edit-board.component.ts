@@ -4,9 +4,7 @@ import { EditableBoardComponent } from './components/editable-board.component';
 import { shuffleArray } from '../../shared/utils/array-utils';
 import { EditableProject } from './domain/editable-project';
 import { Router } from '@angular/router';
-import { PlayableBingoStateService } from '../play-board/state/playable-bingo-state.service';
-import { PlayableBingoBoard } from '../play-board/domain/playable-bingo-board';
-import { PlayableProject } from '../play-board/domain/playable-project';
+import { BoardTransferState } from '../../shared/navigation/board-transfer-state';
 
 @Component({
   selector: 'app-edit-board-feature',
@@ -134,7 +132,6 @@ import { PlayableProject } from '../play-board/domain/playable-project';
 export class EditBoardFeatureComponent {
   state = inject(EditableBingoStateService);
   router = inject(Router);
-  playableState = inject(PlayableBingoStateService);
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
 
@@ -153,14 +150,10 @@ export class EditBoardFeatureComponent {
   }
 
   playAsBingo() {
-    // Konvertiere Editable zu Playable
-    const editableProjects = this.board.getProjects();
-    const playableProjects = editableProjects.map(p => new PlayableProject(p.title, p.cat, p.catKey));
-    const done = new Array(playableProjects.length).fill(false);
-    const bingoLines: number[][] = [];
-    const playableBoard = new PlayableBingoBoard(playableProjects, done, bingoLines);
-    this.playableState.setBoard(playableBoard);
-    this.router.navigate(['/play']);
+    const state: BoardTransferState = {
+      projects: this.board.getProjects().map(p => ({ title: p.title, cat: p.cat, catKey: p.catKey }))
+    };
+    this.router.navigate(['/play'], { state });
   }
 
   dragStart = (i: number) => {
