@@ -1,4 +1,3 @@
-
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BingoService, Project } from './bingo';
@@ -30,6 +29,14 @@ import { BingoService, Project } from './bingo';
       position: relative;
       overflow: hidden;
       background: #fff;
+      transition: box-shadow 0.2s, border 0.2s;
+    }
+
+    .bingo-cell {
+      background: #ffe5e5 !important;
+      border: 2px solid #e74c3c !important;
+      box-shadow: 0 0 12px 2px #e74c3c55;
+      z-index: 2;
     }
 
     .cell-content {
@@ -89,6 +96,10 @@ import { BingoService, Project } from './bingo';
   `]
 })
 export class BingoComponent implements OnInit {
+    // Gibt true zurück, wenn das Feld Teil einer Bingo-Linie ist
+    public isCellInBingo(index: number): boolean {
+      return this.bingoLines.some(line => line.includes(index));
+    }
   projects: Project[] = [];
   done: boolean[] = [];
   bingoLines: number[][] = [];

@@ -2,9 +2,6 @@
 
 
 
-<div *ngIf="bingoLines.length" class="banner">
-  BINGO! 🎉 ({{bingoLines.length}})
-</div>
 
 <div class="grid">
   <div 
@@ -12,6 +9,7 @@
     class="cell"
     [class.done]="done[i]"
     [class.drag-target]="dragTargetIndex === i"
+    [class.bingo-cell]="isCellInBingo(i)"
     draggable="true"
     (click)="toggle(i)"
     (dragstart)="dragStart(i)"
