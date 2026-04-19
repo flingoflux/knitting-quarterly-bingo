@@ -26,9 +26,7 @@ export class BingoStateService {
     this.save();
   }
 
-  bingoService = inject(BingoService);
-
-  constructor() {
+  constructor(private bingoService: BingoService) {
     this.load();
   }
 
@@ -38,8 +36,13 @@ export class BingoStateService {
 
   load() {
     const loaded = this.bingoService.load();
-    this.state.projects = loaded.projects;
-    this.state.done = loaded.done;
+    if (loaded) {
+      this.state.projects = loaded.projects;
+      this.state.done = loaded.done;
+    } else {
+      this.state.projects = [];
+      this.state.done = [];
+    }
     this.updateBingoLines();
   }
 
