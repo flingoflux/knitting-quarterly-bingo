@@ -11,10 +11,12 @@
     *ngFor="let p of projects; let i = index"
     class="cell"
     [class.done]="done[i]"
+    [class.drag-target]="dragTargetIndex === i"
     draggable="true"
     (click)="toggle(i)"
     (dragstart)="dragStart(i)"
-    (dragover)="$event.preventDefault()"
+    (dragover)="$event.preventDefault(); dragOver(i)"
+    (dragleave)="dragLeave(i)"
     (drop)="drop(i)"
   >
     <div>{{p.title}}</div>

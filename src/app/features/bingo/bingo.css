@@ -4,12 +4,21 @@
   gap:8px;
 }
 
+
 .cell{
   border:1px solid #ccc;
   padding:10px;
   min-height:80px;
   text-align:center;
   cursor:pointer;
+  transition: border 0.2s;
+}
+
+.cell.drag-target {
+  border: 2px dashed #185FA5 !important;
+  outline: 2px dashed #185FA5;
+  background-color: #e3f0fa;
+  box-shadow: 0 0 0 2px #185FA533;
 }
 
 .cell.done{ background:#d4edda }

@@ -23,6 +23,13 @@ import { BingoService, Project } from './bingo';
       cursor:pointer;
     }
 
+
+    .cell.drag-target {
+      border: 1px dashed #222 !important;
+      outline: none;
+      background-color: inherit;
+      box-shadow: none;
+    }
     .cell.done{ background:#d4edda }
 
     .cat{
@@ -48,8 +55,11 @@ export class BingoComponent implements OnInit {
   done: boolean[] = [];
   bingoLines: number[][] = [];
 
-
   bingoService = inject(BingoService);
+
+  // Für Drag & Drop
+  private dragSourceIndex: number | null = null;
+  dragTargetIndex: number | null = null;
 
   ngOnInit() {
     const state = this.bingoService.load();
@@ -87,10 +97,31 @@ export class BingoComponent implements OnInit {
   }
 
   dragStart(index: number) {
-    // Optional: Implement drag and drop if needed
+    this.dragSourceIndex = index;
+  }
+
+  dragOver(index: number) {
+    this.dragTargetIndex = index;
+  }
+
+  dragLeave(index: number) {
+    if (this.dragTargetIndex === index) {
+      this.dragTargetIndex = null;
+    }
   }
 
   drop(index: number) {
-    // Optional: Implement drag and drop if needed
+    if (this.dragSourceIndex === null || this.dragSourceIndex === index) {
+      this.dragTargetIndex = null;
+      return;
+    }
+    // Projekte tauschen
+    [this.projects[this.dragSourceIndex], this.projects[index]] = [this.projects[index], this.projects[this.dragSourceIndex]];
+    // Done-Status mit tauschen
+    [this.done[this.dragSourceIndex], this.done[index]] = [this.done[index], this.done[this.dragSourceIndex]];
+    this.dragSourceIndex = null;
+    this.dragTargetIndex = null;
+    this.updateBingoLines();
+    this.save();
   }
 }
