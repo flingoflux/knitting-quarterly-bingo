@@ -12,13 +12,17 @@ export class PlayBoardStateService {
   readonly projects: Signal<BoardCell[]> = computed(() => this.projectsState());
   readonly done: Signal<boolean[]> = computed(() => this.doneState());
   readonly bingoCells: Signal<Set<number>> = computed(() => computeBingoCells(this.doneState()));
-  readonly hasPlayableBoard: Signal<boolean> = computed(() => this.projectsState().length > 0);
 
   private readonly boardDefinitionRepository = inject(BOARD_DEFINITION_READER);
   private readonly bingoGameRepository = inject(BingoGameRepositoryService);
 
   constructor() {
     this.refreshFromDefinition();
+  }
+
+  hasPlayableBoard(): boolean {
+    this.refreshFromDefinition();
+    return this.projectsState().length > 0;
   }
 
   toggle(index: number): void {
