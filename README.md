@@ -9,7 +9,7 @@ Ein Angular-Projekt für ein Bingo-Spiel rund ums Stricken.
 ## Setup
 
 1. **Abhängigkeiten installieren**
-   
+
    ```sh
    pnpm install
    # oder
@@ -17,13 +17,13 @@ Ein Angular-Projekt für ein Bingo-Spiel rund ums Stricken.
    ```
 
 2. **Entwicklungsserver starten**
-   
+
    ```sh
    pnpm start
    # oder
    npm start
    ```
-   
+
    Die App ist dann unter http://localhost:4200 erreichbar.
 
 ## Build für Produktion
@@ -65,6 +65,7 @@ Ein Beispieltest für den BingoService ist enthalten. Weitere Tests können in `
 - Projektstruktur nach Best Practices (core/features/shared)
 
 Weitere Empfehlungen:
+
 - Unit- und E2E-Tests ergänzen
 - ggf. Barrierefreiheit (a11y) und Internationalisierung (i18n) prüfen
 - README aktuell halten

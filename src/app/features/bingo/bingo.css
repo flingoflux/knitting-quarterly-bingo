@@ -1,42 +1,51 @@
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
-
-.cell{
-  border:1px solid #ccc;
-  padding:10px;
-  min-height:80px;
-  text-align:center;
-  cursor:pointer;
+.cell {
+  border: 1px solid #ccc;
+  padding: 10px;
+  min-height: 80px;
+  text-align: center;
+  cursor: pointer;
   transition: border 0.2s;
   border-radius: 10px;
 }
 
 .cell.drag-target {
-  border: 2px dashed #185FA5 !important;
-  outline: 2px dashed #185FA5;
+  border: 2px dashed #185fa5 !important;
+  outline: 2px dashed #185fa5;
   background-color: #e3f0fa;
-  box-shadow: 0 0 0 2px #185FA533;
+  box-shadow: 0 0 0 2px #185fa533;
 }
 
-.cell.done{ background:#d4edda }
-
-.cat{
-  font-size:10px;
-  margin-top:5px;
+.cell.done {
+  background: #d4edda;
 }
 
-.cat-basics{color:#3B6D11}
-.cat-technik{color:#185FA5}
-.cat-accessoire{color:#854F0B}
-.cat-challenge{color:#993556}
+.cat {
+  font-size: 10px;
+  margin-top: 5px;
+}
 
-.banner{
-  background:#d4edda;
-  padding:8px;
-  margin-bottom:10px;
-  text-align:center;
+.cat-basics {
+  color: #3b6d11;
+}
+.cat-technik {
+  color: #185fa5;
+}
+.cat-accessoire {
+  color: #854f0b;
+}
+.cat-challenge {
+  color: #993556;
+}
+
+.banner {
+  background: #d4edda;
+  padding: 8px;
+  margin-bottom: 10px;
+  text-align: center;
 }

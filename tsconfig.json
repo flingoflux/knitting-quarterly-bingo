@@ -6,8 +6,5 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "exclude": [
-    "src/**/*.spec.ts",
-    "vitest.config.ts"
-  ]
+  "exclude": ["src/**/*.spec.ts", "vitest.config.ts"]
 }
