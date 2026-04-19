@@ -7,7 +7,7 @@ import { StorageService } from '../../core/services/storage.service';
 
   beforeEach(() => {
     storageMock = {
-      getItem: () => null,
+      getItem: (_key: string, fallbackFactory?: () => any) => fallbackFactory ? fallbackFactory() : null,
       setItem: () => {}
     } as StorageService;
     service = new BingoService(storageMock);

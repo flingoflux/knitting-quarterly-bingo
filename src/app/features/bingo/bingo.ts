@@ -10,9 +10,7 @@ export interface Project {
 @Injectable({ providedIn: 'root' })
 export class BingoService {
   STORAGE_KEY = 'bingo_state_angular';
-  storage = inject(StorageService);
-
-  constructor() {}
+  constructor(private storage: StorageService) {}
 
   lines = [
     [0, 1, 2, 3],
@@ -47,12 +45,13 @@ export class BingoService {
   ];
 
   load() {
-    const loaded = this.storage.getItem<{ projects: Project[]; done: boolean[] }>(this.STORAGE_KEY);
-    if (loaded) return loaded;
-    return {
-      projects: [...this.defaultProjects],
-      done: new Array(16).fill(false),
-    };
+    return this.storage.getItem<{ projects: Project[]; done: boolean[] }>(
+      this.STORAGE_KEY,
+      () => ({
+        projects: [...this.defaultProjects],
+        done: new Array(16).fill(false),
+      })
+    );
   }
 
   save(state: { projects: Project[]; done: boolean[] }) {
