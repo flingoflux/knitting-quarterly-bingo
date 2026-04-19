@@ -33,10 +33,29 @@ import { BingoService, Project } from './bingo';
     }
 
     .bingo-cell {
-      background: #ffe5e5 !important;
-      border: 2px solid #e74c3c !important;
-      box-shadow: 0 0 12px 2px #e74c3c55;
+      background: #256029 !important;
+      color: #fff !important;
+      border: none !important;
+      box-shadow: 0 0 6px 1.5px #25602966;
+      border-radius: 16px;
+      position: relative;
+      transition: box-shadow 0.3s, background 0.3s, color 0.3s;
       z-index: 2;
+    }
+    .bingo-cell .title,
+    .bingo-cell .cat {
+      color: #fff !important;
+    }
+
+    .bingo-cell .bingo-check {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      font-size: 1.3em;
+      color: #4caf50;
+      opacity: 0.85;
+      pointer-events: none;
+      filter: drop-shadow(0 1px 2px #fff8);
     }
 
     .cell-content {
