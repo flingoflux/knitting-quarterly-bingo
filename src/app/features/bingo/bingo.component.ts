@@ -1,6 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BingoService, Project } from './bingo';
+import { BingoStateService } from './bingo-state.service';
+import { BingoDragService } from './bingo-drag.service';
 
 @Component({
   selector: 'app-bingo',
@@ -114,82 +115,50 @@ import { BingoService, Project } from './bingo';
     }
   `]
 })
-export class BingoComponent implements OnInit {
-    // Gibt true zurück, wenn das Feld Teil einer Bingo-Linie ist
-    public isCellInBingo(index: number): boolean {
-      return this.bingoLines.some(line => line.includes(index));
-    }
-  projects: Project[] = [];
-  done: boolean[] = [];
-  bingoLines: number[][] = [];
+export class BingoComponent {
+  bingoState = inject(BingoStateService);
+  bingoDrag = inject(BingoDragService);
 
-  bingoService = inject(BingoService);
+  get state() {
+    return this.bingoState.state;
+  }
 
-  // Für Drag & Drop
-  private dragSourceIndex: number | null = null;
-  dragTargetIndex: number | null = null;
-
-  ngOnInit() {
-    const state = this.bingoService.load();
-    this.projects = state.projects;
-    this.done = state.done;
-    this.updateBingoLines();
+  isCellInBingo(index: number) {
+    return this.bingoState.isCellInBingo(index);
   }
 
   toggle(index: number) {
-    this.done[index] = !this.done[index];
-    this.updateBingoLines();
-    this.save();
+    this.bingoState.toggle(index);
   }
 
   reset() {
-    this.done.fill(false);
-    this.updateBingoLines();
-    this.save();
+    this.bingoState.reset();
   }
 
   shuffle() {
-    const newState = this.bingoService.shuffleBoard();
-    this.projects = newState.projects;
-    this.done = newState.done;
-    this.updateBingoLines();
-    this.save();
-  }
-
-  private updateBingoLines() {
-    this.bingoLines = this.bingoService.getBingoLines(this.done);
-  }
-
-  private save() {
-    this.bingoService.save({ projects: this.projects, done: this.done });
+    this.bingoState.shuffle();
   }
 
   dragStart(index: number) {
-    this.dragSourceIndex = index;
+    this.bingoDrag.dragStart(index);
   }
 
   dragOver(index: number) {
-    this.dragTargetIndex = index;
+    this.bingoDrag.dragOver(index);
   }
 
   dragLeave(index: number) {
-    if (this.dragTargetIndex === index) {
-      this.dragTargetIndex = null;
-    }
+    this.bingoDrag.dragLeave(index);
   }
 
   drop(index: number) {
-    if (this.dragSourceIndex === null || this.dragSourceIndex === index) {
-      this.dragTargetIndex = null;
-      return;
+    const result = this.bingoDrag.drop(index, this.state.projects, this.state.done);
+    if (result) {
+      this.bingoState.setProjectsAndDone(result.projects, result.done);
     }
-    // Projekte tauschen
-    [this.projects[this.dragSourceIndex], this.projects[index]] = [this.projects[index], this.projects[this.dragSourceIndex]];
-    // Done-Status mit tauschen
-    [this.done[this.dragSourceIndex], this.done[index]] = [this.done[index], this.done[this.dragSourceIndex]];
-    this.dragSourceIndex = null;
-    this.dragTargetIndex = null;
-    this.updateBingoLines();
-    this.save();
+  }
+
+  get dragTargetIndex() {
+    return this.bingoDrag.getDragTargetIndex();
   }
 }
