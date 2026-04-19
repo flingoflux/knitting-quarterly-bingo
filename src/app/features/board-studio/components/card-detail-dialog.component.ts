@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../shared/ports/image-repository';
 
@@ -199,6 +199,7 @@ export class CardDetailDialogComponent {
 
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
   private readonly cdr = inject(ChangeDetectorRef);
+  @Output() imageChanged = new EventEmitter<number>();
 
   title = '';
   imageUrl: string | null = null;
@@ -237,6 +238,7 @@ export class CardDetailDialogComponent {
     await this.imageRepo.saveImage(this.cardIndex, dataUrl);
     this.imageUrl = dataUrl;
     this.loading = false;
+    this.imageChanged.emit(this.cardIndex);
     this.cdr.markForCheck();
     input.value = '';
   }
@@ -244,6 +246,7 @@ export class CardDetailDialogComponent {
   async onDelete(): Promise<void> {
     await this.imageRepo.deleteImage(this.cardIndex);
     this.imageUrl = null;
+    this.imageChanged.emit(this.cardIndex);
     this.cdr.markForCheck();
   }
 }

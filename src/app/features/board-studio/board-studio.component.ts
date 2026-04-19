@@ -41,6 +41,7 @@ import { Router } from '@angular/router';
       </div>
 
       <app-editable-board
+        #editableBoard
         [projects]="projects"
         [dragTargetIndex]="dragTargetIndex"
         (dragStarted)="onDragStart($event)"
@@ -51,7 +52,7 @@ import { Router } from '@angular/router';
         (cardDetailOpened)="onCardDetailOpen($event)"
       ></app-editable-board>
 
-      <app-card-detail-dialog #detailDialog></app-card-detail-dialog>
+      <app-card-detail-dialog #detailDialog (imageChanged)="onImageChanged($event)"></app-card-detail-dialog>
     </div>
   `,
   styles: [`
@@ -126,6 +127,7 @@ import { Router } from '@angular/router';
 })
 export class BoardStudioFeatureComponent {
   @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
+  @ViewChild('editableBoard') private readonly editableBoardRef!: EditableBoardComponent;
   state = inject(BoardStudioStateService);
   router = inject(Router);
   dragTargetIndex: number | null = null;
@@ -178,5 +180,9 @@ export class BoardStudioFeatureComponent {
 
   onCardDetailOpen(event: { index: number; project: BoardCell }) {
     this.detailDialog.open(event.index, event.project.title);
+  }
+
+  onImageChanged(index: number): void {
+    void this.editableBoardRef.refreshImage(index);
   }
 }
