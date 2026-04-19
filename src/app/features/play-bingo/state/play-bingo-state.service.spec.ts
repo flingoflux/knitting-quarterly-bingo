@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
-import { PersistedBoardDefinition } from '../../edit-board/state/board-definition-repository.service';
+import { PersistedBoardDefinition, BoardDefinitionRepositoryService } from '../../board-studio/state/board-definition-repository.service';
 import { BOARD_DEFINITION_READER } from '../../../shared/ports/board-definition-reader';
 import { PlayBingoStateService } from './play-bingo-state.service';
 import { BingoGameRepositoryService } from './bingo-game-repository.service';
@@ -32,6 +32,10 @@ class MockBingoGameRepository {
   }
 }
 
+class MockBoardDefinitionWriter {
+  save(_definition: PersistedBoardDefinition): void {}
+}
+
 function createProjects(length = 16): BoardCell[] {
   return Array.from({ length }, (_, index) => ({
     title: `P${index}`,
@@ -48,6 +52,7 @@ function createState(
     providers: [
       { provide: BOARD_DEFINITION_READER, useValue: boardDefinitionRepository },
       { provide: BingoGameRepositoryService, useValue: bingoGameRepository },
+      { provide: BoardDefinitionRepositoryService, useValue: new MockBoardDefinitionWriter() },
     ],
   });
   return runInInjectionContext(injector, () => new PlayBingoStateService());
