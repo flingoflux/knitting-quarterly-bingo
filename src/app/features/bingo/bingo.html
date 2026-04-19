@@ -19,9 +19,11 @@
     (dragleave)="dragLeave(i)"
     (drop)="drop(i)"
   >
-    <div>{{p.title}}</div>
-    <div class="cat" [ngClass]="'cat-' + p.catKey">
-      {{p.cat}}
+    <div class="cell-content">
+      <div class="title">{{p.title}}</div>
+      <div class="cat" [ngClass]="'cat-' + p.catKey">
+        {{p.cat}}
+      </div>
     </div>
   </div>
 </div>

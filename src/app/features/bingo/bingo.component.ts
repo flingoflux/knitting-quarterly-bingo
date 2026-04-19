@@ -9,19 +9,57 @@ import { BingoService, Project } from './bingo';
   imports: [CommonModule],
   templateUrl: './bingo.html',
   styles: [`
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:8px;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
     }
-
     .cell{
       border:1px solid #ccc;
       padding:10px;
       min-height:80px;
       text-align:center;
       cursor:pointer;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 80px;
+      min-width: 0;
+      position: relative;
+      overflow: hidden;
+      background: #fff;
     }
+
+    .cell-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .title {
+      width: 100%;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .cat {
+      position: absolute;
+      left: 0;
+      bottom: 0px;
+      width: 100%;
+      text-align: center;
+      font-size: 10px;
+      margin: 0;
+      pointer-events: none;
+      z-index: 2;
+      background: transparent;
+    }
+
 
 
     .cell.drag-target {

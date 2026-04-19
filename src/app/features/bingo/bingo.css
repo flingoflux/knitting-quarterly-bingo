@@ -12,6 +12,7 @@
   text-align:center;
   cursor:pointer;
   transition: border 0.2s;
+  border-radius: 10px;
 }
 
 .cell.drag-target {
