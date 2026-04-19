@@ -20,7 +20,12 @@ import { BoardCell } from '../../../shared/domain/board-cell';
           <div class="cats">
             <span *ngFor="let key of p.catKeys" class="cat" [ngClass]="'cat-' + key">{{categoryLabels[key] ?? key}}</span>
           </div>
-          <span *ngIf="done[i]" class="done-check">✓</span>
+          <span *ngIf="done[i]" class="done-check">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </span>
+          <span *ngIf="isCellInBingo(i)" class="bingo-star">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </span>
         </div>
       </div>
     </div>
@@ -54,13 +59,23 @@ import { BoardCell } from '../../../shared/domain/board-cell';
       border-color: #c79362;
     }
     .cell.done {
-      background: #ecf9f0;
-      border-color: #6da07d;
+      background: #edf5e2;
+      border-color: #a9c183;
     }
     .cell.bingo-cell {
-      background: #fff0d7;
-      border-color: #c46e35;
-      box-shadow: 0 0 0 2px rgba(196, 110, 53, 0.28), 0 18px 30px rgba(96, 58, 30, 0.2);
+      border: 2px solid #145906;
+      box-shadow: 0 12px 26px rgba(96, 58, 30, 0.12);
+    }
+    .bingo-star {
+      position: absolute;
+      right: 8px;
+      top: 6px;
+      color: #145906;
+      font-size: 1.35em;
+      line-height: 1;
+    }
+    .cell.bingo-cell .done-check {
+      display: none;
     }
     .cell-content {
       width: 100%;
@@ -116,18 +131,11 @@ import { BoardCell } from '../../../shared/domain/board-cell';
       position: absolute;
       right: 8px;
       top: 8px;
-      color: #2f7a49;
-      font-size: 1.25em;
-      font-weight: bold;
-      background: #effbf3;
-      border: 1px solid #90c29f;
-      width: 1.55rem;
-      height: 1.55rem;
-      border-radius: 999px;
+      color: #3a6620;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      line-height: 1;
+      opacity: 0.85;
     }
     @media (max-width: 960px) {
       .grid.playable {
