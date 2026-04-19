@@ -1,24 +1,63 @@
-import { Injectable, Signal } from '@angular/core';
+import { Injectable, Signal, computed, signal } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
-import { BoardStoreService } from '../../../core/services/board-store.service';
+import { BoardDefinitionRepositoryService } from '../../edit-board/state/board-definition-repository.service';
+import { BingoGameRepositoryService } from './bingo-game-repository.service';
+import { computeBingoCells, createBoardSignature, createEmptyDone, normalizeDone, toggleDone } from '../domain/bingo-game';
 
 @Injectable({ providedIn: 'root' })
 export class PlayBoardStateService {
-  readonly projects: Signal<BoardCell[]>;
-  readonly done: Signal<boolean[]>;
-  readonly bingoCells: Signal<Set<number>>;
+  private readonly projectsState = signal<BoardCell[]>([]);
+  private readonly doneState = signal<boolean[]>([]);
 
-  constructor(private readonly boardStore: BoardStoreService) {
-    this.projects = this.boardStore.projects;
-    this.done = this.boardStore.done;
-    this.bingoCells = this.boardStore.bingoCells;
+  readonly projects: Signal<BoardCell[]> = computed(() => this.projectsState());
+  readonly done: Signal<boolean[]> = computed(() => this.doneState());
+  readonly bingoCells: Signal<Set<number>> = computed(() => computeBingoCells(this.doneState()));
+
+  constructor(
+    private readonly boardDefinitionRepository: BoardDefinitionRepositoryService,
+    private readonly bingoGameRepository: BingoGameRepositoryService,
+  ) {
+    this.refreshFromDefinition();
   }
 
   hasPlayableBoard(): boolean {
-    return this.boardStore.hasProjects();
+    this.refreshFromDefinition();
+    return this.projectsState().length > 0;
   }
 
   toggle(index: number): void {
-    this.boardStore.toggle(index);
+    const toggled = toggleDone(this.doneState(), index);
+    this.doneState.set(toggled);
+    this.persist();
+  }
+
+  private refreshFromDefinition(): void {
+    const boardDefinition = this.boardDefinitionRepository.load();
+    if (boardDefinition === null || boardDefinition.projects.length === 0) {
+      this.projectsState.set([]);
+      this.doneState.set([]);
+      return;
+    }
+
+    const projects = [...boardDefinition.projects];
+    this.projectsState.set(projects);
+
+    const currentSignature = createBoardSignature(projects);
+    const persistedProgress = this.bingoGameRepository.load();
+
+    if (persistedProgress !== null && persistedProgress.boardSignature === currentSignature) {
+      this.doneState.set(normalizeDone(persistedProgress.done, projects.length));
+      return;
+    }
+
+    this.doneState.set(createEmptyDone(projects.length));
+    this.persist();
+  }
+
+  private persist(): void {
+    this.bingoGameRepository.save({
+      boardSignature: createBoardSignature(this.projectsState()),
+      done: this.doneState(),
+    });
   }
 }

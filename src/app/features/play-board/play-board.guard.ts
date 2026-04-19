@@ -1,13 +1,13 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { BoardStoreService } from '../../core/services/board-store.service';
+import { PlayBoardStateService } from './state/play-board-state.service';
 import { canActivatePlayBoardFromState } from './play-board.guard.logic';
 
 export const playBoardGuard: CanActivateFn = () => {
-  const boardStore = inject(BoardStoreService);
+  const playBoardState = inject(PlayBoardStateService);
   const router = inject(Router);
 
-  if (canActivatePlayBoardFromState(boardStore.hasProjects())) {
+  if (canActivatePlayBoardFromState(playBoardState.hasPlayableBoard())) {
     return true;
   }
 
