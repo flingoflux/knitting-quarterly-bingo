@@ -1,6 +1,7 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, Output, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardCell } from '../../../shared/domain/board-cell';
+import { ImageRepository, IMAGE_REPOSITORY } from '../../../shared/ports/image-repository';
 
 interface CategoryOption {
   label: string;
@@ -8,6 +9,11 @@ interface CategoryOption {
 }
 
 interface ProjectEditedEvent {
+  index: number;
+  project: BoardCell;
+}
+
+interface CardDetailOpenedEvent {
   index: number;
   project: BoardCell;
 }
@@ -35,20 +41,42 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
         (dragleave)="onDragLeave(i)"
         (drop)="onDrop(i)"
       >
-        <button
-          type="button"
-          class="edit-btn"
-          title="Projekt bearbeiten"
-          aria-label="Projekt bearbeiten"
-          (click)="startEditing(i, p, $event)"
-        >
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 20h9"></path>
-            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
-          </svg>
-        </button>
+        <div class="photo-area" [class.is-editing]="editingIndex === i">
+          <img *ngIf="getImage(p.imageId)" [src]="getImage(p.imageId)" class="photo-img" [alt]="p.title" />
+          <div *ngIf="!getImage(p.imageId)" class="photo-placeholder">
+            <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </div>
+          <button
+            type="button"
+            class="photo-btn"
+            title="Foto ansehen / hochladen"
+            aria-label="Foto ansehen oder hochladen"
+            (click)="openDetail(i, p, $event)"
+          >
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </button>
+        </div>
 
-        <div class="cell-content">
+        <div class="caption">
+          <button
+            type="button"
+            class="edit-btn"
+            title="Projekt bearbeiten"
+            aria-label="Projekt bearbeiten"
+            (click)="startEditing(i, p, $event)"
+          >
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
+            </svg>
+          </button>
+
           <ng-container *ngIf="editingIndex === i; else readonlyView">
             <input
               class="title-input"
@@ -87,68 +115,118 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
     .grid.editable {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.85rem;
-      max-width: 70rem;
+      gap: 0.65rem;
+      max-width: 52rem;
       margin: 1rem auto 0;
     }
     .cell {
-      background: #fffaf2;
-      border: 1px solid #d9b998;
-      border-radius: 14px;
-      min-height: 156px;
-      width: 100%;
-      position: relative;
+      background: #fff;
+      border-radius: 3px;
+      overflow: hidden;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 12px 26px rgba(96, 58, 30, 0.12);
+      flex-direction: column;
+      box-shadow: 0 2px 5px rgba(60, 30, 10, 0.14), 0 8px 20px rgba(60, 30, 10, 0.10);
       cursor: grab;
-      transition: transform 0.18s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-      font-size: 1.02rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .cell:hover {
-      box-shadow: 0 0 0 3px rgba(196, 110, 53, 0.2), 0 12px 26px rgba(96, 58, 30, 0.14);
-      border-color: #c79362;
+      transform: translateY(-4px) rotate(0.4deg);
+      box-shadow: 0 6px 14px rgba(60, 30, 10, 0.18), 0 16px 32px rgba(60, 30, 10, 0.13);
     }
     .cell.drag-target {
       outline: 2px dashed #b56a39;
       outline-offset: 3px;
-      background: #fff3e2;
       transform: translateY(-2px);
     }
-    .cell-content {
+    .photo-area {
+      position: relative;
       width: 100%;
-      text-align: center;
-      padding: 0.7rem 0.55rem;
+      aspect-ratio: 1 / 1;
+      background: #f2e8d8;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+    .photo-area.is-editing {
+      opacity: 0.45;
+    }
+    .photo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .photo-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c9a878;
+    }
+    .photo-btn {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
+      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      color: #5a2d1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      transition: background 0.18s, transform 0.15s;
+    }
+    .photo-btn:hover,
+    .photo-btn:focus-visible {
+      background: rgba(255, 255, 255, 0.9);
+      transform: scale(1.1);
+    }
+    .photo-btn:focus-visible {
+      outline: 2px solid rgba(196, 110, 53, 0.5);
+      outline-offset: 2px;
+    }
+    .caption {
+      background: #fff;
+      padding: 0.38rem 0.45rem 0.45rem;
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.4rem;
-      min-height: 100%;
+      gap: 0.22rem;
+      min-height: 60px;
+      flex: 1;
     }
     .title {
       font-weight: 700;
-      margin: 2rem 0 0.2rem;
       color: #4a2d1c;
+      font-size: 0.72rem;
       line-height: 1.25;
       text-wrap: balance;
+      text-align: center;
+      padding: 0 1.5rem;
+      margin-top: 0.1rem;
     }
     .cats {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.25rem;
+      gap: 0.22rem;
       justify-content: center;
       margin-top: auto;
-      padding-bottom: 0.2rem;
     }
     .cat {
-      font-size: 0.52rem;
+      font-size: 0.5rem;
       color: #fff;
       border-radius: 999px;
       border: none;
       background: #888;
-      padding: 0.1rem 0.45rem;
+      padding: 0.08rem 0.42rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       font-weight: 700;
@@ -159,61 +237,60 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
     .cat-accessoire { background: #5aaa2a; }
     .edit-btn {
       position: absolute;
-      right: 8px;
-      top: 6px;
-      border: 1px solid #cf9f75;
+      right: 5px;
+      top: 5px;
+      border: 1px solid #e0c8ac;
       border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      background: #fff4e6;
+      width: 24px;
+      height: 24px;
+      background: #fffaf4;
       color: #7b3b22;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       z-index: 2;
-      transition: transform 0.18s ease, background 0.2s, color 0.2s;
+      transition: transform 0.18s ease, background 0.2s;
     }
     .edit-btn:hover,
     .edit-btn:focus-visible {
       transform: translateY(-1px);
       background: #ffe8cd;
-      color: #532615;
     }
     .edit-btn:focus-visible {
-      outline: 3px solid rgba(196, 110, 53, 0.3);
+      outline: 2px solid rgba(196, 110, 53, 0.3);
       outline-offset: 2px;
     }
     .title-input {
-      width: calc(100% - 1rem);
+      width: calc(100% - 2rem);
       border: 1px solid #d0ab86;
-      border-radius: 9px;
-      padding: 0.4rem 0.6rem;
-      font-size: 0.9rem;
+      border-radius: 7px;
+      padding: 0.3rem 0.5rem;
+      font-size: 0.82rem;
       background: #fffdf9;
       color: #3f2a1d;
-      margin-top: 2rem;
       text-align: center;
       font-weight: 600;
+      margin-top: 0.25rem;
     }
     .title-input:focus-visible {
-      outline: 3px solid rgba(196, 110, 53, 0.28);
+      outline: 2px solid rgba(196, 110, 53, 0.28);
       outline-offset: 1px;
     }
     .chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.3rem;
+      gap: 0.28rem;
       justify-content: center;
-      padding: 0 0.25rem 0.2rem;
+      padding: 0 0.2rem;
     }
     .chip {
-      font-size: 0.52rem;
+      font-size: 0.5rem;
       border-radius: 999px;
       border: 1px solid #d0ab86;
       background: #fffaf2;
       color: #a07850;
-      padding: 0.1rem 0.45rem;
+      padding: 0.08rem 0.42rem;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       font-weight: 700;
@@ -224,26 +301,10 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       border-color: #b87a45;
       color: #7b4a20;
     }
-    .chip.chip-active.chip-basics {
-      background: #ffa600;
-      border-color: #ffa600;
-      color: #fff;
-    }
-    .chip.chip-active.chip-technik {
-      background: #1cb3f4;
-      border-color: #1cb3f4;
-      color: #fff;
-    }
-    .chip.chip-active.chip-challenge {
-      background: #c44020;
-      border-color: #c44020;
-      color: #fff;
-    }
-    .chip.chip-active.chip-accessoire {
-      background: #5aaa2a;
-      border-color: #5aaa2a;
-      color: #fff;
-    }
+    .chip.chip-active.chip-basics { background: #ffa600; border-color: #ffa600; color: #fff; }
+    .chip.chip-active.chip-technik { background: #1cb3f4; border-color: #1cb3f4; color: #fff; }
+    .chip.chip-active.chip-challenge { background: #c44020; border-color: #c44020; color: #fff; }
+    .chip.chip-active.chip-accessoire { background: #5aaa2a; border-color: #5aaa2a; color: #fff; }
     @media (max-width: 960px) {
       .grid.editable {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -253,26 +314,68 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       .grid.editable {
         grid-template-columns: 1fr;
       }
-      .cell {
-        min-height: 148px;
-      }
     }
   `]
 })
 export class EditableBoardComponent {
   private readonly el = inject(ElementRef);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
   readonly categoryOptions = CATEGORY_OPTIONS;
-  @Input() projects: BoardCell[] = [];
+
+  private _projects: BoardCell[] = [];
+  @Input() set projects(value: BoardCell[]) {
+    this._projects = value;
+    void this.loadAllImages();
+  }
+  get projects(): BoardCell[] { return this._projects; }
+
   @Input() dragTargetIndex!: number | null;
   @Output() dragStarted = new EventEmitter<number>();
   @Output() dragOverCell = new EventEmitter<number>();
   @Output() dragLeftCell = new EventEmitter<number>();
   @Output() droppedOnCell = new EventEmitter<number>();
   @Output() projectEdited = new EventEmitter<ProjectEditedEvent>();
+  @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
 
   editingIndex: number | null = null;
+  private readonly imageCache = new Map<string, string>();
   private readonly draftTitles = new Map<number, string>();
   private readonly draftCategoryKeys = new Map<number, string[]>();
+
+  getImage(imageId: string | undefined): string | null {
+    if (!imageId) return null;
+    return this.imageCache.get(imageId) ?? null;
+  }
+
+  async refreshImage(imageId: string | null): Promise<void> {
+    if (!imageId) return;
+    const url = await this.imageRepo.getImage(imageId);
+    if (url) {
+      this.imageCache.set(imageId, url);
+    } else {
+      this.imageCache.delete(imageId);
+    }
+    this.cdr.markForCheck();
+  }
+
+  private async loadAllImages(): Promise<void> {
+    const imageIds = this._projects
+      .map(p => p.imageId)
+      .filter((id): id is string => !!id);
+    const uniqueIds = [...new Set(imageIds)];
+    await Promise.all(
+      uniqueIds.map(async id => {
+        const url = await this.imageRepo.getImage(id);
+        if (url) {
+          this.imageCache.set(id, url);
+        } else {
+          this.imageCache.delete(id);
+        }
+      })
+    );
+    this.cdr.markForCheck();
+  }
 
   onDragStart(i: number, event: DragEvent) {
     if (this.editingIndex === i) {
@@ -303,6 +406,11 @@ export class EditableBoardComponent {
     if (editingCell && !editingCell.contains(target)) {
       this.saveAndExit(this.editingIndex, this.projects[this.editingIndex]);
     }
+  }
+
+  openDetail(i: number, project: BoardCell, event: MouseEvent): void {
+    event.stopPropagation();
+    this.cardDetailOpened.emit({ index: i, project });
   }
 
   startEditing(i: number, project: BoardCell, event: MouseEvent): void {

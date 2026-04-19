@@ -1,14 +1,16 @@
-import { Component, inject } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { BoardStudioStateService } from './state/board-studio-state.service';
 import { EditableBoardComponent } from './components/editable-board.component';
+import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-detail-dialog.component';
 import { shuffleArray } from '../../shared/utils/array-utils';
 import { BoardCell } from '../../shared/domain/board-cell';
 import { Router } from '@angular/router';
+import { PlayBingoStateService } from '../play-bingo/state/play-bingo-state.service';
 
 @Component({
   selector: 'app-board-studio-feature',
   standalone: true,
-  imports: [EditableBoardComponent],
+  imports: [EditableBoardComponent, CardDetailDialogComponent],
   template: `
     <div class="feature-shell">
       <div class="button-bar">
@@ -40,6 +42,7 @@ import { Router } from '@angular/router';
       </div>
 
       <app-editable-board
+        #editableBoard
         [projects]="projects"
         [dragTargetIndex]="dragTargetIndex"
         (dragStarted)="onDragStart($event)"
@@ -47,7 +50,10 @@ import { Router } from '@angular/router';
         (dragLeftCell)="onDragLeave($event)"
         (droppedOnCell)="onDrop($event)"
         (projectEdited)="onProjectEdited($event)"
+        (cardDetailOpened)="onCardDetailOpen($event)"
       ></app-editable-board>
+
+      <app-card-detail-dialog #detailDialog (imageChanged)="onImageChanged($event)"></app-card-detail-dialog>
     </div>
   `,
   styles: [`
@@ -121,6 +127,8 @@ import { Router } from '@angular/router';
   `],
 })
 export class BoardStudioFeatureComponent {
+  @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
+  @ViewChild('editableBoard') private readonly editableBoardRef!: EditableBoardComponent;
   state = inject(BoardStudioStateService);
   router = inject(Router);
   dragTargetIndex: number | null = null;
@@ -140,7 +148,10 @@ export class BoardStudioFeatureComponent {
     this.state.setProjects(shuffled as BoardCell[]);
   }
 
+  private readonly playBingoState = inject(PlayBingoStateService);
+
   playBingo() {
+    this.playBingoState.resetProgress();
     this.router.navigate(['/play']);
   }
 
@@ -170,4 +181,20 @@ export class BoardStudioFeatureComponent {
   onProjectEdited(event: { index: number; project: BoardCell }) {
     this.state.updateProject(event.index, event.project);
   }
+
+  onCardDetailOpen(event: { index: number; project: BoardCell }) {
+    this._openCardIndex = event.index;
+    this.detailDialog.open(event.project.imageId ?? null, event.project.title);
+  }
+
+  onImageChanged(event: ImageChangedEvent): void {
+    if (this._openCardIndex === null) return;
+    const project = this.state.projects()[this._openCardIndex];
+    if (project && project.imageId !== event.imageId) {
+      this.state.updateProject(this._openCardIndex, { ...project, imageId: event.imageId ?? undefined });
+    }
+    void this.editableBoardRef.refreshImage(event.imageId);
+  }
+
+  private _openCardIndex: number | null = null;
 }
