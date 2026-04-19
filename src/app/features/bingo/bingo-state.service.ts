@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { BingoService, Project } from './bingo';
-import { IBingoBoard, EditableBingoBoard, PlayableBingoBoard } from './bingo-board';
+import { EditableBingoBoard, PlayableBingoBoard } from './bingo-board';
 
 
 export type BingoBoardMode = 'edit' | 'play';
 
 export interface BingoBoardState {
-  board: IBingoBoard;
+  board: EditableBingoBoard | PlayableBingoBoard;
   mode: BingoBoardMode;
 }
 
@@ -32,22 +32,33 @@ export class BingoStateService {
   }
 
   constructor(private bingoService: BingoService) {
-    this.load();
+    this.loadEditable();
   }
 
   isCellInBingo(index: number): boolean {
     return this.state.board.getBingoLines().some(line => line.includes(index));
   }
 
-  load() {
-    const loaded = this.bingoService.load();
+  loadEditable() {
+    const loaded = this.bingoService.loadEditable();
     if (loaded) {
       this.state.board = new EditableBingoBoard(loaded.projects, loaded.done, this.bingoService.getBingoLines(loaded.done));
     } else {
-      this.state.board = new EditableBingoBoard([], [], []);
+      const projects = [...this.bingoService.defaultProjects].slice(0, 16);
+      const done = new Array(projects.length).fill(false);
+      this.state.board = new EditableBingoBoard(projects, done, this.bingoService.getBingoLines(done));
     }
     this.state.mode = 'edit';
     this.updateBingoLines();
+  }
+
+  loadPlayable() {
+    const loaded = this.bingoService.loadPlayable();
+    if (loaded) {
+      this.state.board = new PlayableBingoBoard(loaded.projects, loaded.done, this.bingoService.getBingoLines(loaded.done));
+      this.state.mode = 'play';
+      this.updateBingoLines();
+    }
   }
 
   toggle(index: number) {
@@ -99,20 +110,28 @@ export class BingoStateService {
   }
 
   private save() {
-    this.bingoService.save({ projects: this.state.board.getProjects(), done: this.state.board.getDone() });
+    if (this.state.board instanceof EditableBingoBoard) {
+      this.bingoService.saveEditable({ projects: this.state.board.getProjects(), done: this.state.board.getDone() });
+    } else if (this.state.board instanceof PlayableBingoBoard) {
+      this.bingoService.savePlayable({ projects: this.state.board.getProjects(), done: this.state.board.getDone() });
+    }
   }
 
   startGame() {
     if (this.state.mode === 'edit' && this.state.board instanceof EditableBingoBoard) {
+      const newPlayable = new PlayableBingoBoard(
+        this.state.board.getProjects(),
+        this.state.board.getDone(),
+        this.state.board.getBingoLines()
+      );
+      this.bingoService.savePlayable({
+        projects: newPlayable.getProjects(),
+        done: newPlayable.getDone(),
+      });
       this.state = {
-        board: new PlayableBingoBoard(
-          this.state.board.getProjects(),
-          this.state.board.getDone(),
-          this.state.board.getBingoLines()
-        ),
-        mode: 'play'
+        board: newPlayable,
+        mode: 'play',
       };
-      this.save();
     }
   }
 

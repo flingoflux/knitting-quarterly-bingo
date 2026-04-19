@@ -10,7 +10,8 @@ export interface Project {
 
 @Injectable({ providedIn: 'root' })
 export class BingoService {
-  STORAGE_KEY = 'bingo_state_angular';
+  STORAGE_KEY_EDITABLE = 'bingo_editable_board';
+  STORAGE_KEY_PLAYABLE = 'bingo_playable_board';
   constructor(private storage: StorageService) {}
 
   lines = [
@@ -45,9 +46,9 @@ export class BingoService {
     { title: 'Garn wechseln', cat: 'Accessoire', catKey: 'accessoire' },
   ];
 
-  load() {
+  loadEditable() {
     return this.storage.getItem<{ projects: Project[]; done: boolean[] }>(
-      this.STORAGE_KEY,
+      this.STORAGE_KEY_EDITABLE,
       () => ({
         projects: [...this.defaultProjects],
         done: new Array(16).fill(false),
@@ -55,8 +56,22 @@ export class BingoService {
     );
   }
 
-  save(state: { projects: Project[]; done: boolean[] }) {
-    this.storage.setItem(this.STORAGE_KEY, state);
+  saveEditable(state: { projects: Project[]; done: boolean[] }) {
+    this.storage.setItem(this.STORAGE_KEY_EDITABLE, state);
+  }
+
+  loadPlayable() {
+    return this.storage.getItem<{ projects: Project[]; done: boolean[] }>(
+      this.STORAGE_KEY_PLAYABLE,
+      () => ({
+        projects: [...this.defaultProjects],
+        done: new Array(16).fill(false),
+      })
+    );
+  }
+
+  savePlayable(state: { projects: Project[]; done: boolean[] }) {
+    this.storage.setItem(this.STORAGE_KEY_PLAYABLE, state);
   }
 
   getBingoLines(done: boolean[]) {

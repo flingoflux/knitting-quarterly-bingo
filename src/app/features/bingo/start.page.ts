@@ -17,7 +17,7 @@ export class BingoStartPageComponent {
   }
 
   newBoard() {
-    this.bingoService.save(this.bingoService.shuffleBoard());
+    this.bingoService.saveEditable(this.bingoService.shuffleBoard());
     this.router.navigate(['/board']);
   }
 }

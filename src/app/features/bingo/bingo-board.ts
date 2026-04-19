@@ -1,12 +1,6 @@
 import { Project } from './bingo';
 
-export interface IBingoBoard {
-  getProjects(): Project[];
-  getDone(): boolean[];
-  getBingoLines(): number[][];
-}
-
-export class EditableBingoBoard implements IBingoBoard {
+export class EditableBingoBoard {
   private projects: Project[];
   private done: boolean[];
   private bingoLines: number[][];
@@ -30,11 +24,11 @@ export class EditableBingoBoard implements IBingoBoard {
   }
 
   setProjects(projects: Project[]) {
-    this.projects = projects;
+    this.projects.splice(0, this.projects.length, ...projects);
   }
 
   setDone(done: boolean[]) {
-    this.done = done;
+    this.done.splice(0, this.done.length, ...done);
   }
 
   setBingoLines(bingoLines: number[][]) {
@@ -44,7 +38,7 @@ export class EditableBingoBoard implements IBingoBoard {
   // Drag & Drop Methoden und weitere Editierfunktionen können hier ergänzt werden
 }
 
-export class PlayableBingoBoard implements IBingoBoard {
+export class PlayableBingoBoard {
   private projects: Project[];
   private done: boolean[];
   private bingoLines: number[][];

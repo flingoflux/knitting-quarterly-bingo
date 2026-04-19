@@ -14,7 +14,7 @@ import { StorageService } from '../../core/services/storage.service';
   });
 
   it('should create default state', () => {
-    const state = service.load();
+    const state = service.loadEditable();
     expect(state.projects.length).toBe(16);
     expect(state.done.length).toBe(16);
   });

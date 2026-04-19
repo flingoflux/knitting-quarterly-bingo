@@ -1,14 +1,50 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { Router } from '@angular/router';
 import { BingoStateService } from './bingo-state.service';
 import { BingoDragService } from './bingo-drag.service';
+import { EditableBoardComponent } from './editable-board.component';
+import { PlayableBoardComponent } from './playable-board.component';
 
 @Component({
   selector: 'app-bingo',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './bingo.html',
+  imports: [CommonModule, NgIf, EditableBoardComponent, PlayableBoardComponent],
+  template: `
+    <div class="board-header">
+      <button class="home-btn" (click)="goHome()" title="Zur Startseite">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#256029" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 4l9 5.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+      <h2>Knitting Bingo</h2>
+    </div>
+
+    <ng-container *ngIf="mode === 'edit'; else playBoard">
+      <ng-container *ngIf="board && board.getProjects().length > 0">
+        <app-editable-board
+          [board]="board"
+          [dragTargetIndex]="dragTargetIndex"
+          [dragStart]="dragStart.bind(this)"
+          [dragOver]="dragOver.bind(this)"
+          [dragLeave]="dragLeave.bind(this)"
+          [drop]="drop.bind(this)"
+        ></app-editable-board>
+      </ng-container>
+    </ng-container>
+    <ng-template #playBoard>
+      <app-playable-board
+        [board]="board"
+        [isCellInBingo]="isCellInBingo.bind(this)"
+        [toggle]="toggle.bind(this)"
+      ></app-playable-board>
+    </ng-template>
+
+    <div class="actions">
+      <button (click)="resetLocalStorage()">Lokalen Speicher zurücksetzen</button>
+      <button (click)="reset()">Zurücksetzen</button>
+      <button (click)="shuffle()">Felder würfeln</button>
+      <button (click)="play()">Bingo spielen</button>
+    </div>
+  `,
   styles: [
     `
       .grid {
@@ -141,7 +177,14 @@ export class BingoComponent {
 
 
   get board() {
-    return this.bingoState.state.board;
+    const board = this.bingoState.state.board;
+    // Logging für Debugging
+    console.log('[BingoComponent] board:', board);
+    if (board) {
+      console.log('[BingoComponent] Projekte:', board.getProjects());
+      console.log('[BingoComponent] Done:', board.getDone());
+    }
+    return board;
   }
 
   get mode() {
@@ -211,5 +254,14 @@ export class BingoComponent {
     if (this.mode === 'edit') {
       this.bingoState.startGame();
     }
+  }
+
+  resetLocalStorage() {
+    localStorage.removeItem('bingo_state_angular');
+    window.location.reload();
+  }
+
+  play() {
+    this.bingoState.startGame();
   }
 }
