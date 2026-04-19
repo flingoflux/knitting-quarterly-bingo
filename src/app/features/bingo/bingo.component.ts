@@ -9,20 +9,65 @@ import { BingoService, Project } from './bingo';
   imports: [CommonModule],
   templateUrl: './bingo.html',
   styles: [`
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:8px;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
     }
-
     .cell{
       border:1px solid #ccc;
       padding:10px;
       min-height:80px;
       text-align:center;
       cursor:pointer;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 80px;
+      min-width: 0;
+      position: relative;
+      overflow: hidden;
+      background: #fff;
     }
 
+    .cell-content {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .title {
+      width: 100%;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .cat {
+      position: absolute;
+      left: 0;
+      bottom: 0px;
+      width: 100%;
+      text-align: center;
+      font-size: 10px;
+      margin: 0;
+      pointer-events: none;
+      z-index: 2;
+      background: transparent;
+    }
+
+
+
+    .cell.drag-target {
+      border: 1px dashed #222 !important;
+      outline: none;
+      background-color: inherit;
+      box-shadow: none;
+    }
     .cell.done{ background:#d4edda }
 
     .cat{
@@ -48,8 +93,11 @@ export class BingoComponent implements OnInit {
   done: boolean[] = [];
   bingoLines: number[][] = [];
 
-
   bingoService = inject(BingoService);
+
+  // Für Drag & Drop
+  private dragSourceIndex: number | null = null;
+  dragTargetIndex: number | null = null;
 
   ngOnInit() {
     const state = this.bingoService.load();
@@ -87,10 +135,31 @@ export class BingoComponent implements OnInit {
   }
 
   dragStart(index: number) {
-    // Optional: Implement drag and drop if needed
+    this.dragSourceIndex = index;
+  }
+
+  dragOver(index: number) {
+    this.dragTargetIndex = index;
+  }
+
+  dragLeave(index: number) {
+    if (this.dragTargetIndex === index) {
+      this.dragTargetIndex = null;
+    }
   }
 
   drop(index: number) {
-    // Optional: Implement drag and drop if needed
+    if (this.dragSourceIndex === null || this.dragSourceIndex === index) {
+      this.dragTargetIndex = null;
+      return;
+    }
+    // Projekte tauschen
+    [this.projects[this.dragSourceIndex], this.projects[index]] = [this.projects[index], this.projects[this.dragSourceIndex]];
+    // Done-Status mit tauschen
+    [this.done[this.dragSourceIndex], this.done[index]] = [this.done[index], this.done[this.dragSourceIndex]];
+    this.dragSourceIndex = null;
+    this.dragTargetIndex = null;
+    this.updateBingoLines();
+    this.save();
   }
 }
