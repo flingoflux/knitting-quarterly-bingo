@@ -1,7 +1,7 @@
 import { Component, ViewChild, inject } from '@angular/core';
 import { PlayBingoStateService } from './state/play-bingo-state.service';
 import { PlayableBoardComponent } from './components/playable-board.component';
-import { CardDetailDialogComponent } from '../board-studio/components/card-detail-dialog.component';
+import { CardDetailDialogComponent, ImageChangedEvent } from '../board-studio/components/card-detail-dialog.component';
 import { Router } from '@angular/router';
 import { BoardCell } from '../../shared/domain/board-cell';
 
@@ -130,11 +130,11 @@ export class PlayBingoFeatureComponent {
   }
 
   onCardDetailOpen(event: { index: number; project: BoardCell }) {
-    this.detailDialog.open(event.index, event.project.title);
+    this.detailDialog.open(event.project.imageId ?? null, event.project.title);
   }
 
-  onImageChanged(index: number): void {
-    void this.playableBoardRef.refreshImage(index);
+  onImageChanged(event: ImageChangedEvent): void {
+    void this.playableBoardRef.refreshImage(event.imageId);
   }
 
   goHome() {

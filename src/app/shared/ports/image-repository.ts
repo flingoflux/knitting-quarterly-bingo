@@ -1,9 +1,9 @@
 import { InjectionToken } from '@angular/core';
 
 export interface ImageRepository {
-  getImage(cardIndex: number): Promise<string | null>;
-  saveImage(cardIndex: number, dataUrl: string): Promise<void>;
-  deleteImage(cardIndex: number): Promise<void>;
+  getImage(imageId: string): Promise<string | null>;
+  saveImage(imageId: string, dataUrl: string): Promise<void>;
+  deleteImage(imageId: string): Promise<void>;
 }
 
 export const IMAGE_REPOSITORY = new InjectionToken<ImageRepository>('ImageRepository');

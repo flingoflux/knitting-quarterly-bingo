@@ -2,6 +2,10 @@ import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output, ViewChi
 import { CommonModule } from '@angular/common';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../shared/ports/image-repository';
 
+export interface ImageChangedEvent {
+  imageId: string | null;
+}
+
 @Component({
   selector: 'app-card-detail-dialog',
   standalone: true,
@@ -199,22 +203,21 @@ export class CardDetailDialogComponent {
 
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
   private readonly cdr = inject(ChangeDetectorRef);
-  @Output() imageChanged = new EventEmitter<number>();
+  @Output() imageChanged = new EventEmitter<ImageChangedEvent>();
 
   title = '';
   imageUrl: string | null = null;
   loading = false;
 
-  private cardIndex = -1;
+  private currentImageId: string | null = null;
 
-
-  async open(cardIndex: number, title: string): Promise<void> {
-    this.cardIndex = cardIndex;
+  async open(imageId: string | null, title: string): Promise<void> {
+    this.currentImageId = imageId;
     this.title = title;
     this.imageUrl = null;
     this.loading = true;
     this.dialogEl.nativeElement.showModal();
-    this.imageUrl = await this.imageRepo.getImage(cardIndex);
+    this.imageUrl = imageId ? await this.imageRepo.getImage(imageId) : null;
     this.loading = false;
     this.cdr.markForCheck();
   }
@@ -234,21 +237,30 @@ export class CardDetailDialogComponent {
     const file = input.files?.[0];
     if (!file) return;
     this.loading = true;
+    const newImageId = this.currentImageId ?? generateUuid();
     const dataUrl = await resizeImage(file, 800);
-    await this.imageRepo.saveImage(this.cardIndex, dataUrl);
+    await this.imageRepo.saveImage(newImageId, dataUrl);
+    this.currentImageId = newImageId;
     this.imageUrl = dataUrl;
     this.loading = false;
-    this.imageChanged.emit(this.cardIndex);
+    this.imageChanged.emit({ imageId: newImageId });
     this.cdr.markForCheck();
     input.value = '';
   }
 
   async onDelete(): Promise<void> {
-    await this.imageRepo.deleteImage(this.cardIndex);
+    if (this.currentImageId) {
+      await this.imageRepo.deleteImage(this.currentImageId);
+    }
+    this.currentImageId = null;
     this.imageUrl = null;
-    this.imageChanged.emit(this.cardIndex);
+    this.imageChanged.emit({ imageId: null });
     this.cdr.markForCheck();
   }
+}
+
+function generateUuid(): string {
+  return crypto.randomUUID();
 }
 
 function resizeImage(file: File, maxPx: number): Promise<string> {

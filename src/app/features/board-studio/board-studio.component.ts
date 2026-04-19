@@ -1,7 +1,7 @@
 import { Component, ViewChild, inject } from '@angular/core';
 import { BoardStudioStateService } from './state/board-studio-state.service';
 import { EditableBoardComponent } from './components/editable-board.component';
-import { CardDetailDialogComponent } from './components/card-detail-dialog.component';
+import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-detail-dialog.component';
 import { shuffleArray } from '../../shared/utils/array-utils';
 import { BoardCell } from '../../shared/domain/board-cell';
 import { Router } from '@angular/router';
@@ -179,10 +179,18 @@ export class BoardStudioFeatureComponent {
   }
 
   onCardDetailOpen(event: { index: number; project: BoardCell }) {
-    this.detailDialog.open(event.index, event.project.title);
+    this._openCardIndex = event.index;
+    this.detailDialog.open(event.project.imageId ?? null, event.project.title);
   }
 
-  onImageChanged(index: number): void {
-    void this.editableBoardRef.refreshImage(index);
+  onImageChanged(event: ImageChangedEvent): void {
+    if (this._openCardIndex === null) return;
+    const project = this.state.projects()[this._openCardIndex];
+    if (project && project.imageId !== event.imageId) {
+      this.state.updateProject(this._openCardIndex, { ...project, imageId: event.imageId ?? undefined });
+    }
+    void this.editableBoardRef.refreshImage(event.imageId);
   }
+
+  private _openCardIndex: number | null = null;
 }

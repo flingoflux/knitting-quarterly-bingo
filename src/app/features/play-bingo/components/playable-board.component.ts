@@ -22,8 +22,8 @@ interface CardDetailOpenedEvent {
         (click)="onToggle(i)"
       >
         <div class="photo-area">
-          <img *ngIf="getImage(i)" [src]="getImage(i)" class="photo-img" [alt]="p.title" />
-          <div *ngIf="!getImage(i)" class="photo-placeholder">
+          <img *ngIf="getImage(p.imageId)" [src]="getImage(p.imageId)" class="photo-img" [alt]="p.title" />
+          <div *ngIf="!getImage(p.imageId)" class="photo-placeholder">
             <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
               <circle cx="12" cy="13" r="4"/>
@@ -241,24 +241,39 @@ export class PlayableBoardComponent {
   @Output() toggled = new EventEmitter<number>();
   @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
 
-  private readonly imageUrls = new Map<number, string | null>();
+  private readonly imageCache = new Map<string, string>();
 
-  getImage(index: number): string | null {
-    return this.imageUrls.get(index) ?? null;
+  getImage(imageId: string | undefined): string | null {
+    if (!imageId) return null;
+    return this.imageCache.get(imageId) ?? null;
   }
 
-  async refreshImage(index: number): Promise<void> {
-    const url = await this.imageRepo.getImage(index);
-    this.imageUrls.set(index, url);
+  async refreshImage(imageId: string | null): Promise<void> {
+    if (!imageId) return;
+    const url = await this.imageRepo.getImage(imageId);
+    if (url) {
+      this.imageCache.set(imageId, url);
+    } else {
+      this.imageCache.delete(imageId);
+    }
     this.cdr.markForCheck();
   }
 
   private async loadAllImages(): Promise<void> {
-    const len = this._projects.length;
-    const urls = await Promise.all(
-      Array.from({ length: len }, (_, i) => this.imageRepo.getImage(i))
+    const imageIds = this._projects
+      .map(p => p.imageId)
+      .filter((id): id is string => !!id);
+    const uniqueIds = [...new Set(imageIds)];
+    await Promise.all(
+      uniqueIds.map(async id => {
+        const url = await this.imageRepo.getImage(id);
+        if (url) {
+          this.imageCache.set(id, url);
+        } else {
+          this.imageCache.delete(id);
+        }
+      })
     );
-    urls.forEach((url, i) => this.imageUrls.set(i, url));
     this.cdr.markForCheck();
   }
 

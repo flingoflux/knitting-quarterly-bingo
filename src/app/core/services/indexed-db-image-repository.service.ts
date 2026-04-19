@@ -23,28 +23,28 @@ export class IndexedDbImageRepository implements ImageRepository {
     return this.dbPromise;
   }
 
-  async getImage(cardIndex: number): Promise<string | null> {
+  async getImage(imageId: string): Promise<string | null> {
     const db = await this.getDb();
     return new Promise((resolve, reject) => {
-      const req = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(cardIndex);
+      const req = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(imageId);
       req.onsuccess = () => resolve((req.result as string) ?? null);
       req.onerror = () => reject(req.error);
     });
   }
 
-  async saveImage(cardIndex: number, dataUrl: string): Promise<void> {
+  async saveImage(imageId: string, dataUrl: string): Promise<void> {
     const db = await this.getDb();
     return new Promise((resolve, reject) => {
-      const req = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(dataUrl, cardIndex);
+      const req = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(dataUrl, imageId);
       req.onsuccess = () => resolve();
       req.onerror = () => reject(req.error);
     });
   }
 
-  async deleteImage(cardIndex: number): Promise<void> {
+  async deleteImage(imageId: string): Promise<void> {
     const db = await this.getDb();
     return new Promise((resolve, reject) => {
-      const req = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(cardIndex);
+      const req = db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(imageId);
       req.onsuccess = () => resolve();
       req.onerror = () => reject(req.error);
     });
