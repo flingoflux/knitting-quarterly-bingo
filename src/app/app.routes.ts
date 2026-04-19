@@ -9,7 +9,7 @@ export const routes: Routes = [
   },
   {
     path: 'edit',
-    loadComponent: () => import('./features/edit-board/edit-board.component').then(m => m.EditBoardFeatureComponent),
+    loadComponent: () => import('./features/board-studio/board-studio.component').then(m => m.BoardStudioFeatureComponent),
   },
   {
     path: 'play',

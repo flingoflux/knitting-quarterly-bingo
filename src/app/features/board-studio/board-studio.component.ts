@@ -1,12 +1,12 @@
 import { Component, inject } from '@angular/core';
-import { EditBoardStateService } from './state/edit-board-state.service';
+import { BoardStudioStateService } from './state/board-studio-state.service';
 import { EditableBoardComponent } from './components/editable-board.component';
 import { shuffleArray } from '../../shared/utils/array-utils';
 import { BoardCell } from '../../shared/domain/board-cell';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-edit-board-feature',
+  selector: 'app-board-studio-feature',
   standalone: true,
   imports: [EditableBoardComponent],
   template: `
@@ -120,8 +120,8 @@ import { Router } from '@angular/router';
     }
   `],
 })
-export class EditBoardFeatureComponent {
-  state = inject(EditBoardStateService);
+export class BoardStudioFeatureComponent {
+  state = inject(BoardStudioStateService);
   router = inject(Router);
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;

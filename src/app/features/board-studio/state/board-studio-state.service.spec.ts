@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BoardCell } from '../../../shared/domain/board-cell';
-import { EditBoardStateService } from './edit-board-state.service';
+import { BoardStudioStateService } from './board-studio-state.service';
 import { BoardDefinitionRepositoryService, PersistedBoardDefinition } from './board-definition-repository.service';
 import { DEFAULT_BOARD_PROJECTS } from '../../../shared/domain/default-board-projects';
 
@@ -27,11 +27,11 @@ function createProjects(length = 16): BoardCell[] {
   }));
 }
 
-function createState(repository: MockBoardDefinitionRepository): EditBoardStateService {
-  return new EditBoardStateService(repository as unknown as BoardDefinitionRepositoryService);
+function createState(repository: MockBoardDefinitionRepository): BoardStudioStateService {
+  return new BoardStudioStateService(repository as unknown as BoardDefinitionRepositoryService);
 }
 
-describe('EditBoardStateService', () => {
+describe('BoardStudioStateService', () => {
   it('initialisiert Defaults wenn kein persistiertes Board vorhanden ist', () => {
     const repository = new MockBoardDefinitionRepository();
 

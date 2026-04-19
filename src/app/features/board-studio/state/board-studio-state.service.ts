@@ -4,7 +4,7 @@ import { BoardDefinitionRepositoryService } from './board-definition-repository.
 import { createDefaultBoardDefinition, reorderBoardProjects } from '../domain/board-definition';
 
 @Injectable({ providedIn: 'root' })
-export class EditBoardStateService {
+export class BoardStudioStateService {
   private readonly projectsState = signal<BoardCell[]>([]);
   readonly projects: Signal<BoardCell[]> = computed(() => this.projectsState());
 
