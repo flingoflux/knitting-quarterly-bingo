@@ -1,6 +1,7 @@
 # Knitting Quarterly Bingo
 
 ![CI](https://github.com/flingoflux/knitting-quarterly-bingo/actions/workflows/ci.yml/badge.svg)
+[![codecov](https://codecov.io/gh/flingoflux/knitting-quarterly-bingo/graph/badge.svg)](https://codecov.io/gh/flingoflux/knitting-quarterly-bingo)
 
 ## Projektüberblick
 
