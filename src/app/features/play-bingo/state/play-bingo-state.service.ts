@@ -25,6 +25,12 @@ export class PlayBingoStateService {
     return this.projectsState().length > 0;
   }
 
+  resetProgress(): void {
+    const empty = createEmptyDone(this.projectsState().length);
+    this.doneState.set(empty);
+    this.persist();
+  }
+
   toggle(index: number): void {
     const toggled = toggleDone(this.doneState(), index);
     this.doneState.set(toggled);

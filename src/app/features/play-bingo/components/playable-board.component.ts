@@ -30,8 +30,8 @@ interface CardDetailOpenedEvent {
             </svg>
           </div>
 
-          <div *ngIf="done[i]" class="done-overlay">
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <div *ngIf="done[i]" class="done-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
           </div>
@@ -87,8 +87,8 @@ interface CardDetailOpenedEvent {
       transform: translateY(-4px) rotate(0.4deg);
       box-shadow: 0 6px 14px rgba(60, 30, 10, 0.18), 0 16px 32px rgba(60, 30, 10, 0.13);
     }
-    .cell.done .photo-area {
-      filter: brightness(0.92);
+    .cell.done .caption {
+      background: #e8f5e3;
     }
     .cell.bingo-cell {
       box-shadow: 0 0 0 3px #145906, 0 8px 22px rgba(20, 89, 6, 0.22);
@@ -115,14 +115,19 @@ interface CardDetailOpenedEvent {
       justify-content: center;
       color: #c9a878;
     }
-    .done-overlay {
+    .done-badge {
       position: absolute;
-      inset: 0;
-      background: rgba(90, 150, 50, 0.45);
+      top: 6px;
+      left: 6px;
+      background: #145906;
+      color: #fff;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
     }
     .bingo-badge {
       position: absolute;
