@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardCell } from '../../../shared/domain/board-cell';
 
@@ -48,20 +48,18 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
           </svg>
         </button>
 
-        <div class="cell-content" (focusout)="onCellFocusOut(i, p, $event)">
+        <div class="cell-content">
           <ng-container *ngIf="editingIndex === i; else readonlyView">
             <input
               class="title-input"
               [value]="getDraftTitle(i, p.title)"
               (input)="onDraftTitleInput(i, $event)"
-              (blur)="saveProject(i, p)"
-              (keydown.enter)="saveProject(i, p)"
+              (keydown.enter)="saveAndExit(i, p)"
             />
 
             <select
               class="cat-select"
               (change)="onDraftCategoryChange(i, $event)"
-              (blur)="saveProject(i, p)"
             >
               <option
                 *ngFor="let option of categoryOptions"
@@ -91,7 +89,7 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       background: #fffaf2;
       border: 1px solid #d9b998;
       border-radius: 14px;
-      min-height: 126px;
+      min-height: 156px;
       width: 100%;
       position: relative;
       display: flex;
@@ -126,7 +124,7 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
     }
     .title {
       font-weight: 700;
-      margin: 0.5rem 0 0.2rem;
+      margin: 2rem 0 0.2rem;
       color: #4a2d1c;
       line-height: 1.25;
       text-wrap: balance;
@@ -158,7 +156,7 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
     .edit-btn {
       position: absolute;
       right: 8px;
-      top: 8px;
+      top: 6px;
       border: 1px solid #cf9f75;
       border-radius: 50%;
       width: 28px;
@@ -193,7 +191,7 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       color: #3f2a1d;
     }
     .title-input {
-      margin-top: 1.2rem;
+      margin-top: 2rem;
       text-align: center;
       font-weight: 600;
     }
@@ -215,12 +213,13 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
         grid-template-columns: 1fr;
       }
       .cell {
-        min-height: 118px;
+        min-height: 148px;
       }
     }
   `]
 })
 export class EditableBoardComponent {
+  private readonly el = inject(ElementRef);
   readonly categoryOptions = CATEGORY_OPTIONS;
   @Input() projects: BoardCell[] = [];
   @Input() dragTargetIndex!: number | null;
@@ -255,8 +254,26 @@ export class EditableBoardComponent {
     this.droppedOnCell.emit(i);
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.editingIndex === null) return;
+    const target = event.target as Node;
+    const cells = this.el.nativeElement.querySelectorAll('.cell');
+    const editingCell = cells[this.editingIndex] as HTMLElement | undefined;
+    if (editingCell && !editingCell.contains(target)) {
+      this.saveAndExit(this.editingIndex, this.projects[this.editingIndex]);
+    }
+  }
+
   startEditing(i: number, project: BoardCell, event: MouseEvent): void {
     event.stopPropagation();
+    if (this.editingIndex === i) {
+      this.saveAndExit(i, project);
+      return;
+    }
+    if (this.editingIndex !== null) {
+      this.saveAndExit(this.editingIndex, this.projects[this.editingIndex]);
+    }
     this.editingIndex = i;
     this.draftTitles.set(i, project.title);
     this.draftCategoryKeys.set(i, this.getCategoryForProject(project)?.key ?? CATEGORY_OPTIONS[0].key);
@@ -272,17 +289,7 @@ export class EditableBoardComponent {
     this.draftCategoryKeys.set(i, target.value);
   }
 
-  onCellFocusOut(i: number, project: BoardCell, event: FocusEvent): void {
-    if (this.editingIndex !== i) {
-      return;
-    }
-
-    const nextFocusedElement = event.relatedTarget as Node | null;
-    const currentCellElement = event.currentTarget as HTMLElement;
-    if (nextFocusedElement !== null && currentCellElement.contains(nextFocusedElement)) {
-      return;
-    }
-
+  saveAndExit(i: number, project: BoardCell): void {
     this.saveProject(i, project);
     this.editingIndex = null;
   }
