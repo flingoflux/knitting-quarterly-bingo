@@ -1,6 +1,6 @@
 import { StartPageComponent } from './start-page.component';
 import { Routes } from '@angular/router';
-import { playBoardGuard } from './features/play-board/play-board.guard';
+import { playBingoGuard } from './features/play-bingo/play-bingo.guard';
 
 export const routes: Routes = [
   {
@@ -13,7 +13,7 @@ export const routes: Routes = [
   },
   {
     path: 'play',
-    canActivate: [playBoardGuard],
-    loadComponent: () => import('./features/play-board/play-board.component').then(m => m.PlayBoardFeatureComponent),
+    canActivate: [playBingoGuard],
+    loadComponent: () => import('./features/play-bingo/play-bingo.component').then(m => m.PlayBingoFeatureComponent),
   },
 ];

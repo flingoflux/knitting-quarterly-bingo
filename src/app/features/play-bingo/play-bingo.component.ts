@@ -1,11 +1,11 @@
 import { Component, inject } from '@angular/core';
-import { PlayBoardStateService } from './state/play-board-state.service';
+import { PlayBingoStateService } from './state/play-bingo-state.service';
 import { PlayableBoardComponent } from './components/playable-board.component';
 import { Router } from '@angular/router';
 import { BoardCell } from '../../shared/domain/board-cell';
 
 @Component({
-  selector: 'app-play-board-feature',
+  selector: 'app-play-bingo-feature',
   standalone: true,
   imports: [PlayableBoardComponent],
   template: `
@@ -20,7 +20,7 @@ import { BoardCell } from '../../shared/domain/board-cell';
         </button>
       </div>
 
-      <div class="play-board-header">
+      <div class="play-bingo-header">
         <p class="eyebrow">Knitting Quarterly - Bingo</p>
         <h2>Happy crafting</h2>
         <p class="subtitle">Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen.</p>
@@ -67,7 +67,7 @@ import { BoardCell } from '../../shared/domain/board-cell';
       background: #fff0db;
       box-shadow: 0 8px 14px rgba(96, 58, 30, 0.16);
     }
-    .play-board-header {
+    .play-bingo-header {
       text-align: center;
       margin-bottom: 1.1rem;
       padding: 0.6rem 0.4rem;
@@ -86,7 +86,7 @@ import { BoardCell } from '../../shared/domain/board-cell';
       color: #5a2d1a;
       text-wrap: balance;
     }
-    .play-board-header .subtitle {
+    .play-bingo-header .subtitle {
       color: #6c5445;
       font-size: 1.03rem;
       max-width: 44rem;
@@ -102,8 +102,8 @@ import { BoardCell } from '../../shared/domain/board-cell';
     }
   `]
 })
-export class PlayBoardFeatureComponent {
-  state = inject(PlayBoardStateService);
+export class PlayBingoFeatureComponent {
+  state = inject(PlayBingoStateService);
   router = inject(Router);
 
   get projects(): BoardCell[] {

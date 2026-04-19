@@ -26,7 +26,7 @@ import { Router } from '@angular/router';
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
           </svg>
         </button>
-        <button class="icon-btn" (click)="playBoard()" title="Als Bingo spielen" aria-label="Als Bingo spielen">
+        <button class="icon-btn" (click)="playBingo()" title="Als Bingo spielen" aria-label="Als Bingo spielen">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
@@ -140,7 +140,7 @@ export class BoardStudioFeatureComponent {
     this.state.setProjects(shuffled as BoardCell[]);
   }
 
-  playBoard() {
+  playBingo() {
     this.router.navigate(['/play']);
   }
 

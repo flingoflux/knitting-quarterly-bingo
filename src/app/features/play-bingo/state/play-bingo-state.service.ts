@@ -5,7 +5,7 @@ import { BingoGameRepositoryService } from './bingo-game-repository.service';
 import { computeBingoCells, createBoardSignature, createEmptyDone, normalizeDone, toggleDone } from '../domain/bingo-game';
 
 @Injectable({ providedIn: 'root' })
-export class PlayBoardStateService {
+export class PlayBingoStateService {
   private readonly projectsState = signal<BoardCell[]>([]);
   private readonly doneState = signal<boolean[]>([]);
 

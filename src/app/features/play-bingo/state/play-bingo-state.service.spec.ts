@@ -3,7 +3,7 @@ import { Injector, runInInjectionContext } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
 import { PersistedBoardDefinition } from '../../edit-board/state/board-definition-repository.service';
 import { BOARD_DEFINITION_READER } from '../../../shared/ports/board-definition-reader';
-import { PlayBoardStateService } from './play-board-state.service';
+import { PlayBingoStateService } from './play-bingo-state.service';
 import { BingoGameRepositoryService } from './bingo-game-repository.service';
 import { BingoGameProgress, createBoardSignature } from '../domain/bingo-game';
 
@@ -43,17 +43,17 @@ function createProjects(length = 16): BoardCell[] {
 function createState(
   boardDefinitionRepository: MockBoardDefinitionRepository,
   bingoGameRepository: MockBingoGameRepository,
-): PlayBoardStateService {
+): PlayBingoStateService {
   const injector = Injector.create({
     providers: [
       { provide: BOARD_DEFINITION_READER, useValue: boardDefinitionRepository },
       { provide: BingoGameRepositoryService, useValue: bingoGameRepository },
     ],
   });
-  return runInInjectionContext(injector, () => new PlayBoardStateService());
+  return runInInjectionContext(injector, () => new PlayBingoStateService());
 }
 
-describe('PlayBoardStateService', () => {
+describe('PlayBingoStateService', () => {
   it('hat kein spielbares Board ohne Definition', () => {
     const boardDefinitionRepository = new MockBoardDefinitionRepository();
     const bingoGameRepository = new MockBingoGameRepository();
