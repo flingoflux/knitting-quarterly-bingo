@@ -5,9 +5,9 @@
 
 <div class="grid">
     <div 
-      *ngFor="let p of projects; let i = index"
+      *ngFor="let p of state.projects; let i = index"
       class="cell"
-      [class.done]="done[i]"
+      [class.done]="state.done[i]"
       [class.drag-target]="dragTargetIndex === i"
       [class.bingo-cell]="isCellInBingo(i)"
       draggable="true"

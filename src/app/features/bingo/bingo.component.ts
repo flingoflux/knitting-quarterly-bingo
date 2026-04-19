@@ -116,50 +116,52 @@ import { BingoDragService } from './bingo-drag.service';
   `]
 })
 export class BingoComponent implements OnInit {
-    // Gibt true zurück, wenn das Feld Teil einer Bingo-Linie ist
-    public isCellInBingo(index: number): boolean {
-      return this.bingoLines.some(line => line.includes(index));
-    }
-  projects: Project[] = [];
-  done: boolean[] = [];
-  bingoLines: number[][] = [];
+  state = {
+    projects: [] as Project[],
+    done: [] as boolean[],
+    bingoLines: [] as number[][]
+  };
 
   bingoService = inject(BingoService);
   bingoDragService = inject(BingoDragService);
 
+  public isCellInBingo(index: number): boolean {
+    return this.state.bingoLines.some(line => line.includes(index));
+  }
+
   ngOnInit() {
-    const state = this.bingoService.load();
-    this.projects = state.projects;
-    this.done = state.done;
+    const loaded = this.bingoService.load();
+    this.state.projects = loaded.projects;
+    this.state.done = loaded.done;
     this.updateBingoLines();
   }
 
   toggle(index: number) {
-    this.done[index] = !this.done[index];
+    this.state.done[index] = !this.state.done[index];
     this.updateBingoLines();
     this.save();
   }
 
   reset() {
-    this.done.fill(false);
+    this.state.done.fill(false);
     this.updateBingoLines();
     this.save();
   }
 
   shuffle() {
     const newState = this.bingoService.shuffleBoard();
-    this.projects = newState.projects;
-    this.done = newState.done;
+    this.state.projects = newState.projects;
+    this.state.done = newState.done;
     this.updateBingoLines();
     this.save();
   }
 
   private updateBingoLines() {
-    this.bingoLines = this.bingoService.getBingoLines(this.done);
+    this.state.bingoLines = this.bingoService.getBingoLines(this.state.done);
   }
 
   private save() {
-    this.bingoService.save({ projects: this.projects, done: this.done });
+    this.bingoService.save({ projects: this.state.projects, done: this.state.done });
   }
 
   dragStart(index: number) {
@@ -175,10 +177,10 @@ export class BingoComponent implements OnInit {
   }
 
   drop(index: number) {
-    const result = this.bingoDragService.drop(index, this.projects, this.done);
+    const result = this.bingoDragService.drop(index, this.state.projects, this.state.done);
     if (result) {
-      this.projects = result.projects;
-      this.done = result.done;
+      this.state.projects = result.projects;
+      this.state.done = result.done;
       this.updateBingoLines();
       this.save();
     }
