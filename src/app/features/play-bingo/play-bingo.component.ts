@@ -1,13 +1,14 @@
-import { Component, inject } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { PlayBingoStateService } from './state/play-bingo-state.service';
 import { PlayableBoardComponent } from './components/playable-board.component';
+import { CardDetailDialogComponent } from '../board-studio/components/card-detail-dialog.component';
 import { Router } from '@angular/router';
 import { BoardCell } from '../../shared/domain/board-cell';
 
 @Component({
   selector: 'app-play-bingo-feature',
   standalone: true,
-  imports: [PlayableBoardComponent],
+  imports: [PlayableBoardComponent, CardDetailDialogComponent],
   template: `
     <div class="feature-shell">
       <div class="toolbar">
@@ -27,11 +28,15 @@ import { BoardCell } from '../../shared/domain/board-cell';
       </div>
 
       <app-playable-board
+        #playableBoard
         [projects]="projects"
         [done]="done"
         [bingoCells]="bingoCells"
         (toggled)="onToggle($event)"
+        (cardDetailOpened)="onCardDetailOpen($event)"
       ></app-playable-board>
+
+      <app-card-detail-dialog #detailDialog (imageChanged)="onImageChanged($event)"></app-card-detail-dialog>
     </div>
   `,
   styles: [
@@ -103,6 +108,8 @@ import { BoardCell } from '../../shared/domain/board-cell';
   `]
 })
 export class PlayBingoFeatureComponent {
+  @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
+  @ViewChild('playableBoard') private readonly playableBoardRef!: PlayableBoardComponent;
   state = inject(PlayBingoStateService);
   router = inject(Router);
 
@@ -120,6 +127,14 @@ export class PlayBingoFeatureComponent {
 
   onToggle(i: number) {
     this.state.toggle(i);
+  }
+
+  onCardDetailOpen(event: { index: number; project: BoardCell }) {
+    this.detailDialog.open(event.index, event.project.title);
+  }
+
+  onImageChanged(index: number): void {
+    void this.playableBoardRef.refreshImage(index);
   }
 
   goHome() {
