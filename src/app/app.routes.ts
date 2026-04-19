@@ -1,10 +1,17 @@
-export const routes = [
+import { StartPageComponent } from './start-page.component';
+import { Routes } from '@angular/router';
+
+export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./features/bingo/start.page').then((m) => m.BingoStartPageComponent),
+    component: StartPageComponent,
   },
   {
-    path: 'board',
-    loadComponent: () => import('./features/bingo/bingo.component').then((m) => m.BingoComponent),
+    path: 'edit',
+    loadComponent: () => import('./features/edit-board/edit-board.component').then(m => m.EditBoardFeatureComponent),
+  },
+  {
+    path: 'play',
+    loadComponent: () => import('./features/play-board/play-board.component').then(m => m.PlayBoardFeatureComponent),
   },
 ];
