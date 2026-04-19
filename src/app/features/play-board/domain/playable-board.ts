@@ -1,6 +1,6 @@
 import { PlayableProject } from './playable-project';
 
-export class PlayableBingoBoard {
+export class PlayableBoard {
   private projects: PlayableProject[];
   private done: boolean[];
   private bingoLines: number[][];
@@ -43,7 +43,7 @@ export class PlayableBingoBoard {
   // Gibt alle Indizes der Zellen zurück, die zu einer vollständigen Bingo-Linie gehören
   getBingoCells(): Set<number> {
     const bingoCells = new Set<number>();
-    for (const line of PlayableBingoBoard.allBingoLines()) {
+    for (const line of PlayableBoard.allBingoLines()) {
       if (line.every(i => this.done[i])) {
         line.forEach(i => bingoCells.add(i));
       }

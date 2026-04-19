@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { PlayableBingoBoard } from '../domain/playable-bingo-board';
+import { PlayableBoard } from '../domain/playable-board';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -82,7 +82,7 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class PlayableBoardComponent implements OnInit {
-  @Input() board!: PlayableBingoBoard;
+  @Input() board!: PlayableBoard;
   @Input() toggle!: (i: number) => void;
 
   isCellInBingo(i: number): boolean {

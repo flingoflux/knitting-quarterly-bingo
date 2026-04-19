@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { EditableBingoBoard } from '../domain/editable-bingo-board';
+import { EditableBoard } from '../domain/editable-board';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -72,7 +72,7 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class EditableBoardComponent implements OnInit {
-  @Input() board!: EditableBingoBoard;
+  @Input() board!: EditableBoard;
   @Input() dragTargetIndex!: number | null;
   @Input() dragStart!: (i: number) => void;
   @Input() dragOver!: (i: number) => void;

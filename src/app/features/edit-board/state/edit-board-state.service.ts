@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { EditableBingoBoard } from '../domain/editable-bingo-board';
+import { EditableBoard } from '../domain/editable-board';
 import { EditableProject } from '../domain/editable-project';
 
 @Injectable({ providedIn: 'root' })
-export class EditableBingoStateService {
-  private board: EditableBingoBoard;
+export class EditBoardStateService {
+  private board: EditableBoard;
   private defaultProjects: EditableProject[] = [
     new EditableProject('Socken stricken', 'Basics', 'basics'),
     new EditableProject('Neues Garn', 'Challenge', 'challenge'),
@@ -25,14 +25,14 @@ export class EditableBingoStateService {
   ];
 
   constructor() {
-    this.board = new EditableBingoBoard([...this.defaultProjects]);
+    this.board = new EditableBoard([...this.defaultProjects]);
   }
 
   resetBoard() {
-    this.board = new EditableBingoBoard([...this.defaultProjects]);
+    this.board = new EditableBoard([...this.defaultProjects]);
   }
 
-  getBoard(): EditableBingoBoard {
+  getBoard(): EditableBoard {
     return this.board;
   }
 

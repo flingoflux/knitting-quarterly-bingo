@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { EditableBingoStateService } from './state/editable-bingo-state.service';
+import { EditBoardStateService } from './state/edit-board-state.service';
 import { EditableBoardComponent } from './components/editable-board.component';
 import { shuffleArray } from '../../shared/utils/array-utils';
 import { EditableProject } from './domain/editable-project';
@@ -27,7 +27,7 @@ import { BoardTransferState } from '../../shared/navigation/board-transfer-state
           <line x1="15" y1="15" x2="21" y2="21"/>
         </svg>
       </button>
-      <button class="icon-btn" (click)="playAsBingo()" title="Als Bingo spielen" aria-label="Als Bingo spielen">
+      <button class="icon-btn" (click)="playBoard()" title="Als Bingo spielen" aria-label="Als Bingo spielen">
         <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
           <circle cx="12" cy="12" r="4"/>
@@ -130,7 +130,7 @@ import { BoardTransferState } from '../../shared/navigation/board-transfer-state
   `],
 })
 export class EditBoardFeatureComponent {
-  state = inject(EditableBingoStateService);
+  state = inject(EditBoardStateService);
   router = inject(Router);
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
@@ -149,7 +149,7 @@ export class EditBoardFeatureComponent {
     this.state.setProjects(shuffled as EditableProject[]);
   }
 
-  playAsBingo() {
+  playBoard() {
     const state: BoardTransferState = {
       projects: this.board.getProjects().map(p => ({ title: p.title, cat: p.cat, catKey: p.catKey }))
     };

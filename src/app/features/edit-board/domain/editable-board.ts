@@ -1,6 +1,6 @@
 import { EditableProject } from './editable-project';
 
-export class EditableBingoBoard {
+export class EditableBoard {
   private projects: EditableProject[];
 
   constructor(projects: EditableProject[]) {

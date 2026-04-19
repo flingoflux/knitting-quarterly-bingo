@@ -1,24 +1,24 @@
 import { Injectable } from '@angular/core';
-import { PlayableBingoBoard } from '../domain/playable-bingo-board';
+import { PlayableBoard } from '../domain/playable-board';
 import { PlayableProject } from '../domain/playable-project';
 
 @Injectable({ providedIn: 'root' })
-export class PlayableBingoStateService {
-  private board: PlayableBingoBoard;
+export class PlayBoardStateService {
+  private board: PlayableBoard;
 
   constructor() {
     // Beispiel: Initialisierung mit Dummy-Daten
-    this.board = new PlayableBingoBoard([
+    this.board = new PlayableBoard([
       new PlayableProject('Socken stricken', 'Basics', 'basics'),
       // ...weitere Projekte
     ], new Array(16).fill(false), []);
   }
 
-  getBoard(): PlayableBingoBoard {
+  getBoard(): PlayableBoard {
     return this.board;
   }
 
-  setBoard(board: PlayableBingoBoard) {
+  setBoard(board: PlayableBoard) {
     this.board = board;
   }
 
