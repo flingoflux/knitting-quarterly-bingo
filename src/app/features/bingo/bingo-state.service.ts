@@ -1,12 +1,18 @@
 import { Injectable } from '@angular/core';
 import { BingoService, Project } from './bingo';
 
+export interface BingoBoardState {
+  projects: Project[];
+  done: boolean[];
+  bingoLines: number[][];
+}
+
 @Injectable({ providedIn: 'root' })
 export class BingoStateService {
-  state = {
-    projects: [] as Project[],
-    done: [] as boolean[],
-    bingoLines: [] as number[][]
+  state: BingoBoardState = {
+    projects: [],
+    done: [],
+    bingoLines: []
   };
 
   constructor(
