@@ -35,6 +35,18 @@ export class EditBoardStateService {
     this.persist();
   }
 
+  updateProject(index: number, project: BoardCell): void {
+    const current = this.projectsState();
+    if (!Number.isInteger(index) || index < 0 || index >= current.length) {
+      return;
+    }
+
+    const updated = [...current];
+    updated[index] = { ...project };
+    this.projectsState.set(updated);
+    this.persist();
+  }
+
   private persist(): void {
     this.repository.save({
       projects: this.projectsState(),
