@@ -1,17 +1,17 @@
-import { PlayableProject } from './playable-project';
+import { BoardCell } from '../../../shared/domain/board-cell';
 
 export class PlayableBoard {
-  private projects: PlayableProject[];
+  private projects: BoardCell[];
   private done: boolean[];
   private bingoLines: number[][];
 
-  constructor(projects: PlayableProject[], done: boolean[], bingoLines: number[][]) {
+  constructor(projects: BoardCell[], done: boolean[], bingoLines: number[][]) {
     this.projects = projects;
     this.done = done;
     this.bingoLines = bingoLines;
   }
 
-  getProjects(): PlayableProject[] {
+  getProjects(): BoardCell[] {
     return this.projects;
   }
 

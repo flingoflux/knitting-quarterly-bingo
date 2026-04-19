@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { PlayableBoard } from '../domain/playable-board';
-import { PlayableProject } from '../domain/playable-project';
+import { BoardCell } from '../../../shared/domain/board-cell';
 
 @Injectable({ providedIn: 'root' })
 export class PlayBoardStateService {
@@ -9,9 +9,9 @@ export class PlayBoardStateService {
   constructor() {
     // Beispiel: Initialisierung mit Dummy-Daten
     this.board = new PlayableBoard([
-      new PlayableProject('Socken stricken', 'Basics', 'basics'),
+      { title: 'Socken stricken', cat: 'Basics', catKey: 'basics' },
       // ...weitere Projekte
-    ], new Array(16).fill(false), []);
+    ] as BoardCell[], new Array(16).fill(false), []);
   }
 
   getBoard(): PlayableBoard {

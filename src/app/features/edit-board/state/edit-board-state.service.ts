@@ -1,27 +1,27 @@
 import { Injectable } from '@angular/core';
 import { EditableBoard } from '../domain/editable-board';
-import { EditableProject } from '../domain/editable-project';
+import { BoardCell } from '../../../shared/domain/board-cell';
 
 @Injectable({ providedIn: 'root' })
 export class EditBoardStateService {
   private board: EditableBoard;
-  private defaultProjects: EditableProject[] = [
-    new EditableProject('Socken stricken', 'Basics', 'basics'),
-    new EditableProject('Neues Garn', 'Challenge', 'challenge'),
-    new EditableProject('Zopfmuster', 'Technik', 'technik'),
-    new EditableProject('Schal', 'Accessoire', 'accessoire'),
-    new EditableProject('Maschenprobe', 'Basics', 'basics'),
-    new EditableProject('Färben', 'Challenge', 'challenge'),
-    new EditableProject('Farbverlauf', 'Technik', 'technik'),
-    new EditableProject('Spitze', 'Technik', 'technik'),
-    new EditableProject('Handschuhe', 'Accessoire', 'accessoire'),
-    new EditableProject('Eigenes Muster', 'Challenge', 'challenge'),
-    new EditableProject('Rundnadel', 'Basics', 'basics'),
-    new EditableProject('Intarsia', 'Technik', 'technik'),
-    new EditableProject('Verschenken', 'Challenge', 'challenge'),
-    new EditableProject('Restgarn', 'Challenge', 'challenge'),
-    new EditableProject('Pullover', 'Basics', 'basics'),
-    new EditableProject('Garn wechseln', 'Accessoire', 'accessoire'),
+  private defaultProjects: BoardCell[] = [
+    { title: 'Socken stricken', cat: 'Basics', catKey: 'basics' },
+    { title: 'Neues Garn', cat: 'Challenge', catKey: 'challenge' },
+    { title: 'Zopfmuster', cat: 'Technik', catKey: 'technik' },
+    { title: 'Schal', cat: 'Accessoire', catKey: 'accessoire' },
+    { title: 'Maschenprobe', cat: 'Basics', catKey: 'basics' },
+    { title: 'Färben', cat: 'Challenge', catKey: 'challenge' },
+    { title: 'Farbverlauf', cat: 'Technik', catKey: 'technik' },
+    { title: 'Spitze', cat: 'Technik', catKey: 'technik' },
+    { title: 'Handschuhe', cat: 'Accessoire', catKey: 'accessoire' },
+    { title: 'Eigenes Muster', cat: 'Challenge', catKey: 'challenge' },
+    { title: 'Rundnadel', cat: 'Basics', catKey: 'basics' },
+    { title: 'Intarsia', cat: 'Technik', catKey: 'technik' },
+    { title: 'Verschenken', cat: 'Challenge', catKey: 'challenge' },
+    { title: 'Restgarn', cat: 'Challenge', catKey: 'challenge' },
+    { title: 'Pullover', cat: 'Basics', catKey: 'basics' },
+    { title: 'Garn wechseln', cat: 'Accessoire', catKey: 'accessoire' },
   ];
 
   constructor() {
@@ -36,7 +36,7 @@ export class EditBoardStateService {
     return this.board;
   }
 
-  setProjects(projects: EditableProject[]) {
+  setProjects(projects: BoardCell[]) {
     this.board.setProjects(projects);
     // ggf. persistieren
   }

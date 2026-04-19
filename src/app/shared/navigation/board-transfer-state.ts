@@ -1,9 +1,5 @@
-export interface BoardCellData {
-  title: string;
-  cat: string;
-  catKey: string;
-}
+import { BoardCell } from '../domain/board-cell';
 
 export interface BoardTransferState {
-  projects: BoardCellData[];
+  projects: BoardCell[];
 }

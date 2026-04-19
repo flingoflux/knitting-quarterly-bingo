@@ -3,7 +3,6 @@ import { PlayBoardStateService } from './state/play-board-state.service';
 import { PlayableBoardComponent } from './components/playable-board.component';
 import { Router } from '@angular/router';
 import { PlayableBoard } from './domain/playable-board';
-import { PlayableProject } from './domain/playable-project';
 import { BoardTransferState } from '../../shared/navigation/board-transfer-state';
 
 @Component({
@@ -66,7 +65,7 @@ export class PlayBoardFeatureComponent implements OnInit {
   ngOnInit() {
     const navState = history.state as Partial<BoardTransferState>;
     if (navState?.projects?.length) {
-      const projects = navState.projects.map(p => new PlayableProject(p.title, p.cat, p.catKey));
+      const projects = navState.projects;
       const done = new Array(projects.length).fill(false);
       this.state.setBoard(new PlayableBoard(projects, done, []));
     }

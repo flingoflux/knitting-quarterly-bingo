@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { PlayableBoard } from './playable-board';
-import { PlayableProject } from './playable-project';
+import { BoardCell } from '../../../shared/domain/board-cell';
 
 describe('PlayableBoard', () => {
-  function createProjects(): PlayableProject[] {
-    return Array.from({ length: 16 }, (_, i) => new PlayableProject('P' + i, 'Cat', 'cat'));
+  function createProjects(): BoardCell[] {
+    return Array.from({ length: 16 }, (_, i) => ({ title: 'P' + i, cat: 'Cat', catKey: 'cat' }));
   }
 
   it('initialisiert mit allen Feldern offen', () => {

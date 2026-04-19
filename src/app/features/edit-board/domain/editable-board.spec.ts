@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { EditableBoard } from './editable-board';
-import { EditableProject } from './editable-project';
+import { BoardCell } from '../../../shared/domain/board-cell';
 
 describe('EditableBoard', () => {
-  function createProjects(): EditableProject[] {
-    return Array.from({ length: 16 }, (_, i) => new EditableProject('P' + i, 'Cat', 'cat'));
+  function createProjects(): BoardCell[] {
+    return Array.from({ length: 16 }, (_, i) => ({ title: 'P' + i, cat: 'Cat', catKey: 'cat' }));
   }
 
   it('liefert die Projekte korrekt zurück', () => {

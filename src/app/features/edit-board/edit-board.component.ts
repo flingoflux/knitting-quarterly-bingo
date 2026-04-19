@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { EditBoardStateService } from './state/edit-board-state.service';
 import { EditableBoardComponent } from './components/editable-board.component';
 import { shuffleArray } from '../../shared/utils/array-utils';
-import { EditableProject } from './domain/editable-project';
+import { BoardCell } from '../../shared/domain/board-cell';
 import { Router } from '@angular/router';
 import { BoardTransferState } from '../../shared/navigation/board-transfer-state';
 
@@ -146,7 +146,7 @@ export class EditBoardFeatureComponent {
   shuffle() {
     const projects = this.board.getProjects();
     const shuffled = shuffleArray(projects);
-    this.state.setProjects(shuffled as EditableProject[]);
+    this.state.setProjects(shuffled as BoardCell[]);
   }
 
   playBoard() {

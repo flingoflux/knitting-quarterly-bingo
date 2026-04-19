@@ -1,17 +1,17 @@
-import { EditableProject } from './editable-project';
+import { BoardCell } from '../../../shared/domain/board-cell';
 
 export class EditableBoard {
-  private projects: EditableProject[];
+  private projects: BoardCell[];
 
-  constructor(projects: EditableProject[]) {
+  constructor(projects: BoardCell[]) {
     this.projects = projects;
   }
 
-  getProjects(): EditableProject[] {
+  getProjects(): BoardCell[] {
     return this.projects;
   }
 
-  setProjects(projects: EditableProject[]) {
+  setProjects(projects: BoardCell[]) {
     this.projects = projects;
   }
 
