@@ -1,4 +1,10 @@
-<h2>Knitting Bingo</h2>
+
+<div class="board-header">
+  <button class="home-btn" (click)="goHome()" title="Zur Startseite">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#256029" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 4l9 5.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </button>
+  <h2>Knitting Bingo</h2>
+</div>
 
 <div class="grid">
   <div 
@@ -26,3 +32,22 @@
   <button (click)="reset()">Zurücksetzen</button>
   <button (click)="shuffle()">Felder würfeln</button>
 </div>
+<style>
+.board-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.home-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem 0.2rem 0.2rem;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.home-btn:hover {
+  background: #e6f4ea;
+}
+</style>

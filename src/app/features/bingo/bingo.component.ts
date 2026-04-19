@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { BingoStateService } from './bingo-state.service';
 import { BingoDragService } from './bingo-drag.service';
 
@@ -133,6 +134,10 @@ import { BingoDragService } from './bingo-drag.service';
 export class BingoComponent {
   bingoState = inject(BingoStateService);
   bingoDrag = inject(BingoDragService);
+  router = inject(Router);
+  goHome() {
+    this.router.navigate(['/']);
+  }
 
   get state() {
     return this.bingoState.state;
