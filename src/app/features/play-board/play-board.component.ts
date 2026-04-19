@@ -1,9 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { PlayBoardStateService } from './state/play-board-state.service';
 import { PlayableBoardComponent } from './components/playable-board.component';
 import { Router } from '@angular/router';
-import { PlayableBoard } from './domain/playable-board';
-import { BoardTransferState } from '../../shared/navigation/board-transfer-state';
+import { BoardCell } from '../../shared/domain/board-cell';
 
 @Component({
   selector: 'app-play-board-feature',
@@ -21,7 +20,12 @@ import { BoardTransferState } from '../../shared/navigation/board-transfer-state
       <h2>Knitting Quarterly Bingo spielen</h2>
       <p class="subtitle">Klicke auf die Felder, um erledigte Projekte abzuhaken!</p>
     </div>
-    <app-playable-board [board]="board" (toggled)="onToggle($event)"></app-playable-board>
+    <app-playable-board
+      [projects]="projects"
+      [done]="done"
+      [bingoCells]="bingoCells"
+      (toggled)="onToggle($event)"
+    ></app-playable-board>
   `,
   styles: [
     `.home-btn {
@@ -58,25 +62,26 @@ import { BoardTransferState } from '../../shared/navigation/board-transfer-state
     .play-board-header .subtitle { color: #666; font-size: 1.1rem; margin-top: 0.5rem; }
   `]
 })
-export class PlayBoardFeatureComponent implements OnInit {
+export class PlayBoardFeatureComponent {
   state = inject(PlayBoardStateService);
   router = inject(Router);
 
-  ngOnInit() {
-    const navState = history.state as Partial<BoardTransferState>;
-    if (navState?.projects?.length) {
-      const projects = navState.projects;
-      const done = new Array(projects.length).fill(false);
-      this.state.setBoard(new PlayableBoard(projects, done, []));
-    }
+  get projects(): BoardCell[] {
+    return this.state.projects();
   }
 
-  get board() {
-    return this.state.getBoard();
+  get done(): boolean[] {
+    return this.state.done();
   }
+
+  get bingoCells(): Set<number> {
+    return this.state.bingoCells();
+  }
+
   onToggle(i: number) {
     this.state.toggle(i);
   }
+
   goHome() {
     this.router.navigate(['/']);
   }

@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { PlayableBoard } from '../domain/playable-board';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { BoardCell } from '../../../shared/domain/board-cell';
 
 @Component({
   selector: 'app-playable-board',
@@ -9,16 +9,16 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="grid playable">
       <div
-        *ngFor="let p of board.getProjects(); let i = index"
+        *ngFor="let p of projects; let i = index"
         class="cell"
-        [class.done]="board.getDone()[i]"
+        [class.done]="done[i]"
         [class.bingo-cell]="isCellInBingo(i)"
         (click)="onToggle(i)"
       >
         <div class="cell-content">
           <div class="title">{{p.title}}</div>
           <div class="cat" [ngClass]="'cat-' + p.catKey">{{p.cat}}</div>
-          <span *ngIf="board.getDone()[i]" class="done-check">✓</span>
+          <span *ngIf="done[i]" class="done-check">✓</span>
         </div>
       </div>
     </div>
@@ -81,8 +81,10 @@ import { CommonModule } from '@angular/common';
     }
   `]
 })
-export class PlayableBoardComponent implements OnInit {
-  @Input() board!: PlayableBoard;
+export class PlayableBoardComponent {
+  @Input() projects: BoardCell[] = [];
+  @Input() done: boolean[] = [];
+  @Input() bingoCells: Set<number> = new Set<number>();
   @Output() toggled = new EventEmitter<number>();
 
   onToggle(i: number) {
@@ -90,11 +92,6 @@ export class PlayableBoardComponent implements OnInit {
   }
 
   isCellInBingo(i: number): boolean {
-    return this.board.getBingoCells().has(i);
-  }
-
-  ngOnInit() {
-    console.log('[PlayableBoardComponent] Projekte:', this.board?.getProjects());
-    console.log('[PlayableBoardComponent] Bingo-Zellen:', Array.from(this.board?.getBingoCells() ?? []));
+    return this.bingoCells.has(i);
   }
 }

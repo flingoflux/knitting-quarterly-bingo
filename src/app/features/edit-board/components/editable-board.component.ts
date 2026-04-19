@@ -1,6 +1,6 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { EditableBoard } from '../domain/editable-board';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { BoardCell } from '../../../shared/domain/board-cell';
 
 @Component({
   selector: 'app-editable-board',
@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="grid editable">
       <div
-        *ngFor="let p of board.getProjects(); let i = index"
+        *ngFor="let p of projects; let i = index"
         class="cell"
         [class.drag-target]="dragTargetIndex === i"
         draggable="true"
@@ -71,8 +71,8 @@ import { CommonModule } from '@angular/common';
     .editable .drag-hint { position: absolute; right: 8px; top: 6px; color: #888; font-size: 1.2em; }
   `]
 })
-export class EditableBoardComponent implements OnInit {
-  @Input() board!: EditableBoard;
+export class EditableBoardComponent {
+  @Input() projects: BoardCell[] = [];
   @Input() dragTargetIndex!: number | null;
   @Output() dragStarted = new EventEmitter<number>();
   @Output() dragOverCell = new EventEmitter<number>();
@@ -93,9 +93,5 @@ export class EditableBoardComponent implements OnInit {
 
   onDrop(i: number) {
     this.droppedOnCell.emit(i);
-  }
-
-  ngOnInit() {
-    console.log('[EditableBoardComponent] Projekte:', this.board?.getProjects());
   }
 }

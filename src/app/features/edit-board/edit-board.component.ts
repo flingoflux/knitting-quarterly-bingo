@@ -4,7 +4,6 @@ import { EditableBoardComponent } from './components/editable-board.component';
 import { shuffleArray } from '../../shared/utils/array-utils';
 import { BoardCell } from '../../shared/domain/board-cell';
 import { Router } from '@angular/router';
-import { BoardTransferState } from '../../shared/navigation/board-transfer-state';
 
 @Component({
   selector: 'app-edit-board-feature',
@@ -39,7 +38,7 @@ import { BoardTransferState } from '../../shared/navigation/board-transfer-state
       <p class="subtitle">Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden!</p>
     </div>
     <app-editable-board
-      [board]="board"
+      [projects]="projects"
       [dragTargetIndex]="dragTargetIndex"
       (dragStarted)="onDragStart($event)"
       (dragOverCell)="onDragOver($event)"
@@ -135,8 +134,8 @@ export class EditBoardFeatureComponent {
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
 
-  get board() {
-    return this.state.getBoard();
+  get projects(): BoardCell[] {
+    return this.state.projects();
   }
 
   goHome() {
@@ -144,16 +143,13 @@ export class EditBoardFeatureComponent {
   }
 
   shuffle() {
-    const projects = this.board.getProjects();
+    const projects = this.projects;
     const shuffled = shuffleArray(projects);
     this.state.setProjects(shuffled as BoardCell[]);
   }
 
   playBoard() {
-    const state: BoardTransferState = {
-      projects: this.board.getProjects().map(p => ({ title: p.title, cat: p.cat, catKey: p.catKey }))
-    };
-    this.router.navigate(['/play'], { state });
+    this.router.navigate(['/play']);
   }
 
   onDragStart(i: number) {
@@ -173,8 +169,7 @@ export class EditBoardFeatureComponent {
 
   onDrop(i: number) {
     if (this.dragStartIndex !== null && this.dragStartIndex !== i) {
-      this.board.swapProjects(this.dragStartIndex, i);
-      this.state.setProjects([...this.board.getProjects()]);
+      this.state.swapProjects(this.dragStartIndex, i);
     }
     this.dragStartIndex = null;
     this.dragTargetIndex = null;

@@ -1,43 +1,25 @@
-import { Injectable } from '@angular/core';
-import { EditableBoard } from '../domain/editable-board';
+import { Injectable, Signal } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
+import { BoardStoreService } from '../../../core/services/board-store.service';
 
 @Injectable({ providedIn: 'root' })
 export class EditBoardStateService {
-  private board: EditableBoard;
-  private defaultProjects: BoardCell[] = [
-    { title: 'Socken stricken', cat: 'Basics', catKey: 'basics' },
-    { title: 'Neues Garn', cat: 'Challenge', catKey: 'challenge' },
-    { title: 'Zopfmuster', cat: 'Technik', catKey: 'technik' },
-    { title: 'Schal', cat: 'Accessoire', catKey: 'accessoire' },
-    { title: 'Maschenprobe', cat: 'Basics', catKey: 'basics' },
-    { title: 'Färben', cat: 'Challenge', catKey: 'challenge' },
-    { title: 'Farbverlauf', cat: 'Technik', catKey: 'technik' },
-    { title: 'Spitze', cat: 'Technik', catKey: 'technik' },
-    { title: 'Handschuhe', cat: 'Accessoire', catKey: 'accessoire' },
-    { title: 'Eigenes Muster', cat: 'Challenge', catKey: 'challenge' },
-    { title: 'Rundnadel', cat: 'Basics', catKey: 'basics' },
-    { title: 'Intarsia', cat: 'Technik', catKey: 'technik' },
-    { title: 'Verschenken', cat: 'Challenge', catKey: 'challenge' },
-    { title: 'Restgarn', cat: 'Challenge', catKey: 'challenge' },
-    { title: 'Pullover', cat: 'Basics', catKey: 'basics' },
-    { title: 'Garn wechseln', cat: 'Accessoire', catKey: 'accessoire' },
-  ];
+  readonly projects: Signal<BoardCell[]>;
 
-  constructor() {
-    this.board = new EditableBoard([...this.defaultProjects]);
+  constructor(private readonly boardStore: BoardStoreService) {
+    this.projects = this.boardStore.projects;
+    this.boardStore.initializeDefaultsIfEmpty();
   }
 
-  resetBoard() {
-    this.board = new EditableBoard([...this.defaultProjects]);
+  resetBoard(): void {
+    this.boardStore.resetToDefaults();
   }
 
-  getBoard(): EditableBoard {
-    return this.board;
+  setProjects(projects: BoardCell[]): void {
+    this.boardStore.setProjects(projects);
   }
 
-  setProjects(projects: BoardCell[]) {
-    this.board.setProjects(projects);
-    // ggf. persistieren
+  swapProjects(startIndex: number, targetIndex: number): void {
+    this.boardStore.swapProjects(startIndex, targetIndex);
   }
 }
