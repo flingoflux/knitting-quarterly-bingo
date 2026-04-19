@@ -15,6 +15,17 @@ export class BingoStateService {
     bingoLines: []
   };
 
+
+  /**
+   * Setzt Projekte und Done-Status neu (z.B. nach Drag & Drop) und aktualisiert Bingo-Lines & Persistenz
+   */
+  setProjectsAndDone(projects: Project[], done: boolean[]) {
+    this.state.projects = projects;
+    this.state.done = done;
+    this.updateBingoLines();
+    this.save();
+  }
+
   constructor(
     private bingoService: BingoService
   ) {

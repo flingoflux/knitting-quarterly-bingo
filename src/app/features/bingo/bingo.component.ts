@@ -154,10 +154,7 @@ export class BingoComponent {
   drop(index: number) {
     const result = this.bingoDrag.drop(index, this.state.projects, this.state.done);
     if (result) {
-      this.state.projects = result.projects;
-      this.state.done = result.done;
-      this.bingoState["updateBingoLines"]();
-      this.bingoState["save"]();
+      this.bingoState.setProjectsAndDone(result.projects, result.done);
     }
   }
 
