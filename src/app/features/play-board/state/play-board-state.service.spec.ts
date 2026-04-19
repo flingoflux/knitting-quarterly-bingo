@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import { Injector, runInInjectionContext } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
 import { PersistedBoardDefinition } from '../../edit-board/state/board-definition-repository.service';
-import { BoardDefinitionReader } from '../../../shared/ports/board-definition-reader';
+import { BOARD_DEFINITION_READER } from '../../../shared/ports/board-definition-reader';
 import { PlayBoardStateService } from './play-board-state.service';
 import { BingoGameRepositoryService } from './bingo-game-repository.service';
 import { BingoGameProgress, createBoardSignature } from '../domain/bingo-game';
@@ -43,10 +44,13 @@ function createState(
   boardDefinitionRepository: MockBoardDefinitionRepository,
   bingoGameRepository: MockBingoGameRepository,
 ): PlayBoardStateService {
-  return new PlayBoardStateService(
-    boardDefinitionRepository as BoardDefinitionReader,
-    bingoGameRepository as unknown as BingoGameRepositoryService,
-  );
+  const injector = Injector.create({
+    providers: [
+      { provide: BOARD_DEFINITION_READER, useValue: boardDefinitionRepository },
+      { provide: BingoGameRepositoryService, useValue: bingoGameRepository },
+    ],
+  });
+  return runInInjectionContext(injector, () => new PlayBoardStateService());
 }
 
 describe('PlayBoardStateService', () => {

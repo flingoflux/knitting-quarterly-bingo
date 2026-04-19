@@ -13,15 +13,10 @@ export class PlayBoardStateService {
   readonly done: Signal<boolean[]> = computed(() => this.doneState());
   readonly bingoCells: Signal<Set<number>> = computed(() => computeBingoCells(this.doneState()));
 
-  private readonly boardDefinitionRepository: BoardDefinitionReader;
-  private readonly bingoGameRepository: BingoGameRepositoryService;
+  private readonly boardDefinitionRepository = inject(BOARD_DEFINITION_READER);
+  private readonly bingoGameRepository = inject(BingoGameRepositoryService);
 
-  constructor(
-    boardDefinitionRepository?: BoardDefinitionReader,
-    bingoGameRepository?: BingoGameRepositoryService,
-  ) {
-    this.boardDefinitionRepository = boardDefinitionRepository ?? inject(BOARD_DEFINITION_READER);
-    this.bingoGameRepository = bingoGameRepository ?? inject(BingoGameRepositoryService);
+  constructor() {
     this.refreshFromDefinition();
   }
 
