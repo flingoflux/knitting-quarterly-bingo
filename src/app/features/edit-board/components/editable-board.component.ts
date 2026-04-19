@@ -32,7 +32,7 @@ import { CommonModule } from '@angular/common';
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
       gap: 8px;
-      max-width: 600px;
+      max-width: 820px;
       margin: 2rem auto;
     }
     .cell {
@@ -40,7 +40,7 @@ import { CommonModule } from '@angular/common';
       border: 1px solid #ccc;
       border-radius: 8px;
       min-height: 120px;
-      min-width: 160px;
+      min-width: 200px;
       width: 100%;
       position: relative;
       display: flex;
