@@ -10,123 +10,116 @@ import { Router } from '@angular/router';
   standalone: true,
   imports: [EditableBoardComponent],
   template: `
-    <div class="button-bar">
-      <button class="icon-btn" (click)="goHome()" title="Zur Startseite" aria-label="Zur Startseite">
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9l9-7 9 7"/>
-          <path d="M9 22V12h6v10"/>
-          <path d="M21 22H3"/>
-        </svg>
-      </button>
-      <button class="icon-btn" (click)="shuffle()" title="Felder würfeln" aria-label="Felder würfeln">
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="16 3 21 3 21 8"/>
-          <line x1="4" y1="20" x2="21" y2="3"/>
-          <polyline points="21 16 21 21 16 21"/>
-          <line x1="15" y1="15" x2="21" y2="21"/>
-        </svg>
-      </button>
-      <button class="icon-btn" (click)="playBoard()" title="Als Bingo spielen" aria-label="Als Bingo spielen">
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/>
-          <circle cx="12" cy="12" r="4"/>
-        </svg>
-      </button>
+    <div class="feature-shell">
+      <div class="button-bar">
+        <button class="icon-btn" (click)="goHome()" title="Zur Startseite" aria-label="Zur Startseite">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7"/>
+            <path d="M9 22V12h6v10"/>
+            <path d="M21 22H3"/>
+          </svg>
+        </button>
+        <button class="icon-btn" (click)="shuffle()" title="Felder würfeln" aria-label="Felder würfeln">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 3 21 3 21 8"/>
+            <line x1="4" y1="20" x2="21" y2="3"/>
+            <polyline points="21 16 21 21 16 21"/>
+            <line x1="15" y1="15" x2="21" y2="21"/>
+          </svg>
+        </button>
+        <button class="icon-btn" (click)="playBoard()" title="Als Bingo spielen" aria-label="Als Bingo spielen">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="4"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="edit-board-header">
+        <p class="eyebrow">Board Studio</p>
+        <h2>Knitting Quarterly Bingo planen</h2>
+        <p class="subtitle">Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden.</p>
+      </div>
+
+      <app-editable-board
+        [projects]="projects"
+        [dragTargetIndex]="dragTargetIndex"
+        (dragStarted)="onDragStart($event)"
+        (dragOverCell)="onDragOver($event)"
+        (dragLeftCell)="onDragLeave($event)"
+        (droppedOnCell)="onDrop($event)"
+        (projectEdited)="onProjectEdited($event)"
+      ></app-editable-board>
     </div>
-    <div class="edit-board-header">
-      <h2>Knitting Quarterly Bingo planen</h2>
-      <p class="subtitle">Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden!</p>
-    </div>
-    <app-editable-board
-      [projects]="projects"
-      [dragTargetIndex]="dragTargetIndex"
-      (dragStarted)="onDragStart($event)"
-      (dragOverCell)="onDragOver($event)"
-      (dragLeftCell)="onDragLeave($event)"
-      (droppedOnCell)="onDrop($event)"
-      (projectEdited)="onProjectEdited($event)"
-    ></app-editable-board>
   `,
   styles: [`
+    .feature-shell {
+      max-width: 72rem;
+      margin: 0 auto;
+      padding: 1.4rem 1.1rem 2rem;
+    }
     .button-bar {
       display: flex;
-      gap: 0.5rem;
+      gap: 0.6rem;
       align-items: center;
-      position: absolute;
-      top: 1.2rem;
-      left: 1.2rem;
-      z-index: 20;
+      margin-bottom: 1.1rem;
     }
     .icon-btn {
-      background: none;
-      border: none;
-      padding: 0.2rem;
-      margin: 0;
+      background: #fff7ec;
+      color: #7b371f;
+      border: 1px solid #c79362;
+      padding: 0.25rem;
       cursor: pointer;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      border-radius: 999px;
+      width: 42px;
+      height: 42px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
+      transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
     }
-    .icon-btn:focus {
-      outline: 2px solid #888;
-      background: #f0f0f0;
+    .icon-btn:focus-visible {
+      outline: 3px solid rgba(196, 110, 53, 0.3);
+      outline-offset: 2px;
     }
     .icon-btn:hover {
-      background: #f5f5f5;
+      transform: translateY(-1px);
+      background: #fff0db;
+      box-shadow: 0 8px 14px rgba(96, 58, 30, 0.16);
     }
     .edit-board-header {
       text-align: center;
-      margin-bottom: 1.5rem;
-      position: relative;
-      margin-top: 4.5rem;
+      margin-bottom: 1.1rem;
+      padding: 0.6rem 0.4rem;
     }
-    .edit-board-header .subtitle { color: #666; font-size: 1.1rem; margin-top: 0.5rem; }
-    .grid.editable {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(4, 1fr);
-      gap: 8px;
-      max-width: 600px;
-      margin: 2rem auto;
+    .eyebrow {
+      margin: 0;
+      color: #8f3b22;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-weight: 700;
     }
-    .cell {
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      min-height: 120px;
-      min-width: 160px;
-      width: 100%;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-      cursor: grab;
-      transition: box-shadow 0.2s;
-      font-size: 1.1rem;
+    h2 {
+      margin: 0.4rem 0 0;
+      font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+      color: #5a2d1a;
+      text-wrap: balance;
     }
-    .cell.drag-target {
-      outline: 2px dashed #888;
-      background: #f0f0f0;
+    .edit-board-header .subtitle {
+      color: #6c5445;
+      font-size: 1.03rem;
+      max-width: 44rem;
+      margin: 0.55rem auto 0;
     }
-    .cell-content {
-      width: 100%;
-      text-align: center;
-      padding: 0.5rem;
+    @media (max-width: 640px) {
+      .feature-shell {
+        padding: 1rem 0.75rem 1.4rem;
+      }
+      .button-bar {
+        justify-content: center;
+      }
     }
-    .title {
-      font-weight: bold;
-      margin-bottom: 0.3rem;
-    }
-    .cat {
-      font-size: 0.9em;
-      color: #666;
-    }
-    .editable .drag-hint { position: absolute; right: 8px; top: 6px; color: #888; font-size: 1.2em; }
   `],
 })
 export class EditBoardFeatureComponent {

@@ -79,81 +79,115 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
   styles: [`
     .grid.editable {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(4, 1fr);
-      gap: 8px;
-      max-width: 820px;
-      margin: 2rem auto;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.85rem;
+      max-width: 70rem;
+      margin: 1rem auto 0;
     }
     .cell {
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      min-height: 120px;
-      min-width: 200px;
+      background: #fffaf2;
+      border: 1px solid #d9b998;
+      border-radius: 14px;
+      min-height: 126px;
       width: 100%;
       position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      box-shadow: 0 12px 26px rgba(96, 58, 30, 0.12);
       cursor: grab;
-      transition: box-shadow 0.2s;
-      font-size: 1.1rem;
+      transition: transform 0.18s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      font-size: 1.02rem;
+    }
+    .cell:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 30px rgba(96, 58, 30, 0.16);
+      border-color: #c79362;
     }
     .cell.drag-target {
-      outline: 2px dashed #888;
-      background: #f0f0f0;
+      outline: 2px dashed #b56a39;
+      outline-offset: 3px;
+      background: #fff3e2;
+      transform: translateY(-2px);
     }
     .cell-content {
       width: 100%;
       text-align: center;
-      padding: 0.5rem;
+      padding: 0.7rem 0.55rem;
       position: relative;
-      display: grid;
-      justify-items: center;
-      gap: 0.45rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      min-height: 100%;
     }
     .title {
-      font-weight: bold;
-      margin-bottom: 0.3rem;
+      font-weight: 700;
+      margin: 0.5rem 0 0.2rem;
+      color: #4a2d1c;
+      line-height: 1.25;
+      text-wrap: balance;
     }
     .cat {
-      font-size: 0.9em;
-      color: #666;
+      font-size: 0.72rem;
+      color: #5b4436;
+      border-radius: 999px;
+      border: 1px solid #d7b899;
+      background: #fff3e2;
+      padding: 0.15rem 0.55rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-top: auto;
+    }
+    .cat-basics {
+      background: #f5eadc;
+    }
+    .cat-technik {
+      background: #ede8ff;
+    }
+    .cat-challenge {
+      background: #ffe6dc;
+    }
+    .cat-accessoire {
+      background: #e6f4ec;
     }
     .edit-btn {
       position: absolute;
-      right: 6px;
-      top: 6px;
-      border: 1px solid #d0d0d0;
+      right: 8px;
+      top: 8px;
+      border: 1px solid #cf9f75;
       border-radius: 50%;
-      width: 26px;
-      height: 26px;
-      background: #fff;
-      color: #555;
+      width: 28px;
+      height: 28px;
+      background: #fff4e6;
+      color: #7b3b22;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       z-index: 2;
-      transition: background 0.2s, color 0.2s;
+      transition: transform 0.18s ease, background 0.2s, color 0.2s;
     }
     .edit-btn:hover,
-    .edit-btn:focus {
-      background: #f3f3f3;
-      color: #222;
-      outline: none;
+    .edit-btn:focus-visible {
+      transform: translateY(-1px);
+      background: #ffe8cd;
+      color: #532615;
+    }
+    .edit-btn:focus-visible {
+      outline: 3px solid rgba(196, 110, 53, 0.3);
+      outline-offset: 2px;
     }
     .title-input,
     .cat-select {
       width: calc(100% - 1rem);
-      border: 1px solid #cfcfcf;
-      border-radius: 6px;
-      padding: 0.35rem 0.5rem;
-      font-size: 0.95rem;
-      background: #fff;
-      color: #333;
+      border: 1px solid #d0ab86;
+      border-radius: 9px;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.9rem;
+      background: #fffdf9;
+      color: #3f2a1d;
     }
     .title-input {
       margin-top: 1.2rem;
@@ -163,7 +197,24 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
     .cat-select {
       margin-bottom: 0.2rem;
     }
-    .editable .drag-hint { position: absolute; right: 8px; top: 6px; color: #888; font-size: 1.2em; }
+    .title-input:focus-visible,
+    .cat-select:focus-visible {
+      outline: 3px solid rgba(196, 110, 53, 0.28);
+      outline-offset: 1px;
+    }
+    @media (max-width: 960px) {
+      .grid.editable {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    @media (max-width: 560px) {
+      .grid.editable {
+        grid-template-columns: 1fr;
+      }
+      .cell {
+        min-height: 118px;
+      }
+    }
   `]
 })
 export class EditableBoardComponent {

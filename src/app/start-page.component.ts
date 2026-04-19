@@ -14,8 +14,8 @@ import { Router } from '@angular/router';
         height="340"
       />
       <div class="actions">
-        <button class="action-btn action-btn-primary" (click)="goToEdit()">Neues Board anlegen</button>
-        <button class="action-btn action-btn-secondary" (click)="goToPlay()">Letztes Bingo spielen</button>
+        <button class="action-btn action-btn-primary" (click)="goToPlay()">Bingo spielen</button>
+        <button class="action-btn action-btn-secondary" (click)="goToEdit()">Board anlegen</button>
       </div>
     </div>
   `,
@@ -27,6 +27,7 @@ import { Router } from '@angular/router';
       gap: 2rem;
       margin-top: 3rem;
       padding: 1.5rem;
+      color: var(--kq-text);
     }
     .logo {
       width: min(340px, 78vw);
@@ -45,7 +46,7 @@ import { Router } from '@angular/router';
       min-width: 16rem;
       border-radius: 999px;
       padding: 0.95rem 1.8rem;
-      border: 1px solid #8e5530;
+      border: 1px solid var(--kq-outline);
       font-size: 1rem;
       font-weight: 700;
       letter-spacing: 0.04em;
@@ -55,21 +56,21 @@ import { Router } from '@angular/router';
     }
     .action-btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 10px 18px rgba(98, 55, 25, 0.16);
+      box-shadow: var(--kq-shadow);
     }
     .action-btn:focus-visible {
       outline: 3px solid rgba(196, 110, 53, 0.28);
       outline-offset: 3px;
     }
     .action-btn-primary {
-      background: linear-gradient(135deg, #8f3b22 0%, #c46e35 100%);
-      color: #fff8ef;
-      border-color: #8f3b22;
+      background: linear-gradient(135deg, var(--kq-primary) 0%, var(--kq-primary-2) 100%);
+      color: var(--kq-bg-soft);
+      border-color: var(--kq-primary);
     }
     .action-btn-secondary {
-      background: #fbf4ea;
-      color: #6b341d;
-      border-color: #b97a3d;
+      background: var(--kq-bg-soft);
+      color: var(--kq-text);
+      border-color: var(--kq-outline);
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
     }
     @media (max-width: 640px) {
