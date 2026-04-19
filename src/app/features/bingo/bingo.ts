@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../../core/services/storage.service';
+import { shuffleArray } from '../../shared/utils/array-utils';
 
 export interface Project {
   title: string;
@@ -63,15 +64,9 @@ export class BingoService {
   }
 
   shuffleBoard() {
-    const pool = [...this.defaultProjects];
-
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-
+    const shuffled = shuffleArray(this.defaultProjects);
     return {
-      projects: pool.slice(0, 16),
+      projects: shuffled.slice(0, 16),
       done: new Array(16).fill(false),
     };
   }
