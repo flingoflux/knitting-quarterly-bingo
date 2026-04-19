@@ -63,4 +63,21 @@ describe('EditBoardStateService', () => {
     expect(state.projects()[3].title).toBe('Project 0');
     expect(repository.lastSavedDefinition?.projects[0].title).toBe('Project 3');
   });
+
+  it('aktualisiert ein Projekt und persistiert die Aenderung', () => {
+    const repository = new MockBoardDefinitionRepository();
+    repository.loadedDefinition = { projects: createProjects(4) };
+    const state = createState(repository);
+
+    state.updateProject(1, {
+      title: 'Neues Projekt',
+      cat: 'Technik',
+      catKey: 'technik',
+    });
+
+    expect(state.projects()[1].title).toBe('Neues Projekt');
+    expect(state.projects()[1].cat).toBe('Technik');
+    expect(state.projects()[1].catKey).toBe('technik');
+    expect(repository.lastSavedDefinition?.projects[1].title).toBe('Neues Projekt');
+  });
 });

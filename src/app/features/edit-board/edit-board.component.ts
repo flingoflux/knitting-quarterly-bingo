@@ -44,6 +44,7 @@ import { Router } from '@angular/router';
       (dragOverCell)="onDragOver($event)"
       (dragLeftCell)="onDragLeave($event)"
       (droppedOnCell)="onDrop($event)"
+      (projectEdited)="onProjectEdited($event)"
     ></app-editable-board>
   `,
   styles: [`
@@ -173,5 +174,9 @@ export class EditBoardFeatureComponent {
     }
     this.dragStartIndex = null;
     this.dragTargetIndex = null;
+  }
+
+  onProjectEdited(event: { index: number; project: BoardCell }) {
+    this.state.updateProject(event.index, event.project);
   }
 }
