@@ -56,7 +56,6 @@ export class BingoService {
   save(state: { projects: Project[]; done: boolean[] }) {
     this.storage.setItem(this.STORAGE_KEY, state);
   }
-  }
 
   getBingoLines(done: boolean[]) {
     return this.lines.filter((line) => line.every((i) => done[i]));

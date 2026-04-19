@@ -176,5 +176,4 @@ export class BingoComponent {
   get dragTargetIndex() {
     return this.bingoDrag.getDragTargetIndex();
   }
-  }
 }
