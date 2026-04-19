@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BingoService, Project } from './bingo';
+import { BingoDragService } from './bingo-drag.service';
 
 @Component({
   selector: 'app-bingo',
@@ -124,10 +125,7 @@ export class BingoComponent implements OnInit {
   bingoLines: number[][] = [];
 
   bingoService = inject(BingoService);
-
-  // Für Drag & Drop
-  private dragSourceIndex: number | null = null;
-  dragTargetIndex: number | null = null;
+  bingoDragService = inject(BingoDragService);
 
   ngOnInit() {
     const state = this.bingoService.load();
@@ -165,31 +163,28 @@ export class BingoComponent implements OnInit {
   }
 
   dragStart(index: number) {
-    this.dragSourceIndex = index;
+    this.bingoDragService.dragStart(index);
   }
 
   dragOver(index: number) {
-    this.dragTargetIndex = index;
+    this.bingoDragService.dragOver(index);
   }
 
   dragLeave(index: number) {
-    if (this.dragTargetIndex === index) {
-      this.dragTargetIndex = null;
-    }
+    this.bingoDragService.dragLeave(index);
   }
 
   drop(index: number) {
-    if (this.dragSourceIndex === null || this.dragSourceIndex === index) {
-      this.dragTargetIndex = null;
-      return;
+    const result = this.bingoDragService.drop(index, this.projects, this.done);
+    if (result) {
+      this.projects = result.projects;
+      this.done = result.done;
+      this.updateBingoLines();
+      this.save();
     }
-    // Projekte tauschen
-    [this.projects[this.dragSourceIndex], this.projects[index]] = [this.projects[index], this.projects[this.dragSourceIndex]];
-    // Done-Status mit tauschen
-    [this.done[this.dragSourceIndex], this.done[index]] = [this.done[index], this.done[this.dragSourceIndex]];
-    this.dragSourceIndex = null;
-    this.dragTargetIndex = null;
-    this.updateBingoLines();
-    this.save();
+  }
+
+  get dragTargetIndex() {
+    return this.bingoDragService.getDragTargetIndex();
   }
 }
