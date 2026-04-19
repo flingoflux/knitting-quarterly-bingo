@@ -12,7 +12,6 @@ export class PlayBoardStateService {
   readonly projects: Signal<BoardCell[]> = computed(() => this.projectsState());
   readonly done: Signal<boolean[]> = computed(() => this.doneState());
   readonly bingoCells: Signal<Set<number>> = computed(() => computeBingoCells(this.doneState()));
-  readonly hasPlayableBoard: Signal<boolean> = computed(() => this.projectsState().length > 0);
 
   private readonly boardDefinitionRepository: BoardDefinitionReader;
   private readonly bingoGameRepository: BingoGameRepositoryService;
@@ -24,6 +23,11 @@ export class PlayBoardStateService {
     this.boardDefinitionRepository = boardDefinitionRepository ?? inject(BOARD_DEFINITION_READER);
     this.bingoGameRepository = bingoGameRepository ?? inject(BingoGameRepositoryService);
     this.refreshFromDefinition();
+  }
+
+  hasPlayableBoard(): boolean {
+    this.refreshFromDefinition();
+    return this.projectsState().length > 0;
   }
 
   toggle(index: number): void {
