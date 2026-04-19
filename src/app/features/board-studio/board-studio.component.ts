@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { BoardStudioStateService } from './state/board-studio-state.service';
 import { EditableBoardComponent } from './components/editable-board.component';
+import { CardDetailDialogComponent } from './components/card-detail-dialog.component';
 import { shuffleArray } from '../../shared/utils/array-utils';
 import { BoardCell } from '../../shared/domain/board-cell';
 import { Router } from '@angular/router';
@@ -8,7 +9,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-board-studio-feature',
   standalone: true,
-  imports: [EditableBoardComponent],
+  imports: [EditableBoardComponent, CardDetailDialogComponent],
   template: `
     <div class="feature-shell">
       <div class="button-bar">
@@ -47,7 +48,10 @@ import { Router } from '@angular/router';
         (dragLeftCell)="onDragLeave($event)"
         (droppedOnCell)="onDrop($event)"
         (projectEdited)="onProjectEdited($event)"
+        (cardDetailOpened)="onCardDetailOpen($event)"
       ></app-editable-board>
+
+      <app-card-detail-dialog #detailDialog></app-card-detail-dialog>
     </div>
   `,
   styles: [`
@@ -121,6 +125,7 @@ import { Router } from '@angular/router';
   `],
 })
 export class BoardStudioFeatureComponent {
+  @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
   state = inject(BoardStudioStateService);
   router = inject(Router);
   dragTargetIndex: number | null = null;
@@ -169,5 +174,9 @@ export class BoardStudioFeatureComponent {
 
   onProjectEdited(event: { index: number; project: BoardCell }) {
     this.state.updateProject(event.index, event.project);
+  }
+
+  onCardDetailOpen(event: { index: number; project: BoardCell }) {
+    this.detailDialog.open(event.index, event.project.title);
   }
 }

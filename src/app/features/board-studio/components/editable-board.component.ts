@@ -12,6 +12,11 @@ interface ProjectEditedEvent {
   project: BoardCell;
 }
 
+interface CardDetailOpenedEvent {
+  index: number;
+  project: BoardCell;
+}
+
 const CATEGORY_OPTIONS: CategoryOption[] = [
   { label: 'Basics', key: 'basics' },
   { label: 'Technik', key: 'technik' },
@@ -35,6 +40,19 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
         (dragleave)="onDragLeave(i)"
         (drop)="onDrop(i)"
       >
+        <button
+          type="button"
+          class="photo-btn"
+          title="Foto ansehen / hochladen"
+          aria-label="Foto ansehen oder hochladen"
+          (click)="openDetail(i, p, $event)"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+        </button>
+
         <button
           type="button"
           class="edit-btn"
@@ -157,6 +175,33 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
     .cat-technik { background: #1cb3f4; }
     .cat-challenge { background: #c44020; }
     .cat-accessoire { background: #5aaa2a; }
+    .photo-btn {
+      position: absolute;
+      left: 8px;
+      top: 6px;
+      border: 1px solid #cf9f75;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      background: #fff4e6;
+      color: #7b3b22;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 2;
+      transition: transform 0.18s ease, background 0.2s, color 0.2s;
+    }
+    .photo-btn:hover,
+    .photo-btn:focus-visible {
+      transform: translateY(-1px);
+      background: #ffe8cd;
+      color: #532615;
+    }
+    .photo-btn:focus-visible {
+      outline: 3px solid rgba(196, 110, 53, 0.3);
+      outline-offset: 2px;
+    }
     .edit-btn {
       position: absolute;
       right: 8px;
@@ -269,6 +314,7 @@ export class EditableBoardComponent {
   @Output() dragLeftCell = new EventEmitter<number>();
   @Output() droppedOnCell = new EventEmitter<number>();
   @Output() projectEdited = new EventEmitter<ProjectEditedEvent>();
+  @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
 
   editingIndex: number | null = null;
   private readonly draftTitles = new Map<number, string>();
@@ -303,6 +349,11 @@ export class EditableBoardComponent {
     if (editingCell && !editingCell.contains(target)) {
       this.saveAndExit(this.editingIndex, this.projects[this.editingIndex]);
     }
+  }
+
+  openDetail(i: number, project: BoardCell, event: MouseEvent): void {
+    event.stopPropagation();
+    this.cardDetailOpened.emit({ index: i, project });
   }
 
   startEditing(i: number, project: BoardCell, event: MouseEvent): void {
