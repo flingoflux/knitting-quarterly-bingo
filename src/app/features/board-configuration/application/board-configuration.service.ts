@@ -14,7 +14,7 @@ export class BoardConfigurationService {
   constructor() {
     const result = this.reader.load();
     if (result.ok && result.value.projects.length > 0) {
-      this.boardState.set(BoardDefinition.fromProjects(result.value.projects));
+      this.boardState.set(BoardDefinition.fromProjects(result.value.projects, result.value.id));
       return;
     }
 
@@ -27,7 +27,7 @@ export class BoardConfigurationService {
   }
 
   setProjects(projects: BoardCell[]): void {
-    this.boardState.set(BoardDefinition.fromProjects(projects));
+    this.boardState.set(BoardDefinition.fromProjects(projects, this.boardState().id));
     this.persist();
   }
 

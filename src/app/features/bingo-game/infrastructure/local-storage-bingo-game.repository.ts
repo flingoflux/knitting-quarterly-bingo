@@ -5,7 +5,7 @@ import { BingoGameRepository } from '../domain/bingo-game.repository';
 
 @Injectable({ providedIn: 'root' })
 export class LocalStorageBingoGameRepository implements BingoGameRepository {
-  private readonly storageKey = 'kq-bingo-play-state-v1';
+  private readonly storageKey = 'kq-bingo-active-game-v2';
 
   constructor(private readonly storage: StorageService) {}
 
@@ -15,8 +15,12 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
 
   save(progress: BingoGameProgress): void {
     this.storage.setItem(this.storageKey, {
+      boardDefinitionId: progress.boardDefinitionId,
       boardSignature: progress.boardSignature,
+      boardSnapshot: [...progress.boardSnapshot],
+      cellImages: [...progress.cellImages],
       done: [...progress.done],
+      startedAt: progress.startedAt,
     });
   }
 }

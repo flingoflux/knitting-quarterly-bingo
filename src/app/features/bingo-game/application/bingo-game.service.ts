@@ -1,6 +1,6 @@
 import { Injectable, inject, Signal, computed, signal } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
-import { BOARD_DEFINITION_READER, BOARD_DEFINITION_WRITER } from '../../board-configuration/domain/board-definition.repository';
+import { BOARD_DEFINITION_READER } from '../../board-configuration/domain/board-definition.repository';
 import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
 import { BingoGame, createBoardSignature } from '../domain/bingo-game';
 
@@ -13,7 +13,6 @@ export class BingoGameService {
   readonly bingoCells: Signal<Set<number>> = computed(() => this.gameState().bingoCells);
 
   private readonly boardDefinitionRepository = inject(BOARD_DEFINITION_READER);
-  private readonly boardDefinitionWriter = inject(BOARD_DEFINITION_WRITER);
   private readonly bingoGameRepository = inject(BINGO_GAME_REPOSITORY);
 
   constructor() {
@@ -25,22 +24,22 @@ export class BingoGameService {
     return !this.gameState().isEmpty;
   }
 
-  updateProjectImageId(index: number, imageId: string | undefined): void {
-    const projects = [...this.gameState().projects];
-    if (index < 0 || index >= projects.length) return;
-    projects[index] = { ...projects[index], imageId };
-    this.boardDefinitionWriter.save({ projects });
-    this.gameState.set(this.gameState().updateProjects(projects));
+  updateCellImage(index: number, imageId: string | undefined): void {
+    const updated = this.gameState().updateCellImage(index, imageId);
+    this.persist(updated);
+    this.gameState.set(updated);
   }
 
   resetProgress(): void {
-    this.gameState.set(this.gameState().resetProgress());
-    this.persist();
+    const reset = this.gameState().resetProgress();
+    this.persist(reset);
+    this.gameState.set(reset);
   }
 
   toggle(index: number): void {
-    this.gameState.set(this.gameState().toggle(index));
-    this.persist();
+    const toggled = this.gameState().toggle(index);
+    this.persist(toggled);
+    this.gameState.set(toggled);
   }
 
   private refreshFromDefinition(): void {
@@ -50,20 +49,24 @@ export class BingoGameService {
       return;
     }
 
-    const projects = result.value.projects;
+    const { id: boardDefinitionId, projects } = result.value;
     const persistedProgress = this.bingoGameRepository.load();
 
-    if (persistedProgress !== null && persistedProgress.boardSignature === createBoardSignature(projects)) {
+    if (
+      persistedProgress !== null &&
+      persistedProgress.boardDefinitionId === boardDefinitionId &&
+      persistedProgress.boardSignature === createBoardSignature(projects)
+    ) {
       this.gameState.set(BingoGame.restore(projects, persistedProgress));
       return;
     }
 
-    const game = BingoGame.fromDefinition(projects);
+    const game = BingoGame.fromDefinition(boardDefinitionId, projects);
+    this.persist(game);
     this.gameState.set(game);
-    this.persist();
   }
 
-  private persist(): void {
-    this.bingoGameRepository.save(this.gameState().toProgress());
+  private persist(game: BingoGame): void {
+    this.bingoGameRepository.save(game.toProgress());
   }
 }

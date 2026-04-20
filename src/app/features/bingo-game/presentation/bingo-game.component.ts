@@ -249,7 +249,7 @@ export class BingoGameComponent {
 
   onImageChanged(event: ImageChangedEvent): void {
     if (this._openCardIndex !== null) {
-      this.state.updateProjectImageId(this._openCardIndex, event.imageId ?? undefined);
+      this.state.updateCellImage(this._openCardIndex, event.imageId ?? undefined);
     }
     void this.playableBoardRef.refreshImage(event.imageId);
   }
