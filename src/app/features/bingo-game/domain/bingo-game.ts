@@ -5,31 +5,78 @@ export interface BingoGameProgress {
   done: boolean[];
 }
 
-export function createBoardSignature(projects: BoardCell[]): string {
+export function createBoardSignature(projects: readonly BoardCell[]): string {
   return JSON.stringify(projects.map(project => ({
     title: project.title,
   })));
 }
 
-export function createEmptyDone(length: number): boolean[] {
-  return new Array(length).fill(false);
-}
+export class BingoGame {
+  private constructor(
+    private readonly _projects: readonly BoardCell[],
+    private readonly _done: readonly boolean[],
+  ) {}
 
-export function normalizeDone(done: boolean[], length: number): boolean[] {
-  return Array.from({ length }, (_, index) => Boolean(done[index]));
-}
-
-export function toggleDone(done: boolean[], index: number): boolean[] {
-  if (!isValidIndex(index, done.length)) {
-    return [...done];
+  static empty(): BingoGame {
+    return new BingoGame([], []);
   }
 
-  const next = [...done];
-  next[index] = !next[index];
-  return next;
+  static fromDefinition(projects: readonly BoardCell[]): BingoGame {
+    return new BingoGame([...projects], new Array(projects.length).fill(false));
+  }
+
+  static restore(projects: readonly BoardCell[], saved: BingoGameProgress): BingoGame {
+    const signature = createBoardSignature(projects);
+    if (saved.boardSignature !== signature) {
+      return BingoGame.fromDefinition(projects);
+    }
+    const done = Array.from({ length: projects.length }, (_, i) => Boolean(saved.done[i]));
+    return new BingoGame([...projects], done);
+  }
+
+  get projects(): readonly BoardCell[] {
+    return this._projects;
+  }
+
+  get done(): readonly boolean[] {
+    return this._done;
+  }
+
+  get bingoCells(): Set<number> {
+    return computeBingoCells(this._done);
+  }
+
+  get isEmpty(): boolean {
+    return this._projects.length === 0;
+  }
+
+  toggle(index: number): BingoGame {
+    if (!isValidIndex(index, this._done.length)) {
+      return new BingoGame(this._projects, [...this._done]);
+    }
+    const next = [...this._done];
+    next[index] = !next[index];
+    return new BingoGame(this._projects, next);
+  }
+
+  resetProgress(): BingoGame {
+    return new BingoGame(this._projects, new Array(this._projects.length).fill(false));
+  }
+
+  updateProjects(projects: readonly BoardCell[]): BingoGame {
+    const done = Array.from({ length: projects.length }, (_, i) => Boolean(this._done[i]));
+    return new BingoGame([...projects], done);
+  }
+
+  toProgress(): BingoGameProgress {
+    return {
+      boardSignature: createBoardSignature(this._projects),
+      done: [...this._done] as boolean[],
+    };
+  }
 }
 
-export function computeBingoCells(done: boolean[]): Set<number> {
+function computeBingoCells(done: readonly boolean[]): Set<number> {
   const size = Math.sqrt(done.length);
   if (!Number.isInteger(size) || size < 2) {
     return new Set<number>();
