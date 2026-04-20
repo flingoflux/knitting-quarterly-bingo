@@ -6,7 +6,6 @@ import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-
 import { shuffleArray } from '../../../shared/utils/array-utils';
 import { BoardCell } from '../../../shared/domain/board-cell';
 import { Router } from '@angular/router';
-import { BingoGameService } from '../../bingo-game/application/bingo-game.service';
 
 @Component({
   selector: 'app-board-configuration',
@@ -217,10 +216,7 @@ export class BoardConfigurationComponent {
     this.state.setProjects(shuffled as BoardCell[]);
   }
 
-  private readonly bingoGameService = inject(BingoGameService);
-
   playBingo() {
-    this.bingoGameService.resetProgress();
     this.router.navigate(['/play']);
   }
 
