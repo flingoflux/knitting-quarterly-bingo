@@ -148,8 +148,8 @@ import { PlayBingoStateService } from '../play-bingo/state/play-bingo-state.serv
       background: #fff0db;
     }
     .mode-btn.active {
-      background: #145906;
-      color: #fff;
+      background: linear-gradient(135deg, #8f3b22 0%, #c46e35 100%);
+      color: #fff7ec;
     }
     .mode-btn:focus-visible {
       outline: 3px solid rgba(196, 110, 53, 0.3);
