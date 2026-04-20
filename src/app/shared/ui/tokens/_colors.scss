@@ -1,0 +1,24 @@
+// KQ Design Tokens – Farben
+// Eingebunden über styles.scss → shared/ui/tokens/_index.scss
+
+:root {
+  // Hintergründe
+  --kq-bg: #f9f1e7;
+  --kq-bg-soft: #fff8ef;
+
+  // Text
+  --kq-text: #3f2a1d;
+  --kq-muted: #6c5445;
+
+  // Primärfarben
+  --kq-primary: #8f3b22;
+  --kq-primary-2: #c46e35;
+
+  // Rahmen & Karten
+  --kq-outline: #c79362;
+  --kq-card: #fffaf2;
+  --kq-card-border: #d9b998;
+
+  // Schatten
+  --kq-shadow: 0 12px 28px rgba(96, 58, 30, 0.14);
+}

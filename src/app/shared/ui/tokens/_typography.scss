@@ -1,0 +1,16 @@
+// KQ Design Tokens – Typografie
+
+:root {
+  --kq-font-family: 'Avenir Next', 'Trebuchet MS', 'Segoe UI', sans-serif;
+
+  --kq-font-size-xs:   0.7rem;
+  --kq-font-size-sm:   0.78rem;
+  --kq-font-size-base: 1rem;
+  --kq-font-size-lg:   1.15rem;
+  --kq-font-size-h2:   clamp(1.6rem, 2.6vw, 2.2rem);
+
+  --kq-font-weight-normal: 400;
+  --kq-font-weight-bold:   700;
+
+  --kq-letter-spacing-caps: 0.16em;
+}
