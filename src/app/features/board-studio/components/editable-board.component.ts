@@ -18,7 +18,7 @@ interface CardDetailOpenedEvent {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="grid editable">
+    <div class="grid editable" [class.mode-polaroid]="mode === 'polaroid'" [class.mode-horizontal]="mode === 'horizontal'">
       <div
         *ngFor="let p of projects; let i = index"
         class="cell"
@@ -82,16 +82,15 @@ interface CardDetailOpenedEvent {
     </div>
   `,
   styles: [`
+    /* ── Gemeinsame Basis ── */
     .grid.editable {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.65rem;
-      max-width: 52rem;
-      margin: 1rem auto 0;
+      gap: 0.6rem;
+      margin: 0.5rem auto 0;
     }
     .cell {
       background: #fff;
-      border-radius: 3px;
+      border-radius: 4px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -100,7 +99,7 @@ interface CardDetailOpenedEvent {
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .cell:hover {
-      transform: translateY(-4px) rotate(0.4deg);
+      transform: translateY(-3px) rotate(0.3deg);
       box-shadow: 0 6px 14px rgba(60, 30, 10, 0.18), 0 16px 32px rgba(60, 30, 10, 0.13);
     }
     .cell.drag-target {
@@ -110,8 +109,6 @@ interface CardDetailOpenedEvent {
     }
     .photo-area {
       position: relative;
-      width: 100%;
-      aspect-ratio: 1 / 1;
       background: #f2e8d8;
       overflow: hidden;
       flex-shrink: 0;
@@ -164,24 +161,16 @@ interface CardDetailOpenedEvent {
     }
     .caption {
       background: #fff;
-      padding: 0.38rem 0.45rem 0.45rem;
       position: relative;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 0.22rem;
-      min-height: 60px;
       flex: 1;
     }
     .title {
       font-weight: 700;
       color: #4a2d1c;
-      font-size: 0.72rem;
       line-height: 1.25;
       text-wrap: balance;
-      text-align: center;
-      padding: 0 1.5rem;
-      margin-top: 0.1rem;
     }
     .edit-btn {
       position: absolute;
@@ -210,28 +199,114 @@ interface CardDetailOpenedEvent {
       outline-offset: 2px;
     }
     .title-input {
-      width: calc(100% - 2rem);
       border: 1px solid #d0ab86;
       border-radius: 7px;
       padding: 0.3rem 0.5rem;
-      font-size: 0.82rem;
       background: #fffdf9;
       color: #3f2a1d;
-      text-align: center;
       font-weight: 600;
-      margin-top: 0.25rem;
+      text-align: center;
     }
     .title-input:focus-visible {
       outline: 2px solid rgba(196, 110, 53, 0.28);
       outline-offset: 1px;
     }
-    @media (max-width: 960px) {
-      .grid.editable {
+
+    /* ── Option B: Polaroid ── */
+    .grid.editable.mode-polaroid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      max-width: 52rem;
+    }
+    .mode-polaroid .cell {
+      padding: 7px 7px 0;
+      border-radius: 5px;
+    }
+    .mode-polaroid .photo-area {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 2px;
+    }
+    .mode-polaroid .caption {
+      padding: 0.45rem 0.2rem 0.6rem;
+      align-items: center;
+      min-height: 44px;
+    }
+    .mode-polaroid .title {
+      font-size: 0.74rem;
+      text-align: center;
+      padding: 0 1.5rem;
+      margin-top: 0.1rem;
+    }
+    .mode-polaroid .title-input {
+      width: calc(100% - 2rem);
+      font-size: 0.82rem;
+      margin-top: 0.25rem;
+    }
+
+    /* ── Option A: Horizontal ── */
+    .grid.editable.mode-horizontal {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      max-width: 58rem;
+      gap: 0.4rem;
+    }
+    .mode-horizontal .cell {
+      flex-direction: row;
+      align-items: stretch;
+      height: 4.8rem;
+    }
+    .mode-horizontal .cell:hover {
+      transform: translateY(-2px) rotate(0deg);
+    }
+    .mode-horizontal .photo-area {
+      width: 4.8rem;
+      height: 4.8rem;
+      aspect-ratio: unset;
+      flex-shrink: 0;
+    }
+    .mode-horizontal .caption {
+      flex: 1;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 0.35rem 2rem 0.35rem 0.45rem;
+      overflow: hidden;
+    }
+    .mode-horizontal .title {
+      font-size: 0.7rem;
+      text-align: left;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .mode-horizontal .photo-btn {
+      width: 22px;
+      height: 22px;
+      bottom: 4px;
+      right: 4px;
+    }
+    .mode-horizontal .title-input {
+      width: calc(100% - 0.5rem);
+      font-size: 0.72rem;
+      padding: 0.2rem 0.4rem;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .grid.editable.mode-polaroid,
+      .grid.editable.mode-horizontal {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
+      .mode-horizontal .cell {
+        height: 5.2rem;
+      }
+      .mode-horizontal .photo-area {
+        width: 5.2rem;
+        height: 5.2rem;
+      }
     }
-    @media (max-width: 560px) {
-      .grid.editable {
+    @media (max-width: 520px) {
+      .grid.editable.mode-polaroid,
+      .grid.editable.mode-horizontal {
         grid-template-columns: 1fr;
       }
     }
@@ -249,6 +324,7 @@ export class EditableBoardComponent {
   }
   get projects(): BoardCell[] { return this._projects; }
 
+  @Input() mode: 'polaroid' | 'horizontal' = 'polaroid';
   @Input() dragTargetIndex!: number | null;
   @Output() dragStarted = new EventEmitter<number>();
   @Output() dragOverCell = new EventEmitter<number>();

@@ -1,4 +1,5 @@
 import { Component, ViewChild, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { BoardStudioStateService } from './state/board-studio-state.service';
 import { EditableBoardComponent } from './components/editable-board.component';
 import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-detail-dialog.component';
@@ -10,7 +11,7 @@ import { PlayBingoStateService } from '../play-bingo/state/play-bingo-state.serv
 @Component({
   selector: 'app-board-studio-feature',
   standalone: true,
-  imports: [EditableBoardComponent, CardDetailDialogComponent],
+  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent],
   template: `
     <div class="feature-shell">
       <div class="button-bar">
@@ -33,18 +34,48 @@ import { PlayBingoStateService } from '../play-bingo/state/play-bingo-state.serv
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
         </button>
+
+        <div class="view-toggle" role="group" aria-label="Kartenansicht">
+          <button
+            class="mode-btn"
+            [class.active]="viewMode === 'polaroid'"
+            (click)="viewMode = 'polaroid'"
+            title="Polaroid"
+            aria-label="Polaroid-Ansicht"
+          >
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <line x1="3" y1="16" x2="21" y2="16"/>
+            </svg>
+          </button>
+          <button
+            class="mode-btn"
+            [class.active]="viewMode === 'horizontal'"
+            (click)="viewMode = 'horizontal'"
+            title="Kompaktansicht"
+            aria-label="Kompaktansicht"
+          >
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="7" height="7" rx="1"/>
+              <line x1="12" y1="6.5" x2="22" y2="6.5"/>
+              <rect x="2" y="14" width="7" height="7" rx="1"/>
+              <line x1="12" y1="17.5" x2="22" y2="17.5"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <div class="edit-board-header">
+      <div class="edit-board-header" [class.compact-header]="viewMode === 'horizontal'">
         <p class="eyebrow">Knitting Quarterly - Board Studio</p>
         <h2>Challenges und Projekte planen</h2>
-        <p class="subtitle">Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden.</p>
+        <p class="subtitle" *ngIf="viewMode === 'polaroid'">Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden.</p>
       </div>
 
       <app-editable-board
         #editableBoard
         [projects]="projects"
         [dragTargetIndex]="dragTargetIndex"
+        [mode]="viewMode"
         (dragStarted)="onDragStart($event)"
         (dragOverCell)="onDragOver($event)"
         (dragLeftCell)="onDragLeave($event)"
@@ -91,10 +122,47 @@ import { PlayBingoStateService } from '../play-bingo/state/play-bingo-state.serv
       background: #fff0db;
       box-shadow: 0 8px 14px rgba(96, 58, 30, 0.16);
     }
+    .view-toggle {
+      display: flex;
+      border: 1px solid #c79362;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-left: 0.3rem;
+    }
+    .mode-btn {
+      background: #fff7ec;
+      color: #7b371f;
+      border: none;
+      cursor: pointer;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.18s ease, color 0.18s ease;
+    }
+    .mode-btn + .mode-btn {
+      border-left: 1px solid #c79362;
+    }
+    .mode-btn:hover:not(.active) {
+      background: #fff0db;
+    }
+    .mode-btn.active {
+      background: #145906;
+      color: #fff;
+    }
+    .mode-btn:focus-visible {
+      outline: 3px solid rgba(196, 110, 53, 0.3);
+      outline-offset: -2px;
+    }
     .edit-board-header {
       text-align: center;
       margin-bottom: 1.1rem;
       padding: 0.6rem 0.4rem;
+    }
+    .edit-board-header.compact-header {
+      padding: 0.2rem 0.4rem 0.4rem;
+      margin-bottom: 0.5rem;
     }
     .eyebrow {
       margin: 0;
@@ -131,6 +199,7 @@ export class BoardStudioFeatureComponent {
   @ViewChild('editableBoard') private readonly editableBoardRef!: EditableBoardComponent;
   state = inject(BoardStudioStateService);
   router = inject(Router);
+  viewMode: 'polaroid' | 'horizontal' = 'polaroid';
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
 
