@@ -23,4 +23,8 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
       startedAt: progress.startedAt,
     });
   }
+
+  clear(): void {
+    this.storage.removeItem(this.storageKey);
+  }
 }

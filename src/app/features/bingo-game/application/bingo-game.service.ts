@@ -7,8 +7,18 @@ import { BingoGame, createBoardSignature } from '../domain/bingo-game';
 @Injectable()
 export class BingoGameService {
   private readonly gameState = signal<BingoGame>(BingoGame.empty());
+  private readonly _definitionProjects = signal<BoardCell[]>([]);
 
   readonly projects: Signal<BoardCell[]> = computed(() => this.gameState().projects as BoardCell[]);
+  readonly definitionProjects: Signal<BoardCell[]> = this._definitionProjects.asReadonly();
+  readonly effectiveProjects: Signal<BoardCell[]> = computed(() => {
+    const game = this.gameState().projects as BoardCell[];
+    const def = this._definitionProjects();
+    return game.map((p, i) => ({
+      title: p.title,
+      imageId: p.imageId ?? def[i]?.imageId,
+    }));
+  });
   readonly done: Signal<boolean[]> = computed(() => this.gameState().done as boolean[]);
   readonly bingoCells: Signal<Set<number>> = computed(() => this.gameState().bingoCells);
 
@@ -45,11 +55,13 @@ export class BingoGameService {
   private refreshFromDefinition(): void {
     const result = this.boardDefinitionRepository.load();
     if (!result.ok || result.value.projects.length === 0) {
+      this._definitionProjects.set([]);
       this.gameState.set(BingoGame.empty());
       return;
     }
 
     const { id: boardDefinitionId, projects } = result.value;
+    this._definitionProjects.set([...projects]);
     const persistedProgress = this.bingoGameRepository.load();
 
     if (

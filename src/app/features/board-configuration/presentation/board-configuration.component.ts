@@ -217,7 +217,7 @@ export class BoardConfigurationComponent {
   }
 
   playBingo() {
-    this.router.navigate(['/play']);
+    void this.router.navigate(['/play'], { queryParams: { new: 'true' } });
   }
 
   onDragStart(i: number) {

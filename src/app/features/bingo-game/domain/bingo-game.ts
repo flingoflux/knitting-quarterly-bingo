@@ -34,7 +34,7 @@ export class BingoGame {
     return new BingoGame(
       boardDefinitionId,
       cells.map(c => ({ title: c.title })),
-      cells.map(c => c.imageId),
+      new Array(cells.length).fill(undefined),
       new Array(cells.length).fill(false),
       new Date().toISOString(),
     );

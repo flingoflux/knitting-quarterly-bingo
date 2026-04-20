@@ -2,14 +2,15 @@ import { Component, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BingoGameService } from '../application/bingo-game.service';
 import { PlayableBoardComponent } from './components/playable-board.component';
-import { CardDetailDialogComponent, ImageChangedEvent } from '../../board-configuration/presentation/components/card-detail-dialog.component';
+import { ProjectComparisonDialogComponent } from './components/project-comparison-dialog.component';
+import { ImageChangedEvent } from '../../board-configuration/presentation/components/card-detail-dialog.component';
 import { Router } from '@angular/router';
 import { BoardCell } from '../../../shared/domain/board-cell';
 
 @Component({
   selector: 'app-bingo-game',
   standalone: true,
-  imports: [CommonModule, PlayableBoardComponent, CardDetailDialogComponent],
+  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent],
   template: `
     <div class="feature-shell">
       <div class="toolbar">
@@ -77,7 +78,7 @@ import { BoardCell } from '../../../shared/domain/board-cell';
         (cardDetailOpened)="onCardDetailOpen($event)"
       ></app-playable-board>
 
-      <app-card-detail-dialog #detailDialog (imageChanged)="onImageChanged($event)"></app-card-detail-dialog>
+      <app-project-comparison-dialog #comparisonDialog (imageChanged)="onImageChanged($event)"></app-project-comparison-dialog>
     </div>
   `,
   styles: [
@@ -211,7 +212,7 @@ import { BoardCell } from '../../../shared/domain/board-cell';
   `]
 })
 export class BingoGameComponent {
-  @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
+  @ViewChild('comparisonDialog') private readonly comparisonDialog!: ProjectComparisonDialogComponent;
   @ViewChild('playableBoard') private readonly playableBoardRef!: PlayableBoardComponent;
   state = inject(BingoGameService);
   router = inject(Router);
@@ -219,7 +220,7 @@ export class BingoGameComponent {
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
 
   get projects(): BoardCell[] {
-    return this.state.projects();
+    return this.state.effectiveProjects();
   }
 
   get done(): boolean[] {
@@ -244,7 +245,9 @@ export class BingoGameComponent {
 
   onCardDetailOpen(event: { index: number; project: BoardCell }) {
     this._openCardIndex = event.index;
-    this.detailDialog.open(event.project.imageId ?? null, event.project.title);
+    const definitionImageId = this.state.definitionProjects()[event.index]?.imageId ?? null;
+    const gameImageId = this.state.projects()[event.index]?.imageId ?? null;
+    void this.comparisonDialog.open(event.project.title, definitionImageId, gameImageId);
   }
 
   onImageChanged(event: ImageChangedEvent): void {
