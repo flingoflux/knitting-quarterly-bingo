@@ -332,7 +332,7 @@ flowchart TB
     IDB2[(IndexedDB\nBilder als Blobs/DataURLs)]
   end
 
-  NGINX -->|HTTP(S)| BROWSER
+  NGINX -->|HTTPS| BROWSER
   SPAAPP --> LS2
   SPAAPP --> IDB2
 ```
