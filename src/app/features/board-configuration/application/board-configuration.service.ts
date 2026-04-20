@@ -3,7 +3,7 @@ import { BoardCell } from '../../../shared/domain/board-cell';
 import { BOARD_DEFINITION_READER, BOARD_DEFINITION_WRITER } from '../domain/board-definition.repository';
 import { BoardDefinition } from '../domain/board-definition';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class BoardConfigurationService {
   private readonly boardState = signal<BoardDefinition>(BoardDefinition.createDefault());
   readonly projects: Signal<BoardCell[]> = computed(() => this.boardState().projects as BoardCell[]);
