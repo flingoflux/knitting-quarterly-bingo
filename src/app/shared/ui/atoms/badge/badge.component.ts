@@ -29,6 +29,7 @@ export type KqBadgeVariant = 'done' | 'bingo';
         *ngIf="variant === 'bingo'"
         name="star"
         [size]="iconSize + 2"
+        [filled]="true"
       />
     </div>
   `,
