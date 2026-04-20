@@ -13,7 +13,7 @@ interface CardDetailOpenedEvent {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="grid playable">
+    <div class="grid playable" [class.mode-polaroid]="mode === 'polaroid'" [class.mode-horizontal]="mode === 'horizontal'">
       <div
         *ngFor="let p of projects; let i = index"
         class="cell"
@@ -63,16 +63,15 @@ interface CardDetailOpenedEvent {
     </div>
   `,
   styles: [`
+    /* ── Gemeinsame Basis ── */
     .grid.playable {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.65rem;
-      max-width: 52rem;
-      margin: 1rem auto 0;
+      gap: 0.6rem;
+      margin: 0.5rem auto 0;
     }
     .cell {
       background: #fff;
-      border-radius: 3px;
+      border-radius: 4px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -81,19 +80,14 @@ interface CardDetailOpenedEvent {
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .cell:hover {
-      transform: translateY(-4px) rotate(0.4deg);
+      transform: translateY(-3px) rotate(0.3deg);
       box-shadow: 0 6px 14px rgba(60, 30, 10, 0.18), 0 16px 32px rgba(60, 30, 10, 0.13);
-    }
-    .cell.done .caption {
-      background: #e8f5e3;
     }
     .cell.bingo-cell {
       box-shadow: 0 0 0 3px #145906, 0 8px 22px rgba(20, 89, 6, 0.22);
     }
     .photo-area {
       position: relative;
-      width: 100%;
-      aspect-ratio: 1 / 1;
       background: #f2e8d8;
       overflow: hidden;
       flex-shrink: 0;
@@ -170,29 +164,115 @@ interface CardDetailOpenedEvent {
     }
     .caption {
       background: #fff;
-      padding: 0.38rem 0.45rem 0.45rem;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 0.22rem;
-      min-height: 60px;
       flex: 1;
     }
     .title {
       font-weight: 700;
       color: #4a2d1c;
-      font-size: 0.72rem;
       line-height: 1.25;
       text-wrap: balance;
+    }
+
+    /* ── Option B: Polaroid ── */
+    .grid.playable.mode-polaroid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      max-width: 52rem;
+    }
+    .mode-polaroid .cell {
+      padding: 7px 7px 0;
+      border-radius: 5px;
+    }
+    .mode-polaroid .photo-area {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 2px;
+    }
+    .mode-polaroid .caption {
+      padding: 0.45rem 0.2rem 0.6rem;
+      align-items: center;
+      min-height: 44px;
+    }
+    .mode-polaroid .title {
+      font-size: 0.74rem;
       text-align: center;
     }
-    @media (max-width: 960px) {
-      .grid.playable {
+
+    /* ── Option A: Horizontal ── */
+    .grid.playable.mode-horizontal {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      max-width: 58rem;
+      gap: 0.4rem;
+    }
+    .mode-horizontal .cell {
+      flex-direction: row;
+      align-items: stretch;
+      height: 4.8rem;
+    }
+    .mode-horizontal .cell:hover {
+      transform: translateY(-2px) rotate(0deg);
+    }
+    .mode-horizontal .photo-area {
+      width: 4.8rem;
+      height: 4.8rem;
+      aspect-ratio: unset;
+      flex-shrink: 0;
+    }
+    .mode-horizontal .caption {
+      flex: 1;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 0.35rem 0.5rem 0.35rem 0.45rem;
+      min-height: unset;
+      overflow: hidden;
+    }
+    .mode-horizontal .title {
+      font-size: 0.7rem;
+      text-align: left;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .mode-horizontal .done-badge {
+      width: 18px;
+      height: 18px;
+      top: 4px;
+      left: 4px;
+    }
+    .mode-horizontal .done-badge svg { width: 10px; height: 10px; }
+    .mode-horizontal .bingo-badge {
+      width: 20px;
+      height: 20px;
+      top: 4px;
+      right: 4px;
+    }
+    .mode-horizontal .bingo-badge svg { width: 11px; height: 11px; }
+    .mode-horizontal .photo-btn {
+      width: 22px;
+      height: 22px;
+      bottom: 4px;
+      right: 4px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      .grid.playable.mode-polaroid,
+      .grid.playable.mode-horizontal {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
+      .mode-horizontal .cell {
+        height: 5.2rem;
+      }
+      .mode-horizontal .photo-area {
+        width: 5.2rem;
+        height: 5.2rem;
+      }
     }
-    @media (max-width: 560px) {
-      .grid.playable {
+    @media (max-width: 520px) {
+      .grid.playable.mode-polaroid,
+      .grid.playable.mode-horizontal {
         grid-template-columns: 1fr;
       }
     }
@@ -211,6 +291,7 @@ export class PlayableBoardComponent {
 
   @Input() done: boolean[] = [];
   @Input() bingoCells: Set<number> = new Set<number>();
+  @Input() mode: 'polaroid' | 'horizontal' = 'polaroid';
   @Output() toggled = new EventEmitter<number>();
   @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
 
