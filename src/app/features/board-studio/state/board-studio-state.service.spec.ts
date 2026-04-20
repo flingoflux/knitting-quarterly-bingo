@@ -23,7 +23,6 @@ class MockBoardDefinitionRepository {
 function createProjects(length = 16): BoardCell[] {
   return Array.from({ length }, (_, index) => ({
     title: `Project ${index}`,
-    catKeys: ['cat'],
   }));
 }
 
@@ -70,11 +69,9 @@ describe('BoardStudioStateService', () => {
 
     state.updateProject(1, {
       title: 'Neues Projekt',
-      catKeys: ['technik'],
     });
 
     expect(state.projects()[1].title).toBe('Neues Projekt');
-    expect(state.projects()[1].catKeys).toEqual(['technik']);
     expect(repository.lastSavedDefinition?.projects[1].title).toBe('Neues Projekt');
   });
 });

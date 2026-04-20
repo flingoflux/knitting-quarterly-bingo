@@ -39,8 +39,6 @@ class MockBoardDefinitionWriter {
 function createProjects(length = 16): BoardCell[] {
   return Array.from({ length }, (_, index) => ({
     title: `P${index}`,
-    cat: 'Cat',
-    catKey: 'cat',
   }));
 }
 

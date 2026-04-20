@@ -58,9 +58,6 @@ interface CardDetailOpenedEvent {
 
         <div class="caption">
           <div class="title">{{p.title}}</div>
-          <div class="cats">
-            <span *ngFor="let key of p.catKeys" class="cat" [ngClass]="'cat-' + key">{{categoryLabels[key] ?? key}}</span>
-          </div>
         </div>
       </div>
     </div>
@@ -189,28 +186,6 @@ interface CardDetailOpenedEvent {
       text-wrap: balance;
       text-align: center;
     }
-    .cats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.22rem;
-      justify-content: center;
-      margin-top: auto;
-    }
-    .cat {
-      font-size: 0.5rem;
-      color: #fff;
-      border-radius: 999px;
-      border: none;
-      background: #888;
-      padding: 0.08rem 0.42rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-    .cat-basics { background: #ffa600; }
-    .cat-technik { background: #1cb3f4; }
-    .cat-challenge { background: #c44020; }
-    .cat-accessoire { background: #5aaa2a; }
     @media (max-width: 960px) {
       .grid.playable {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -226,13 +201,6 @@ interface CardDetailOpenedEvent {
 export class PlayableBoardComponent {
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
   private readonly cdr = inject(ChangeDetectorRef);
-
-  readonly categoryLabels: Record<string, string> = {
-    basics: 'Basics',
-    technik: 'Technik',
-    challenge: 'Challenge',
-    accessoire: 'Accessoire',
-  };
 
   private _projects: BoardCell[] = [];
   @Input() set projects(value: BoardCell[]) {

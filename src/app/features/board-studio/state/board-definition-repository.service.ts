@@ -12,8 +12,6 @@ function isValidBoardCell(cell: unknown): cell is BoardCell {
     typeof cell === 'object' &&
     cell !== null &&
     typeof (cell as BoardCell).title === 'string' &&
-    Array.isArray((cell as BoardCell).catKeys) &&
-    (cell as BoardCell).catKeys.every((k) => typeof k === 'string') &&
     ((cell as BoardCell).imageId === undefined || typeof (cell as BoardCell).imageId === 'string')
   );
 }

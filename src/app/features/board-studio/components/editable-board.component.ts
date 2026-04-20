@@ -3,11 +3,6 @@ import { CommonModule } from '@angular/common';
 import { BoardCell } from '../../../shared/domain/board-cell';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../shared/ports/image-repository';
 
-interface CategoryOption {
-  label: string;
-  key: string;
-}
-
 interface ProjectEditedEvent {
   index: number;
   project: BoardCell;
@@ -17,13 +12,6 @@ interface CardDetailOpenedEvent {
   index: number;
   project: BoardCell;
 }
-
-const CATEGORY_OPTIONS: CategoryOption[] = [
-  { label: 'Basics', key: 'basics' },
-  { label: 'Technik', key: 'technik' },
-  { label: 'Challenge', key: 'challenge' },
-  { label: 'Accessoire', key: 'accessoire' },
-];
 
 @Component({
   selector: 'app-editable-board',
@@ -84,28 +72,10 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
               (input)="onDraftTitleInput(i, $event)"
               (keydown.enter)="saveAndExit(i, p)"
             />
-
-            <div class="chips">
-              <button
-                *ngFor="let option of categoryOptions"
-                type="button"
-                class="chip"
-                [class.chip-active]="isDraftCatKeySelected(i, p.catKeys, option.key)"
-                [ngClass]="'chip-' + option.key"
-                (click)="toggleDraftCategory(i, p.catKeys, option.key, $event)"
-              >{{option.label}}</button>
-            </div>
           </ng-container>
 
           <ng-template #readonlyView>
             <div class="title">{{p.title}}</div>
-            <div class="cats">
-              <span
-                *ngFor="let key of p.catKeys"
-                class="cat"
-                [ngClass]="'cat-' + key"
-              >{{getCategoryLabel(key)}}</span>
-            </div>
           </ng-template>
         </div>
       </div>
@@ -213,28 +183,6 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       padding: 0 1.5rem;
       margin-top: 0.1rem;
     }
-    .cats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.22rem;
-      justify-content: center;
-      margin-top: auto;
-    }
-    .cat {
-      font-size: 0.5rem;
-      color: #fff;
-      border-radius: 999px;
-      border: none;
-      background: #888;
-      padding: 0.08rem 0.42rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-    .cat-basics { background: #ffa600; }
-    .cat-technik { background: #1cb3f4; }
-    .cat-challenge { background: #c44020; }
-    .cat-accessoire { background: #5aaa2a; }
     .edit-btn {
       position: absolute;
       right: 5px;
@@ -277,34 +225,6 @@ const CATEGORY_OPTIONS: CategoryOption[] = [
       outline: 2px solid rgba(196, 110, 53, 0.28);
       outline-offset: 1px;
     }
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.28rem;
-      justify-content: center;
-      padding: 0 0.2rem;
-    }
-    .chip {
-      font-size: 0.5rem;
-      border-radius: 999px;
-      border: 1px solid #d0ab86;
-      background: #fffaf2;
-      color: #a07850;
-      padding: 0.08rem 0.42rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s, color 0.15s;
-    }
-    .chip:hover {
-      border-color: #b87a45;
-      color: #7b4a20;
-    }
-    .chip.chip-active.chip-basics { background: #ffa600; border-color: #ffa600; color: #fff; }
-    .chip.chip-active.chip-technik { background: #1cb3f4; border-color: #1cb3f4; color: #fff; }
-    .chip.chip-active.chip-challenge { background: #c44020; border-color: #c44020; color: #fff; }
-    .chip.chip-active.chip-accessoire { background: #5aaa2a; border-color: #5aaa2a; color: #fff; }
     @media (max-width: 960px) {
       .grid.editable {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -321,7 +241,6 @@ export class EditableBoardComponent {
   private readonly el = inject(ElementRef);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
-  readonly categoryOptions = CATEGORY_OPTIONS;
 
   private _projects: BoardCell[] = [];
   @Input() set projects(value: BoardCell[]) {
@@ -341,7 +260,6 @@ export class EditableBoardComponent {
   editingIndex: number | null = null;
   private readonly imageCache = new Map<string, string>();
   private readonly draftTitles = new Map<number, string>();
-  private readonly draftCategoryKeys = new Map<number, string[]>();
 
   getImage(imageId: string | undefined): string | null {
     if (!imageId) return null;
@@ -424,29 +342,11 @@ export class EditableBoardComponent {
     }
     this.editingIndex = i;
     this.draftTitles.set(i, project.title);
-    this.draftCategoryKeys.set(i, [...project.catKeys]);
   }
 
   onDraftTitleInput(i: number, event: Event): void {
     const target = event.target as HTMLInputElement;
     this.draftTitles.set(i, target.value);
-  }
-
-  toggleDraftCategory(i: number, fallbackCatKeys: string[], key: string, event: MouseEvent): void {
-    event.stopPropagation();
-    const current = this.draftCategoryKeys.get(i) ?? [...fallbackCatKeys];
-    const idx = current.indexOf(key);
-    if (idx === -1) {
-      this.draftCategoryKeys.set(i, [...current, key]);
-    } else {
-      if (current.length === 1) return;
-      this.draftCategoryKeys.set(i, current.filter((k) => k !== key));
-    }
-  }
-
-  isDraftCatKeySelected(i: number, fallbackCatKeys: string[], key: string): boolean {
-    const keys = this.draftCategoryKeys.get(i) ?? fallbackCatKeys;
-    return keys.includes(key);
   }
 
   saveAndExit(i: number, project: BoardCell): void {
@@ -461,30 +361,20 @@ export class EditableBoardComponent {
 
     const draftTitle = this.getDraftTitle(i, project.title).trim();
     const title = draftTitle.length > 0 ? draftTitle : project.title;
-    const catKeys = this.draftCategoryKeys.get(i) ?? [...project.catKeys];
-    const updatedProject: BoardCell = { title, catKeys };
+    const updatedProject: BoardCell = { title, imageId: project.imageId };
 
     if (!this.isSameProject(project, updatedProject)) {
       this.projectEdited.emit({ index: i, project: updatedProject });
     }
 
     this.draftTitles.set(i, title);
-    this.draftCategoryKeys.set(i, catKeys);
   }
 
   getDraftTitle(i: number, fallback: string): string {
     return this.draftTitles.get(i) ?? fallback;
   }
 
-  getCategoryLabel(key: string): string {
-    return CATEGORY_OPTIONS.find((o) => o.key === key)?.label ?? key;
-  }
-
   private isSameProject(first: BoardCell, second: BoardCell): boolean {
-    return (
-      first.title === second.title &&
-      first.catKeys.length === second.catKeys.length &&
-      first.catKeys.every((k) => second.catKeys.includes(k))
-    );
+    return first.title === second.title;
   }
 }
