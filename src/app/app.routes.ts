@@ -1,6 +1,7 @@
 import { StartPageComponent } from './start-page.component';
 import { Routes } from '@angular/router';
 import { bingoGameGuard } from './features/bingo-game/presentation/bingo-game.guard';
+import { BingoGameService } from './features/bingo-game/application/bingo-game.service';
 
 export const routes: Routes = [
   {
@@ -14,6 +15,7 @@ export const routes: Routes = [
   {
     path: 'play',
     canActivate: [bingoGameGuard],
+    providers: [BingoGameService],
     loadComponent: () => import('./features/bingo-game/presentation/bingo-game.component').then(m => m.BingoGameComponent),
   },
 ];

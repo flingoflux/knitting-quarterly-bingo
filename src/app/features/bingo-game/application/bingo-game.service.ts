@@ -5,7 +5,7 @@ import { LocalStorageBingoGameRepository } from '../infrastructure/local-storage
 import { LocalStorageBoardRepository } from '../../board-configuration/infrastructure/local-storage-board.repository';
 import { BingoGame, createBoardSignature } from '../domain/bingo-game';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class BingoGameService {
   private readonly gameState = signal<BingoGame>(BingoGame.empty());
 
