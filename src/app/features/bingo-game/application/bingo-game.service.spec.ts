@@ -6,7 +6,7 @@ import { PersistedQuarterlyPlan } from '../../board-configuration/infrastructure
 import { QUARTERLY_PLAN_READER } from '../../board-configuration/domain/quarterly-plan.repository';
 import { BingoGameService } from './bingo-game.service';
 import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
-import { BingoGameProgress, createBoardSignature } from '../domain/bingo-game';
+import { BingoGameProgress, ChallengeProgress, createBoardSignature } from '../domain/bingo-game';
 
 const TEST_BOARD_ID = 'test-board-id';
 
@@ -38,8 +38,6 @@ class MockBingoGameRepository {
       boardDefinitionId: progress.boardDefinitionId,
       boardSignature: progress.boardSignature,
       challenges: [...progress.challenges],
-      cellImages: [...progress.cellImages],
-      completed: [...progress.completed],
       startedAt: progress.startedAt,
     };
     this.loadedProgress = this.lastSavedProgress;
@@ -49,6 +47,16 @@ class MockBingoGameRepository {
 function createChallenges(length = 16): Challenge[] {
   return Array.from({ length }, (_, index) => ({
     name: `C${index}`,
+  }));
+}
+
+function createProgressChallenges(challenges: Challenge[], overrides: Partial<ChallengeProgress>[] = []): ChallengeProgress[] {
+  return challenges.map((c, i) => ({
+    name: c.name,
+    planningImageId: undefined,
+    progressImageId: undefined,
+    completed: false,
+    ...overrides[i],
   }));
 }
 
@@ -93,14 +101,11 @@ describe('BingoGameService', () => {
     const boardRepo = new MockBoardDefinitionRepository();
     boardRepo.loadedDefinition = { id: TEST_BOARD_ID, challenges };
     const bingoRepo = new MockBingoGameRepository();
-    const completed = new Array(16).fill(false);
-    completed[0] = true;
+    const overrides: Partial<ChallengeProgress>[] = [{ completed: true }];
     bingoRepo.loadedProgress = {
       boardDefinitionId: TEST_BOARD_ID,
       boardSignature: createBoardSignature(challenges),
-      challenges: challenges.map(c => ({ name: c.name })),
-      cellImages: new Array(16).fill(undefined),
-      completed,
+      challenges: createProgressChallenges(challenges, overrides),
       startedAt: new Date().toISOString(),
     };
 
@@ -118,8 +123,6 @@ describe('BingoGameService', () => {
       boardDefinitionId: TEST_BOARD_ID,
       boardSignature: 'old-signature',
       challenges: [],
-      cellImages: [],
-      completed: new Array(16).fill(true),
       startedAt: new Date().toISOString(),
     };
 
@@ -138,7 +141,7 @@ describe('BingoGameService', () => {
     service.toggle(0);
 
     expect(service.completed()[0]).toBe(true);
-    expect(bingoRepo.lastSavedProgress?.completed[0]).toBe(true);
+    expect(bingoRepo.lastSavedProgress?.challenges[0].completed).toBe(true);
   });
 
   it('erkennt Bingo in der ersten Zeile', () => {
@@ -146,14 +149,16 @@ describe('BingoGameService', () => {
     const boardRepo = new MockBoardDefinitionRepository();
     boardRepo.loadedDefinition = { id: TEST_BOARD_ID, challenges };
     const bingoRepo = new MockBingoGameRepository();
-    const completed = new Array(16).fill(false);
-    completed[0] = completed[1] = completed[2] = completed[3] = true;
+    const overrides: Partial<ChallengeProgress>[] = [
+      { completed: true },
+      { completed: true },
+      { completed: true },
+      { completed: true },
+    ];
     bingoRepo.loadedProgress = {
       boardDefinitionId: TEST_BOARD_ID,
       boardSignature: createBoardSignature(challenges),
-      challenges: challenges.map(c => ({ name: c.name })),
-      cellImages: new Array(16).fill(undefined),
-      completed,
+      challenges: createProgressChallenges(challenges, overrides),
       startedAt: new Date().toISOString(),
     };
 

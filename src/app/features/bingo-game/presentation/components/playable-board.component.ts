@@ -1,11 +1,11 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Challenge } from '../../../../shared/domain/challenge';
+import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 
 interface CardDetailOpenedEvent {
   index: number;
-  challenge: Challenge;
+  challenge: ChallengeProgress;
 }
 
 @Component({
@@ -22,8 +22,8 @@ interface CardDetailOpenedEvent {
         (click)="onToggle(i)"
       >
         <div class="photo-area">
-          <img *ngIf="getImage(p.imageId)" [src]="getImage(p.imageId)" class="photo-img" [alt]="p.name" />
-          <div *ngIf="!getImage(p.imageId)" class="photo-placeholder">
+          <img *ngIf="getImage(p.progressImageId ?? p.planningImageId)" [src]="getImage(p.progressImageId ?? p.planningImageId)" class="photo-img" [alt]="p.name" />
+          <div *ngIf="!getImage(p.progressImageId ?? p.planningImageId)" class="photo-placeholder">
             <img src="assets/logo_plain.svg" class="logo-placeholder" alt="" />
           </div>
 
@@ -285,12 +285,12 @@ export class PlayableBoardComponent {
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  private _challenges: Challenge[] = [];
-  @Input() set challenges(value: Challenge[]) {
+  private _challenges: ChallengeProgress[] = [];
+  @Input() set challenges(value: ChallengeProgress[]) {
     this._challenges = value;
     void this.loadAllImages();
   }
-  get challenges(): Challenge[] { return this._challenges; }
+  get challenges(): ChallengeProgress[] { return this._challenges; }
 
   @Input() completed: boolean[] = [];
   @Input() bingoCells: Set<number> = new Set<number>();
@@ -318,7 +318,7 @@ export class PlayableBoardComponent {
 
   private async loadAllImages(): Promise<void> {
     const imageIds = this._challenges
-      .map(c => c.imageId)
+      .flatMap(c => [c.progressImageId, c.planningImageId])
       .filter((id): id is string => !!id);
     const uniqueIds = [...new Set(imageIds)];
     await Promise.all(
@@ -338,7 +338,7 @@ export class PlayableBoardComponent {
     this.toggled.emit(i);
   }
 
-  openDetail(i: number, challenge: Challenge, event: MouseEvent): void {
+  openDetail(i: number, challenge: ChallengeProgress, event: MouseEvent): void {
     event.stopPropagation();
     this.cardDetailOpened.emit({ index: i, challenge });
   }

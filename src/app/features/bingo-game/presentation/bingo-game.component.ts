@@ -5,7 +5,7 @@ import { PlayableBoardComponent } from './components/playable-board.component';
 import { ProjectComparisonDialogComponent } from './components/project-comparison-dialog.component';
 import { ImageChangedEvent } from '../../board-configuration/presentation/components/card-detail-dialog.component';
 import { Router } from '@angular/router';
-import { Challenge } from '../../../shared/domain/challenge';
+import { ChallengeProgress } from '../domain/bingo-game';
 
 @Component({
   selector: 'app-bingo-game',
@@ -219,8 +219,8 @@ export class BingoGameComponent {
 
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
 
-  get challenges(): Challenge[] {
-    return this.state.effectiveChallenges();
+  get challenges(): ChallengeProgress[] {
+    return this.state.challenges();
   }
 
   get completed(): boolean[] {
@@ -243,16 +243,18 @@ export class BingoGameComponent {
     this.state.toggle(i);
   }
 
-  onCardDetailOpen(event: { index: number; challenge: Challenge }) {
+  onCardDetailOpen(event: { index: number; challenge: ChallengeProgress }) {
     this._openCardIndex = event.index;
-    const definitionImageId = this.state.definitionChallenges()[event.index]?.imageId ?? null;
-    const gameImageId = this.state.challenges()[event.index]?.imageId ?? null;
-    void this.comparisonDialog.open(event.challenge.name, definitionImageId, gameImageId);
+    void this.comparisonDialog.open(
+      event.challenge.name,
+      event.challenge.planningImageId ?? null,
+      event.challenge.progressImageId ?? null,
+    );
   }
 
   onImageChanged(event: ImageChangedEvent): void {
     if (this._openCardIndex !== null) {
-      this.state.updateCellImage(this._openCardIndex, event.imageId ?? undefined);
+      this.state.updateProgressImage(this._openCardIndex, event.imageId ?? undefined);
     }
     void this.playableBoardRef.refreshImage(event.imageId);
   }
