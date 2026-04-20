@@ -5,7 +5,7 @@ import { PlayableBoardComponent } from './components/playable-board.component';
 import { ProjectComparisonDialogComponent } from './components/project-comparison-dialog.component';
 import { ImageChangedEvent } from '../../board-configuration/presentation/components/card-detail-dialog.component';
 import { Router } from '@angular/router';
-import { BoardCell } from '../../../shared/domain/board-cell';
+import { Challenge } from '../../../shared/domain/challenge';
 
 @Component({
   selector: 'app-bingo-game',
@@ -53,11 +53,11 @@ import { BoardCell } from '../../../shared/domain/board-cell';
 
         <div class="status-grid" aria-label="Fortschritt">
           <div
-            *ngFor="let d of done; let i = index"
+            *ngFor="let d of completed; let i = index"
             class="status-cell"
             [class.done]="d"
             [class.bingo]="isCellInBingo(i)"
-            [attr.title]="projects[i]?.title"
+            [attr.title]="challenges[i]?.name"
           ></div>
         </div>
       </div>
@@ -70,8 +70,8 @@ import { BoardCell } from '../../../shared/domain/board-cell';
 
       <app-playable-board
         #playableBoard
-        [projects]="projects"
-        [done]="done"
+        [challenges]="challenges"
+        [completed]="completed"
         [bingoCells]="bingoCells"
         [mode]="viewMode"
         (toggled)="onToggle($event)"
@@ -219,12 +219,12 @@ export class BingoGameComponent {
 
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
 
-  get projects(): BoardCell[] {
-    return this.state.effectiveProjects();
+  get challenges(): Challenge[] {
+    return this.state.effectiveChallenges();
   }
 
-  get done(): boolean[] {
-    return this.state.done();
+  get completed(): boolean[] {
+    return this.state.completed();
   }
 
   get bingoCells(): Set<number> {
@@ -243,11 +243,11 @@ export class BingoGameComponent {
     this.state.toggle(i);
   }
 
-  onCardDetailOpen(event: { index: number; project: BoardCell }) {
+  onCardDetailOpen(event: { index: number; challenge: Challenge }) {
     this._openCardIndex = event.index;
-    const definitionImageId = this.state.definitionProjects()[event.index]?.imageId ?? null;
-    const gameImageId = this.state.projects()[event.index]?.imageId ?? null;
-    void this.comparisonDialog.open(event.project.title, definitionImageId, gameImageId);
+    const definitionImageId = this.state.definitionChallenges()[event.index]?.imageId ?? null;
+    const gameImageId = this.state.challenges()[event.index]?.imageId ?? null;
+    void this.comparisonDialog.open(event.challenge.name, definitionImageId, gameImageId);
   }
 
   onImageChanged(event: ImageChangedEvent): void {

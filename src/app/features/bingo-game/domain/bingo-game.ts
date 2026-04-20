@@ -1,28 +1,28 @@
-import { BoardCell } from '../../../shared/domain/board-cell';
+import { Challenge } from '../../../shared/domain/challenge';
 
-export interface BingoCell {
-  title: string;
+export interface ChallengeSnapshot {
+  name: string;
 }
 
 export interface BingoGameProgress {
   boardDefinitionId: string;
   boardSignature: string;
-  boardSnapshot: BingoCell[];
+  challenges: ChallengeSnapshot[];
   cellImages: (string | undefined)[];
-  done: boolean[];
+  completed: boolean[];
   startedAt: string;
 }
 
-export function createBoardSignature(cells: readonly { title: string }[]): string {
-  return JSON.stringify(cells.map(c => ({ title: c.title })));
+export function createBoardSignature(cells: readonly { name: string }[]): string {
+  return JSON.stringify(cells.map(c => ({ name: c.name })));
 }
 
 export class BingoGame {
   private constructor(
     readonly boardDefinitionId: string,
-    private readonly _snapshot: readonly BingoCell[],
+    private readonly _challenges: readonly ChallengeSnapshot[],
     private readonly _cellImages: readonly (string | undefined)[],
-    private readonly _done: readonly boolean[],
+    private readonly _completed: readonly boolean[],
     readonly startedAt: string,
   ) {}
 
@@ -30,91 +30,91 @@ export class BingoGame {
     return new BingoGame('', [], [], [], new Date().toISOString());
   }
 
-  static fromDefinition(boardDefinitionId: string, cells: readonly { title: string; imageId?: string }[]): BingoGame {
+  static fromDefinition(boardDefinitionId: string, cells: readonly { name: string; imageId?: string }[]): BingoGame {
     return new BingoGame(
       boardDefinitionId,
-      cells.map(c => ({ title: c.title })),
+      cells.map(c => ({ name: c.name })),
       new Array(cells.length).fill(undefined),
       new Array(cells.length).fill(false),
       new Date().toISOString(),
     );
   }
 
-  static restore(cells: readonly { title: string }[], saved: BingoGameProgress): BingoGame {
+  static restore(cells: readonly { name: string }[], saved: BingoGameProgress): BingoGame {
     const signature = createBoardSignature(cells);
     if (saved.boardSignature !== signature) {
       return BingoGame.fromDefinition(saved.boardDefinitionId, cells);
     }
     return new BingoGame(
       saved.boardDefinitionId,
-      [...saved.boardSnapshot],
+      [...saved.challenges],
       [...saved.cellImages],
-      saved.done.map(Boolean),
+      saved.completed.map(Boolean),
       saved.startedAt,
     );
   }
 
-  get projects(): readonly BoardCell[] {
-    return this._snapshot.map((cell, i) => ({
-      title: cell.title,
+  get challenges(): readonly Challenge[] {
+    return this._challenges.map((cell, i) => ({
+      name: cell.name,
       imageId: this._cellImages[i],
     }));
   }
 
-  get done(): readonly boolean[] {
-    return this._done;
+  get completed(): readonly boolean[] {
+    return this._completed;
   }
 
   get bingoCells(): Set<number> {
-    return computeBingoCells(this._done);
+    return computeBingoCells(this._completed);
   }
 
   get isEmpty(): boolean {
-    return this._snapshot.length === 0;
+    return this._challenges.length === 0;
   }
 
   toggle(index: number): BingoGame {
-    if (!isValidIndex(index, this._done.length)) {
-      return new BingoGame(this.boardDefinitionId, this._snapshot, this._cellImages, [...this._done], this.startedAt);
+    if (!isValidIndex(index, this._completed.length)) {
+      return new BingoGame(this.boardDefinitionId, this._challenges, this._cellImages, [...this._completed], this.startedAt);
     }
-    const next = [...this._done];
+    const next = [...this._completed];
     next[index] = !next[index];
-    return new BingoGame(this.boardDefinitionId, this._snapshot, this._cellImages, next, this.startedAt);
+    return new BingoGame(this.boardDefinitionId, this._challenges, this._cellImages, next, this.startedAt);
   }
 
   resetProgress(): BingoGame {
     return new BingoGame(
       this.boardDefinitionId,
-      this._snapshot,
+      this._challenges,
       this._cellImages,
-      new Array(this._snapshot.length).fill(false),
+      new Array(this._challenges.length).fill(false),
       this.startedAt,
     );
   }
 
   updateCellImage(index: number, imageId: string | undefined): BingoGame {
-    if (!isValidIndex(index, this._snapshot.length)) {
-      return new BingoGame(this.boardDefinitionId, this._snapshot, [...this._cellImages], this._done, this.startedAt);
+    if (!isValidIndex(index, this._challenges.length)) {
+      return new BingoGame(this.boardDefinitionId, this._challenges, [...this._cellImages], this._completed, this.startedAt);
     }
     const next = [...this._cellImages];
     next[index] = imageId;
-    return new BingoGame(this.boardDefinitionId, this._snapshot, next, this._done, this.startedAt);
+    return new BingoGame(this.boardDefinitionId, this._challenges, next, this._completed, this.startedAt);
   }
 
   toProgress(): BingoGameProgress {
     return {
       boardDefinitionId: this.boardDefinitionId,
-      boardSignature: createBoardSignature(this._snapshot),
-      boardSnapshot: [...this._snapshot] as BingoCell[],
+      boardSignature: createBoardSignature(this._challenges),
+      challenges: [...this._challenges] as ChallengeSnapshot[],
       cellImages: [...this._cellImages] as (string | undefined)[],
-      done: [...this._done] as boolean[],
+      completed: [...this._completed] as boolean[],
       startedAt: this.startedAt,
     };
   }
 }
 
-function computeBingoCells(done: readonly boolean[]): Set<number> {
-  const size = Math.sqrt(done.length);
+function computeBingoCells(completed: readonly boolean[]): Set<number> {
+  const size = Math.sqrt(completed.length);
   if (!Number.isInteger(size) || size < 2) {
     return new Set<number>();
   }
@@ -147,7 +147,7 @@ function computeBingoCells(done: readonly boolean[]): Set<number> {
 
   const result = new Set<number>();
   for (const line of lines) {
-    if (line.every(cellIndex => done[cellIndex])) {
+    if (line.every(cellIndex => completed[cellIndex])) {
       line.forEach(cellIndex => result.add(cellIndex));
     }
   }

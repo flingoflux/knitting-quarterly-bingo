@@ -17,9 +17,9 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
     this.storage.setItem(this.storageKey, {
       boardDefinitionId: progress.boardDefinitionId,
       boardSignature: progress.boardSignature,
-      boardSnapshot: [...progress.boardSnapshot],
+      challenges: [...progress.challenges],
       cellImages: [...progress.cellImages],
-      done: [...progress.done],
+      completed: [...progress.completed],
       startedAt: progress.startedAt,
     });
   }
