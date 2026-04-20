@@ -113,7 +113,8 @@ export interface ImageChangedEvent {
       background: #fff3e4;
       border: 1.5px dashed #d0ab86;
       border-radius: 14px;
-      min-height: 220px;
+      aspect-ratio: 1 / 1;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -125,7 +126,6 @@ export interface ImageChangedEvent {
       object-fit: cover;
       border-radius: 13px;
       display: block;
-      max-height: 340px;
     }
     .placeholder {
       display: flex;
