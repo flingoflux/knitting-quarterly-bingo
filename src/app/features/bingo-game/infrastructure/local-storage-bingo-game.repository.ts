@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../../../core/services/storage.service';
 import { BingoGameProgress } from '../domain/bingo-game';
+import { BingoGameRepository } from '../domain/bingo-game.repository';
 
 @Injectable({ providedIn: 'root' })
-export class BingoGameRepositoryService {
+export class LocalStorageBingoGameRepository implements BingoGameRepository {
   private readonly storageKey = 'kq-bingo-play-state-v1';
 
   constructor(private readonly storage: StorageService) {}

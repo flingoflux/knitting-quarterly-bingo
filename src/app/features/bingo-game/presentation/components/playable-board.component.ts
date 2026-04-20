@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BoardCell } from '../../../shared/domain/board-cell';
-import { ImageRepository, IMAGE_REPOSITORY } from '../../../shared/ports/image-repository';
+import { BoardCell } from '../../../../shared/domain/board-cell';
+import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 
 interface CardDetailOpenedEvent {
   index: number;

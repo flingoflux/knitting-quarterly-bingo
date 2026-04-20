@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, ElementRef, EventEmitter, NgZone, Output, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ImageRepository, IMAGE_REPOSITORY } from '../../../shared/ports/image-repository';
+import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 
 export interface ImageChangedEvent {
   imageId: string | null;
