@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
 import { Result } from '../../../shared/domain/result';
-import { LocalStorageBoardRepository, PersistedBoardDefinition } from '../../board-configuration/infrastructure/local-storage-board.repository';
-import { BOARD_DEFINITION_READER } from '../../board-configuration/domain/board-definition.repository';
+import { PersistedBoardDefinition } from '../../board-configuration/infrastructure/local-storage-board.repository';
+import { BOARD_DEFINITION_READER, BOARD_DEFINITION_WRITER } from '../../board-configuration/domain/board-definition.repository';
 import { BingoGameService } from './bingo-game.service';
-import { LocalStorageBingoGameRepository } from '../infrastructure/local-storage-bingo-game.repository';
+import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
 import { BingoGameProgress, createBoardSignature } from '../domain/bingo-game';
 
 class MockBoardDefinitionRepository {
@@ -53,8 +53,8 @@ function createService(
   const injector = Injector.create({
     providers: [
       { provide: BOARD_DEFINITION_READER, useValue: boardDefinitionRepository },
-      { provide: LocalStorageBingoGameRepository, useValue: bingoGameRepository },
-      { provide: LocalStorageBoardRepository, useValue: new MockBoardDefinitionWriter() },
+      { provide: BOARD_DEFINITION_WRITER, useValue: new MockBoardDefinitionWriter() },
+      { provide: BINGO_GAME_REPOSITORY, useValue: bingoGameRepository },
     ],
   });
   return runInInjectionContext(injector, () => new BingoGameService());

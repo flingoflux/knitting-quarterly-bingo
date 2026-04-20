@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { Injector, runInInjectionContext } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
 import { Result } from '../../../shared/domain/result';
 import { BoardConfigurationService } from './board-configuration.service';
-import { LocalStorageBoardRepository, PersistedBoardDefinition } from '../infrastructure/local-storage-board.repository';
+import { PersistedBoardDefinition } from '../infrastructure/local-storage-board.repository';
+import { BOARD_DEFINITION_READER, BOARD_DEFINITION_WRITER } from '../domain/board-definition.repository';
 import { DEFAULT_BOARD_PROJECTS } from '../../../shared/domain/default-board-projects';
 
 class MockBoardDefinitionRepository {
@@ -31,7 +33,13 @@ function createProjects(length = 16): BoardCell[] {
 }
 
 function createService(repository: MockBoardDefinitionRepository): BoardConfigurationService {
-  return new BoardConfigurationService(repository as unknown as LocalStorageBoardRepository);
+  const injector = Injector.create({
+    providers: [
+      { provide: BOARD_DEFINITION_READER, useValue: repository },
+      { provide: BOARD_DEFINITION_WRITER, useValue: repository },
+    ],
+  });
+  return runInInjectionContext(injector, () => new BoardConfigurationService());
 }
 
 describe('BoardConfigurationService', () => {

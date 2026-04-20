@@ -7,3 +7,9 @@ export interface BoardDefinitionReader {
 }
 
 export const BOARD_DEFINITION_READER = new InjectionToken<BoardDefinitionReader>('BoardDefinitionReader');
+
+export interface BoardDefinitionWriter {
+  save(definition: { projects: BoardCell[] }): void;
+}
+
+export const BOARD_DEFINITION_WRITER = new InjectionToken<BoardDefinitionWriter>('BoardDefinitionWriter');

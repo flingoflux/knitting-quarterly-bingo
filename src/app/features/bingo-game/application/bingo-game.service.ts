@@ -1,8 +1,7 @@
 import { Injectable, inject, Signal, computed, signal } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
-import { BOARD_DEFINITION_READER } from '../../board-configuration/domain/board-definition.repository';
-import { LocalStorageBingoGameRepository } from '../infrastructure/local-storage-bingo-game.repository';
-import { LocalStorageBoardRepository } from '../../board-configuration/infrastructure/local-storage-board.repository';
+import { BOARD_DEFINITION_READER, BOARD_DEFINITION_WRITER } from '../../board-configuration/domain/board-definition.repository';
+import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
 import { BingoGame, createBoardSignature } from '../domain/bingo-game';
 
 @Injectable()
@@ -14,8 +13,8 @@ export class BingoGameService {
   readonly bingoCells: Signal<Set<number>> = computed(() => this.gameState().bingoCells);
 
   private readonly boardDefinitionRepository = inject(BOARD_DEFINITION_READER);
-  private readonly boardDefinitionWriter = inject(LocalStorageBoardRepository);
-  private readonly bingoGameRepository = inject(LocalStorageBingoGameRepository);
+  private readonly boardDefinitionWriter = inject(BOARD_DEFINITION_WRITER);
+  private readonly bingoGameRepository = inject(BINGO_GAME_REPOSITORY);
 
   constructor() {
     this.refreshFromDefinition();
