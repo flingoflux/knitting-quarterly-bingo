@@ -49,6 +49,16 @@ import { BoardCell } from '../../shared/domain/board-cell';
             </svg>
           </button>
         </div>
+
+        <div class="status-grid" aria-label="Fortschritt">
+          <div
+            *ngFor="let d of done; let i = index"
+            class="status-cell"
+            [class.done]="d"
+            [class.bingo]="isCellInBingo(i)"
+            [attr.title]="projects[i]?.title"
+          ></div>
+        </div>
       </div>
 
       <div class="play-bingo-header" [class.compact-header]="viewMode === 'horizontal'">
@@ -106,6 +116,7 @@ import { BoardCell } from '../../shared/domain/board-cell';
     }
     .view-toggle {
       display: flex;
+      height: 42px;
       border: 1px solid #c79362;
       border-radius: 999px;
       overflow: hidden;
@@ -116,7 +127,7 @@ import { BoardCell } from '../../shared/domain/board-cell';
       border: none;
       cursor: pointer;
       width: 42px;
-      height: 42px;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -135,6 +146,30 @@ import { BoardCell } from '../../shared/domain/board-cell';
     .mode-btn:focus-visible {
       outline: 3px solid rgba(196, 110, 53, 0.3);
       outline-offset: -2px;
+    }
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 14px);
+      grid-template-rows: repeat(4, 8px);
+      gap: 3px;
+      align-self: center;
+      margin-left: 0.4rem;
+    }
+    .status-cell {
+      width: 14px;
+      height: 8px;
+      border-radius: 2px;
+      background: #fff;
+      border: 1.5px solid #d0b08a;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .status-cell.done {
+      background: #145906;
+      border-color: #145906;
+    }
+    .status-cell.bingo {
+      background: #145906;
+      border-color: #145906;
     }
     .play-bingo-header {
       text-align: center;
@@ -212,6 +247,10 @@ export class PlayBingoFeatureComponent {
   }
 
   private _openCardIndex: number | null = null;
+
+  isCellInBingo(i: number): boolean {
+    return this.bingoCells.has(i);
+  }
 
   goHome() {
     this.router.navigate(['/']);
