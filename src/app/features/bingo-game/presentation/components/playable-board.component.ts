@@ -2,8 +2,7 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } fro
 import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
-import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
-import { BadgeComponent } from '../../../../shared/ui/atoms/badge/badge.component';
+import { ChallengeCardComponent } from '../../../../shared/ui/molecules/challenge-card/challenge-card.component';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -13,198 +12,41 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-playable-board',
   standalone: true,
-  imports: [CommonModule, IconComponent, BadgeComponent],
+  imports: [CommonModule, ChallengeCardComponent],
   template: `
     <div class="grid playable" [class.mode-polaroid]="mode === 'polaroid'" [class.mode-horizontal]="mode === 'horizontal'">
-      <div
+      <kq-challenge-card
         *ngFor="let p of challenges; let i = index"
-        class="cell"
-        [class.done]="completed[i]"
-        [class.bingo-cell]="isCellInBingo(i)"
+        [name]="p.name"
+        [imageUrl]="getImage(p.progressImageId ?? p.planningImageId)"
+        [mode]="mode"
+        [done]="completed[i]"
+        [inBingo]="isCellInBingo(i)"
+        [showCameraButton]="true"
         (click)="onToggle(i)"
-      >
-        <div class="photo-area">
-          <img *ngIf="getImage(p.progressImageId ?? p.planningImageId)" [src]="getImage(p.progressImageId ?? p.planningImageId)" class="photo-img" [alt]="p.name" />
-          <div *ngIf="!getImage(p.progressImageId ?? p.planningImageId)" class="photo-placeholder">
-            <img src="assets/logo_plain.svg" class="logo-placeholder" alt="" />
-          </div>
-
-          <kq-badge *ngIf="completed[i]" variant="done" [compact]="mode === 'horizontal'"/>
-          <kq-badge *ngIf="isCellInBingo(i)" variant="bingo" [compact]="mode === 'horizontal'"/>
-
-          <button
-            type="button"
-            class="photo-btn"
-            title="Foto ansehen / hochladen"
-            aria-label="Foto ansehen oder hochladen"
-            (click)="openDetail(i, p, $event)"
-          >
-            <kq-icon name="camera" [size]="13"/>
-          </button>
-        </div>
-
-        <div class="caption">
-          <div class="title">{{p.name}}</div>
-        </div>
-      </div>
+        (cameraClicked)="openDetail(i, p, $event)"
+      />
     </div>
   `,
   styles: [`
-    /* ── Gemeinsame Basis ── */
+    /* Grid-Container */
     .grid.playable {
       display: grid;
       gap: 0.6rem;
       margin: 0.5rem auto 0;
     }
-    .cell {
-      background: #fff;
-      border-radius: 4px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 2px 5px rgba(60, 30, 10, 0.14), 0 8px 20px rgba(60, 30, 10, 0.10);
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .cell:hover {
-      transform: translateY(-3px) rotate(0.3deg);
-      box-shadow: 0 6px 14px rgba(60, 30, 10, 0.18), 0 16px 32px rgba(60, 30, 10, 0.13);
-    }
-    .cell.bingo-cell {
-      box-shadow: 0 0 0 3px #145906, 0 8px 22px rgba(20, 89, 6, 0.22);
-    }
-    .photo-area {
-      position: relative;
-      background: #f2e8d8;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-    .photo-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .photo-placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #c9a878;
-    }
-    .logo-placeholder {
-      width: 58px;
-      height: 58px;
-      object-fit: contain;
-      filter: brightness(0) saturate(100%) invert(73%) sepia(28%) saturate(500%) hue-rotate(355deg) brightness(94%) contrast(88%) opacity(0.45);
-    }
-    .photo-btn {
-      position: absolute;
-      bottom: 5px;
-      right: 5px;
-      border: 1.5px solid rgba(255, 255, 255, 0.85);
-      border-radius: 50%;
-      width: 26px;
-      height: 26px;
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      color: #5a2d1a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 2;
-      transition: background 0.18s, transform 0.15s;
-    }
-    .photo-btn:hover,
-    .photo-btn:focus-visible {
-      background: rgba(255, 255, 255, 0.9);
-      transform: scale(1.1);
-    }
-    .photo-btn:focus-visible {
-      outline: 2px solid rgba(196, 110, 53, 0.5);
-      outline-offset: 2px;
-    }
-    .caption {
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-    }
-    .title {
-      font-weight: 700;
-      color: #4a2d1c;
-      line-height: 1.25;
-      text-wrap: balance;
-    }
 
-    /* ── Option B: Polaroid ── */
+    /* ── Polaroid ── */
     .grid.playable.mode-polaroid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
       max-width: 52rem;
     }
-    .mode-polaroid .cell {
-      padding: 7px 7px 0;
-      border-radius: 5px;
-    }
-    .mode-polaroid .photo-area {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      border-radius: 2px;
-    }
-    .mode-polaroid .caption {
-      padding: 0.45rem 0.2rem 0.6rem;
-      align-items: center;
-      min-height: 44px;
-    }
-    .mode-polaroid .title {
-      font-size: 0.74rem;
-      text-align: center;
-    }
 
-    /* ── Option A: Horizontal ── */
+    /* ── Horizontal ── */
     .grid.playable.mode-horizontal {
       grid-template-columns: repeat(4, minmax(0, 1fr));
       max-width: 58rem;
       gap: 0.4rem;
-    }
-    .mode-horizontal .cell {
-      flex-direction: row;
-      align-items: stretch;
-      height: 4.8rem;
-    }
-    .mode-horizontal .cell:hover {
-      transform: translateY(-2px) rotate(0deg);
-    }
-    .mode-horizontal .photo-area {
-      width: 4.8rem;
-      height: 4.8rem;
-      aspect-ratio: unset;
-      flex-shrink: 0;
-    }
-    .mode-horizontal .caption {
-      flex: 1;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 0.35rem 0.5rem 0.35rem 0.45rem;
-      min-height: unset;
-      overflow: hidden;
-    }
-    .mode-horizontal .title {
-      font-size: 0.7rem;
-      text-align: left;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .mode-horizontal .photo-btn {
-      width: 22px;
-      height: 22px;
-      bottom: 4px;
-      right: 4px;
     }
 
     /* ── Responsive ── */
@@ -212,13 +54,6 @@ interface CardDetailOpenedEvent {
       .grid.playable.mode-polaroid,
       .grid.playable.mode-horizontal {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-      .mode-horizontal .cell {
-        height: 5.2rem;
-      }
-      .mode-horizontal .photo-area {
-        width: 5.2rem;
-        height: 5.2rem;
       }
     }
     @media (max-width: 520px) {
