@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } fro
 import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
+import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -11,7 +12,7 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-playable-board',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   template: `
     <div class="grid playable" [class.mode-polaroid]="mode === 'polaroid'" [class.mode-horizontal]="mode === 'horizontal'">
       <div
@@ -28,15 +29,11 @@ interface CardDetailOpenedEvent {
           </div>
 
           <div *ngIf="completed[i]" class="done-badge">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
+            <kq-icon name="check" [size]="12" [strokeWidth]="3"/>
           </div>
 
           <div *ngIf="isCellInBingo(i)" class="bingo-badge">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-            </svg>
+            <kq-icon name="star" [size]="14"/>
           </div>
 
           <button
@@ -46,10 +43,7 @@ interface CardDetailOpenedEvent {
             aria-label="Foto ansehen oder hochladen"
             (click)="openDetail(i, p, $event)"
           >
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-              <circle cx="12" cy="13" r="4"/>
-            </svg>
+            <kq-icon name="camera" [size]="13"/>
           </button>
         </div>
 

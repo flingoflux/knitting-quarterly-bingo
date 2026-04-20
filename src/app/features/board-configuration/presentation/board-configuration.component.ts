@@ -6,32 +6,23 @@ import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-
 import { shuffleArray } from '../../../shared/utils/array-utils';
 import { Challenge } from '../../../shared/domain/challenge';
 import { Router } from '@angular/router';
+import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 
 @Component({
   selector: 'app-board-configuration',
   standalone: true,
-  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent],
+  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent],
   template: `
     <div class="feature-shell">
       <div class="button-bar">
         <button class="icon-btn" (click)="goHome()" title="Zur Startseite" aria-label="Zur Startseite">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7"/>
-            <path d="M9 22V12h6v10"/>
-            <path d="M21 22H3"/>
-          </svg>
+          <kq-icon name="home" [size]="22"/>
         </button>
         <button class="icon-btn" (click)="shuffle()" title="Felder würfeln" aria-label="Felder würfeln">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-          </svg>
+          <kq-icon name="shuffle" [size]="22"/>
         </button>
         <button class="icon-btn" (click)="playBingo()" title="Als Bingo spielen" aria-label="Als Bingo spielen">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
+          <kq-icon name="play" [size]="22"/>
         </button>
 
         <div class="view-toggle" role="group" aria-label="Kartenansicht">
@@ -42,10 +33,7 @@ import { Router } from '@angular/router';
             title="Polaroid"
             aria-label="Polaroid-Ansicht"
           >
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <line x1="3" y1="16" x2="21" y2="16"/>
-            </svg>
+            <kq-icon name="polaroid" [size]="17"/>
           </button>
           <button
             class="mode-btn"
@@ -54,12 +42,7 @@ import { Router } from '@angular/router';
             title="Kompaktansicht"
             aria-label="Kompaktansicht"
           >
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="7" height="7" rx="1"/>
-              <line x1="12" y1="6.5" x2="22" y2="6.5"/>
-              <rect x="2" y="14" width="7" height="7" rx="1"/>
-              <line x1="12" y1="17.5" x2="22" y2="17.5"/>
-            </svg>
+            <kq-icon name="horizontal" [size]="17"/>
           </button>
         </div>
       </div>

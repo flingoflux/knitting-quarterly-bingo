@@ -6,20 +6,17 @@ import { ProjectComparisonDialogComponent } from './components/project-compariso
 import { ImageChangedEvent } from '../../board-configuration/presentation/components/card-detail-dialog.component';
 import { Router } from '@angular/router';
 import { ChallengeProgress } from '../domain/bingo-game';
+import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 
 @Component({
   selector: 'app-bingo-game',
   standalone: true,
-  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent],
+  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent, IconComponent],
   template: `
     <div class="feature-shell">
       <div class="toolbar">
         <button class="home-btn" (click)="goHome()" title="Zur Startseite" aria-label="Zur Startseite">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9l9-7 9 7"/>
-            <path d="M9 22V12h6v10"/>
-            <path d="M21 22H3"/>
-          </svg>
+          <kq-icon name="home" [size]="22"/>
         </button>
 
         <div class="view-toggle" role="group" aria-label="Kartenansicht">
@@ -30,10 +27,7 @@ import { ChallengeProgress } from '../domain/bingo-game';
             title="Polaroid"
             aria-label="Polaroid-Ansicht"
           >
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2"/>
-              <line x1="3" y1="16" x2="21" y2="16"/>
-            </svg>
+            <kq-icon name="polaroid" [size]="17"/>
           </button>
           <button
             class="mode-btn"
@@ -42,12 +36,7 @@ import { ChallengeProgress } from '../domain/bingo-game';
             title="Kompaktansicht – alles auf einen Blick"
             aria-label="Kompaktansicht"
           >
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="7" height="7" rx="1"/>
-              <line x1="12" y1="6.5" x2="22" y2="6.5"/>
-              <rect x="2" y="14" width="7" height="7" rx="1"/>
-              <line x1="12" y1="17.5" x2="22" y2="17.5"/>
-            </svg>
+            <kq-icon name="horizontal" [size]="17"/>
           </button>
         </div>
 

@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, I
 import { CommonModule } from '@angular/common';
 import { Challenge } from '../../../../shared/domain/challenge';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
+import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 
 interface ChallengeEditedEvent {
   index: number;
@@ -16,7 +17,7 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-editable-board',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   template: `
     <div class="grid editable" [class.mode-polaroid]="mode === 'polaroid'" [class.mode-horizontal]="mode === 'horizontal'">
       <div
@@ -41,10 +42,7 @@ interface CardDetailOpenedEvent {
             aria-label="Foto ansehen oder hochladen"
             (click)="openDetail(i, p, $event)"
           >
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-              <circle cx="12" cy="13" r="4"/>
-            </svg>
+            <kq-icon name="camera" [size]="13"/>
           </button>
         </div>
 
@@ -56,10 +54,7 @@ interface CardDetailOpenedEvent {
             aria-label="Projekt bearbeiten"
             (click)="startEditing(i, p, $event)"
           >
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9"></path>
-              <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
-            </svg>
+            <kq-icon name="edit" [size]="13"/>
           </button>
 
           <ng-container *ngIf="editingIndex === i; else readonlyView">

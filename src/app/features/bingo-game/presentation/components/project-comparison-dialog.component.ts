@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output, ViewChi
 import { CommonModule } from '@angular/common';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { ImageChangedEvent } from '../../../board-configuration/presentation/components/card-detail-dialog.component';
+import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 
 interface CropState {
   imgSrc: string;
@@ -21,15 +22,12 @@ interface CropState {
 @Component({
   selector: 'app-project-comparison-dialog',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   template: `
     <dialog #dialog (click)="onDialogClick($event)">
       <div class="panel">
         <button class="close-btn" type="button" (click)="close()" aria-label="Dialog schließen">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
+          <kq-icon name="close" [size]="18" [strokeWidth]="2.5"/>
         </button>
 
         <h3 class="card-title">{{ title }}</h3>
@@ -53,9 +51,7 @@ interface CropState {
           </div>
           <div class="crop-actions">
             <button class="confirm-btn" type="button" (click)="onCropConfirm()">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"/>
-              </svg>
+              <kq-icon name="check" [size]="16" [strokeWidth]="2.5"/>
               Zuschnitt übernehmen
             </button>
             <button class="cancel-crop-btn" type="button" (click)="onCropCancel()">Abbrechen</button>
@@ -72,10 +68,7 @@ interface CropState {
               <div class="image-area">
                 <img *ngIf="definitionImageUrl" [src]="definitionImageUrl" class="preview-img" [alt]="title" />
                 <div *ngIf="!definitionImageUrl && !loadingDefinition" class="placeholder">
-                  <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" class="placeholder-icon">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                    <circle cx="12" cy="13" r="4"/>
-                  </svg>
+                  <kq-icon name="camera" [size]="36" [strokeWidth]="1.3" class="placeholder-icon"/>
                   <p class="placeholder-text">Kein Foto geplant</p>
                 </div>
                 <div *ngIf="loadingDefinition" class="loading">Lädt…</div>
@@ -88,10 +81,7 @@ interface CropState {
               <div class="image-area">
                 <img *ngIf="gameImageUrl && !loadingGame" [src]="gameImageUrl" class="preview-img" [alt]="title" />
                 <div *ngIf="!gameImageUrl && !loadingGame" class="placeholder">
-                  <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" class="placeholder-icon">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                    <circle cx="12" cy="13" r="4"/>
-                  </svg>
+                  <kq-icon name="camera" [size]="36" [strokeWidth]="1.3" class="placeholder-icon"/>
                   <p class="placeholder-text">Noch kein Foto</p>
                 </div>
                 <div *ngIf="loadingGame" class="loading">Lädt…</div>
@@ -99,19 +89,11 @@ interface CropState {
               <div class="actions">
                 <label class="upload-btn" [class.is-replace]="!!gameImageUrl">
                   <input type="file" accept="image/*" (change)="onFileSelected($event)" hidden />
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="17 8 12 3 7 8"/>
-                    <line x1="12" y1="3" x2="12" y2="15"/>
-                  </svg>
+                  <kq-icon name="upload" [size]="14"/>
                   {{ gameImageUrl ? 'Ersetzen' : 'Foto hochladen' }}
                 </label>
                 <button *ngIf="gameImageUrl" class="delete-btn" type="button" (click)="onDelete()">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6l-1 14H6L5 6"/>
-                    <path d="M10 11v6M14 11v6"/>
-                  </svg>
+                  <kq-icon name="delete" [size]="14"/>
                   Entfernen
                 </button>
               </div>
