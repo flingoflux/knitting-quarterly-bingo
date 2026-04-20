@@ -1,6 +1,6 @@
 import { StartPageComponent } from './start-page.component';
 import { Routes } from '@angular/router';
-import { playBingoGuard } from './features/play-bingo/play-bingo.guard';
+import { bingoGameGuard } from './features/bingo-game/presentation/bingo-game.guard';
 
 export const routes: Routes = [
   {
@@ -9,11 +9,11 @@ export const routes: Routes = [
   },
   {
     path: 'edit',
-    loadComponent: () => import('./features/board-studio/board-studio.component').then(m => m.BoardStudioFeatureComponent),
+    loadComponent: () => import('./features/board-configuration/presentation/board-configuration.component').then(m => m.BoardConfigurationComponent),
   },
   {
     path: 'play',
-    canActivate: [playBingoGuard],
-    loadComponent: () => import('./features/play-bingo/play-bingo.component').then(m => m.PlayBingoFeatureComponent),
+    canActivate: [bingoGameGuard],
+    loadComponent: () => import('./features/bingo-game/presentation/bingo-game.component').then(m => m.BingoGameComponent),
   },
 ];

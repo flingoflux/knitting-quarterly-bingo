@@ -1,12 +1,12 @@
 import { Injectable, inject, Signal, computed, signal } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
-import { BOARD_DEFINITION_READER, BoardDefinitionReader } from '../../../shared/ports/board-definition-reader';
-import { BingoGameRepositoryService } from './bingo-game-repository.service';
+import { BOARD_DEFINITION_READER } from '../../board-configuration/domain/board-definition.repository';
+import { LocalStorageBingoGameRepository } from '../infrastructure/local-storage-bingo-game.repository';
+import { LocalStorageBoardRepository } from '../../board-configuration/infrastructure/local-storage-board.repository';
 import { computeBingoCells, createBoardSignature, createEmptyDone, normalizeDone, toggleDone } from '../domain/bingo-game';
-import { BoardDefinitionRepositoryService } from '../../board-studio/state/board-definition-repository.service';
 
 @Injectable({ providedIn: 'root' })
-export class PlayBingoStateService {
+export class BingoGameService {
   private readonly projectsState = signal<BoardCell[]>([]);
   private readonly doneState = signal<boolean[]>([]);
 
@@ -15,8 +15,8 @@ export class PlayBingoStateService {
   readonly bingoCells: Signal<Set<number>> = computed(() => computeBingoCells(this.doneState()));
 
   private readonly boardDefinitionRepository = inject(BOARD_DEFINITION_READER);
-  private readonly boardDefinitionWriter = inject(BoardDefinitionRepositoryService);
-  private readonly bingoGameRepository = inject(BingoGameRepositoryService);
+  private readonly boardDefinitionWriter = inject(LocalStorageBoardRepository);
+  private readonly bingoGameRepository = inject(LocalStorageBingoGameRepository);
 
   constructor() {
     this.refreshFromDefinition();

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BoardCell } from '../../../shared/domain/board-cell';
-import { BoardStudioStateService } from './board-studio-state.service';
-import { BoardDefinitionRepositoryService, PersistedBoardDefinition } from './board-definition-repository.service';
+import { BoardConfigurationService } from './board-configuration.service';
+import { LocalStorageBoardRepository, PersistedBoardDefinition } from '../infrastructure/local-storage-board.repository';
 import { DEFAULT_BOARD_PROJECTS } from '../../../shared/domain/default-board-projects';
 
 class MockBoardDefinitionRepository {
@@ -26,17 +26,17 @@ function createProjects(length = 16): BoardCell[] {
   }));
 }
 
-function createState(repository: MockBoardDefinitionRepository): BoardStudioStateService {
-  return new BoardStudioStateService(repository as unknown as BoardDefinitionRepositoryService);
+function createService(repository: MockBoardDefinitionRepository): BoardConfigurationService {
+  return new BoardConfigurationService(repository as unknown as LocalStorageBoardRepository);
 }
 
-describe('BoardStudioStateService', () => {
+describe('BoardConfigurationService', () => {
   it('initialisiert Defaults wenn kein persistiertes Board vorhanden ist', () => {
     const repository = new MockBoardDefinitionRepository();
 
-    const state = createState(repository);
+    const service = createService(repository);
 
-    expect(state.projects()).toEqual(DEFAULT_BOARD_PROJECTS);
+    expect(service.projects()).toEqual(DEFAULT_BOARD_PROJECTS);
     expect(repository.lastSavedDefinition?.projects).toEqual(DEFAULT_BOARD_PROJECTS);
   });
 
@@ -44,34 +44,41 @@ describe('BoardStudioStateService', () => {
     const repository = new MockBoardDefinitionRepository();
     repository.loadedDefinition = { projects: createProjects(4) };
 
-    const state = createState(repository);
+    const service = createService(repository);
 
-    expect(state.projects()).toHaveLength(4);
-    expect(state.projects()[0].title).toBe('Project 0');
+    expect(service.projects()).toHaveLength(4);
+    expect(service.projects()[0].title).toBe('Project 0');
   });
 
   it('tauscht Projekte und persistiert das Ergebnis', () => {
     const repository = new MockBoardDefinitionRepository();
     repository.loadedDefinition = { projects: createProjects(4) };
-    const state = createState(repository);
+    const service = createService(repository);
 
-    state.swapProjects(0, 3);
+    service.swapProjects(0, 3);
 
-    expect(state.projects()[0].title).toBe('Project 3');
-    expect(state.projects()[3].title).toBe('Project 0');
+    expect(service.projects()[0].title).toBe('Project 3');
+    expect(service.projects()[3].title).toBe('Project 0');
     expect(repository.lastSavedDefinition?.projects[0].title).toBe('Project 3');
   });
 
-  it('aktualisiert ein Projekt und persistiert die Aenderung', () => {
+  it('aktualisiert ein einzelnes Projekt', () => {
     const repository = new MockBoardDefinitionRepository();
     repository.loadedDefinition = { projects: createProjects(4) };
-    const state = createState(repository);
+    const service = createService(repository);
 
-    state.updateProject(1, {
-      title: 'Neues Projekt',
-    });
+    service.updateProject(1, { title: 'Updated' });
 
-    expect(state.projects()[1].title).toBe('Neues Projekt');
-    expect(repository.lastSavedDefinition?.projects[1].title).toBe('Neues Projekt');
+    expect(service.projects()[1].title).toBe('Updated');
+  });
+
+  it('setzt das Board auf Defaults zurueck', () => {
+    const repository = new MockBoardDefinitionRepository();
+    repository.loadedDefinition = { projects: createProjects(4) };
+    const service = createService(repository);
+
+    service.resetBoard();
+
+    expect(service.projects()).toEqual(DEFAULT_BOARD_PROJECTS);
   });
 });

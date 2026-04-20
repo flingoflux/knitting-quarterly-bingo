@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../../../core/services/storage.service';
 import { BoardCell } from '../../../shared/domain/board-cell';
-import { BoardDefinitionReader } from '../../../shared/ports/board-definition-reader';
+import { BoardDefinitionReader } from '../domain/board-definition.repository';
 
 export interface PersistedBoardDefinition {
   projects: BoardCell[];
@@ -17,7 +17,7 @@ function isValidBoardCell(cell: unknown): cell is BoardCell {
 }
 
 @Injectable({ providedIn: 'root' })
-export class BoardDefinitionRepositoryService implements BoardDefinitionReader {
+export class LocalStorageBoardRepository implements BoardDefinitionReader {
   private readonly storageKey = 'kq-bingo-board-definition-v1';
 
   constructor(private readonly storage: StorageService) {}

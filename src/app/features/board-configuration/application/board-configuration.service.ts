@@ -1,14 +1,14 @@
 import { Injectable, Signal, computed, signal } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
-import { BoardDefinitionRepositoryService } from './board-definition-repository.service';
+import { LocalStorageBoardRepository } from '../infrastructure/local-storage-board.repository';
 import { createDefaultBoardDefinition, reorderBoardProjects } from '../domain/board-definition';
 
 @Injectable({ providedIn: 'root' })
-export class BoardStudioStateService {
+export class BoardConfigurationService {
   private readonly projectsState = signal<BoardCell[]>([]);
   readonly projects: Signal<BoardCell[]> = computed(() => this.projectsState());
 
-  constructor(private readonly repository: BoardDefinitionRepositoryService) {
+  constructor(private readonly repository: LocalStorageBoardRepository) {
     const persisted = this.repository.load();
     if (persisted !== null && persisted.projects.length > 0) {
       this.projectsState.set([...persisted.projects]);
