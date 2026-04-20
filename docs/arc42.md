@@ -56,20 +56,16 @@ Die Anwendung unterstützt zwei Phasen:
 
 ### 3.1 Systemkontext
 
-```plantuml
-@startuml
-skinparam backgroundColor transparent
-skinparam componentStyle rectangle
-
-rectangle "Browser" {
-  component "Knitting Quarterly Bingo\n(Angular SPA)" as APP
-  database "LocalStorage\n(Plan + Spielstand)" as LS
-  database "IndexedDB\n(Challenge-Bilder als Data-URLs)" as IDB
+```mermaid
+flowchart TB
+  subgraph Browser
+    APP[Knitting Quarterly Bingo<br/>Angular SPA]
+    LS[(LocalStorage<br/>Plan + Spielstand)]
+    IDB[(IndexedDB<br/>Challenge-Bilder als Data-URLs)]
+  end
 
   APP --> LS
   APP --> IDB
-}
-@enduml
 ```
 
 **Externe Schnittstellen:** keine. Die Anwendung kommuniziert ausschließlich mit Browser-APIs.
@@ -93,98 +89,81 @@ rectangle "Browser" {
 
 ### 5.1 Ebene 1 – Gesamtsystem
 
-```plantuml
-@startuml
-skinparam backgroundColor transparent
-skinparam classAttributeIconSize 0
+```mermaid
+classDiagram
+  class QuarterlyPlan {
+    +UUID id
+    +Challenge[16] challenges
+    +QuarterlyPlan update(index, challenge)
+    +QuarterlyPlan reorder(from, to)
+  }
 
-class "QuarterlyPlan" as QuarterlyPlan {
-  +id: UUID
-  +challenges: Challenge[16]
-  +update(index, challenge): QuarterlyPlan
-  +reorder(from, to): QuarterlyPlan
-}
+  class Challenge {
+    +string name
+    +UUID imageId?
+  }
 
-class "Challenge" as Challenge {
-  +name: string
-  +imageId?: UUID
-}
+  class BingoGame {
+    +string boardSignature
+    +ChallengeProgress[16] progress
+    +BingoGame toggle(index)
+    +BingoGame updateProgressImage(index, imageId)
+    +BingoGame resetProgress()
+    +Set~int~ bingoCells()
+  }
 
-class "BingoGame" as BingoGame {
-  +boardSignature: string
-  +progress: ChallengeProgress[16]
-  +toggle(index): BingoGame
-  +updateProgressImage(index, imageId): BingoGame
-  +resetProgress(): BingoGame
-  +bingoCells(): Set<int>
-}
+  class ChallengeProgress {
+    +string name
+    +UUID planningImageId?
+    +UUID progressImageId?
+    +boolean completed
+  }
 
-class "ChallengeProgress" as ChallengeProgress {
-  +name: string
-  +planningImageId?: UUID
-  +progressImageId?: UUID
-  +completed: boolean
-}
+  QuarterlyPlan "1" o-- "16" Challenge
+  BingoGame "1" o-- "16" ChallengeProgress
+  ChallengeProgress ..> Challenge : aus Plan abgeleitet
 
-QuarterlyPlan "1" o-- "16" Challenge
-BingoGame "1" o-- "16" ChallengeProgress
-ChallengeProgress ..> Challenge : aus Plan abgeleitet
-
-note right of BingoGame
-Immutable Aggregat:
-alle Mutationen liefern
-neue Instanzen.
-end note
-@enduml
+  note for BingoGame "Immutable Aggregat:\nalle Mutationen liefern\nneue Instanzen."
 ```
 
 ### 5.2 Architekturbild – Ports and Adapters
 
-```plantuml
-@startuml
-skinparam backgroundColor transparent
-skinparam componentStyle rectangle
+```mermaid
+flowchart TB
+  PRESENTATION[Presentation<br/>Angular Components, Guards, Dialoge]
+  APPLICATION[Application<br/>Services / Use Cases]
+  DOMAIN[Domain<br/>Aggregate + Value Objects]
 
-rectangle "Presentation\n(Angular Components, Guards, Dialoge)" as PRESENTATION
-rectangle "Application\n(Services / Use Cases)" as APPLICATION
-rectangle "Domain\n(Aggregate + Value Objects)" as DOMAIN
+  QPR[[QuarterlyPlanReader]]
+  QPW[[QuarterlyPlanWriter]]
+  BGR[[BingoGameRepository]]
+  IR[[ImageRepository]]
 
-interface "QuarterlyPlanReader" as QPR
-interface "QuarterlyPlanWriter" as QPW
-interface "BingoGameRepository" as BGR
-interface "ImageRepository" as IR
+  LSBR[LocalStorageBoardRepository]
+  LSBGR[LocalStorageBingoGameRepository]
+  IDBR[IndexedDbImageRepositoryService]
+  LS[(LocalStorage)]
+  IDB[(IndexedDB)]
 
-component "LocalStorageBoardRepository" as LSBR
-component "LocalStorageBingoGameRepository" as LSBGR
-component "IndexedDbImageRepositoryService" as IDBR
-database "LocalStorage" as LS
-database "IndexedDB" as IDB
+  PRESENTATION --> APPLICATION
+  APPLICATION --> DOMAIN
 
-PRESENTATION --> APPLICATION
-APPLICATION --> DOMAIN
+  APPLICATION --> QPR
+  APPLICATION --> QPW
+  APPLICATION --> BGR
+  APPLICATION --> IR
 
-APPLICATION --> QPR
-APPLICATION --> QPW
-APPLICATION --> BGR
-APPLICATION --> IR
+  LSBR -. implements .-> QPR
+  LSBR -. implements .-> QPW
+  LSBGR -. implements .-> BGR
+  IDBR -. implements .-> IR
 
-LSBR ..|> QPR
-LSBR ..|> QPW
-LSBGR ..|> BGR
-IDBR ..|> IR
-
-LSBR --> LS
-LSBGR --> LS
-IDBR --> IDB
-
-note bottom
-Abhaengigkeitsregel:
-innen kennt nichts von aussen.
-Adapter haengen von Ports ab,
-nicht die Domain von Adaptern.
-end note
-@enduml
+  LSBR --> LS
+  LSBGR --> LS
+  IDBR --> IDB
 ```
+
+Abhaengigkeitsregel: innen kennt nichts von aussen. Adapter haengen von Ports ab, nicht die Domain von Adaptern.
 
 **Kernelemente und Verantwortlichkeiten:**
 
@@ -200,150 +179,138 @@ end note
 
 ### Szenario 1: Erstaufruf – kein Plan vorhanden
 
-```plantuml
-@startuml
-skinparam backgroundColor transparent
+```mermaid
+sequenceDiagram
+  actor Benutzer
+  participant Browser
+  participant SPC as StartPageComponent
+  participant BGG as BingoGameGuard
+  participant BGS as BingoGameService
+  participant BCC as BoardConfigurationComponent
+  participant BCS as BoardConfigurationService
+  participant LocalStorage
 
-actor Benutzer
-participant Browser
-participant StartPageComponent as SPC
-participant BingoGameGuard as BGG
-participant BingoGameService as BGS
-participant BoardConfigurationComponent as BCC
-participant BoardConfigurationService as BCS
-database LocalStorage
+  Benutzer->>Browser: Oeffnet /
+  Browser->>SPC: Laden
+  Benutzer->>SPC: Klick auf "Spielen"
+  SPC->>BGG: canActivate()
+  BGG->>BGS: hasPlayableBoard()
+  BGS-->>BGG: false
+  BGG-->>Browser: Redirect /edit
 
-Benutzer -> Browser : Öffnet /
-Browser -> SPC : Laden
-Benutzer -> SPC : Klick auf "Spielen"
-SPC -> BGG : canActivate()
-BGG -> BGS : hasPlayableBoard()
-BGS --> BGG : false
-BGG --> Browser : Redirect /edit
-
-Browser -> BCC : Laden
-BCC -> BCS : initialize()
-BCS -> LocalStorage : read(board-definition)
-LocalStorage --> BCS : kein Plan
-BCS -> BCS : QuarterlyPlan.createDefault()
-BCS -> LocalStorage : save(default plan)
-@enduml
+  Browser->>BCC: Laden
+  BCC->>BCS: initialize()
+  BCS->>LocalStorage: read(board-definition)
+  LocalStorage-->>BCS: kein Plan
+  BCS->>BCS: QuarterlyPlan.createDefault()
+  BCS->>LocalStorage: save(default plan)
 ```
 
 ### Szenario 2: Plan bearbeiten
 
-```plantuml
-@startuml
-skinparam backgroundColor transparent
+```mermaid
+sequenceDiagram
+  actor Benutzer
+  participant BCC as BoardConfigurationComponent
+  participant BCS as BoardConfigurationService
+  participant QP as QuarterlyPlan
+  participant IDB as IndexedDbImageRepository
+  participant LocalStorage
 
-actor Benutzer
-participant BoardConfigurationComponent as BCC
-participant BoardConfigurationService as BCS
-participant QuarterlyPlan as QP
-participant IndexedDbImageRepository as IDB
-database LocalStorage
+  Benutzer->>BCC: Drag & Drop Challenge
+  BCC->>BCS: swapChallenges(i, j)
+  BCS->>QP: reorder(i, j)
+  QP-->>BCS: neue Instanz
+  BCS->>LocalStorage: persist(plan)
 
-Benutzer -> BCC : Drag & Drop Challenge
-BCC -> BCS : swapChallenges(i, j)
-BCS -> QP : reorder(i, j)
-QP --> BCS : neue Instanz
-BCS -> LocalStorage : persist(plan)
+  Benutzer->>BCC: Klick auf Challenge-Karte
+  BCC->>BCC: CardDetailDialog oeffnen
+  Benutzer->>BCC: Bild aufnehmen/hochladen
+  BCC->>IDB: saveImage(uuid, dataUrl)
+  IDB-->>BCC: uuid gespeichert
+  BCC->>BCS: updateChallenge(i, { name, imageId })
+  BCS->>QP: update(i, challenge)
+  QP-->>BCS: neue Instanz
+  BCS->>LocalStorage: persist(plan)
 
-Benutzer -> BCC : Klick auf Challenge-Karte
-BCC -> BCC : CardDetailDialog öffnen
-Benutzer -> BCC : Bild aufnehmen/hochladen
-BCC -> IDB : saveImage(uuid, dataUrl)
-IDB --> BCC : uuid gespeichert
-BCC -> BCS : updateChallenge(i, { name, imageId })
-BCS -> QP : update(i, challenge)
-QP --> BCS : neue Instanz
-BCS -> LocalStorage : persist(plan)
-
-Benutzer -> BCC : Klick auf "Spielen"
-BCC --> Benutzer : Navigation nach /play
-@enduml
+  Benutzer->>BCC: Klick auf "Spielen"
+  BCC-->>Benutzer: Navigation nach /play
 ```
 
 ### Szenario 3: Spiel spielen
 
-```plantuml
-@startuml
-skinparam backgroundColor transparent
+```mermaid
+sequenceDiagram
+  actor Benutzer
+  participant BGC as BingoGameComponent
+  participant BGS as BingoGameService
+  participant BG as BingoGame
+  participant PBC as PlayableBoardComponent
+  participant PCDC as ProjectComparisonDialogComponent
+  participant IDB as IndexedDbImageRepository
+  participant LocalStorage
 
-actor Benutzer
-participant BingoGameComponent as BGC
-participant BingoGameService as BGS
-participant BingoGame as BG
-participant PlayableBoardComponent as PBC
-participant ProjectComparisonDialogComponent as PCDC
-participant IndexedDbImageRepository as IDB
-database LocalStorage
+  Benutzer->>BGC: Navigation nach /play
+  BGC->>BGS: refreshFromDefinition()
+  BGS->>LocalStorage: load(plan)
+  BGS->>LocalStorage: load(saved game)
+  alt Signatur stimmt
+    BGS->>BG: restore(challenges, savedProgress)
+  else Signatur geaendert
+    BGS->>BG: fromDefinition(challenges)
+  end
+  BGS-->>BGC: game state
+  BGC->>PBC: render(board)
 
-Benutzer -> BGC : Navigation nach /play
-BGC -> BGS : refreshFromDefinition()
-BGS -> LocalStorage : load(plan)
-BGS -> LocalStorage : load(saved game)
-alt Signatur stimmt
-  BGS -> BG : restore(challenges, savedProgress)
-else Signatur geändert
-  BGS -> BG : fromDefinition(challenges)
-end
-BGS --> BGC : game state
-BGC -> PBC : render(board)
+  Benutzer->>PBC: Challenge abhaken
+  PBC->>BGS: toggle(index)
+  BGS->>BG: toggle(index)
+  BG-->>BGS: neue Instanz + bingoCells
+  BGS->>LocalStorage: persist(game)
+  BGS-->>PBC: aktualisierter state
 
-Benutzer -> PBC : Challenge abhaken
-PBC -> BGS : toggle(index)
-BGS -> BG : toggle(index)
-BG --> BGS : neue Instanz + bingoCells
-BGS -> LocalStorage : persist(game)
-BGS --> PBC : aktualisierter state
+  Benutzer->>PBC: Klick auf Karte
+  PBC->>PCDC: oeffnen
+  PCDC-->>Benutzer: planningImage + progressImage
 
-Benutzer -> PBC : Klick auf Karte
-PBC -> PCDC : öffnen
-PCDC --> Benutzer : planningImage + progressImage
-
-Benutzer -> PCDC : Fortschrittsfoto hochladen
-PCDC -> IDB : saveImage(uuid, dataUrl)
-PCDC -> BGS : updateProgressImage(index, uuid)
-BGS -> BG : updateProgressImage(index, uuid)
-BG --> BGS : neue Instanz
-BGS -> LocalStorage : persist(game)
-@enduml
+  Benutzer->>PCDC: Fortschrittsfoto hochladen
+  PCDC->>IDB: saveImage(uuid, dataUrl)
+  PCDC->>BGS: updateProgressImage(index, uuid)
+  BGS->>BG: updateProgressImage(index, uuid)
+  BG-->>BGS: neue Instanz
+  BGS->>LocalStorage: persist(game)
 ```
 
 ### 6.4 Zustandsmodell – Spiellebenszyklus
 
-```plantuml
-@startuml
-skinparam backgroundColor transparent
+```mermaid
+stateDiagram-v2
+  [*] --> KeinPlan
 
-[*] --> KeinPlan
+  KeinPlan: Kein gueltiger QuarterlyPlan
+  KeinPlan --> Planung: Nutzer oeffnet /edit
 
-KeinPlan : Kein gueltiger QuarterlyPlan
-KeinPlan --> Planung : Nutzer oeffnet /edit
+  Planung: Plan bearbeiten\n(Challenge-Namen/Reihenfolge/Bilder)
+  Planung --> Spielfaehig: Plan mit 16 Challenges gespeichert
 
-Planung : Plan bearbeiten\n(Challenge-Namen/Reihenfolge/Bilder)
-Planung --> Spielfaehig : Plan mit 16 Challenges gespeichert
+  Spielfaehig: Guard erlaubt /play
+  Spielfaehig --> Spielen: Nutzer startet Spiel
 
-Spielfaehig : Guard erlaubt /play
-Spielfaehig --> Spielen : Nutzer startet Spiel
+  Spielen: Toggle/Foto-Upload\nProgress wird persistiert
+  Spielen --> BingoErreicht: mindestens eine volle Linie
+  Spielen --> Spielen: weitere Zuege
 
-Spielen : Toggle/Foto-Upload\nProgress wird persistiert
-Spielen --> BingoErreicht : mindestens eine volle Linie
-Spielen --> Spielen : weitere Zuege
+  BingoErreicht: Bingo markiert, Spiel laeuft weiter
+  BingoErreicht --> Spielen: weitere Aenderungen ohne Reset
 
-BingoErreicht : Bingo markiert, Spiel laeuft weiter
-BingoErreicht --> Spielen : weitere Aenderungen ohne Reset
+  Spielen --> ResetWegenPlanAenderung: Board-Signatur ungleich
+  BingoErreicht --> ResetWegenPlanAenderung: Board-Signatur ungleich
 
-Spielen --> ResetWegenPlanAenderung : Board-Signatur ungleich
-BingoErreicht --> ResetWegenPlanAenderung : Board-Signatur ungleich
+  ResetWegenPlanAenderung: Fortschritt verwerfen\nNeues Game aus Definition
+  ResetWegenPlanAenderung --> Spielfaehig
 
-ResetWegenPlanAenderung : Fortschritt verwerfen\nNeues Game aus Definition
-ResetWegenPlanAenderung --> Spielfaehig
-
-Spielen --> Spielfaehig : resetProgress()
-BingoErreicht --> Spielfaehig : resetProgress()
-@enduml
+  Spielen --> Spielfaehig: resetProgress()
+  BingoErreicht --> Spielfaehig: resetProgress()
 ```
 
 ---
@@ -352,26 +319,22 @@ BingoErreicht --> Spielfaehig : resetProgress()
 
 Die Anwendung wird als statische Webanwendung ausgeliefert. Es gibt nur eine Laufzeitumgebung: den Browser des Benutzers.
 
-```plantuml
-@startuml
-skinparam backgroundColor transparent
-skinparam nodeStyle rectangle
+```mermaid
+flowchart TB
+  subgraph NGINX[nginx\nDocker-Container]
+    DIST[dist/\nstatische Dateien]
+    SPA[SPA-Fallback\nalle Routen -> index.html]
+  end
 
-node "nginx\n(Docker-Container)" as NGINX {
-  artifact "dist/\nstatische Dateien" as DIST
-  artifact "SPA-Fallback\nalle Routen -> index.html" as SPA
-}
+  subgraph BROWSER[Browser]
+    SPAAPP[Angular SPA\nmain.js]
+    LS2[(LocalStorage\nPlan, Spielstand)]
+    IDB2[(IndexedDB\nBilder als Blobs/DataURLs)]
+  end
 
-node "Browser" as BROWSER {
-  component "Angular SPA\n(main.js)" as SPAAPP
-  database "LocalStorage\n(Plan, Spielstand)" as LS2
-  database "IndexedDB\n(Bilder als Blobs/DataURLs)" as IDB2
-}
-
-NGINX --> BROWSER : HTTP(S)
-SPAAPP --> LS2
-SPAAPP --> IDB2
-@enduml
+  NGINX -->|HTTP(S)| BROWSER
+  SPAAPP --> LS2
+  SPAAPP --> IDB2
 ```
 
 **Deployment:** `docker-compose up` baut die App und startet nginx. Konfiguration in `Dockerfile` und `docker-compose.yml`.
@@ -440,40 +403,24 @@ Fehler aus Storage-Operationen werden als `Result<T, E>` zurückgegeben (typsich
 
 ### 8.8 Fehler- und Fallback-Sicht
 
-```plantuml
-@startuml
-skinparam backgroundColor transparent
+```mermaid
+flowchart TD
+  A[User Action laden/speichern/toggle/upload] --> B{Storage-Operation erfolgreich?}
+  B -->|ja| C[Domänenzustand aktualisieren]
+  C --> D[persist in LocalStorage/IndexedDB]
+  D --> E[UI rendert aktuellen Zustand]
 
-start
+  B -->|nein| F[Result T,E ok = false]
+  F --> G{Kontext?}
+  G -->|Plan laden| H[QuarterlyPlan.createDefault]
+  G -->|Spiel laden| I[BingoGame.fromDefinition]
+  G -->|Bild laden| J[Platzhalterbild anzeigen]
+  G -->|sonst| K[Aktion abbrechen und Zustand konsistent halten]
 
-:User Action (laden/speichern/toggle/upload);
-
-if (Storage-Operation erfolgreich?) then (ja)
-  :Domänenzustand aktualisieren;
-  :persist() in LocalStorage/IndexedDB;
-  :UI rendert aktuellen Zustand;
-else (nein)
-  :Result<T,E>.ok = false;
-
-  if (Kontext = Plan laden?) then (ja)
-    :QuarterlyPlan.createDefault();
-    :Weiter mit leerem/default Plan;
-  elseif (Kontext = Spiel laden?) then (ja)
-    :BingoGame.fromDefinition();
-    :Fortschritt verwerfen, neues Spiel;
-  elseif (Kontext = Bild laden?) then (ja)
-    :Platzhalterbild anzeigen;
-    :Spielbar bleiben ohne Foto;
-  else (sonst)
-    :Keine Exception in UI werfen;
-    :Aktion abbrechen, Zustand konsistent halten;
-  endif
-
-  :UI bleibt benutzbar (degraded mode);
-endif
-
-stop
-@enduml
+  H --> L[UI bleibt benutzbar degraded mode]
+  I --> L
+  J --> L
+  K --> L
 ```
 
 **Fallback-Prinzipien:**
@@ -592,36 +539,32 @@ Standalone Angular Components, die Organisms und kleinere Feature-spezifische Ko
 
 #### **Kompositions-Muster**
 
-```plantuml
-@startuml
-skinparam backgroundColor transparent
-skinparam componentStyle rectangle
+```mermaid
+flowchart TB
+  Page[Page bingo-game.component]
+  Toolbar[PageToolbar Organism]
+  Grid[BoardGrid Organism]
+  Card[ChallengeCard x16 Molecule]
+  Btn[KqButton Atom]
+  Icon[KqIcon Atom]
+  Badge[KqBadge Atom]
+  Dialog[ProjectComparisonDialog Feature-Component]
+  Planning[Planungsfoto]
+  Progress[Fortschrittsfoto]
 
-component "Page\n(bingo-game.component)" as Page
-component "PageToolbar\n(Organism)" as Toolbar
-component "BoardGrid\n(Organism)" as Grid
-component "ChallengeCard x16\n(Molecule)" as Card
-component "KqButton\n(Atom)" as Btn
-component "KqIcon\n(Atom)" as Icon
-component "KqBadge\n(Atom)" as Badge
-component "ProjectComparisonDialog\n(Feature-Component)" as Dialog
-component "Planungsfoto" as Planning
-component "Fortschrittsfoto" as Progress
+  Page --> Toolbar
+  Page --> Grid
+  Page --> Dialog
 
-Page --> Toolbar
-Page --> Grid
-Page --> Dialog
+  Toolbar -->|Home/Reset| Btn
+  Toolbar -->|View-Mode| Icon
 
-Toolbar --> Btn : Home/Reset
-Toolbar --> Icon : View-Mode
+  Grid --> Card
+  Card --> Badge
+  Card -->|Kamera| Icon
 
-Grid --> Card
-Card --> Badge
-Card --> Icon : Kamera
-
-Dialog --> Planning
-Dialog --> Progress
-@enduml
+  Dialog --> Planning
+  Dialog --> Progress
 ```
 
 #### **Design Token Integration**
@@ -648,55 +591,46 @@ Vorteil: Themeing oder Brand-Anpassungen erfordern nur Änderung der Token-Varia
 
 ### 8.10 Datenmodell – Persistenz
 
-```plantuml
-@startuml
-skinparam backgroundColor transparent
-skinparam classAttributeIconSize 0
-
-package "LocalStorage" {
-  class "BoardDefinitionV2\nkey: kq-bingo-board-definition-v2" as BoardDef {
-    +id: UUID
-    +challenges: Challenge[16]
+```mermaid
+classDiagram
+  class BoardDef {
+    +UUID id
+    +Challenge[16] challenges
+    +key: kq-bingo-board-definition-v2
   }
 
-  class "ActiveGameV3\nkey: kq-bingo-active-game-v3" as ActiveGame {
-    +boardSignature: string
-    +progress: ChallengeProgress[16]
+  class ActiveGame {
+    +string boardSignature
+    +ChallengeProgress[16] progress
+    +key: kq-bingo-active-game-v3
   }
-}
 
-package "IndexedDB" {
-  class "ImageBlob\nkey: UUID" as ImageBlob {
-    +data: Blob | DataURL
+  class ImageBlob {
+    +Blob|DataURL data
+    +key: UUID
   }
-}
 
-class "Challenge" as Challenge {
-  +name: string
-  +imageId?: UUID
-}
+  class Challenge {
+    +string name
+    +UUID imageId?
+  }
 
-class "ChallengeProgress" as ChallengeProgress {
-  +name: string
-  +planningImageId?: UUID
-  +progressImageId?: UUID
-  +completed: boolean
-}
+  class ChallengeProgress {
+    +string name
+    +UUID planningImageId?
+    +UUID progressImageId?
+    +boolean completed
+  }
 
-BoardDef "1" o-- "16" Challenge
-ActiveGame "1" o-- "16" ChallengeProgress
+  BoardDef "1" o-- "16" Challenge
+  ActiveGame "1" o-- "16" ChallengeProgress
 
-Challenge::imageId --> ImageBlob
-ChallengeProgress::planningImageId --> ImageBlob
-ChallengeProgress::progressImageId --> ImageBlob
-
-note bottom
-Strukturdaten liegen in LocalStorage.
-Bilddaten liegen in IndexedDB und werden
-ueber UUIDs referenziert.
-end note
-@enduml
+  Challenge --> ImageBlob : imageId
+  ChallengeProgress --> ImageBlob : planningImageId
+  ChallengeProgress --> ImageBlob : progressImageId
 ```
+
+Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden ueber UUIDs referenziert.
 
 ---
 
