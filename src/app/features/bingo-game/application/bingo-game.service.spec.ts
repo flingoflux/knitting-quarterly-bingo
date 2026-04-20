@@ -3,10 +3,12 @@ import { Injector, runInInjectionContext } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
 import { Result } from '../../../shared/domain/result';
 import { PersistedBoardDefinition } from '../../board-configuration/infrastructure/local-storage-board.repository';
-import { BOARD_DEFINITION_READER, BOARD_DEFINITION_WRITER } from '../../board-configuration/domain/board-definition.repository';
+import { BOARD_DEFINITION_READER } from '../../board-configuration/domain/board-definition.repository';
 import { BingoGameService } from './bingo-game.service';
 import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
 import { BingoGameProgress, createBoardSignature } from '../domain/bingo-game';
+
+const TEST_BOARD_ID = 'test-board-id';
 
 class MockBoardDefinitionRepository {
   loadedDefinition: PersistedBoardDefinition | null = null;
@@ -16,6 +18,10 @@ class MockBoardDefinitionRepository {
       return Result.err('not-found');
     }
     return Result.ok(this.loadedDefinition);
+  }
+
+  findById(_id: string): Result<PersistedBoardDefinition, string> {
+    return this.load();
   }
 }
 
@@ -29,15 +35,15 @@ class MockBingoGameRepository {
 
   save(progress: BingoGameProgress): void {
     this.lastSavedProgress = {
+      boardDefinitionId: progress.boardDefinitionId,
       boardSignature: progress.boardSignature,
+      boardSnapshot: [...progress.boardSnapshot],
+      cellImages: [...progress.cellImages],
       done: [...progress.done],
+      startedAt: progress.startedAt,
     };
     this.loadedProgress = this.lastSavedProgress;
   }
-}
-
-class MockBoardDefinitionWriter {
-  save(_definition: PersistedBoardDefinition): void {}
 }
 
 function createProjects(length = 16): BoardCell[] {
@@ -53,7 +59,6 @@ function createService(
   const injector = Injector.create({
     providers: [
       { provide: BOARD_DEFINITION_READER, useValue: boardDefinitionRepository },
-      { provide: BOARD_DEFINITION_WRITER, useValue: new MockBoardDefinitionWriter() },
       { provide: BINGO_GAME_REPOSITORY, useValue: bingoGameRepository },
     ],
   });
@@ -73,7 +78,7 @@ describe('BingoGameService', () => {
 
   it('laedt Board-Definition beim Start', () => {
     const boardRepo = new MockBoardDefinitionRepository();
-    boardRepo.loadedDefinition = { projects: createProjects(16) };
+    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, projects: createProjects(16) };
     const bingoRepo = new MockBingoGameRepository();
 
     const service = createService(boardRepo, bingoRepo);
@@ -86,11 +91,18 @@ describe('BingoGameService', () => {
   it('laedt persistierten Spielfortschritt bei passender Signatur', () => {
     const projects = createProjects(16);
     const boardRepo = new MockBoardDefinitionRepository();
-    boardRepo.loadedDefinition = { projects };
+    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, projects };
     const bingoRepo = new MockBingoGameRepository();
     const done = new Array(16).fill(false);
     done[0] = true;
-    bingoRepo.loadedProgress = { boardSignature: createBoardSignature(projects), done };
+    bingoRepo.loadedProgress = {
+      boardDefinitionId: TEST_BOARD_ID,
+      boardSignature: createBoardSignature(projects),
+      boardSnapshot: projects.map(p => ({ title: p.title })),
+      cellImages: new Array(16).fill(undefined),
+      done,
+      startedAt: new Date().toISOString(),
+    };
 
     const service = createService(boardRepo, bingoRepo);
 
@@ -100,11 +112,15 @@ describe('BingoGameService', () => {
 
   it('setzt Fortschritt zurück bei geänderter Board-Signatur', () => {
     const boardRepo = new MockBoardDefinitionRepository();
-    boardRepo.loadedDefinition = { projects: createProjects(16) };
+    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, projects: createProjects(16) };
     const bingoRepo = new MockBingoGameRepository();
     bingoRepo.loadedProgress = {
+      boardDefinitionId: TEST_BOARD_ID,
       boardSignature: 'old-signature',
+      boardSnapshot: [],
+      cellImages: [],
       done: new Array(16).fill(true),
+      startedAt: new Date().toISOString(),
     };
 
     const service = createService(boardRepo, bingoRepo);
@@ -115,7 +131,7 @@ describe('BingoGameService', () => {
   it('toggled ein Feld und persistiert', () => {
     const projects = createProjects(16);
     const boardRepo = new MockBoardDefinitionRepository();
-    boardRepo.loadedDefinition = { projects };
+    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, projects };
     const bingoRepo = new MockBingoGameRepository();
 
     const service = createService(boardRepo, bingoRepo);
@@ -128,11 +144,18 @@ describe('BingoGameService', () => {
   it('erkennt Bingo in der ersten Zeile', () => {
     const projects = createProjects(16);
     const boardRepo = new MockBoardDefinitionRepository();
-    boardRepo.loadedDefinition = { projects };
+    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, projects };
     const bingoRepo = new MockBingoGameRepository();
     const done = new Array(16).fill(false);
     done[0] = done[1] = done[2] = done[3] = true;
-    bingoRepo.loadedProgress = { boardSignature: createBoardSignature(projects), done };
+    bingoRepo.loadedProgress = {
+      boardDefinitionId: TEST_BOARD_ID,
+      boardSignature: createBoardSignature(projects),
+      boardSnapshot: projects.map(p => ({ title: p.title })),
+      cellImages: new Array(16).fill(undefined),
+      done,
+      startedAt: new Date().toISOString(),
+    };
 
     const service = createService(boardRepo, bingoRepo);
 

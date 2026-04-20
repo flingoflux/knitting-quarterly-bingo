@@ -1,41 +1,64 @@
 import { BoardCell } from '../../../shared/domain/board-cell';
 
-export interface BingoGameProgress {
-  boardSignature: string;
-  done: boolean[];
+export interface BingoCell {
+  title: string;
 }
 
-export function createBoardSignature(projects: readonly BoardCell[]): string {
-  return JSON.stringify(projects.map(project => ({
-    title: project.title,
-  })));
+export interface BingoGameProgress {
+  boardDefinitionId: string;
+  boardSignature: string;
+  boardSnapshot: BingoCell[];
+  cellImages: (string | undefined)[];
+  done: boolean[];
+  startedAt: string;
+}
+
+export function createBoardSignature(cells: readonly { title: string }[]): string {
+  return JSON.stringify(cells.map(c => ({ title: c.title })));
 }
 
 export class BingoGame {
   private constructor(
-    private readonly _projects: readonly BoardCell[],
+    readonly boardDefinitionId: string,
+    private readonly _snapshot: readonly BingoCell[],
+    private readonly _cellImages: readonly (string | undefined)[],
     private readonly _done: readonly boolean[],
+    readonly startedAt: string,
   ) {}
 
   static empty(): BingoGame {
-    return new BingoGame([], []);
+    return new BingoGame('', [], [], [], new Date().toISOString());
   }
 
-  static fromDefinition(projects: readonly BoardCell[]): BingoGame {
-    return new BingoGame([...projects], new Array(projects.length).fill(false));
+  static fromDefinition(boardDefinitionId: string, cells: readonly { title: string; imageId?: string }[]): BingoGame {
+    return new BingoGame(
+      boardDefinitionId,
+      cells.map(c => ({ title: c.title })),
+      new Array(cells.length).fill(undefined),
+      new Array(cells.length).fill(false),
+      new Date().toISOString(),
+    );
   }
 
-  static restore(projects: readonly BoardCell[], saved: BingoGameProgress): BingoGame {
-    const signature = createBoardSignature(projects);
+  static restore(cells: readonly { title: string }[], saved: BingoGameProgress): BingoGame {
+    const signature = createBoardSignature(cells);
     if (saved.boardSignature !== signature) {
-      return BingoGame.fromDefinition(projects);
+      return BingoGame.fromDefinition(saved.boardDefinitionId, cells);
     }
-    const done = Array.from({ length: projects.length }, (_, i) => Boolean(saved.done[i]));
-    return new BingoGame([...projects], done);
+    return new BingoGame(
+      saved.boardDefinitionId,
+      [...saved.boardSnapshot],
+      [...saved.cellImages],
+      saved.done.map(Boolean),
+      saved.startedAt,
+    );
   }
 
   get projects(): readonly BoardCell[] {
-    return this._projects;
+    return this._snapshot.map((cell, i) => ({
+      title: cell.title,
+      imageId: this._cellImages[i],
+    }));
   }
 
   get done(): readonly boolean[] {
@@ -47,31 +70,45 @@ export class BingoGame {
   }
 
   get isEmpty(): boolean {
-    return this._projects.length === 0;
+    return this._snapshot.length === 0;
   }
 
   toggle(index: number): BingoGame {
     if (!isValidIndex(index, this._done.length)) {
-      return new BingoGame(this._projects, [...this._done]);
+      return new BingoGame(this.boardDefinitionId, this._snapshot, this._cellImages, [...this._done], this.startedAt);
     }
     const next = [...this._done];
     next[index] = !next[index];
-    return new BingoGame(this._projects, next);
+    return new BingoGame(this.boardDefinitionId, this._snapshot, this._cellImages, next, this.startedAt);
   }
 
   resetProgress(): BingoGame {
-    return new BingoGame(this._projects, new Array(this._projects.length).fill(false));
+    return new BingoGame(
+      this.boardDefinitionId,
+      this._snapshot,
+      this._cellImages,
+      new Array(this._snapshot.length).fill(false),
+      this.startedAt,
+    );
   }
 
-  updateProjects(projects: readonly BoardCell[]): BingoGame {
-    const done = Array.from({ length: projects.length }, (_, i) => Boolean(this._done[i]));
-    return new BingoGame([...projects], done);
+  updateCellImage(index: number, imageId: string | undefined): BingoGame {
+    if (!isValidIndex(index, this._snapshot.length)) {
+      return new BingoGame(this.boardDefinitionId, this._snapshot, [...this._cellImages], this._done, this.startedAt);
+    }
+    const next = [...this._cellImages];
+    next[index] = imageId;
+    return new BingoGame(this.boardDefinitionId, this._snapshot, next, this._done, this.startedAt);
   }
 
   toProgress(): BingoGameProgress {
     return {
-      boardSignature: createBoardSignature(this._projects),
+      boardDefinitionId: this.boardDefinitionId,
+      boardSignature: createBoardSignature(this._snapshot),
+      boardSnapshot: [...this._snapshot] as BingoCell[],
+      cellImages: [...this._cellImages] as (string | undefined)[],
       done: [...this._done] as boolean[],
+      startedAt: this.startedAt,
     };
   }
 }

@@ -18,8 +18,13 @@ class MockBoardDefinitionRepository {
     return Result.ok(this.loadedDefinition);
   }
 
+  findById(_id: string): Result<PersistedBoardDefinition, string> {
+    return this.load();
+  }
+
   save(definition: PersistedBoardDefinition): void {
     this.lastSavedDefinition = {
+      id: definition.id,
       projects: [...definition.projects],
     };
     this.loadedDefinition = this.lastSavedDefinition;
@@ -54,7 +59,7 @@ describe('BoardConfigurationService', () => {
 
   it('laedt persistierte Definition beim Start', () => {
     const repository = new MockBoardDefinitionRepository();
-    repository.loadedDefinition = { projects: createProjects(4) };
+    repository.loadedDefinition = { id: 'test-id', projects: createProjects(4) };
 
     const service = createService(repository);
 
@@ -64,7 +69,7 @@ describe('BoardConfigurationService', () => {
 
   it('tauscht Projekte und persistiert das Ergebnis', () => {
     const repository = new MockBoardDefinitionRepository();
-    repository.loadedDefinition = { projects: createProjects(4) };
+    repository.loadedDefinition = { id: 'test-id', projects: createProjects(4) };
     const service = createService(repository);
 
     service.swapProjects(0, 3);
@@ -76,7 +81,7 @@ describe('BoardConfigurationService', () => {
 
   it('aktualisiert ein einzelnes Projekt', () => {
     const repository = new MockBoardDefinitionRepository();
-    repository.loadedDefinition = { projects: createProjects(4) };
+    repository.loadedDefinition = { id: 'test-id', projects: createProjects(4) };
     const service = createService(repository);
 
     service.updateProject(1, { title: 'Updated' });
@@ -86,7 +91,7 @@ describe('BoardConfigurationService', () => {
 
   it('setzt das Board auf Defaults zurueck', () => {
     const repository = new MockBoardDefinitionRepository();
-    repository.loadedDefinition = { projects: createProjects(4) };
+    repository.loadedDefinition = { id: 'test-id', projects: createProjects(4) };
     const service = createService(repository);
 
     service.resetBoard();
