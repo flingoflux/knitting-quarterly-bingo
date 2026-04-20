@@ -1,4 +1,5 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, inject } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export type KqIconName =
   | 'home'
@@ -60,6 +61,8 @@ const ICONS: Record<KqIconName, string> = {
   `],
 })
 export class IconComponent implements OnChanges {
+  private readonly sanitizer = inject(DomSanitizer);
+
   @Input({ required: true }) name!: KqIconName;
   @Input() size: number = 20;
   @Input() strokeWidth: number = 2;
@@ -67,10 +70,11 @@ export class IconComponent implements OnChanges {
   /** Für Stern-Icon: fill benötigt */
   @Input() filled = false;
 
-  svgContent = '';
+  svgContent: SafeHtml = '';
 
   ngOnChanges(): void {
     const paths = ICONS[this.name] ?? '';
-    this.svgContent = paths;
+    // Pfade sind hardcodierte Strings im Component – kein Nutzereingabe, daher sicher
+    this.svgContent = this.sanitizer.bypassSecurityTrustHtml(paths);
   }
 }
