@@ -24,7 +24,7 @@ interface CardDetailOpenedEvent {
         <div class="photo-area">
           <img *ngIf="getImage(p.imageId)" [src]="getImage(p.imageId)" class="photo-img" [alt]="p.title" />
           <div *ngIf="!getImage(p.imageId)" class="photo-placeholder">
-            <img src="assets/logo.svg" class="logo-placeholder" alt="" />
+            <img src="assets/logo_plain.svg" class="logo-placeholder" alt="" />
           </div>
 
           <div *ngIf="done[i]" class="done-badge">
