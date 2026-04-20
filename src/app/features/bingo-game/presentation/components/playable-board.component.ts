@@ -1,11 +1,11 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BoardCell } from '../../../../shared/domain/board-cell';
+import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 
 interface CardDetailOpenedEvent {
   index: number;
-  project: BoardCell;
+  challenge: ChallengeProgress;
 }
 
 @Component({
@@ -15,19 +15,19 @@ interface CardDetailOpenedEvent {
   template: `
     <div class="grid playable" [class.mode-polaroid]="mode === 'polaroid'" [class.mode-horizontal]="mode === 'horizontal'">
       <div
-        *ngFor="let p of projects; let i = index"
+        *ngFor="let p of challenges; let i = index"
         class="cell"
-        [class.done]="done[i]"
+        [class.done]="completed[i]"
         [class.bingo-cell]="isCellInBingo(i)"
         (click)="onToggle(i)"
       >
         <div class="photo-area">
-          <img *ngIf="getImage(p.imageId)" [src]="getImage(p.imageId)" class="photo-img" [alt]="p.title" />
-          <div *ngIf="!getImage(p.imageId)" class="photo-placeholder">
+          <img *ngIf="getImage(p.progressImageId ?? p.planningImageId)" [src]="getImage(p.progressImageId ?? p.planningImageId)" class="photo-img" [alt]="p.name" />
+          <div *ngIf="!getImage(p.progressImageId ?? p.planningImageId)" class="photo-placeholder">
             <img src="assets/logo_plain.svg" class="logo-placeholder" alt="" />
           </div>
 
-          <div *ngIf="done[i]" class="done-badge">
+          <div *ngIf="completed[i]" class="done-badge">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
@@ -54,7 +54,7 @@ interface CardDetailOpenedEvent {
         </div>
 
         <div class="caption">
-          <div class="title">{{p.title}}</div>
+          <div class="title">{{p.name}}</div>
         </div>
       </div>
     </div>
@@ -285,14 +285,14 @@ export class PlayableBoardComponent {
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  private _projects: BoardCell[] = [];
-  @Input() set projects(value: BoardCell[]) {
-    this._projects = value;
+  private _challenges: ChallengeProgress[] = [];
+  @Input() set challenges(value: ChallengeProgress[]) {
+    this._challenges = value;
     void this.loadAllImages();
   }
-  get projects(): BoardCell[] { return this._projects; }
+  get challenges(): ChallengeProgress[] { return this._challenges; }
 
-  @Input() done: boolean[] = [];
+  @Input() completed: boolean[] = [];
   @Input() bingoCells: Set<number> = new Set<number>();
   @Input() mode: 'polaroid' | 'horizontal' = 'polaroid';
   @Output() toggled = new EventEmitter<number>();
@@ -317,8 +317,8 @@ export class PlayableBoardComponent {
   }
 
   private async loadAllImages(): Promise<void> {
-    const imageIds = this._projects
-      .map(p => p.imageId)
+    const imageIds = this._challenges
+      .flatMap(c => [c.progressImageId, c.planningImageId])
       .filter((id): id is string => !!id);
     const uniqueIds = [...new Set(imageIds)];
     await Promise.all(
@@ -338,9 +338,9 @@ export class PlayableBoardComponent {
     this.toggled.emit(i);
   }
 
-  openDetail(i: number, project: BoardCell, event: MouseEvent): void {
+  openDetail(i: number, challenge: ChallengeProgress, event: MouseEvent): void {
     event.stopPropagation();
-    this.cardDetailOpened.emit({ index: i, project });
+    this.cardDetailOpened.emit({ index: i, challenge });
   }
 
   isCellInBingo(i: number): boolean {

@@ -1,16 +1,16 @@
 import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BoardCell } from '../../../../shared/domain/board-cell';
+import { Challenge } from '../../../../shared/domain/challenge';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 
-interface ProjectEditedEvent {
+interface ChallengeEditedEvent {
   index: number;
-  project: BoardCell;
+  challenge: Challenge;
 }
 
 interface CardDetailOpenedEvent {
   index: number;
-  project: BoardCell;
+  challenge: Challenge;
 }
 
 @Component({
@@ -20,7 +20,7 @@ interface CardDetailOpenedEvent {
   template: `
     <div class="grid editable" [class.mode-polaroid]="mode === 'polaroid'" [class.mode-horizontal]="mode === 'horizontal'">
       <div
-        *ngFor="let p of projects; let i = index"
+        *ngFor="let p of challenges; let i = index"
         class="cell"
         [class.drag-target]="dragTargetIndex === i"
         [attr.draggable]="editingIndex === i ? 'false' : 'true'"
@@ -30,7 +30,7 @@ interface CardDetailOpenedEvent {
         (drop)="onDrop(i)"
       >
         <div class="photo-area" [class.is-editing]="editingIndex === i">
-          <img *ngIf="getImage(p.imageId)" [src]="getImage(p.imageId)" class="photo-img" [alt]="p.title" />
+          <img *ngIf="getImage(p.imageId)" [src]="getImage(p.imageId)" class="photo-img" [alt]="p.name" />
           <div *ngIf="!getImage(p.imageId)" class="photo-placeholder">
             <img src="assets/logo_plain.svg" class="logo-placeholder" alt="" />
           </div>
@@ -65,14 +65,14 @@ interface CardDetailOpenedEvent {
           <ng-container *ngIf="editingIndex === i; else readonlyView">
             <input
               class="title-input"
-              [value]="getDraftTitle(i, p.title)"
-              (input)="onDraftTitleInput(i, $event)"
+              [value]="getDraftName(i, p.name)"
+              (input)="onDraftNameInput(i, $event)"
               (keydown.enter)="saveAndExit(i, p)"
             />
           </ng-container>
 
           <ng-template #readonlyView>
-            <div class="title">{{p.title}}</div>
+            <div class="title">{{p.name}}</div>
           </ng-template>
         </div>
       </div>
@@ -320,12 +320,12 @@ export class EditableBoardComponent {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
 
-  private _projects: BoardCell[] = [];
-  @Input() set projects(value: BoardCell[]) {
-    this._projects = value;
+  private _challenges: Challenge[] = [];
+  @Input() set challenges(value: Challenge[]) {
+    this._challenges = value;
     void this.loadAllImages();
   }
-  get projects(): BoardCell[] { return this._projects; }
+  get challenges(): Challenge[] { return this._challenges; }
 
   @Input() mode: 'polaroid' | 'horizontal' = 'polaroid';
   @Input() dragTargetIndex!: number | null;
@@ -333,12 +333,12 @@ export class EditableBoardComponent {
   @Output() dragOverCell = new EventEmitter<number>();
   @Output() dragLeftCell = new EventEmitter<number>();
   @Output() droppedOnCell = new EventEmitter<number>();
-  @Output() projectEdited = new EventEmitter<ProjectEditedEvent>();
+  @Output() challengeEdited = new EventEmitter<ChallengeEditedEvent>();
   @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
 
   editingIndex: number | null = null;
   private readonly imageCache = new Map<string, string>();
-  private readonly draftTitles = new Map<number, string>();
+  private readonly draftNames = new Map<number, string>();
 
   getImage(imageId: string | undefined): string | null {
     if (!imageId) return null;
@@ -357,8 +357,8 @@ export class EditableBoardComponent {
   }
 
   private async loadAllImages(): Promise<void> {
-    const imageIds = this._projects
-      .map(p => p.imageId)
+    const imageIds = this._challenges
+      .map(c => c.imageId)
       .filter((id): id is string => !!id);
     const uniqueIds = [...new Set(imageIds)];
     await Promise.all(
@@ -401,59 +401,59 @@ export class EditableBoardComponent {
     const cells = this.el.nativeElement.querySelectorAll('.cell');
     const editingCell = cells[this.editingIndex] as HTMLElement | undefined;
     if (editingCell && !editingCell.contains(target)) {
-      this.saveAndExit(this.editingIndex, this.projects[this.editingIndex]);
+      this.saveAndExit(this.editingIndex, this.challenges[this.editingIndex]);
     }
   }
 
-  openDetail(i: number, project: BoardCell, event: MouseEvent): void {
+  openDetail(i: number, challenge: Challenge, event: MouseEvent): void {
     event.stopPropagation();
-    this.cardDetailOpened.emit({ index: i, project });
+    this.cardDetailOpened.emit({ index: i, challenge });
   }
 
-  startEditing(i: number, project: BoardCell, event: MouseEvent): void {
+  startEditing(i: number, challenge: Challenge, event: MouseEvent): void {
     event.stopPropagation();
     if (this.editingIndex === i) {
-      this.saveAndExit(i, project);
+      this.saveAndExit(i, challenge);
       return;
     }
     if (this.editingIndex !== null) {
-      this.saveAndExit(this.editingIndex, this.projects[this.editingIndex]);
+      this.saveAndExit(this.editingIndex, this.challenges[this.editingIndex]);
     }
     this.editingIndex = i;
-    this.draftTitles.set(i, project.title);
+    this.draftNames.set(i, challenge.name);
   }
 
-  onDraftTitleInput(i: number, event: Event): void {
+  onDraftNameInput(i: number, event: Event): void {
     const target = event.target as HTMLInputElement;
-    this.draftTitles.set(i, target.value);
+    this.draftNames.set(i, target.value);
   }
 
-  saveAndExit(i: number, project: BoardCell): void {
-    this.saveProject(i, project);
+  saveAndExit(i: number, challenge: Challenge): void {
+    this.saveChallenge(i, challenge);
     this.editingIndex = null;
   }
 
-  saveProject(i: number, project: BoardCell): void {
+  saveChallenge(i: number, challenge: Challenge): void {
     if (this.editingIndex !== i) {
       return;
     }
 
-    const draftTitle = this.getDraftTitle(i, project.title).trim();
-    const title = draftTitle.length > 0 ? draftTitle : project.title;
-    const updatedProject: BoardCell = { title, imageId: project.imageId };
+    const draftName = this.getDraftName(i, challenge.name).trim();
+    const name = draftName.length > 0 ? draftName : challenge.name;
+    const updatedChallenge: Challenge = { name, imageId: challenge.imageId };
 
-    if (!this.isSameProject(project, updatedProject)) {
-      this.projectEdited.emit({ index: i, project: updatedProject });
+    if (!this.isSameChallenge(challenge, updatedChallenge)) {
+      this.challengeEdited.emit({ index: i, challenge: updatedChallenge });
     }
 
-    this.draftTitles.set(i, title);
+    this.draftNames.set(i, name);
   }
 
-  getDraftTitle(i: number, fallback: string): string {
-    return this.draftTitles.get(i) ?? fallback;
+  getDraftName(i: number, fallback: string): string {
+    return this.draftNames.get(i) ?? fallback;
   }
 
-  private isSameProject(first: BoardCell, second: BoardCell): boolean {
-    return first.title === second.title;
+  private isSameChallenge(first: Challenge, second: Challenge): boolean {
+    return first.name === second.name;
   }
 }

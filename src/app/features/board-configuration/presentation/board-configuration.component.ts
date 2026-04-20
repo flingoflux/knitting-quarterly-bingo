@@ -4,7 +4,7 @@ import { BoardConfigurationService } from '../application/board-configuration.se
 import { EditableBoardComponent } from './components/editable-board.component';
 import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-detail-dialog.component';
 import { shuffleArray } from '../../../shared/utils/array-utils';
-import { BoardCell } from '../../../shared/domain/board-cell';
+import { Challenge } from '../../../shared/domain/challenge';
 import { Router } from '@angular/router';
 
 @Component({
@@ -72,14 +72,14 @@ import { Router } from '@angular/router';
 
       <app-editable-board
         #editableBoard
-        [projects]="projects"
+        [challenges]="challenges"
         [dragTargetIndex]="dragTargetIndex"
         [mode]="viewMode"
         (dragStarted)="onDragStart($event)"
         (dragOverCell)="onDragOver($event)"
         (dragLeftCell)="onDragLeave($event)"
         (droppedOnCell)="onDrop($event)"
-        (projectEdited)="onProjectEdited($event)"
+        (challengeEdited)="onChallengeEdited($event)"
         (cardDetailOpened)="onCardDetailOpen($event)"
       ></app-editable-board>
 
@@ -202,8 +202,8 @@ export class BoardConfigurationComponent {
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
 
-  get projects(): BoardCell[] {
-    return this.state.projects();
+  get challenges(): Challenge[] {
+    return this.state.challenges();
   }
 
   goHome() {
@@ -211,9 +211,9 @@ export class BoardConfigurationComponent {
   }
 
   shuffle() {
-    const projects = this.projects;
-    const shuffled = shuffleArray(projects);
-    this.state.setProjects(shuffled as BoardCell[]);
+    const challenges = this.challenges;
+    const shuffled = shuffleArray(challenges);
+    this.state.setChallenges(shuffled as Challenge[]);
   }
 
   playBingo() {
@@ -237,26 +237,26 @@ export class BoardConfigurationComponent {
 
   onDrop(i: number) {
     if (this.dragStartIndex !== null && this.dragStartIndex !== i) {
-      this.state.swapProjects(this.dragStartIndex, i);
+      this.state.swapChallenges(this.dragStartIndex, i);
     }
     this.dragStartIndex = null;
     this.dragTargetIndex = null;
   }
 
-  onProjectEdited(event: { index: number; project: BoardCell }) {
-    this.state.updateProject(event.index, event.project);
+  onChallengeEdited(event: { index: number; challenge: Challenge }) {
+    this.state.updateChallenge(event.index, event.challenge);
   }
 
-  onCardDetailOpen(event: { index: number; project: BoardCell }) {
+  onCardDetailOpen(event: { index: number; challenge: Challenge }) {
     this._openCardIndex = event.index;
-    this.detailDialog.open(event.project.imageId ?? null, event.project.title);
+    this.detailDialog.open(event.challenge.imageId ?? null, event.challenge.name);
   }
 
   onImageChanged(event: ImageChangedEvent): void {
     if (this._openCardIndex === null) return;
-    const project = this.state.projects()[this._openCardIndex];
-    if (project && project.imageId !== event.imageId) {
-      this.state.updateProject(this._openCardIndex, { ...project, imageId: event.imageId ?? undefined });
+    const challenge = this.state.challenges()[this._openCardIndex];
+    if (challenge && challenge.imageId !== event.imageId) {
+      this.state.updateChallenge(this._openCardIndex, { ...challenge, imageId: event.imageId ?? undefined });
     }
     void this.editableBoardRef.refreshImage(event.imageId);
   }

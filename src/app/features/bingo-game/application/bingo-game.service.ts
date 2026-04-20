@@ -1,28 +1,18 @@
 import { Injectable, inject, Signal, computed, signal } from '@angular/core';
-import { BoardCell } from '../../../shared/domain/board-cell';
-import { BOARD_DEFINITION_READER } from '../../board-configuration/domain/board-definition.repository';
+import { ChallengeProgress } from '../domain/bingo-game';
+import { QUARTERLY_PLAN_READER } from '../../board-configuration/domain/quarterly-plan.repository';
 import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
 import { BingoGame, createBoardSignature } from '../domain/bingo-game';
 
 @Injectable()
 export class BingoGameService {
   private readonly gameState = signal<BingoGame>(BingoGame.empty());
-  private readonly _definitionProjects = signal<BoardCell[]>([]);
 
-  readonly projects: Signal<BoardCell[]> = computed(() => this.gameState().projects as BoardCell[]);
-  readonly definitionProjects: Signal<BoardCell[]> = this._definitionProjects.asReadonly();
-  readonly effectiveProjects: Signal<BoardCell[]> = computed(() => {
-    const game = this.gameState().projects as BoardCell[];
-    const def = this._definitionProjects();
-    return game.map((p, i) => ({
-      title: p.title,
-      imageId: p.imageId ?? def[i]?.imageId,
-    }));
-  });
-  readonly done: Signal<boolean[]> = computed(() => this.gameState().done as boolean[]);
+  readonly challenges: Signal<ChallengeProgress[]> = computed(() => this.gameState().challenges as ChallengeProgress[]);
+  readonly completed: Signal<boolean[]> = computed(() => this.gameState().completed as boolean[]);
   readonly bingoCells: Signal<Set<number>> = computed(() => this.gameState().bingoCells);
 
-  private readonly boardDefinitionRepository = inject(BOARD_DEFINITION_READER);
+  private readonly quarterlyPlanRepository = inject(QUARTERLY_PLAN_READER);
   private readonly bingoGameRepository = inject(BINGO_GAME_REPOSITORY);
 
   constructor() {
@@ -34,8 +24,8 @@ export class BingoGameService {
     return !this.gameState().isEmpty;
   }
 
-  updateCellImage(index: number, imageId: string | undefined): void {
-    const updated = this.gameState().updateCellImage(index, imageId);
+  updateProgressImage(index: number, imageId: string | undefined): void {
+    const updated = this.gameState().updateProgressImage(index, imageId);
     this.persist(updated);
     this.gameState.set(updated);
   }
@@ -53,27 +43,25 @@ export class BingoGameService {
   }
 
   private refreshFromDefinition(): void {
-    const result = this.boardDefinitionRepository.load();
-    if (!result.ok || result.value.projects.length === 0) {
-      this._definitionProjects.set([]);
+    const result = this.quarterlyPlanRepository.load();
+    if (!result.ok || result.value.challenges.length === 0) {
       this.gameState.set(BingoGame.empty());
       return;
     }
 
-    const { id: boardDefinitionId, projects } = result.value;
-    this._definitionProjects.set([...projects]);
+    const { id: boardDefinitionId, challenges } = result.value;
     const persistedProgress = this.bingoGameRepository.load();
 
     if (
       persistedProgress !== null &&
       persistedProgress.boardDefinitionId === boardDefinitionId &&
-      persistedProgress.boardSignature === createBoardSignature(projects)
+      persistedProgress.boardSignature === createBoardSignature(challenges)
     ) {
-      this.gameState.set(BingoGame.restore(projects, persistedProgress));
+      this.gameState.set(BingoGame.restore(challenges, persistedProgress));
       return;
     }
 
-    const game = BingoGame.fromDefinition(boardDefinitionId, projects);
+    const game = BingoGame.fromDefinition(boardDefinitionId, challenges);
     this.persist(game);
     this.gameState.set(game);
   }

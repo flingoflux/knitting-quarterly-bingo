@@ -1,8 +1,8 @@
 import { InjectionToken } from '@angular/core';
-import { BoardCell } from '../domain/board-cell';
+import { Challenge } from '../domain/challenge';
 
-export interface BoardDefinitionReader {
-  load(): { projects: BoardCell[] } | null;
+export interface QuarterlyPlanPortReader {
+  load(): { challenges: Challenge[] } | null;
 }
 
-export const BOARD_DEFINITION_READER = new InjectionToken<BoardDefinitionReader>('BoardDefinitionReader');
+export const QUARTERLY_PLAN_PORT_READER = new InjectionToken<QuarterlyPlanPortReader>('QuarterlyPlanPortReader');

@@ -1,120 +1,116 @@
-import { BoardCell } from '../../../shared/domain/board-cell';
-
-export interface BingoCell {
-  title: string;
+export interface ChallengeProgress {
+  name: string;
+  planningImageId?: string;
+  progressImageId?: string;
+  completed: boolean;
 }
 
 export interface BingoGameProgress {
   boardDefinitionId: string;
   boardSignature: string;
-  boardSnapshot: BingoCell[];
-  cellImages: (string | undefined)[];
-  done: boolean[];
+  challenges: ChallengeProgress[];
   startedAt: string;
 }
 
-export function createBoardSignature(cells: readonly { title: string }[]): string {
-  return JSON.stringify(cells.map(c => ({ title: c.title })));
+export function createBoardSignature(cells: readonly { name: string }[]): string {
+  return JSON.stringify(cells.map(c => ({ name: c.name })));
 }
 
 export class BingoGame {
   private constructor(
     readonly boardDefinitionId: string,
-    private readonly _snapshot: readonly BingoCell[],
-    private readonly _cellImages: readonly (string | undefined)[],
-    private readonly _done: readonly boolean[],
+    private readonly _challenges: readonly ChallengeProgress[],
     readonly startedAt: string,
   ) {}
 
   static empty(): BingoGame {
-    return new BingoGame('', [], [], [], new Date().toISOString());
+    return new BingoGame('', [], new Date().toISOString());
   }
 
-  static fromDefinition(boardDefinitionId: string, cells: readonly { title: string; imageId?: string }[]): BingoGame {
+  static fromDefinition(boardDefinitionId: string, cells: readonly { name: string; imageId?: string }[]): BingoGame {
     return new BingoGame(
       boardDefinitionId,
-      cells.map(c => ({ title: c.title })),
-      new Array(cells.length).fill(undefined),
-      new Array(cells.length).fill(false),
+      cells.map(c => ({
+        name: c.name,
+        planningImageId: c.imageId,
+        progressImageId: undefined,
+        completed: false,
+      })),
       new Date().toISOString(),
     );
   }
 
-  static restore(cells: readonly { title: string }[], saved: BingoGameProgress): BingoGame {
+  static restore(cells: readonly { name: string; imageId?: string }[], saved: BingoGameProgress): BingoGame {
     const signature = createBoardSignature(cells);
     if (saved.boardSignature !== signature) {
       return BingoGame.fromDefinition(saved.boardDefinitionId, cells);
     }
     return new BingoGame(
       saved.boardDefinitionId,
-      [...saved.boardSnapshot],
-      [...saved.cellImages],
-      saved.done.map(Boolean),
+      saved.challenges.map((c, i) => ({
+        name: c.name,
+        planningImageId: c.planningImageId ?? cells[i]?.imageId,
+        progressImageId: c.progressImageId,
+        completed: Boolean(c.completed),
+      })),
       saved.startedAt,
     );
   }
 
-  get projects(): readonly BoardCell[] {
-    return this._snapshot.map((cell, i) => ({
-      title: cell.title,
-      imageId: this._cellImages[i],
-    }));
+  get challenges(): readonly ChallengeProgress[] {
+    return this._challenges;
   }
 
-  get done(): readonly boolean[] {
-    return this._done;
+  get completed(): readonly boolean[] {
+    return this._challenges.map(c => c.completed);
   }
 
   get bingoCells(): Set<number> {
-    return computeBingoCells(this._done);
+    return computeBingoCells(this._challenges.map(c => c.completed));
   }
 
   get isEmpty(): boolean {
-    return this._snapshot.length === 0;
+    return this._challenges.length === 0;
   }
 
   toggle(index: number): BingoGame {
-    if (!isValidIndex(index, this._done.length)) {
-      return new BingoGame(this.boardDefinitionId, this._snapshot, this._cellImages, [...this._done], this.startedAt);
+    if (!isValidIndex(index, this._challenges.length)) {
+      return new BingoGame(this.boardDefinitionId, [...this._challenges], this.startedAt);
     }
-    const next = [...this._done];
-    next[index] = !next[index];
-    return new BingoGame(this.boardDefinitionId, this._snapshot, this._cellImages, next, this.startedAt);
+    const next = [...this._challenges];
+    next[index] = { ...next[index], completed: !next[index].completed };
+    return new BingoGame(this.boardDefinitionId, next, this.startedAt);
   }
 
   resetProgress(): BingoGame {
     return new BingoGame(
       this.boardDefinitionId,
-      this._snapshot,
-      this._cellImages,
-      new Array(this._snapshot.length).fill(false),
+      this._challenges.map(c => ({ ...c, completed: false })),
       this.startedAt,
     );
   }
 
-  updateCellImage(index: number, imageId: string | undefined): BingoGame {
-    if (!isValidIndex(index, this._snapshot.length)) {
-      return new BingoGame(this.boardDefinitionId, this._snapshot, [...this._cellImages], this._done, this.startedAt);
+  updateProgressImage(index: number, imageId: string | undefined): BingoGame {
+    if (!isValidIndex(index, this._challenges.length)) {
+      return new BingoGame(this.boardDefinitionId, [...this._challenges], this.startedAt);
     }
-    const next = [...this._cellImages];
-    next[index] = imageId;
-    return new BingoGame(this.boardDefinitionId, this._snapshot, next, this._done, this.startedAt);
+    const next = [...this._challenges];
+    next[index] = { ...next[index], progressImageId: imageId };
+    return new BingoGame(this.boardDefinitionId, next, this.startedAt);
   }
 
   toProgress(): BingoGameProgress {
     return {
       boardDefinitionId: this.boardDefinitionId,
-      boardSignature: createBoardSignature(this._snapshot),
-      boardSnapshot: [...this._snapshot] as BingoCell[],
-      cellImages: [...this._cellImages] as (string | undefined)[],
-      done: [...this._done] as boolean[],
+      boardSignature: createBoardSignature(this._challenges),
+      challenges: [...this._challenges] as ChallengeProgress[],
       startedAt: this.startedAt,
     };
   }
 }
 
-function computeBingoCells(done: readonly boolean[]): Set<number> {
-  const size = Math.sqrt(done.length);
+function computeBingoCells(completed: readonly boolean[]): Set<number> {
+  const size = Math.sqrt(completed.length);
   if (!Number.isInteger(size) || size < 2) {
     return new Set<number>();
   }
@@ -147,7 +143,7 @@ function computeBingoCells(done: readonly boolean[]): Set<number> {
 
   const result = new Set<number>();
   for (const line of lines) {
-    if (line.every(cellIndex => done[cellIndex])) {
+    if (line.every(cellIndex => completed[cellIndex])) {
       line.forEach(cellIndex => result.add(cellIndex));
     }
   }
