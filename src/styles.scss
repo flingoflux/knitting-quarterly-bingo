@@ -1,15 +1,4 @@
-:root {
-  --kq-bg: #f9f1e7;
-  --kq-bg-soft: #fff8ef;
-  --kq-text: #3f2a1d;
-  --kq-muted: #6c5445;
-  --kq-primary: #8f3b22;
-  --kq-primary-2: #c46e35;
-  --kq-outline: #c79362;
-  --kq-card: #fffaf2;
-  --kq-card-border: #d9b998;
-  --kq-shadow: 0 12px 28px rgba(96, 58, 30, 0.14);
-}
+@use 'app/shared/ui/tokens/index';
 
 * {
   box-sizing: border-box;
@@ -23,7 +12,7 @@ body {
 
 body {
   color: var(--kq-text);
-  font-family: 'Avenir Next', 'Trebuchet MS', 'Segoe UI', sans-serif;
+  font-family: var(--kq-font-family);
   background: #fff;
 }
 
