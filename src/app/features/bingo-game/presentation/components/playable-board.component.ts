@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { ChallengeCardComponent } from '../../../../shared/ui/molecules/challenge-card/challenge-card.component';
+import { BoardGridComponent } from '../../../../shared/ui/organisms/board-grid/board-grid.component';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -12,9 +13,9 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-playable-board',
   standalone: true,
-  imports: [CommonModule, ChallengeCardComponent],
+  imports: [CommonModule, ChallengeCardComponent, BoardGridComponent],
   template: `
-    <div class="grid playable" [class.mode-polaroid]="mode === 'polaroid'" [class.mode-horizontal]="mode === 'horizontal'">
+    <kq-board-grid [mode]="mode">
       <kq-challenge-card
         *ngFor="let p of challenges; let i = index"
         [name]="p.name"
@@ -26,43 +27,8 @@ interface CardDetailOpenedEvent {
         (click)="onToggle(i)"
         (cameraClicked)="openDetail(i, p, $event)"
       />
-    </div>
-  `,
-  styles: [`
-    /* Grid-Container */
-    .grid.playable {
-      display: grid;
-      gap: 0.6rem;
-      margin: 0.5rem auto 0;
-    }
-
-    /* ── Polaroid ── */
-    .grid.playable.mode-polaroid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      max-width: 52rem;
-    }
-
-    /* ── Horizontal ── */
-    .grid.playable.mode-horizontal {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      max-width: 58rem;
-      gap: 0.4rem;
-    }
-
-    /* ── Responsive ── */
-    @media (max-width: 900px) {
-      .grid.playable.mode-polaroid,
-      .grid.playable.mode-horizontal {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-    @media (max-width: 520px) {
-      .grid.playable.mode-polaroid,
-      .grid.playable.mode-horizontal {
-        grid-template-columns: 1fr;
-      }
-    }
-  `]
+    </kq-board-grid>
+  `
 })
 export class PlayableBoardComponent {
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);

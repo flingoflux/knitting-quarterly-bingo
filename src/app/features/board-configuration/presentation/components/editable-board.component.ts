@@ -4,6 +4,7 @@ import { Challenge } from '../../../../shared/domain/challenge';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 import { ChallengeCardComponent } from '../../../../shared/ui/molecules/challenge-card/challenge-card.component';
+import { BoardGridComponent } from '../../../../shared/ui/organisms/board-grid/board-grid.component';
 
 interface ChallengeEditedEvent {
   index: number;
@@ -18,9 +19,9 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-editable-board',
   standalone: true,
-  imports: [CommonModule, IconComponent, ChallengeCardComponent],
+  imports: [CommonModule, IconComponent, ChallengeCardComponent, BoardGridComponent],
   template: `
-    <div class="grid editable" [class.mode-polaroid]="mode === 'polaroid'" [class.mode-horizontal]="mode === 'horizontal'">
+    <kq-board-grid [mode]="mode">
       <div
         *ngFor="let p of challenges; let i = index"
         class="cell"
@@ -62,7 +63,7 @@ interface CardDetailOpenedEvent {
           </ng-container>
         </kq-challenge-card>
       </div>
-    </div>
+    </kq-board-grid>
   `,
   styles: [`
     /* ── Grid-Container ── */
@@ -165,11 +166,119 @@ interface CardDetailOpenedEvent {
       padding: 0.2rem 0.4rem;
     }
 
-    /* ── Responsive ── */
-    @media (max-width: 900px) {
-      .grid.editable.mode-polaroid,
-      .grid.editable.mode-horizontal {
-        grid-template-columns: repeat(2, minmax(0, 1fr))t(i, target.value);
+  `]
+})
+export class EditableBoardComponent {
+  private readonly el = inject(ElementRef);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
+
+  private _challenges: Challenge[] = [];
+  @Input() set challenges(value: Challenge[]) {
+    this._challenges = value;
+    void this.loadAllImages();
+  }
+  get challenges(): Challenge[] { return this._challenges; }
+
+  @Input() mode: 'polaroid' | 'horizontal' = 'polaroid';
+  @Input() dragTargetIndex!: number | null;
+  @Output() dragStarted = new EventEmitter<number>();
+  @Output() dragOverCell = new EventEmitter<number>();
+  @Output() dragLeftCell = new EventEmitter<number>();
+  @Output() droppedOnCell = new EventEmitter<number>();
+  @Output() challengeEdited = new EventEmitter<ChallengeEditedEvent>();
+  @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
+
+  editingIndex: number | null = null;
+  private readonly imageCache = new Map<string, string>();
+  private readonly draftNames = new Map<number, string>();
+
+  getImage(imageId: string | undefined): string | null {
+    if (!imageId) return null;
+    return this.imageCache.get(imageId) ?? null;
+  }
+
+  async refreshImage(imageId: string | null): Promise<void> {
+    if (!imageId) return;
+    const url = await this.imageRepo.getImage(imageId);
+    if (url) {
+      this.imageCache.set(imageId, url);
+    } else {
+      this.imageCache.delete(imageId);
+    }
+    this.cdr.markForCheck();
+  }
+
+  private async loadAllImages(): Promise<void> {
+    const imageIds = this._challenges
+      .map(c => c.imageId)
+      .filter((id): id is string => !!id);
+    const uniqueIds = [...new Set(imageIds)];
+    await Promise.all(
+      uniqueIds.map(async id => {
+        const url = await this.imageRepo.getImage(id);
+        if (url) {
+          this.imageCache.set(id, url);
+        } else {
+          this.imageCache.delete(id);
+        }
+      })
+    );
+    this.cdr.markForCheck();
+  }
+
+  onDragStart(i: number, event: DragEvent) {
+    if (this.editingIndex === i) {
+      event.preventDefault();
+      return;
+    }
+    this.dragStarted.emit(i);
+  }
+
+  onDragOver(i: number) {
+    this.dragOverCell.emit(i);
+  }
+
+  onDragLeave(i: number) {
+    this.dragLeftCell.emit(i);
+  }
+
+  onDrop(i: number) {
+    this.droppedOnCell.emit(i);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.editingIndex === null) return;
+    const target = event.target as Node;
+    const cells = this.el.nativeElement.querySelectorAll('.cell');
+    const editingCell = cells[this.editingIndex] as HTMLElement | undefined;
+    if (editingCell && !editingCell.contains(target)) {
+      this.saveAndExit(this.editingIndex, this.challenges[this.editingIndex]);
+    }
+  }
+
+  openDetail(i: number, challenge: Challenge, event: MouseEvent): void {
+    event.stopPropagation();
+    this.cardDetailOpened.emit({ index: i, challenge });
+  }
+
+  startEditing(i: number, challenge: Challenge, event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.editingIndex === i) {
+      this.saveAndExit(i, challenge);
+      return;
+    }
+    if (this.editingIndex !== null) {
+      this.saveAndExit(this.editingIndex, this.challenges[this.editingIndex]);
+    }
+    this.editingIndex = i;
+    this.draftNames.set(i, challenge.name);
+  }
+
+  onDraftNameInput(i: number, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.draftNames.set(i, target.value);
   }
 
   saveAndExit(i: number, challenge: Challenge): void {
