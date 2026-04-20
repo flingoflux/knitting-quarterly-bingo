@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
+import { BadgeComponent } from '../../../../shared/ui/atoms/badge/badge.component';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -12,7 +13,7 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-playable-board',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, BadgeComponent],
   template: `
     <div class="grid playable" [class.mode-polaroid]="mode === 'polaroid'" [class.mode-horizontal]="mode === 'horizontal'">
       <div
@@ -28,13 +29,8 @@ interface CardDetailOpenedEvent {
             <img src="assets/logo_plain.svg" class="logo-placeholder" alt="" />
           </div>
 
-          <div *ngIf="completed[i]" class="done-badge">
-            <kq-icon name="check" [size]="12" [strokeWidth]="3"/>
-          </div>
-
-          <div *ngIf="isCellInBingo(i)" class="bingo-badge">
-            <kq-icon name="star" [size]="14"/>
-          </div>
+          <kq-badge *ngIf="completed[i]" variant="done" [compact]="mode === 'horizontal'"/>
+          <kq-badge *ngIf="isCellInBingo(i)" variant="bingo" [compact]="mode === 'horizontal'"/>
 
           <button
             type="button"
@@ -102,34 +98,6 @@ interface CardDetailOpenedEvent {
       height: 58px;
       object-fit: contain;
       filter: brightness(0) saturate(100%) invert(73%) sepia(28%) saturate(500%) hue-rotate(355deg) brightness(94%) contrast(88%) opacity(0.45);
-    }
-    .done-badge {
-      position: absolute;
-      top: 6px;
-      left: 6px;
-      background: #145906;
-      color: #fff;
-      border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    }
-    .bingo-badge {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      background: #145906;
-      color: #fff;
-      border-radius: 50%;
-      width: 26px;
-      height: 26px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
     }
     .photo-btn {
       position: absolute;
@@ -232,20 +200,6 @@ interface CardDetailOpenedEvent {
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .mode-horizontal .done-badge {
-      width: 18px;
-      height: 18px;
-      top: 4px;
-      left: 4px;
-    }
-    .mode-horizontal .done-badge svg { width: 10px; height: 10px; }
-    .mode-horizontal .bingo-badge {
-      width: 20px;
-      height: 20px;
-      top: 4px;
-      right: 4px;
-    }
-    .mode-horizontal .bingo-badge svg { width: 11px; height: 11px; }
     .mode-horizontal .photo-btn {
       width: 22px;
       height: 22px;
