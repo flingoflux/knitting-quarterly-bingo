@@ -32,10 +32,7 @@ interface CardDetailOpenedEvent {
         <div class="photo-area" [class.is-editing]="editingIndex === i">
           <img *ngIf="getImage(p.imageId)" [src]="getImage(p.imageId)" class="photo-img" [alt]="p.title" />
           <div *ngIf="!getImage(p.imageId)" class="photo-placeholder">
-            <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-              <circle cx="12" cy="13" r="4"/>
-            </svg>
+            <img src="assets/logo.svg" class="logo-placeholder" alt="" />
           </div>
           <button
             type="button"
@@ -130,6 +127,12 @@ interface CardDetailOpenedEvent {
       align-items: center;
       justify-content: center;
       color: #c9a878;
+    }
+    .logo-placeholder {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+      filter: brightness(0) saturate(100%) invert(73%) sepia(28%) saturate(500%) hue-rotate(355deg) brightness(94%) contrast(88%) opacity(0.45);
     }
     .photo-btn {
       position: absolute;
