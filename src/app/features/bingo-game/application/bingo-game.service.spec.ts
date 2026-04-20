@@ -168,4 +168,39 @@ describe('BingoGameService', () => {
     expect(service.bingoCells().has(3)).toBe(true);
     expect(service.bingoCells().has(4)).toBe(false);
   });
+
+  it('speichert progressImageId und behält planningImageId', () => {
+    const challenges = createChallenges(16);
+    const challengesWithImage = challenges.map((c, i) => ({ ...c, imageId: i === 0 ? 'plan-img' : undefined }));
+    const boardRepo = new MockBoardDefinitionRepository();
+    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, challenges: challengesWithImage };
+    const bingoRepo = new MockBingoGameRepository();
+
+    const service = createService(boardRepo, bingoRepo);
+    service.updateProgressImage(0, 'progress-photo');
+
+    expect(service.challenges()[0].progressImageId).toBe('progress-photo');
+    expect(service.challenges()[0].planningImageId).toBe('plan-img');
+    expect(bingoRepo.lastSavedProgress?.challenges[0].progressImageId).toBe('progress-photo');
+  });
+
+  it('setzt alle Challenges bei resetProgress zurück', () => {
+    const challenges = createChallenges(16);
+    const boardRepo = new MockBoardDefinitionRepository();
+    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, challenges };
+    const bingoRepo = new MockBingoGameRepository();
+    const overrides: Partial<ChallengeProgress>[] = Array.from({ length: 16 }, () => ({ completed: true }));
+    bingoRepo.loadedProgress = {
+      boardDefinitionId: TEST_BOARD_ID,
+      boardSignature: createBoardSignature(challenges),
+      challenges: createProgressChallenges(challenges, overrides),
+      startedAt: new Date().toISOString(),
+    };
+
+    const service = createService(boardRepo, bingoRepo);
+    service.resetProgress();
+
+    expect(service.completed().every(c => !c)).toBe(true);
+    expect(bingoRepo.lastSavedProgress?.challenges.every(c => !c.completed)).toBe(true);
+  });
 });
