@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
+import { Result } from '../../../shared/domain/result';
 import { LocalStorageBoardRepository, PersistedBoardDefinition } from '../../board-configuration/infrastructure/local-storage-board.repository';
 import { BOARD_DEFINITION_READER } from '../../board-configuration/domain/board-definition.repository';
 import { BingoGameService } from './bingo-game.service';
@@ -10,8 +11,11 @@ import { BingoGameProgress, createBoardSignature } from '../domain/bingo-game';
 class MockBoardDefinitionRepository {
   loadedDefinition: PersistedBoardDefinition | null = null;
 
-  load(): PersistedBoardDefinition | null {
-    return this.loadedDefinition;
+  load(): Result<PersistedBoardDefinition, string> {
+    if (this.loadedDefinition === null) {
+      return Result.err('not-found');
+    }
+    return Result.ok(this.loadedDefinition);
   }
 }
 

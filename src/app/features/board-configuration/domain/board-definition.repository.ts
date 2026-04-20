@@ -1,8 +1,9 @@
 import { InjectionToken } from '@angular/core';
 import { BoardCell } from '../../../shared/domain/board-cell';
+import { Result } from '../../../shared/domain/result';
 
 export interface BoardDefinitionReader {
-  load(): { projects: BoardCell[] } | null;
+  load(): Result<{ projects: BoardCell[] }, string>;
 }
 
 export const BOARD_DEFINITION_READER = new InjectionToken<BoardDefinitionReader>('BoardDefinitionReader');

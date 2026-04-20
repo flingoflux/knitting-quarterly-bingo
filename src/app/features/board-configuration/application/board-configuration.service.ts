@@ -9,9 +9,9 @@ export class BoardConfigurationService {
   readonly projects: Signal<BoardCell[]> = computed(() => this.boardState().projects as BoardCell[]);
 
   constructor(private readonly repository: LocalStorageBoardRepository) {
-    const persisted = this.repository.load();
-    if (persisted !== null && persisted.projects.length > 0) {
-      this.boardState.set(BoardDefinition.fromProjects(persisted.projects));
+    const result = this.repository.load();
+    if (result.ok && result.value.projects.length > 0) {
+      this.boardState.set(BoardDefinition.fromProjects(result.value.projects));
       return;
     }
 

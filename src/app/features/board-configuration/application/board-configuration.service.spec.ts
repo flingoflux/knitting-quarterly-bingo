@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BoardCell } from '../../../shared/domain/board-cell';
+import { Result } from '../../../shared/domain/result';
 import { BoardConfigurationService } from './board-configuration.service';
 import { LocalStorageBoardRepository, PersistedBoardDefinition } from '../infrastructure/local-storage-board.repository';
 import { DEFAULT_BOARD_PROJECTS } from '../../../shared/domain/default-board-projects';
@@ -8,8 +9,11 @@ class MockBoardDefinitionRepository {
   loadedDefinition: PersistedBoardDefinition | null = null;
   lastSavedDefinition: PersistedBoardDefinition | null = null;
 
-  load(): PersistedBoardDefinition | null {
-    return this.loadedDefinition;
+  load(): Result<PersistedBoardDefinition, string> {
+    if (this.loadedDefinition === null) {
+      return Result.err('not-found');
+    }
+    return Result.ok(this.loadedDefinition);
   }
 
   save(definition: PersistedBoardDefinition): void {

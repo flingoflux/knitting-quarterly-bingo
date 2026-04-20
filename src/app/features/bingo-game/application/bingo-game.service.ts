@@ -45,13 +45,13 @@ export class BingoGameService {
   }
 
   private refreshFromDefinition(): void {
-    const boardDefinition = this.boardDefinitionRepository.load();
-    if (boardDefinition === null || boardDefinition.projects.length === 0) {
+    const result = this.boardDefinitionRepository.load();
+    if (!result.ok || result.value.projects.length === 0) {
       this.gameState.set(BingoGame.empty());
       return;
     }
 
-    const projects = boardDefinition.projects;
+    const projects = result.value.projects;
     const persistedProgress = this.bingoGameRepository.load();
 
     if (persistedProgress !== null && persistedProgress.boardSignature === createBoardSignature(projects)) {

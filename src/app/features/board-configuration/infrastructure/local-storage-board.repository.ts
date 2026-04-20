@@ -1,19 +1,11 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../../../core/services/storage.service';
-import { BoardCell } from '../../../shared/domain/board-cell';
+import { BoardCell, isValidBoardCell } from '../../../shared/domain/board-cell';
 import { BoardDefinitionReader } from '../domain/board-definition.repository';
+import { Result } from '../../../shared/domain/result';
 
 export interface PersistedBoardDefinition {
   projects: BoardCell[];
-}
-
-function isValidBoardCell(cell: unknown): cell is BoardCell {
-  return (
-    typeof cell === 'object' &&
-    cell !== null &&
-    typeof (cell as BoardCell).title === 'string' &&
-    ((cell as BoardCell).imageId === undefined || typeof (cell as BoardCell).imageId === 'string')
-  );
 }
 
 @Injectable({ providedIn: 'root' })
@@ -22,12 +14,15 @@ export class LocalStorageBoardRepository implements BoardDefinitionReader {
 
   constructor(private readonly storage: StorageService) {}
 
-  load(): PersistedBoardDefinition | null {
+  load(): Result<PersistedBoardDefinition, string> {
     const raw = this.storage.getItem<{ projects: unknown[] }>(this.storageKey);
-    if (raw === null || !Array.isArray(raw.projects) || !raw.projects.every(isValidBoardCell)) {
-      return null;
+    if (raw === null) {
+      return Result.err('not-found');
     }
-    return { projects: raw.projects };
+    if (!Array.isArray(raw.projects) || !raw.projects.every(isValidBoardCell)) {
+      return Result.err('invalid-data');
+    }
+    return Result.ok({ projects: raw.projects });
   }
 
   save(definition: PersistedBoardDefinition): void {
