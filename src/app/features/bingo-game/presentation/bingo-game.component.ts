@@ -160,7 +160,10 @@ export class BingoGameComponent implements OnInit {
     })
   );
   readonly isPreviewMode = computed(() => this.quarterly().isFuturePreview());
-  readonly canGoToNextQuarter = computed(() => true);
+  readonly canGoToNextQuarter = computed(() => {
+    const nextQuarterId = this.quarterClock.getNextQuarterIdFromQuarterId(this.actualCurrentQuarterId);
+    return this.displayedQuarterId() !== nextQuarterId;
+  });
   readonly canGoToPreviousQuarter = computed(() => true);
 
   ngOnInit(): void {
