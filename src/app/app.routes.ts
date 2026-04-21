@@ -4,7 +4,7 @@ import { bingoGameGuard } from './features/bingo-game/presentation/bingo-game.gu
 import { BingoGameService } from './features/bingo-game/application/bingo-game.service';
 import { BoardConfigurationService } from './features/board-configuration/application/board-configuration.service';
 import { ArchiveOverviewService } from './features/archive/application/archive-overview.service';
-import { quarterNavigationGuard } from './features/quarter-lifecycle/presentation/quarter-navigation.guard';
+import { quarterlyViewGuard } from './features/quarter-lifecycle/presentation/quarterly-view.guard';
 
 export const routes: Routes = [
   {
@@ -13,15 +13,15 @@ export const routes: Routes = [
   },
   {
     path: 'edit',
-    canActivate: [quarterNavigationGuard],
-    data: { returnTo: 'edit' },
+    canActivate: [quarterlyViewGuard],
+    data: { viewMode: 'edit' },
     providers: [BoardConfigurationService],
     loadComponent: () => import('./features/board-configuration/presentation/board-configuration.component').then(m => m.BoardConfigurationComponent),
   },
   {
     path: 'play',
-    canActivate: [quarterNavigationGuard, bingoGameGuard],
-    data: { returnTo: 'play' },
+    canActivate: [quarterlyViewGuard, bingoGameGuard],
+    data: { viewMode: 'play' },
     providers: [BingoGameService],
     loadComponent: () => import('./features/bingo-game/presentation/bingo-game.component').then(m => m.BingoGameComponent),
   },
