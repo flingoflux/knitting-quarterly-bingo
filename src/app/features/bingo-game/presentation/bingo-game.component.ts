@@ -1,4 +1,4 @@
-import { Component, ViewChild, inject, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, inject, AfterViewInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BingoGameService } from '../application/bingo-game.service';
@@ -18,9 +18,9 @@ import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
     <div class="feature-shell">
       <kq-page-toolbar
         [mode]="viewMode"
-        [quarterLabel]="currentQuarterId"
+        [quarterLabel]="displayedQuarterId()"
         [canGoToPreviousQuarter]="true"
-        [canGoToNextQuarter]="true"
+        [canGoToNextQuarter]="canGoToNextQuarter()"
         (modeChange)="viewMode = $event"
         (homeClicked)="goHome()"
         (previousQuarterClicked)="goToArchive()"
@@ -37,8 +37,8 @@ import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
         </div>
       </kq-page-toolbar>
 
-      <div class="preview-banner" *ngIf="state.isPreviewMode()">
-        💡 Du schaust dir das <strong>nächste Quartal</strong> an. Fortschritt wird hier nicht gespeichert.
+      <div class="preview-banner" *ngIf="isPreviewMode()">
+        💡 Du schaust dir das <strong>{{ displayedQuarterId() }}</strong> an. Fortschritt wird hier nicht gespeichert.
       </div>
 
       <div class="play-bingo-header" [class.compact-header]="viewMode === 'horizontal'">
@@ -147,12 +147,20 @@ export class BingoGameComponent implements AfterViewInit {
   route = inject(ActivatedRoute);
 
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
-  readonly currentQuarterId = new QuarterClock().getQuarterId(new Date());
+  private readonly quarterClock = new QuarterClock();
+  readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
+  readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
+  readonly isPreviewMode = computed(() => this.displayedQuarterId() !== this.actualCurrentQuarterId);
+  readonly canGoToNextQuarter = computed(() => true);
 
   ngAfterViewInit(): void {
     const quarterParam = this.route.snapshot.queryParamMap.get('quarter');
     if (quarterParam) {
-      this.state.setPreviewMode(true);
+      this.displayedQuarterId.set(quarterParam);
+      this.state.setPreviewMode(true, quarterParam);
+    } else {
+      this.displayedQuarterId.set(this.actualCurrentQuarterId);
+      this.state.setPreviewMode(false);
     }
   }
 
@@ -181,7 +189,7 @@ export class BingoGameComponent implements AfterViewInit {
   }
 
   goToNextQuarter() {
-    const nextQuarter = new QuarterClock().getNextQuarterId(new Date());
+    const nextQuarter = this.quarterClock.getNextQuarterIdFromQuarterId(this.displayedQuarterId());
     void this.router.navigate(['/play'], { queryParams: { quarter: nextQuarter } });
   }
 

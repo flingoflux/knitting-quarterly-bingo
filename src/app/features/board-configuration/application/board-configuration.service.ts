@@ -23,10 +23,11 @@ export class BoardConfigurationService {
     this.resetBoard();
   }
 
-  setPreviewMode(enabled: boolean): void {
+  setPreviewMode(enabled: boolean, quarterId?: string): void {
     this.previewMode.set(enabled);
     if (enabled) {
-      this.boardState.set(QuarterlyPlan.createDefault());
+      const id = quarterId || 'preview-quarter';
+      this.boardState.set(QuarterlyPlan.createDefault(id));
     }
   }
 
@@ -54,6 +55,6 @@ export class BoardConfigurationService {
     if (this.previewMode()) {
       return; // Keine Persistierung im Vorschau-Modus
     }
-    this.writer.save(this.boardState().toPlain());
+    this.writer.save(this.boardState().toPersistable());
   }
 }

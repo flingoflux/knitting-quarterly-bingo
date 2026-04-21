@@ -1,4 +1,4 @@
-import { Component, ViewChild, inject, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, inject, AfterViewInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BoardConfigurationService } from '../application/board-configuration.service';
@@ -19,9 +19,9 @@ import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
     <div class="feature-shell">
       <kq-page-toolbar
         [mode]="viewMode"
-        [quarterLabel]="currentQuarterId"
+        [quarterLabel]="displayedQuarterId()"
         [canGoToPreviousQuarter]="true"
-        [canGoToNextQuarter]="true"
+        [canGoToNextQuarter]="canGoToNextQuarter()"
         (modeChange)="viewMode = $event"
         (homeClicked)="goHome()"
         (previousQuarterClicked)="goToArchive()"
@@ -37,8 +37,8 @@ import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
         </ng-container>
       </kq-page-toolbar>
 
-      <div class="preview-banner" *ngIf="state.isPreviewMode()">
-        💡 Du schaust dir das <strong>nächste Quartal</strong> an. Änderungen werden hier nicht gespeichert.
+      <div class="preview-banner" *ngIf="isPreviewMode()">
+        💡 Du schaust dir das <strong>{{ displayedQuarterId() }}</strong> an. Änderungen werden hier nicht gespeichert.
       </div>
 
       <div class="edit-board-header" [class.compact-header]="viewMode === 'horizontal'">
@@ -125,14 +125,22 @@ export class BoardConfigurationComponent implements AfterViewInit {
   router = inject(Router);
   route = inject(ActivatedRoute);
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
-  readonly currentQuarterId = new QuarterClock().getQuarterId(new Date());
+  private readonly quarterClock = new QuarterClock();
+  readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
+  readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
+  readonly isPreviewMode = computed(() => this.displayedQuarterId() !== this.actualCurrentQuarterId);
+  readonly canGoToNextQuarter = computed(() => true);
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
 
   ngAfterViewInit(): void {
     const quarterParam = this.route.snapshot.queryParamMap.get('quarter');
     if (quarterParam) {
-      this.state.setPreviewMode(true);
+      this.displayedQuarterId.set(quarterParam);
+      this.state.setPreviewMode(true, quarterParam);
+    } else {
+      this.displayedQuarterId.set(this.actualCurrentQuarterId);
+      this.state.setPreviewMode(false);
     }
   }
 
@@ -149,7 +157,7 @@ export class BoardConfigurationComponent implements AfterViewInit {
   }
 
   goToNextQuarter() {
-    const nextQuarter = new QuarterClock().getNextQuarterId(new Date());
+    const nextQuarter = this.quarterClock.getNextQuarterIdFromQuarterId(this.displayedQuarterId());
     void this.router.navigate(['/edit'], { queryParams: { quarter: nextQuarter } });
   }
 
@@ -160,7 +168,7 @@ export class BoardConfigurationComponent implements AfterViewInit {
   }
 
   playBingo() {
-    void this.router.navigate(['/play'], { queryParams: { new: 'true' } });
+    void this.router.navigate(['/play'], { queryParams: { quarter: this.displayedQuarterId() } });
   }
 
   onDragStart(i: number) {

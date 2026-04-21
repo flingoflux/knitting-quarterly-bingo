@@ -22,10 +22,11 @@ export class BingoGameService {
     this.refreshFromDefinition();
   }
 
-  setPreviewMode(enabled: boolean): void {
+  setPreviewMode(enabled: boolean, quarterId?: string): void {
     this.previewMode.set(enabled);
     if (enabled) {
-      const game = BingoGame.fromDefinition('preview-quarter', DEFAULT_CHALLENGES);
+      const id = quarterId || 'preview-quarter';
+      const game = BingoGame.fromDefinition(id, DEFAULT_CHALLENGES);
       this.gameState.set(game);
     }
   }

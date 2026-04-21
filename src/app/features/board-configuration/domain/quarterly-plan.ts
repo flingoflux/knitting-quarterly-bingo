@@ -7,8 +7,9 @@ export class QuarterlyPlan {
     private readonly _challenges: readonly Challenge[],
   ) {}
 
-  static createDefault(): QuarterlyPlan {
-    return new QuarterlyPlan(crypto.randomUUID(), [...DEFAULT_CHALLENGES]);
+  static createDefault(id?: string): QuarterlyPlan {
+    const planId = id || crypto.randomUUID();
+    return new QuarterlyPlan(planId, [...DEFAULT_CHALLENGES]);
   }
 
   static fromChallenges(challenges: readonly Challenge[], id: string): QuarterlyPlan {
@@ -36,6 +37,10 @@ export class QuarterlyPlan {
     const updated = [...this._challenges];
     updated[index] = { ...challenge };
     return new QuarterlyPlan(this.id, updated);
+  }
+
+  toPersistable(): { id: string; challenges: Challenge[] } {
+    return { id: this.id, challenges: [...this._challenges] as Challenge[] };
   }
 
   toPlain(): { id: string; challenges: Challenge[] } {
