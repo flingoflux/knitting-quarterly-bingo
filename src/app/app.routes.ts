@@ -1,10 +1,8 @@
 import { StartPageComponent } from './start-page.component';
 import { Routes } from '@angular/router';
-import { bingoGameGuard } from './features/bingo-game/presentation/bingo-game.guard';
 import { BingoGameService } from './features/bingo-game/application/bingo-game.service';
 import { BoardConfigurationService } from './features/board-configuration/application/board-configuration.service';
 import { ArchiveOverviewService } from './features/archive/application/archive-overview.service';
-import { quarterlyViewGuard } from './features/quarter-lifecycle/presentation/quarterly-view.guard';
 
 export const routes: Routes = [
   {
@@ -12,18 +10,19 @@ export const routes: Routes = [
     component: StartPageComponent,
   },
   {
-    path: 'edit',
-    canActivate: [quarterlyViewGuard],
-    data: { viewMode: 'edit' },
-    providers: [BoardConfigurationService],
-    loadComponent: () => import('./features/board-configuration/presentation/board-configuration.component').then(m => m.BoardConfigurationComponent),
+    path: 'quarterly',
+    providers: [BingoGameService, BoardConfigurationService],
+    loadComponent: () => import('./shared/ui/templates/quarterly-view/quarterly-view.component').then(m => m.QuarterlyViewComponent),
   },
   {
     path: 'play',
-    canActivate: [quarterlyViewGuard, bingoGameGuard],
-    data: { viewMode: 'play' },
-    providers: [BingoGameService],
-    loadComponent: () => import('./features/bingo-game/presentation/bingo-game.component').then(m => m.BingoGameComponent),
+    redirectTo: 'quarterly',
+    pathMatch: 'full',
+  },
+  {
+    path: 'edit',
+    redirectTo: 'quarterly',
+    pathMatch: 'full',
   },
   {
     path: 'archive',
