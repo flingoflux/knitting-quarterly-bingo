@@ -22,6 +22,9 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
         <p class="eyebrow">Knitting Quarterly - Archiv</p>
         <h2>Bisher erledigte Runden</h2>
         <p class="subtitle">Miniuebersicht abgeschlossener Bingo-Boards.</p>
+        <p class="prototype-note" *ngIf="isShowingPrototype()">
+          Vorschau mit Beispiel-Boards, bis echte Quartale archiviert wurden.
+        </p>
       </section>
 
       <section *ngIf="hasEntries(); else emptyState" class="archive-list" aria-label="Archivierte Quartale">
@@ -87,6 +90,18 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
       color: #6c5445;
       font-size: 0.98rem;
       max-width: 36rem;
+    }
+
+    .prototype-note {
+      margin: 0.65rem auto 0;
+      max-width: 32rem;
+      color: #8a3d23;
+      font-size: 0.88rem;
+      line-height: 1.4;
+      background: #fff3e6;
+      border: 1px solid #ebc4ac;
+      border-radius: 999px;
+      padding: 0.42rem 0.85rem;
     }
 
     .archive-list {
@@ -158,6 +173,7 @@ export class ArchiveComponent {
 
   readonly entries = this.state.entries;
   readonly hasEntries = this.state.hasEntries;
+  readonly isShowingPrototype = this.state.isShowingPrototype;
 
   goHome(): void {
     void this.router.navigate(['/']);

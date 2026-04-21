@@ -3,6 +3,7 @@ import { Injector, runInInjectionContext } from '@angular/core';
 import { ArchiveEntry } from '../domain/archive-entry';
 import { ARCHIVE_REPOSITORY } from '../domain/archive.repository';
 import { ArchiveOverviewService } from './archive-overview.service';
+import { DEFAULT_ARCHIVE_ENTRIES } from '../domain/default-archive-entries';
 
 class MockArchiveRepository {
   entries: ArchiveEntry[] = [];
@@ -60,8 +61,9 @@ describe('ArchiveOverviewService', () => {
 
     const service = createService(repository);
 
-    expect(service.entries()).toEqual([]);
-    expect(service.hasEntries()).toBe(false);
+    expect(service.entries()).toEqual(DEFAULT_ARCHIVE_ENTRIES);
+    expect(service.hasEntries()).toBe(true);
+    expect(service.isShowingPrototype()).toBe(true);
   });
 
   it('reload liest den aktuellen Repository-Stand neu ein', () => {
@@ -76,5 +78,6 @@ describe('ArchiveOverviewService', () => {
     service.reload();
 
     expect(service.entries().map(entry => entry.id)).toEqual(['new', 'old']);
+    expect(service.isShowingPrototype()).toBe(false);
   });
 });
