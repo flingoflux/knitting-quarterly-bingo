@@ -1,11 +1,11 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, ViewChild, inject, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BoardConfigurationService } from '../application/board-configuration.service';
 import { EditableBoardComponent } from './components/editable-board.component';
 import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-detail-dialog.component';
 import { shuffleArray } from '../../../shared/utils/array-utils';
 import { Challenge } from '../../../shared/domain/challenge';
-import { Router } from '@angular/router';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
@@ -21,9 +21,11 @@ import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
         [mode]="viewMode"
         [quarterLabel]="currentQuarterId"
         [canGoToPreviousQuarter]="true"
+        [canGoToNextQuarter]="true"
         (modeChange)="viewMode = $event"
         (homeClicked)="goHome()"
         (previousQuarterClicked)="goToArchive()"
+        (nextQuarterClicked)="goToNextQuarter()"
       >
         <ng-container toolbar-actions>
           <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
@@ -34,6 +36,10 @@ import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
           </kq-button>
         </ng-container>
       </kq-page-toolbar>
+
+      <div class="preview-banner" *ngIf="state.isPreviewMode()">
+        💡 Du schaust dir das <strong>nächste Quartal</strong> an. Änderungen werden hier nicht gespeichert.
+      </div>
 
       <div class="edit-board-header" [class.compact-header]="viewMode === 'horizontal'">
         <p class="eyebrow">Knitting Quarterly - Board Studio</p>
@@ -62,6 +68,16 @@ import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
       max-width: 72rem;
       margin: 0 auto;
       padding: 1.4rem 1.1rem 2rem;
+    }
+    .preview-banner {
+      background: #fff7ec;
+      border: 1px solid #c79362;
+      border-radius: 0.5rem;
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 1.1rem;
+      color: #5a2d1a;
+      font-size: 0.95rem;
+      font-weight: 500;
     }
     .edit-board-header {
       text-align: center;
@@ -102,15 +118,23 @@ import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
     }
   `],
 })
-export class BoardConfigurationComponent {
+export class BoardConfigurationComponent implements AfterViewInit {
   @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
   @ViewChild('editableBoard') private readonly editableBoardRef!: EditableBoardComponent;
   state = inject(BoardConfigurationService);
   router = inject(Router);
+  route = inject(ActivatedRoute);
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
   readonly currentQuarterId = new QuarterClock().getQuarterId(new Date());
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
+
+  ngAfterViewInit(): void {
+    const quarterParam = this.route.snapshot.queryParamMap.get('quarter');
+    if (quarterParam) {
+      this.state.setPreviewMode(true);
+    }
+  }
 
   get challenges(): Challenge[] {
     return this.state.challenges();
@@ -122,6 +146,11 @@ export class BoardConfigurationComponent {
 
   goToArchive() {
     void this.router.navigate(['/archive'], { queryParams: { returnTo: 'edit' } });
+  }
+
+  goToNextQuarter() {
+    const nextQuarter = new QuarterClock().getNextQuarterId(new Date());
+    void this.router.navigate(['/edit'], { queryParams: { quarter: nextQuarter } });
   }
 
   shuffle() {

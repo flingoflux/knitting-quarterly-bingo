@@ -1,10 +1,10 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, ViewChild, inject, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BingoGameService } from '../application/bingo-game.service';
 import { PlayableBoardComponent } from './components/playable-board.component';
 import { ProjectComparisonDialogComponent } from './components/project-comparison-dialog.component';
 import { ImageChangedEvent } from '../../board-configuration/presentation/components/card-detail-dialog.component';
-import { Router } from '@angular/router';
 import { ChallengeProgress } from '../domain/bingo-game';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
@@ -20,9 +20,11 @@ import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
         [mode]="viewMode"
         [quarterLabel]="currentQuarterId"
         [canGoToPreviousQuarter]="true"
+        [canGoToNextQuarter]="true"
         (modeChange)="viewMode = $event"
         (homeClicked)="goHome()"
         (previousQuarterClicked)="goToArchive()"
+        (nextQuarterClicked)="goToNextQuarter()"
       >
         <div class="status-grid" aria-label="Fortschritt">
           <div
@@ -34,6 +36,10 @@ import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
           ></div>
         </div>
       </kq-page-toolbar>
+
+      <div class="preview-banner" *ngIf="state.isPreviewMode()">
+        💡 Du schaust dir das <strong>nächste Quartal</strong> an. Fortschritt wird hier nicht gespeichert.
+      </div>
 
       <div class="play-bingo-header" [class.compact-header]="viewMode === 'horizontal'">
         <p class="eyebrow">Knitting Quarterly - Bingo</p>
@@ -59,6 +65,16 @@ import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
       max-width: 72rem;
       margin: 0 auto;
       padding: 1.4rem 1.1rem 2rem;
+    }
+    .preview-banner {
+      background: #fff7ec;
+      border: 1px solid #c79362;
+      border-radius: 0.5rem;
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 1.1rem;
+      color: #5a2d1a;
+      font-size: 0.95rem;
+      font-weight: 500;
     }
     .status-grid {
       display: grid;
@@ -123,14 +139,22 @@ import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
     }
   `]
 })
-export class BingoGameComponent {
+export class BingoGameComponent implements AfterViewInit {
   @ViewChild('comparisonDialog') private readonly comparisonDialog!: ProjectComparisonDialogComponent;
   @ViewChild('playableBoard') private readonly playableBoardRef!: PlayableBoardComponent;
   state = inject(BingoGameService);
   router = inject(Router);
+  route = inject(ActivatedRoute);
 
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
   readonly currentQuarterId = new QuarterClock().getQuarterId(new Date());
+
+  ngAfterViewInit(): void {
+    const quarterParam = this.route.snapshot.queryParamMap.get('quarter');
+    if (quarterParam) {
+      this.state.setPreviewMode(true);
+    }
+  }
 
   get challenges(): ChallengeProgress[] {
     return this.state.challenges();
@@ -154,6 +178,11 @@ export class BingoGameComponent {
 
   goToArchive() {
     void this.router.navigate(['/archive'], { queryParams: { returnTo: 'play' } });
+  }
+
+  goToNextQuarter() {
+    const nextQuarter = new QuarterClock().getNextQuarterId(new Date());
+    void this.router.navigate(['/play'], { queryParams: { quarter: nextQuarter } });
   }
 
   onToggle(i: number) {

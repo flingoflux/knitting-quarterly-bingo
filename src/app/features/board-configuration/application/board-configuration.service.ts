@@ -6,7 +6,9 @@ import { QuarterlyPlan } from '../domain/quarterly-plan';
 @Injectable()
 export class BoardConfigurationService {
   private readonly boardState = signal<QuarterlyPlan>(QuarterlyPlan.createDefault());
+  private readonly previewMode = signal(false);
   readonly challenges: Signal<Challenge[]> = computed(() => this.boardState().challenges as Challenge[]);
+  readonly isPreviewMode = computed(() => this.previewMode());
 
   private readonly reader = inject(QUARTERLY_PLAN_READER);
   private readonly writer = inject(QUARTERLY_PLAN_WRITER);
@@ -19,6 +21,13 @@ export class BoardConfigurationService {
     }
 
     this.resetBoard();
+  }
+
+  setPreviewMode(enabled: boolean): void {
+    this.previewMode.set(enabled);
+    if (enabled) {
+      this.boardState.set(QuarterlyPlan.createDefault());
+    }
   }
 
   resetBoard(): void {
@@ -42,6 +51,9 @@ export class BoardConfigurationService {
   }
 
   private persist(): void {
+    if (this.previewMode()) {
+      return; // Keine Persistierung im Vorschau-Modus
+    }
     this.writer.save(this.boardState().toPlain());
   }
 }

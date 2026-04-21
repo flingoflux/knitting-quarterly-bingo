@@ -21,4 +21,13 @@ describe('QuarterClock', () => {
     expect(clock.isRolloverDue('2026-Q1', '2026-Q2')).toBe(true);
     expect(clock.isRolloverDue('2026-Q2', '2026-Q2')).toBe(false);
   });
+
+  it('berechnet das nächste Quartal korrekt', () => {
+    const clock = new QuarterClock();
+
+    expect(clock.getNextQuarterId(new Date('2026-01-15T12:00:00.000Z'))).toBe('2026-Q2');
+    expect(clock.getNextQuarterId(new Date('2026-04-21T12:00:00.000Z'))).toBe('2026-Q3');
+    expect(clock.getNextQuarterId(new Date('2026-10-15T12:00:00.000Z'))).toBe('2027-Q1');
+    expect(clock.getNextQuarterId(new Date('2026-12-31T12:00:00.000Z'))).toBe('2027-Q1');
+  });
 });
