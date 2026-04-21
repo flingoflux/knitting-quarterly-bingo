@@ -3,39 +3,23 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ArchiveOverviewService } from '../application/archive-overview.service';
 import { ArchiveEntry } from '../domain/archive-entry';
-import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
-import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
+import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 
 @Component({
   selector: 'app-archive',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, IconComponent],
+  imports: [CommonModule, PageToolbarComponent],
   template: `
     <div class="feature-shell">
-      <header class="top-row">
-        <div class="top-row-left">
-          <kq-button variant="icon" (click)="goHome()" title="Zur Startseite" ariaLabel="Zur Startseite">
-            <kq-icon name="home" [size]="22"/>
-          </kq-button>
-        </div>
-
-        <div class="top-row-center">
-          <div class="quarter-nav">
-            <span class="nav-placeholder" aria-hidden="true"></span>
-            <span class="quarter-label">Archiv</span>
-            <kq-button
-              variant="icon"
-              (click)="goToCurrentQuarter()"
-              [title]="returnTarget === 'edit' ? 'Zum aktuellen Planungsquartal' : 'Zum aktuellen Spielquartal'"
-              [ariaLabel]="returnTarget === 'edit' ? 'Zum aktuellen Planungsquartal' : 'Zum aktuellen Spielquartal'"
-            >
-              <kq-icon name="chevron-right" [size]="20"/>
-            </kq-button>
-          </div>
-        </div>
-
-        <div class="top-row-right"></div>
-      </header>
+      <kq-page-toolbar
+        quarterLabel="Archiv"
+        [showPreviousButton]="false"
+        [showNextButton]="true"
+        [showViewToggle]="false"
+        [canGoToNextQuarter]="true"
+        (homeClicked)="goHome()"
+        (nextQuarterClicked)="goToCurrentQuarter()"
+      />
 
       <section class="archive-header">
         <p class="eyebrow">Knitting Quarterly - Archiv</p>
@@ -77,59 +61,7 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
       color: #412a22;
     }
 
-    .top-row {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 0.6rem;
-      align-items: center;
-      margin-bottom: 1.1rem;
-    }
 
-    .top-row-left {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-    }
-
-    .top-row-center {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .top-row-right {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-    }
-
-    .quarter-nav {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-    }
-
-    .nav-placeholder {
-      width: 42px;
-      height: 42px;
-      visibility: hidden;
-    }
-
-    .quarter-label {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 10.5rem;
-      height: 42px;
-      border-radius: 999px;
-      border: 1px solid #c79362;
-      background: #fff7ec;
-      color: #7b371f;
-      font-size: 0.84rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
 
     .archive-header {
       text-align: center;
@@ -234,17 +166,6 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
       max-width: 52rem;
       text-align: center;
       color: #6c5445;
-    }
-
-    @media (max-width: 768px) {
-      .top-row {
-        grid-template-columns: 1fr;
-        justify-items: center;
-      }
-      .top-row-left,
-      .top-row-right {
-        display: none;
-      }
     }
   `],
 })

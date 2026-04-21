@@ -15,32 +15,39 @@ import { ButtonComponent } from '../../atoms/button/button.component';
 
     <div class="toolbar-center">
       <div class="quarter-nav">
-        <kq-button
-          variant="icon"
-          [disabled]="!canGoToPreviousQuarter"
-          (click)="previousQuarterClicked.emit()"
-          title="Vorheriges Quartal"
-          ariaLabel="Vorheriges Quartal"
-        >
-          <kq-icon name="chevron-left" [size]="20"/>
-        </kq-button>
+        @if (showPreviousButton) {
+          <kq-button
+            variant="icon"
+            [disabled]="!canGoToPreviousQuarter"
+            (click)="previousQuarterClicked.emit()"
+            title="Vorheriges Quartal"
+            ariaLabel="Vorheriges Quartal"
+          >
+            <kq-icon name="chevron-left" [size]="20"/>
+          </kq-button>
+        } @else {
+          <span class="nav-placeholder" aria-hidden="true"></span>
+        }
         <span class="quarter-label">{{ quarterLabel }}</span>
-        <kq-button
-          variant="icon"
-          [disabled]="!canGoToNextQuarter"
-          (click)="nextQuarterClicked.emit()"
-          title="Naechstes Quartal"
-          ariaLabel="Naechstes Quartal"
-        >
-          <kq-icon name="chevron-right" [size]="20"/>
-        </kq-button>
+        @if (showNextButton) {
+          <kq-button
+            variant="icon"
+            [disabled]="!canGoToNextQuarter"
+            (click)="nextQuarterClicked.emit()"
+            title="Naechstes Quartal"
+            ariaLabel="Naechstes Quartal"
+          >
+            <kq-icon name="chevron-right" [size]="20"/>
+          </kq-button>
+        }
       </div>
       <ng-content />
     </div>
 
     <div class="toolbar-end">
       <ng-content select="[toolbar-actions]" />
-      <div class="view-toggle" role="group" aria-label="Kartenansicht">
+      @if (showViewToggle) {
+        <div class="view-toggle" role="group" aria-label="Kartenansicht">
         <button
           class="mode-btn"
           type="button"
@@ -61,7 +68,8 @@ import { ButtonComponent } from '../../atoms/button/button.component';
         >
           <kq-icon name="horizontal" [size]="17"/>
         </button>
-      </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -87,6 +95,11 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
+    }
+    .nav-placeholder {
+      width: 42px;
+      height: 42px;
+      visibility: hidden;
     }
     .quarter-label {
       display: inline-flex;
@@ -159,6 +172,9 @@ export class PageToolbarComponent {
   @Input() quarterLabel: string | null = null;
   @Input() canGoToPreviousQuarter = false;
   @Input() canGoToNextQuarter = false;
+  @Input() showPreviousButton = true;
+  @Input() showNextButton = true;
+  @Input() showViewToggle = true;
   @Output() modeChange = new EventEmitter<'polaroid' | 'horizontal'>();
   @Output() homeClicked = new EventEmitter<void>();
   @Output() previousQuarterClicked = new EventEmitter<void>();
