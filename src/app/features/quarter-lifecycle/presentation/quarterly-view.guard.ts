@@ -26,10 +26,26 @@ export const quarterlyViewGuard: CanActivateFn = (route: ActivatedRouteSnapshot)
     });
   }
 
-  // Quarter liegt in der Vergangenheit → Archiv
-  if (quarterClock.isPastQuarter(quarterId, currentQuarterId)) {
+  const comparison = quarterClock.compareQuarterIds(quarterId, currentQuarterId);
+  
+  // Past quarter → Archiv
+  if (comparison < 0) {
     return inject(Router).createUrlTree(['/archive'], {
       queryParams: { returnTo: viewMode },
+    });
+  }
+
+  // Play-View: Nur current erlaubt, future → edit
+  if (viewMode === 'play' && comparison > 0) {
+    return inject(Router).createUrlTree(['/edit'], {
+      queryParams: { quarter: quarterId },
+    });
+  }
+
+  // Edit-View: Nur future erlaubt, current → play
+  if (viewMode === 'edit' && comparison === 0) {
+    return inject(Router).createUrlTree(['/play'], {
+      queryParams: { quarter: quarterId },
     });
   }
 
