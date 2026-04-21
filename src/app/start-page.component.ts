@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { ButtonComponent } from './shared/ui/atoms/button/button.component';
 import { BINGO_GAME_REPOSITORY } from './features/bingo-game/domain/bingo-game.repository';
 import { QuarterLifecycleService } from './features/quarter-lifecycle/application/quarter-lifecycle.service';
-import { QuarterClock } from './features/quarter-lifecycle/domain/quarter-clock';
+import { QuarterClock } from './core/domain';
 
 @Component({
   selector: 'app-start-page',
@@ -172,7 +172,9 @@ export class StartPageComponent {
   }
 
   goToEdit() {
-    this.router.navigate(['/edit']);
+    const currentQuarterId = this.quarterClock.getQuarterId(new Date());
+    const planningQuarterId = this.quarterClock.getNextQuarterIdFromQuarterId(currentQuarterId);
+    this.router.navigate(['/edit'], { queryParams: { quarter: planningQuarterId } });
   }
 
   goToPlay() {

@@ -3,7 +3,7 @@ import { StorageService } from '../../../core/services/storage.service';
 import { Challenge, isValidChallenge } from '../../../shared/domain/challenge';
 import { QuarterlyPlanData, QuarterlyPlanReader, QuarterlyPlanWriter } from '../domain/quarterly-plan.repository';
 import { Result } from '../../../shared/domain/result';
-import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
+import { QuarterClock } from '../../../core/domain';
 
 export interface PersistedQuarterlyPlan {
   id: string;

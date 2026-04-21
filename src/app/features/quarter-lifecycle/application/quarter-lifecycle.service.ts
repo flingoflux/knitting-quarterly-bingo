@@ -4,7 +4,7 @@ import { ARCHIVE_REPOSITORY } from '../../archive/domain/archive.repository';
 import { createArchiveEntry } from '../../archive/domain/archive-entry';
 import { QUARTERLY_PLAN_WRITER } from '../../board-configuration/domain/quarterly-plan.repository';
 import { BINGO_GAME_REPOSITORY } from '../../bingo-game/domain/bingo-game.repository';
-import { QuarterClock } from '../domain/quarter-clock';
+import { QuarterClock } from '../../../core/domain';
 import { createQuarterLifecycleState } from '../domain/quarter-lifecycle-state';
 import { QUARTER_LIFECYCLE_STATE_REPOSITORY } from '../domain/quarter-lifecycle-state.repository';
 

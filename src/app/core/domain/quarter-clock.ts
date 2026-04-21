@@ -32,6 +32,22 @@ export class QuarterClock {
     return `${year}-Q${quarter}`;
   }
 
+  getPreviousQuarterIdFromQuarterId(quarterId: string): string {
+    const match = quarterId.match(/(\d{4})-Q(\d)/);
+    if (!match) {
+      throw new Error(`Invalid quarter ID: ${quarterId}`);
+    }
+    let year = parseInt(match[1], 10);
+    let quarter = parseInt(match[2], 10);
+    if (quarter === 1) {
+      quarter = 4;
+      year -= 1;
+    } else {
+      quarter -= 1;
+    }
+    return `${year}-Q${quarter}`;
+  }
+
   compareQuarterIds(a: string, b: string): number {
     const parsedA = this.parseQuarterId(a);
     const parsedB = this.parseQuarterId(b);

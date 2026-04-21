@@ -1,4 +1,5 @@
-import { Component, ViewChild, inject, AfterViewInit, signal, computed } from '@angular/core';
+import { Component, ViewChild, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BingoGameService } from '../application/bingo-game.service';
@@ -8,8 +9,7 @@ import { ImageChangedEvent } from '../../board-configuration/presentation/compon
 import { ChallengeProgress } from '../domain/bingo-game';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
-import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
-import { KnittingQuarterly } from '../../quarter-lifecycle/domain/knitting-quarterly';
+import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
 
 @Component({
   selector: 'app-bingo-game',
@@ -24,7 +24,7 @@ import { KnittingQuarterly } from '../../quarter-lifecycle/domain/knitting-quart
         [canGoToNextQuarter]="canGoToNextQuarter()"
         (modeChange)="viewMode = $event"
         (homeClicked)="goHome()"
-        (previousQuarterClicked)="goToArchive()"
+        (previousQuarterClicked)="goToPreviousQuarter()"
         (nextQuarterClicked)="goToNextQuarter()"
       >
         <div class="status-grid" aria-label="Fortschritt">
@@ -140,12 +140,13 @@ import { KnittingQuarterly } from '../../quarter-lifecycle/domain/knitting-quart
     }
   `]
 })
-export class BingoGameComponent implements AfterViewInit {
+export class BingoGameComponent implements OnInit {
   @ViewChild('comparisonDialog') private readonly comparisonDialog!: ProjectComparisonDialogComponent;
   @ViewChild('playableBoard') private readonly playableBoardRef!: PlayableBoardComponent;
   state = inject(BingoGameService);
   router = inject(Router);
   route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
 
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
   private readonly quarterClock = new QuarterClock();
@@ -161,15 +162,19 @@ export class BingoGameComponent implements AfterViewInit {
   readonly isPreviewMode = computed(() => this.quarterly().isFuturePreview());
   readonly canGoToNextQuarter = computed(() => true);
 
-  ngAfterViewInit(): void {
-    const quarterParam = this.route.snapshot.queryParamMap.get('quarter');
-    if (quarterParam) {
-      this.displayedQuarterId.set(quarterParam);
-      this.state.setPreviewMode(this.quarterly().isFuturePreview(), quarterParam);
-    } else {
-      this.displayedQuarterId.set(this.actualCurrentQuarterId);
-      this.state.setPreviewMode(false);
-    }
+  ngOnInit(): void {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(queryParams => {
+        const quarterParam = queryParams.get('quarter');
+        if (quarterParam) {
+          this.displayedQuarterId.set(quarterParam);
+          this.state.setPreviewMode(this.quarterly().isFuturePreview(), quarterParam);
+        } else {
+          this.displayedQuarterId.set(this.actualCurrentQuarterId);
+          this.state.setPreviewMode(false);
+        }
+      });
   }
 
   get challenges(): ChallengeProgress[] {
@@ -192,13 +197,14 @@ export class BingoGameComponent implements AfterViewInit {
     this.router.navigate(['/']);
   }
 
-  goToArchive() {
-    void this.router.navigate(['/archive'], { queryParams: { returnTo: 'play' } });
-  }
-
   goToNextQuarter() {
     const nextQuarter = this.quarterClock.getNextQuarterIdFromQuarterId(this.displayedQuarterId());
-    void this.router.navigate(['/play'], { queryParams: { quarter: nextQuarter } });
+    void this.router.navigate(['/edit'], { queryParams: { quarter: nextQuarter } });
+  }
+
+  goToPreviousQuarter() {
+    const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
+    void this.router.navigate(['/play'], { queryParams: { quarter: previousQuarter } });
   }
 
   onToggle(i: number) {

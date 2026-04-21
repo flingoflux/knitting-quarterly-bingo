@@ -1,4 +1,5 @@
-import { Component, ViewChild, inject, AfterViewInit, signal, computed } from '@angular/core';
+import { Component, ViewChild, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BoardConfigurationService } from '../application/board-configuration.service';
@@ -9,8 +10,7 @@ import { Challenge } from '../../../shared/domain/challenge';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
-import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
-import { KnittingQuarterly } from '../../quarter-lifecycle/domain/knitting-quarterly';
+import { QuarterClock } from '../../../core/domain';
 
 @Component({
   selector: 'app-board-configuration',
@@ -25,22 +25,15 @@ import { KnittingQuarterly } from '../../quarter-lifecycle/domain/knitting-quart
         [canGoToNextQuarter]="canGoToNextQuarter()"
         (modeChange)="viewMode = $event"
         (homeClicked)="goHome()"
-        (previousQuarterClicked)="goToArchive()"
+        (previousQuarterClicked)="goToPreviousQuarter()"
         (nextQuarterClicked)="goToNextQuarter()"
       >
         <ng-container toolbar-actions>
           <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
             <kq-icon name="shuffle" [size]="22"/>
           </kq-button>
-          <kq-button variant="icon" (click)="playBingo()" title="Als Bingo spielen" ariaLabel="Als Bingo spielen">
-            <kq-icon name="play" [size]="22"/>
-          </kq-button>
         </ng-container>
       </kq-page-toolbar>
-
-      <div class="preview-banner" *ngIf="isPreviewMode()">
-        💡 Du schaust dir das <strong>{{ displayedQuarterId() }}</strong> an. Änderungen werden hier nicht gespeichert.
-      </div>
 
       <div class="edit-board-header" [class.compact-header]="viewMode === 'horizontal'">
         <p class="eyebrow">Knitting Quarterly - Board Studio</p>
@@ -69,16 +62,6 @@ import { KnittingQuarterly } from '../../quarter-lifecycle/domain/knitting-quart
       max-width: 72rem;
       margin: 0 auto;
       padding: 1.4rem 1.1rem 2rem;
-    }
-    .preview-banner {
-      background: #fff7ec;
-      border: 1px solid #c79362;
-      border-radius: 0.5rem;
-      padding: 0.9rem 1.1rem;
-      margin-bottom: 1.1rem;
-      color: #5a2d1a;
-      font-size: 0.95rem;
-      font-weight: 500;
     }
     .edit-board-header {
       text-align: center;
@@ -119,37 +102,31 @@ import { KnittingQuarterly } from '../../quarter-lifecycle/domain/knitting-quart
     }
   `],
 })
-export class BoardConfigurationComponent implements AfterViewInit {
+export class BoardConfigurationComponent implements OnInit {
   @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
   @ViewChild('editableBoard') private readonly editableBoardRef!: EditableBoardComponent;
   state = inject(BoardConfigurationService);
   router = inject(Router);
   route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
   private readonly quarterClock = new QuarterClock();
   readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
   readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
-  readonly quarterly = computed(() =>
-    KnittingQuarterly.create({
-      quarterId: this.displayedQuarterId(),
-      currentQuarterId: this.actualCurrentQuarterId,
-      boardDefinitionId: this.displayedQuarterId(),
-    })
-  );
-  readonly isPreviewMode = computed(() => this.quarterly().isFuturePreview());
   readonly canGoToNextQuarter = computed(() => true);
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
 
-  ngAfterViewInit(): void {
-    const quarterParam = this.route.snapshot.queryParamMap.get('quarter');
-    if (quarterParam) {
-      this.displayedQuarterId.set(quarterParam);
-      this.state.setPreviewMode(this.quarterly().isFuturePreview(), quarterParam);
-    } else {
-      this.displayedQuarterId.set(this.actualCurrentQuarterId);
-      this.state.setPreviewMode(false);
-    }
+  ngOnInit(): void {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(queryParams => {
+        const quarterParam = queryParams.get('quarter');
+        const planningQuarterId = quarterParam
+          ?? this.quarterClock.getNextQuarterIdFromQuarterId(this.actualCurrentQuarterId);
+        this.displayedQuarterId.set(planningQuarterId);
+        this.state.setPreviewMode(false, planningQuarterId);
+      });
   }
 
   get challenges(): Challenge[] {
@@ -160,23 +137,20 @@ export class BoardConfigurationComponent implements AfterViewInit {
     this.router.navigate(['/']);
   }
 
-  goToArchive() {
-    void this.router.navigate(['/archive'], { queryParams: { returnTo: 'edit' } });
-  }
-
   goToNextQuarter() {
     const nextQuarter = this.quarterClock.getNextQuarterIdFromQuarterId(this.displayedQuarterId());
     void this.router.navigate(['/edit'], { queryParams: { quarter: nextQuarter } });
+  }
+
+  goToPreviousQuarter() {
+    const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
+    void this.router.navigate(['/edit'], { queryParams: { quarter: previousQuarter } });
   }
 
   shuffle() {
     const challenges = this.challenges;
     const shuffled = shuffleArray(challenges);
     this.state.setChallenges(shuffled as Challenge[]);
-  }
-
-  playBingo() {
-    void this.router.navigate(['/play'], { queryParams: { quarter: this.displayedQuarterId() } });
   }
 
   onDragStart(i: number) {

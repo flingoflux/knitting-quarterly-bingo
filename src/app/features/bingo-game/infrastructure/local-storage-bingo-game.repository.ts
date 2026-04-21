@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { StorageService } from '../../../core/services/storage.service';
 import { BingoGameProgress, ChallengeProgress } from '../domain/bingo-game';
 import { BingoGameRepository } from '../domain/bingo-game.repository';
-import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
+import { QuarterClock } from '../../../core/domain';
 
 interface LegacyV2Progress {
   boardDefinitionId: string;

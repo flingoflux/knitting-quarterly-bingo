@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router, ActivatedRouteSnapshot } from '@angular/router';
 import { BingoGameService } from '../application/bingo-game.service';
 import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
-import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
+import { QuarterClock } from '../../../core/domain';
 
 export const bingoGameGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const bingoGameService = inject(BingoGameService);

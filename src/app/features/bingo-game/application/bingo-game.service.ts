@@ -4,7 +4,7 @@ import { QUARTERLY_PLAN_READER } from '../../board-configuration/domain/quarterl
 import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
 import { BingoGame, createBoardSignature } from '../domain/bingo-game';
 import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
-import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
+import { QuarterClock } from '../../../core/domain';
 
 @Injectable()
 export class BingoGameService {

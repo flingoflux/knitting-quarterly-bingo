@@ -2,7 +2,7 @@ import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { Challenge } from '../../../shared/domain/challenge';
 import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from '../domain/quarterly-plan.repository';
 import { QuarterlyPlan } from '../domain/quarterly-plan';
-import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
+import { QuarterClock } from '../../../core/domain';
 
 @Injectable()
 export class BoardConfigurationService {
