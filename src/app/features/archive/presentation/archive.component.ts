@@ -68,7 +68,7 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
     .feature-shell {
       max-width: 52rem;
       margin: 0 auto;
-      padding: 1.2rem 1rem 2rem;
+      padding: 1.4rem 1.1rem 2rem;
       color: #412a22;
     }
 
