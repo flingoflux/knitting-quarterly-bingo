@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ButtonComponent } from './shared/ui/atoms/button/button.component';
 import { BINGO_GAME_REPOSITORY } from './features/bingo-game/domain/bingo-game.repository';
+import { QuarterLifecycleService } from './features/quarter-lifecycle/application/quarter-lifecycle.service';
 
 @Component({
   selector: 'app-start-page',
@@ -155,6 +156,7 @@ import { BINGO_GAME_REPOSITORY } from './features/bingo-game/domain/bingo-game.r
 })
 export class StartPageComponent {
   private readonly bingoGameRepository = inject(BINGO_GAME_REPOSITORY);
+  private readonly quarterLifecycleService = inject(QuarterLifecycleService);
 
   readonly daysUntilNextQuarterly = this.getDaysUntilNextQuarterly(new Date());
   readonly hasBingo = this.hasAnyBingoFromStoredProgress();
@@ -163,7 +165,9 @@ export class StartPageComponent {
     this.hasBingo,
   );
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    this.quarterLifecycleService.ensureCurrentQuarter();
+  }
 
   goToEdit() {
     this.router.navigate(['/edit']);
