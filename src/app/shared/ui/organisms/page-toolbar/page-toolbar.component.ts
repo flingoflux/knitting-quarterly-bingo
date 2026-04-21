@@ -11,29 +11,30 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       <kq-icon name="home" [size]="22"/>
     </kq-button>
 
-    <div class="quarter-nav">
-      <kq-button
-        variant="icon"
-        [disabled]="!canGoToPreviousQuarter"
-        (click)="previousQuarterClicked.emit()"
-        title="Vorheriges Quartal"
-        ariaLabel="Vorheriges Quartal"
-      >
-        <kq-icon name="chevron-left" [size]="20"/>
-      </kq-button>
-      <span class="quarter-label">{{ quarterLabel }}</span>
-      <kq-button
-        variant="icon"
-        [disabled]="!canGoToNextQuarter"
-        (click)="nextQuarterClicked.emit()"
-        title="Naechstes Quartal"
-        ariaLabel="Naechstes Quartal"
-      >
-        <kq-icon name="chevron-right" [size]="20"/>
-      </kq-button>
+    <div class="toolbar-center">
+      <div class="quarter-nav">
+        <kq-button
+          variant="icon"
+          [disabled]="!canGoToPreviousQuarter"
+          (click)="previousQuarterClicked.emit()"
+          title="Vorheriges Quartal"
+          ariaLabel="Vorheriges Quartal"
+        >
+          <kq-icon name="chevron-left" [size]="20"/>
+        </kq-button>
+        <span class="quarter-label">{{ quarterLabel }}</span>
+        <kq-button
+          variant="icon"
+          [disabled]="!canGoToNextQuarter"
+          (click)="nextQuarterClicked.emit()"
+          title="Naechstes Quartal"
+          ariaLabel="Naechstes Quartal"
+        >
+          <kq-icon name="chevron-right" [size]="20"/>
+        </kq-button>
+      </div>
+      <ng-content />
     </div>
-
-    <ng-content />
 
     <div class="toolbar-end">
       <ng-content select="[toolbar-actions]" />
@@ -69,11 +70,17 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       margin-bottom: 1.1rem;
       flex-wrap: wrap;
     }
+    .toolbar-center {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex: 1;
+      justify-content: center;
+    }
     .quarter-nav {
       display: inline-flex;
       align-items: center;
       gap: 0.45rem;
-      margin-left: 0.2rem;
     }
     .quarter-label {
       display: inline-flex;
@@ -95,7 +102,6 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      margin-left: auto;
     }
     .view-toggle {
       display: flex;
