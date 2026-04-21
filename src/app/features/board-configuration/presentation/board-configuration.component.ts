@@ -10,6 +10,7 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
+import { KnittingQuarterly } from '../../quarter-lifecycle/domain/knitting-quarterly';
 
 @Component({
   selector: 'app-board-configuration',
@@ -128,7 +129,14 @@ export class BoardConfigurationComponent implements AfterViewInit {
   private readonly quarterClock = new QuarterClock();
   readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
   readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
-  readonly isPreviewMode = computed(() => this.displayedQuarterId() !== this.actualCurrentQuarterId);
+  readonly quarterly = computed(() =>
+    KnittingQuarterly.create({
+      quarterId: this.displayedQuarterId(),
+      currentQuarterId: this.actualCurrentQuarterId,
+      boardDefinitionId: this.displayedQuarterId(),
+    })
+  );
+  readonly isPreviewMode = computed(() => this.quarterly().isFuturePreview());
   readonly canGoToNextQuarter = computed(() => true);
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
@@ -137,7 +145,7 @@ export class BoardConfigurationComponent implements AfterViewInit {
     const quarterParam = this.route.snapshot.queryParamMap.get('quarter');
     if (quarterParam) {
       this.displayedQuarterId.set(quarterParam);
-      this.state.setPreviewMode(true, quarterParam);
+      this.state.setPreviewMode(this.quarterly().isFuturePreview(), quarterParam);
     } else {
       this.displayedQuarterId.set(this.actualCurrentQuarterId);
       this.state.setPreviewMode(false);
