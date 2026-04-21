@@ -31,17 +31,18 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
 
       <section *ngIf="hasEntries(); else emptyState" class="archive-list" aria-label="Archivierte Quartale">
         <article class="archive-card" *ngFor="let entry of entries()">
-          <header class="card-header">
+          <div class="status-grid" [attr.aria-label]="'Bingo Status: ' + entry.completedCount + ' von ' + entry.totalCount">
+            <div
+              *ngFor="let d of entry.completed; let i = index"
+              class="status-cell"
+              [class.done]="d"
+              [class.bingo]="isCellInBingo(i, entry.bingoCells)"
+            ></div>
+          </div>
+          <div class="card-content">
             <h3>{{ entry.quarterId }}</h3>
-            <span class="badge" [class.badge--success]="entry.hasBingo">
-              {{ entry.hasBingo ? 'Bingo geschafft' : 'Kein Bingo' }}
-            </span>
-          </header>
-          <p class="meta">{{ entry.completedCount }}/{{ entry.totalCount }} Challenges erledigt</p>
-          <p class="meta" *ngIf="entry.completedChallengeNames.length > 0">
-            Erledigt: {{ completedPreview(entry) }}
-          </p>
-          <p class="meta" *ngIf="entry.completedChallengeNames.length === 0">Noch keine erledigten Challenges.</p>
+            <p class="meta">{{ entry.completedCount }}/{{ entry.totalCount }} Challenges geschafft</p>
+          </div>
         </article>
       </section>
 
@@ -114,50 +115,57 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
       border-radius: 16px;
       background: #fff9f2;
       padding: 0.85rem 0.95rem;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1rem;
+      align-items: start;
     }
 
-    .card-header {
+    .card-content {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.7rem;
-      margin-bottom: 0.35rem;
+      flex-direction: column;
+      gap: 0.3rem;
     }
 
     h3 {
       margin: 0;
       font-size: 1rem;
+      line-height: 1.2;
       color: #5a2d1a;
     }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      border-radius: 999px;
-      border: 1px solid #cf9c84;
-      color: #8a3d23;
-      background: #fff;
-      font-size: 0.76rem;
-      font-weight: 700;
-      padding: 0.22rem 0.55rem;
-      white-space: nowrap;
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 14px);
+      grid-template-rows: repeat(4, 8px);
+      gap: 3px;
+      margin-top: 0.15rem;
     }
 
-    .badge--success {
-      border-color: #3e7b2f;
-      color: #2f5f24;
-      background: #eef8eb;
+    .status-cell {
+      width: 14px;
+      height: 8px;
+      border-radius: 2px;
+      background: #fff;
+      border: 1.5px solid #d0b08a;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .status-cell.done {
+      background: #145906;
+      border-color: #145906;
+    }
+
+    .status-cell.bingo {
+      background: #145906;
+      border-color: #145906;
     }
 
     .meta {
       margin: 0;
-      font-size: 0.9rem;
+      font-size: 0.86rem;
       line-height: 1.35;
-      color: #5f4a3f;
-    }
-
-    .meta + .meta {
-      margin-top: 0.28rem;
+      color: #8a7766;
     }
 
     .empty-state {
@@ -186,7 +194,7 @@ export class ArchiveComponent {
     void this.router.navigate([this.returnTarget === 'edit' ? '/edit' : '/play']);
   }
 
-  completedPreview(entry: ArchiveEntry): string {
-    return entry.completedChallengeNames.slice(0, 3).join(', ');
+  isCellInBingo(index: number, bingoCells: number[]): boolean {
+    return bingoCells.includes(index);
   }
 }

@@ -11,6 +11,8 @@ export const DEFAULT_ARCHIVE_ENTRIES: ArchiveEntry[] = [
     totalCount: 16,
     hasBingo: true,
     completedChallengeNames: ['Socken', 'Cardigan', 'Fair Isle', 'Restesocken'],
+    completed: [true, true, false, true, true, true, true, true, false, true, false, false, true, false, true, true],
+    bingoCells: [0, 1, 3, 4, 5, 6, 7, 9, 12, 14, 15],
   },
   {
     id: 'prototype-2025-q4',
@@ -22,6 +24,8 @@ export const DEFAULT_ARCHIVE_ENTRIES: ArchiveEntry[] = [
     totalCount: 16,
     hasBingo: false,
     completedChallengeNames: ['Muetze', 'Shawl', 'Mini-Sweater'],
+    completed: [true, false, true, false, false, true, false, true, true, false, false, true, false, false, true, false],
+    bingoCells: [],
   },
   {
     id: 'prototype-2025-q3',
@@ -33,5 +37,7 @@ export const DEFAULT_ARCHIVE_ENTRIES: ArchiveEntry[] = [
     totalCount: 16,
     hasBingo: true,
     completedChallengeNames: ['Top', 'Summer Tee', 'Lace Socks', 'Baby Blanket'],
+    completed: [true, true, true, true, true, false, true, true, true, true, false, true, true, true, false, true],
+    bingoCells: [0, 1, 2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 15],
   },
 ];
