@@ -11,6 +11,28 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       <kq-icon name="home" [size]="22"/>
     </kq-button>
 
+    <div class="quarter-nav">
+      <kq-button
+        variant="icon"
+        [disabled]="!canGoToPreviousQuarter"
+        (click)="previousQuarterClicked.emit()"
+        title="Vorheriges Quartal"
+        ariaLabel="Vorheriges Quartal"
+      >
+        <kq-icon name="chevron-left" [size]="20"/>
+      </kq-button>
+      <span class="quarter-label">{{ quarterLabel }}</span>
+      <kq-button
+        variant="icon"
+        [disabled]="!canGoToNextQuarter"
+        (click)="nextQuarterClicked.emit()"
+        title="Naechstes Quartal"
+        ariaLabel="Naechstes Quartal"
+      >
+        <kq-icon name="chevron-right" [size]="20"/>
+      </kq-button>
+    </div>
+
     <ng-content select="[toolbar-actions]" />
 
     <div class="view-toggle" role="group" aria-label="Kartenansicht">
@@ -44,6 +66,29 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       gap: 0.6rem;
       align-items: center;
       margin-bottom: 1.1rem;
+      flex-wrap: wrap;
+    }
+    .quarter-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-left: 0.2rem;
+    }
+    .quarter-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 6.6rem;
+      height: 42px;
+      padding: 0 0.9rem;
+      border-radius: 999px;
+      border: 1px solid var(--kq-outline, #c79362);
+      background: #fff7ec;
+      color: #7b371f;
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
     .view-toggle {
       display: flex;
@@ -51,7 +96,7 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       border: 1px solid var(--kq-outline, #c79362);
       border-radius: 999px;
       overflow: hidden;
-      margin-left: 0.3rem;
+      margin-left: auto;
     }
     .mode-btn {
       background: #fff7ec;
@@ -83,6 +128,11 @@ import { ButtonComponent } from '../../atoms/button/button.component';
 })
 export class PageToolbarComponent {
   @Input() mode: 'polaroid' | 'horizontal' = 'polaroid';
+  @Input() quarterLabel: string | null = null;
+  @Input() canGoToPreviousQuarter = false;
+  @Input() canGoToNextQuarter = false;
   @Output() modeChange = new EventEmitter<'polaroid' | 'horizontal'>();
   @Output() homeClicked = new EventEmitter<void>();
+  @Output() previousQuarterClicked = new EventEmitter<void>();
+  @Output() nextQuarterClicked = new EventEmitter<void>();
 }

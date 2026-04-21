@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
+import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
 
 @Component({
   selector: 'app-board-configuration',
@@ -16,7 +17,14 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
   imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent],
   template: `
     <div class="feature-shell">
-      <kq-page-toolbar [mode]="viewMode" (modeChange)="viewMode = $event" (homeClicked)="goHome()">
+      <kq-page-toolbar
+        [mode]="viewMode"
+        [quarterLabel]="currentQuarterId"
+        [canGoToPreviousQuarter]="true"
+        (modeChange)="viewMode = $event"
+        (homeClicked)="goHome()"
+        (previousQuarterClicked)="goToArchive()"
+      >
         <ng-container toolbar-actions>
           <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
             <kq-icon name="shuffle" [size]="22"/>
@@ -100,6 +108,7 @@ export class BoardConfigurationComponent {
   state = inject(BoardConfigurationService);
   router = inject(Router);
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
+  readonly currentQuarterId = new QuarterClock().getQuarterId(new Date());
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
 
@@ -109,6 +118,10 @@ export class BoardConfigurationComponent {
 
   goHome() {
     this.router.navigate(['/']);
+  }
+
+  goToArchive() {
+    void this.router.navigate(['/archive'], { queryParams: { returnTo: 'edit' } });
   }
 
   shuffle() {

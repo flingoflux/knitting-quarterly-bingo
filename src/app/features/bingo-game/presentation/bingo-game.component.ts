@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { ChallengeProgress } from '../domain/bingo-game';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
+import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
 
 @Component({
   selector: 'app-bingo-game',
@@ -15,7 +16,14 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
   imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent],
   template: `
     <div class="feature-shell">
-      <kq-page-toolbar [mode]="viewMode" (modeChange)="viewMode = $event" (homeClicked)="goHome()">
+      <kq-page-toolbar
+        [mode]="viewMode"
+        [quarterLabel]="currentQuarterId"
+        [canGoToPreviousQuarter]="true"
+        (modeChange)="viewMode = $event"
+        (homeClicked)="goHome()"
+        (previousQuarterClicked)="goToArchive()"
+      >
         <div class="status-grid" aria-label="Fortschritt">
           <div
             *ngFor="let d of completed; let i = index"
@@ -122,6 +130,7 @@ export class BingoGameComponent {
   router = inject(Router);
 
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
+  readonly currentQuarterId = new QuarterClock().getQuarterId(new Date());
 
   get challenges(): ChallengeProgress[] {
     return this.state.challenges();
@@ -141,6 +150,10 @@ export class BingoGameComponent {
 
   goHome() {
     this.router.navigate(['/']);
+  }
+
+  goToArchive() {
+    void this.router.navigate(['/archive'], { queryParams: { returnTo: 'play' } });
   }
 
   onToggle(i: number) {

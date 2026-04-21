@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ArchiveOverviewService } from '../application/archive-overview.service';
 import { ArchiveEntry } from '../domain/archive-entry';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
@@ -16,6 +16,18 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
         <kq-button variant="icon" (click)="goHome()" title="Zur Startseite" ariaLabel="Zur Startseite">
           <kq-icon name="home" [size]="22"/>
         </kq-button>
+
+        <div class="quarter-nav">
+          <span class="quarter-label">Archiv</span>
+          <kq-button
+            variant="icon"
+            (click)="goToCurrentQuarter()"
+            [title]="returnTarget === 'edit' ? 'Zum aktuellen Planungsquartal' : 'Zum aktuellen Spielquartal'"
+            [ariaLabel]="returnTarget === 'edit' ? 'Zum aktuellen Planungsquartal' : 'Zum aktuellen Spielquartal'"
+          >
+            <kq-icon name="chevron-right" [size]="20"/>
+          </kq-button>
+        </div>
       </header>
 
       <section class="archive-header">
@@ -61,7 +73,33 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
     .top-row {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .quarter-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .quarter-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 6.6rem;
+      height: 42px;
+      padding: 0 0.9rem;
+      border-radius: 999px;
+      border: 1px solid #c79362;
+      background: #fff7ec;
+      color: #7b371f;
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
     }
 
     .archive-header {
@@ -170,13 +208,19 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 export class ArchiveComponent {
   private readonly state = inject(ArchiveOverviewService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly entries = this.state.entries;
   readonly hasEntries = this.state.hasEntries;
   readonly isShowingPrototype = this.state.isShowingPrototype;
+  readonly returnTarget = this.route.snapshot.queryParamMap.get('returnTo') === 'edit' ? 'edit' : 'play';
 
   goHome(): void {
     void this.router.navigate(['/']);
+  }
+
+  goToCurrentQuarter(): void {
+    void this.router.navigate([this.returnTarget === 'edit' ? '/edit' : '/play']);
   }
 
   completedPreview(entry: ArchiveEntry): string {
