@@ -1,0 +1,169 @@
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { ArchiveOverviewService } from '../application/archive-overview.service';
+import { ArchiveEntry } from '../domain/archive-entry';
+import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
+import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
+
+@Component({
+  selector: 'app-archive',
+  standalone: true,
+  imports: [CommonModule, ButtonComponent, IconComponent],
+  template: `
+    <div class="feature-shell">
+      <header class="top-row">
+        <kq-button variant="icon" (click)="goHome()" title="Zur Startseite" ariaLabel="Zur Startseite">
+          <kq-icon name="home" [size]="22"/>
+        </kq-button>
+      </header>
+
+      <section class="archive-header">
+        <p class="eyebrow">Knitting Quarterly - Archiv</p>
+        <h2>Bisher erledigte Runden</h2>
+        <p class="subtitle">Miniuebersicht abgeschlossener Bingo-Boards.</p>
+      </section>
+
+      <section *ngIf="hasEntries(); else emptyState" class="archive-list" aria-label="Archivierte Quartale">
+        <article class="archive-card" *ngFor="let entry of entries()">
+          <header class="card-header">
+            <h3>{{ entry.quarterId }}</h3>
+            <span class="badge" [class.badge--success]="entry.hasBingo">
+              {{ entry.hasBingo ? 'Bingo geschafft' : 'Kein Bingo' }}
+            </span>
+          </header>
+          <p class="meta">{{ entry.completedCount }}/{{ entry.totalCount }} Challenges erledigt</p>
+          <p class="meta" *ngIf="entry.completedChallengeNames.length > 0">
+            Erledigt: {{ completedPreview(entry) }}
+          </p>
+          <p class="meta" *ngIf="entry.completedChallengeNames.length === 0">Noch keine erledigten Challenges.</p>
+        </article>
+      </section>
+
+      <ng-template #emptyState>
+        <section class="empty-state">
+          <p>Noch keine archivierten Runden vorhanden.</p>
+        </section>
+      </ng-template>
+    </div>
+  `,
+  styles: [`
+    .feature-shell {
+      max-width: 52rem;
+      margin: 0 auto;
+      padding: 1.2rem 1rem 2rem;
+      color: #412a22;
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .archive-header {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: #8f3b22;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+    }
+
+    h2 {
+      margin: 0.4rem 0 0;
+      font-size: clamp(1.4rem, 2.5vw, 2rem);
+      color: #5a2d1a;
+      text-wrap: balance;
+    }
+
+    .subtitle {
+      margin: 0.55rem auto 0;
+      color: #6c5445;
+      font-size: 0.98rem;
+      max-width: 36rem;
+    }
+
+    .archive-list {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .archive-card {
+      border: 1px solid #e6c8b4;
+      border-radius: 16px;
+      background: #fff9f2;
+      padding: 0.85rem 0.95rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.7rem;
+      margin-bottom: 0.35rem;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: #5a2d1a;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid #cf9c84;
+      color: #8a3d23;
+      background: #fff;
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 0.22rem 0.55rem;
+      white-space: nowrap;
+    }
+
+    .badge--success {
+      border-color: #3e7b2f;
+      color: #2f5f24;
+      background: #eef8eb;
+    }
+
+    .meta {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.35;
+      color: #5f4a3f;
+    }
+
+    .meta + .meta {
+      margin-top: 0.28rem;
+    }
+
+    .empty-state {
+      margin-top: 1rem;
+      text-align: center;
+      color: #6c5445;
+    }
+  `],
+})
+export class ArchiveComponent {
+  private readonly state = inject(ArchiveOverviewService);
+  private readonly router = inject(Router);
+
+  readonly entries = this.state.entries;
+  readonly hasEntries = this.state.hasEntries;
+
+  goHome(): void {
+    void this.router.navigate(['/']);
+  }
+
+  completedPreview(entry: ArchiveEntry): string {
+    return entry.completedChallengeNames.slice(0, 3).join(', ');
+  }
+}

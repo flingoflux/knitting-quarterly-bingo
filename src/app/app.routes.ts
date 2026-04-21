@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { bingoGameGuard } from './features/bingo-game/presentation/bingo-game.guard';
 import { BingoGameService } from './features/bingo-game/application/bingo-game.service';
 import { BoardConfigurationService } from './features/board-configuration/application/board-configuration.service';
+import { ArchiveOverviewService } from './features/archive/application/archive-overview.service';
 
 export const routes: Routes = [
   {
@@ -19,5 +20,10 @@ export const routes: Routes = [
     canActivate: [bingoGameGuard],
     providers: [BingoGameService],
     loadComponent: () => import('./features/bingo-game/presentation/bingo-game.component').then(m => m.BingoGameComponent),
+  },
+  {
+    path: 'archive',
+    providers: [ArchiveOverviewService],
+    loadComponent: () => import('./features/archive/presentation/archive.component').then(m => m.ArchiveComponent),
   },
 ];
