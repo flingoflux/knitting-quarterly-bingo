@@ -144,7 +144,14 @@ export class BoardConfigurationComponent implements OnInit {
 
   goToPreviousQuarter() {
     const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
-    void this.router.navigate(['/edit'], { queryParams: { quarter: previousQuarter } });
+    const currentQuarter = this.quarterClock.getQuarterId(new Date());
+    
+    // Past quarter → Archive
+    if (this.quarterClock.isPastQuarter(previousQuarter, currentQuarter)) {
+      void this.router.navigate(['/archive'], { queryParams: { returnTo: 'edit' } });
+    } else {
+      void this.router.navigate(['/edit'], { queryParams: { quarter: previousQuarter } });
+    }
   }
 
   shuffle() {
