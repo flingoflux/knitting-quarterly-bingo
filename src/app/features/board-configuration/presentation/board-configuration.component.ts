@@ -21,7 +21,7 @@ import { QuarterClock } from '../../../core/domain';
       <kq-page-toolbar
         [mode]="viewMode"
         [quarterLabel]="displayedQuarterId()"
-        [canGoToPreviousQuarter]="true"
+        [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
         [canGoToNextQuarter]="canGoToNextQuarter()"
         (modeChange)="viewMode = $event"
         (homeClicked)="goHome()"
@@ -114,6 +114,10 @@ export class BoardConfigurationComponent implements OnInit {
   readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
   readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
   readonly canGoToNextQuarter = computed(() => true);
+  readonly canGoToPreviousQuarter = computed(() => {
+    const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
+    return !this.quarterClock.isPastQuarter(previousQuarter, this.actualCurrentQuarterId);
+  });
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
 
