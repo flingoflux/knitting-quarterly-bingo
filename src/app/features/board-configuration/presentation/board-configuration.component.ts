@@ -140,19 +140,12 @@ export class BoardConfigurationComponent implements OnInit {
 
   goToNextQuarter() {
     const nextQuarter = this.quarterClock.getNextQuarterIdFromQuarterId(this.displayedQuarterId());
-    void this.router.navigate(['/edit'], { queryParams: { quarter: nextQuarter } });
+    void this.router.navigate(['/quarterly'], { queryParams: { quarter: nextQuarter } });
   }
 
   goToPreviousQuarter() {
     const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
-    const currentQuarter = this.quarterClock.getQuarterId(new Date());
-    
-    // Past quarter → Archive
-    if (this.quarterClock.isPastQuarter(previousQuarter, currentQuarter)) {
-      void this.router.navigate(['/archive'], { queryParams: { returnTo: 'edit' } });
-    } else {
-      void this.router.navigate(['/edit'], { queryParams: { quarter: previousQuarter } });
-    }
+    void this.router.navigate(['/quarterly'], { queryParams: { quarter: previousQuarter } });
   }
 
   shuffle() {

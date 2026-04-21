@@ -174,11 +174,12 @@ export class StartPageComponent {
   goToEdit() {
     const currentQuarterId = this.quarterClock.getQuarterId(new Date());
     const planningQuarterId = this.quarterClock.getNextQuarterIdFromQuarterId(currentQuarterId);
-    this.router.navigate(['/edit'], { queryParams: { quarter: planningQuarterId } });
+    this.router.navigate(['/quarterly'], { queryParams: { quarter: planningQuarterId } });
   }
 
   goToPlay() {
-    this.router.navigate(['/play']);
+    const currentQuarterId = this.quarterClock.getQuarterId(new Date());
+    this.router.navigate(['/quarterly'], { queryParams: { quarter: currentQuarterId } });
   }
 
   goToArchive() {

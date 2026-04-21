@@ -200,28 +200,12 @@ export class BingoGameComponent implements OnInit {
 
   goToNextQuarter() {
     const nextQuarter = this.quarterClock.getNextQuarterIdFromQuarterId(this.displayedQuarterId());
-    void this.router.navigate(['/edit'], { queryParams: { quarter: nextQuarter } });
+    void this.router.navigate(['/quarterly'], { queryParams: { quarter: nextQuarter } });
   }
 
   goToPreviousQuarter() {
     const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
-    const currentQuarter = this.quarterClock.getQuarterId(new Date());
-    
-    console.log('[BingoGame] goToPreviousQuarter:', {
-      displayedQuarter: this.displayedQuarterId(),
-      previousQuarter,
-      currentQuarter,
-      isPast: this.quarterClock.isPastQuarter(previousQuarter, currentQuarter),
-    });
-    
-    // Past quarter → Archive
-    if (this.quarterClock.isPastQuarter(previousQuarter, currentQuarter)) {
-      console.log('[BingoGame] → Navigate to /archive');
-      void this.router.navigate(['/archive'], { queryParams: { returnTo: 'play' } });
-    } else {
-      console.log('[BingoGame] → Navigate to /play with quarter:', previousQuarter);
-      void this.router.navigate(['/play'], { queryParams: { quarter: previousQuarter } });
-    }
+    void this.router.navigate(['/quarterly'], { queryParams: { quarter: previousQuarter } });
   }
 
   onToggle(i: number) {
