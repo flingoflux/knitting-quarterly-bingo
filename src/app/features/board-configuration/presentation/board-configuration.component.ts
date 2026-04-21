@@ -10,36 +10,39 @@ import { Challenge } from '../../../shared/domain/challenge';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
+import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
 import { QuarterClock } from '../../../core/domain';
 
 @Component({
   selector: 'app-board-configuration',
   standalone: true,
-  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent],
+  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent, BoardToolbarComponent],
   template: `
     <div class="feature-shell">
       <kq-page-toolbar
-        [mode]="viewMode"
+        [maxWidth]="viewMode === 'horizontal' ? '58rem' : '52rem'"
         [quarterLabel]="displayedQuarterId()"
         [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
         [showNextButton]="canGoToNextQuarter()"
-        (modeChange)="viewMode = $event"
         (homeClicked)="goHome()"
         (previousQuarterClicked)="goToPreviousQuarter()"
         (nextQuarterClicked)="goToNextQuarter()"
-      >
-        <ng-container toolbar-actions>
-          <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
-            <kq-icon name="shuffle" [size]="22"/>
-          </kq-button>
-        </ng-container>
-      </kq-page-toolbar>
+      ></kq-page-toolbar>
 
       <div class="edit-board-header" [class.compact-header]="viewMode === 'horizontal'">
         <p class="eyebrow">Knitting Quarterly - Board Studio</p>
         <h2>Challenges und Projekte planen</h2>
         <p class="subtitle" *ngIf="viewMode === 'polaroid'">Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden.</p>
       </div>
+
+      <kq-board-toolbar
+        [mode]="viewMode"
+        (modeChange)="viewMode = $event"
+      >
+        <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
+          <kq-icon name="shuffle" [size]="22"/>
+        </kq-button>
+      </kq-board-toolbar>
 
       <app-editable-board
         #editableBoard

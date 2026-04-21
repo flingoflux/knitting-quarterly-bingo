@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 export type KqButtonVariant = 'primary' | 'secondary' | 'icon' | 'ghost';
+export type KqButtonSize = 'regular' | 'sm';
 
 /**
  * Allgemeiner Button-Baustein.
@@ -17,7 +18,7 @@ export type KqButtonVariant = 'primary' | 'secondary' | 'icon' | 'ghost';
       [title]="title ?? ''"
       [attr.aria-label]="ariaLabel ?? title ?? null"
       [disabled]="disabled"
-      [class]="'kq-btn kq-btn--' + variant"
+      [class]="buttonClasses"
     >
       <ng-content />
     </button>
@@ -61,6 +62,10 @@ export type KqButtonVariant = 'primary' | 'secondary' | 'icon' | 'ghost';
       transform: translateY(-1px);
       background: #fff0db;
       box-shadow: 0 8px 14px rgba(96, 58, 30, 0.16);
+    }
+    .kq-btn--icon-sm {
+      width: 32px;
+      height: 32px;
     }
 
     /* Primary */
@@ -127,8 +132,17 @@ export type KqButtonVariant = 'primary' | 'secondary' | 'icon' | 'ghost';
 })
 export class ButtonComponent {
   @Input() variant: KqButtonVariant = 'primary';
+  @Input() size: KqButtonSize = 'regular';
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() title?: string;
   @Input() ariaLabel?: string;
   @Input() disabled = false;
+
+  get buttonClasses(): string {
+    const classes = ['kq-btn', `kq-btn--${this.variant}`];
+    if (this.variant === 'icon' && this.size === 'sm') {
+      classes.push('kq-btn--icon-sm');
+    }
+    return classes.join(' ');
+  }
 }

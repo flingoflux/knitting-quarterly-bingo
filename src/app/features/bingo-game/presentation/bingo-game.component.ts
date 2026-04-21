@@ -9,34 +9,24 @@ import { ImageChangedEvent } from '../../board-configuration/presentation/compon
 import { ChallengeProgress } from '../domain/bingo-game';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
+import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
 import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
 
 @Component({
   selector: 'app-bingo-game',
   standalone: true,
-  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent],
+  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent, BoardToolbarComponent],
   template: `
     <div class="feature-shell">
       <kq-page-toolbar
-        [mode]="viewMode"
+        [maxWidth]="viewMode === 'horizontal' ? '58rem' : '52rem'"
         [quarterLabel]="displayedQuarterId()"
         [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
         [showNextButton]="canGoToNextQuarter()"
-        (modeChange)="viewMode = $event"
         (homeClicked)="goHome()"
         (previousQuarterClicked)="goToPreviousQuarter()"
         (nextQuarterClicked)="goToNextQuarter()"
-      >
-        <div toolbar-actions class="status-grid" aria-label="Fortschritt">
-          <div
-            *ngFor="let d of completed; let i = index"
-            class="status-cell"
-            [class.done]="d"
-            [class.bingo]="isCellInBingo(i)"
-            [attr.title]="challenges[i]?.name"
-          ></div>
-        </div>
-      </kq-page-toolbar>
+      ></kq-page-toolbar>
 
       <div class="preview-banner" *ngIf="isPreviewMode()">
         💡 Du schaust dir das <strong>{{ displayedQuarterId() }}</strong> an. Fortschritt wird hier nicht gespeichert.
@@ -47,6 +37,21 @@ import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
         <h2>Happy crafting</h2>
         <p class="subtitle" *ngIf="viewMode === 'polaroid'">Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen.</p>
       </div>
+
+      <kq-board-toolbar
+        [mode]="viewMode"
+        (modeChange)="viewMode = $event"
+      >
+        <div class="status-grid" aria-label="Fortschritt">
+          <div
+            *ngFor="let d of completed; let i = index"
+            class="status-cell"
+            [class.done]="d"
+            [class.bingo]="isCellInBingo(i)"
+            [attr.title]="challenges[i]?.name"
+          ></div>
+        </div>
+      </kq-board-toolbar>
 
       <app-playable-board
         #playableBoard
@@ -82,8 +87,7 @@ import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
       grid-template-columns: repeat(4, 14px);
       grid-template-rows: repeat(4, 8px);
       gap: 3px;
-      align-self: center;
-      margin-left: 0.4rem;
+      margin: 0;
     }
     .status-cell {
       width: 14px;

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
 
@@ -18,12 +18,13 @@ import { ButtonComponent } from '../../atoms/button/button.component';
         @if (showPreviousButton) {
           <kq-button
             variant="icon"
+            size="sm"
             [disabled]="!canGoToPreviousQuarter"
             (click)="previousQuarterClicked.emit()"
             title="Vorheriges Quartal"
             ariaLabel="Vorheriges Quartal"
           >
-            <kq-icon name="chevron-left" [size]="16"/>
+            <kq-icon name="chevron-left" [size]="12"/>
           </kq-button>
         } @else {
           <span class="nav-placeholder" aria-hidden="true"></span>
@@ -32,11 +33,12 @@ import { ButtonComponent } from '../../atoms/button/button.component';
         @if (showNextButton) {
           <kq-button
             variant="icon"
+            size="sm"
             (click)="nextQuarterClicked.emit()"
             title="Naechstes Quartal"
             ariaLabel="Naechstes Quartal"
           >
-            <kq-icon name="chevron-right" [size]="16"/>
+            <kq-icon name="chevron-right" [size]="12"/>
           </kq-button>
         } @else {
           <span class="nav-placeholder" aria-hidden="true"></span>
@@ -47,30 +49,6 @@ import { ButtonComponent } from '../../atoms/button/button.component';
 
     <div class="toolbar-end">
       <ng-content select="[toolbar-actions]" />
-      @if (showViewToggle) {
-        <div class="view-toggle" role="group" aria-label="Kartenansicht">
-        <button
-          class="mode-btn"
-          type="button"
-          [class.active]="mode === 'polaroid'"
-          (click)="modeChange.emit('polaroid')"
-          title="Polaroid"
-          aria-label="Polaroid-Ansicht"
-        >
-          <kq-icon name="polaroid" [size]="17"/>
-        </button>
-        <button
-          class="mode-btn"
-          type="button"
-          [class.active]="mode === 'horizontal'"
-          (click)="modeChange.emit('horizontal')"
-          title="Kompaktansicht – alles auf einen Blick"
-          aria-label="Kompaktansicht"
-        >
-          <kq-icon name="horizontal" [size]="17"/>
-        </button>
-        </div>
-      }
     </div>
   `,
   styles: [`
@@ -80,6 +58,9 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       gap: 0.6rem;
       align-items: center;
       margin-bottom: 1.1rem;
+      max-width: 52rem;
+      margin-left: auto;
+      margin-right: auto;
     }
     .toolbar-left {
       display: flex;
@@ -101,7 +82,7 @@ import { ButtonComponent } from '../../atoms/button/button.component';
     .quarter-nav {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.3rem;
     }
     .quarter-nav kq-button {
       opacity: 0.75;
@@ -110,23 +91,24 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       opacity: 1;
     }
     .nav-placeholder {
-      width: 42px;
-      height: 42px;
+      width: 32px;
+      height: 32px;
       visibility: hidden;
     }
     .quarter-label {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 10.5rem;
-      height: 36px;
+      min-width: 7.4rem;
+      height: 28px;
+      padding: 0 0.7rem;
       border-radius: 999px;
       border: 1px solid rgba(199, 147, 98, 0.5);
       background: rgba(255, 247, 236, 0.6);
       color: #7b371f;
-      font-size: 0.78rem;
+      font-size: 0.68rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
     }
     .toolbar-end {
@@ -134,39 +116,6 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       align-items: center;
       gap: 0.6rem;
       justify-content: flex-end;
-    }
-    .view-toggle {
-      display: flex;
-      height: 42px;
-      border: 1px solid var(--kq-outline, #c79362);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-    .mode-btn {
-      background: #fff7ec;
-      color: #7b371f;
-      border: none;
-      cursor: pointer;
-      width: 42px;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.18s ease, color 0.18s ease;
-    }
-    .mode-btn + .mode-btn {
-      border-left: 1px solid var(--kq-outline, #c79362);
-    }
-    .mode-btn:hover:not(.active) {
-      background: #fff0db;
-    }
-    .mode-btn.active {
-      background: linear-gradient(135deg, #8f3b22 0%, #c46e35 100%);
-      color: #fff7ec;
-    }
-    .mode-btn:focus-visible {
-      outline: 3px solid rgba(196, 110, 53, 0.3);
-      outline-offset: -2px;
     }
     @media (max-width: 768px) {
       :host {
@@ -181,14 +130,17 @@ import { ButtonComponent } from '../../atoms/button/button.component';
   `]
 })
 export class PageToolbarComponent {
-  @Input() mode: 'polaroid' | 'horizontal' = 'polaroid';
   @Input() quarterLabel: string | null = null;
   @Input() canGoToPreviousQuarter = false;
   @Input() showPreviousButton = true;
   @Input() showNextButton = true;
-  @Input() showViewToggle = true;
-  @Output() modeChange = new EventEmitter<'polaroid' | 'horizontal'>();
+  @Input() maxWidth = '52rem';
   @Output() homeClicked = new EventEmitter<void>();
   @Output() previousQuarterClicked = new EventEmitter<void>();
   @Output() nextQuarterClicked = new EventEmitter<void>();
+
+  @HostBinding('style.max-width')
+  get hostMaxWidth(): string {
+    return this.maxWidth;
+  }
 }

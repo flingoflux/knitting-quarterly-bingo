@@ -15,7 +15,6 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
         quarterLabel="Archiv"
         [showPreviousButton]="false"
         [showNextButton]="true"
-        [showViewToggle]="false"
         (homeClicked)="goHome()"
         (nextQuarterClicked)="goToCurrentQuarter()"
       />
