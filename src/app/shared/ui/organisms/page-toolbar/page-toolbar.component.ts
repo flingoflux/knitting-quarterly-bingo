@@ -33,32 +33,33 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       </kq-button>
     </div>
 
-    <ng-content select="[toolbar-actions]" />
-
-    <div class="view-toggle" role="group" aria-label="Kartenansicht">
-      <button
-        class="mode-btn"
-        type="button"
-        [class.active]="mode === 'polaroid'"
-        (click)="modeChange.emit('polaroid')"
-        title="Polaroid"
-        aria-label="Polaroid-Ansicht"
-      >
-        <kq-icon name="polaroid" [size]="17"/>
-      </button>
-      <button
-        class="mode-btn"
-        type="button"
-        [class.active]="mode === 'horizontal'"
-        (click)="modeChange.emit('horizontal')"
-        title="Kompaktansicht – alles auf einen Blick"
-        aria-label="Kompaktansicht"
-      >
-        <kq-icon name="horizontal" [size]="17"/>
-      </button>
-    </div>
-
     <ng-content />
+
+    <div class="toolbar-end">
+      <ng-content select="[toolbar-actions]" />
+      <div class="view-toggle" role="group" aria-label="Kartenansicht">
+        <button
+          class="mode-btn"
+          type="button"
+          [class.active]="mode === 'polaroid'"
+          (click)="modeChange.emit('polaroid')"
+          title="Polaroid"
+          aria-label="Polaroid-Ansicht"
+        >
+          <kq-icon name="polaroid" [size]="17"/>
+        </button>
+        <button
+          class="mode-btn"
+          type="button"
+          [class.active]="mode === 'horizontal'"
+          (click)="modeChange.emit('horizontal')"
+          title="Kompaktansicht – alles auf einen Blick"
+          aria-label="Kompaktansicht"
+        >
+          <kq-icon name="horizontal" [size]="17"/>
+        </button>
+      </div>
+    </div>
   `,
   styles: [`
     :host {
@@ -90,13 +91,18 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       letter-spacing: 0.06em;
       text-transform: uppercase;
     }
+    .toolbar-end {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-left: auto;
+    }
     .view-toggle {
       display: flex;
       height: 42px;
       border: 1px solid var(--kq-outline, #c79362);
       border-radius: 999px;
       overflow: hidden;
-      margin-left: auto;
     }
     .mode-btn {
       background: #fff7ec;
