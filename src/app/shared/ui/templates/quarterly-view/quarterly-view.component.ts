@@ -45,7 +45,6 @@ export class QuarterlyViewComponent implements OnInit {
 
     // Past quarter → redirect to archive
     if (comparison < 0) {
-      console.log('[QuarterlyView] Past quarter detected, redirecting to archive:', qId);
       void this.router.navigate(['/archive']);
       return null;
     }
@@ -61,11 +60,8 @@ export class QuarterlyViewComponent implements OnInit {
         const qId = params.get('quarter');
         if (!qId) {
           // No quarter specified → use current
-          console.log('[QuarterlyView] No quarter param, using current:', this.currentQuarterId);
           this.quarterId.set(this.currentQuarterId);
         } else {
-          console.log('[QuarterlyView] Quarter param:', qId, '| viewType will be:', 
-            this.quarterClock.compareQuarterIds(qId, this.currentQuarterId) === 0 ? 'play' : 'edit');
           this.quarterId.set(qId);
         }
       });
