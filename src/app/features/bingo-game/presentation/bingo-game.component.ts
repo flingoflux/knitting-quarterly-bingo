@@ -27,7 +27,7 @@ import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
         (previousQuarterClicked)="goToPreviousQuarter()"
         (nextQuarterClicked)="goToNextQuarter()"
       >
-        <div class="status-grid" aria-label="Fortschritt">
+        <div toolbar-actions class="status-grid" aria-label="Fortschritt">
           <div
             *ngFor="let d of completed; let i = index"
             class="status-cell"

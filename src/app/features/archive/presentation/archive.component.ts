@@ -17,16 +17,18 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
           <kq-icon name="home" [size]="22"/>
         </kq-button>
 
-        <div class="quarter-nav">
-          <span class="quarter-label">Archiv</span>
-          <kq-button
-            variant="icon"
-            (click)="goToCurrentQuarter()"
-            [title]="returnTarget === 'edit' ? 'Zum aktuellen Planungsquartal' : 'Zum aktuellen Spielquartal'"
-            [ariaLabel]="returnTarget === 'edit' ? 'Zum aktuellen Planungsquartal' : 'Zum aktuellen Spielquartal'"
-          >
-            <kq-icon name="chevron-right" [size]="20"/>
-          </kq-button>
+        <div class="top-row-center">
+          <div class="quarter-nav">
+            <span class="quarter-label">Archiv</span>
+            <kq-button
+              variant="icon"
+              (click)="goToCurrentQuarter()"
+              [title]="returnTarget === 'edit' ? 'Zum aktuellen Planungsquartal' : 'Zum aktuellen Spielquartal'"
+              [ariaLabel]="returnTarget === 'edit' ? 'Zum aktuellen Planungsquartal' : 'Zum aktuellen Spielquartal'"
+            >
+              <kq-icon name="chevron-right" [size]="20"/>
+            </kq-button>
+          </div>
         </div>
       </header>
 
@@ -73,10 +75,16 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
     .top-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 0.8rem;
-      margin-bottom: 1rem;
+      gap: 0.6rem;
+      margin-bottom: 1.1rem;
       flex-wrap: wrap;
+    }
+
+    .top-row-center {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      justify-content: center;
     }
 
     .quarter-nav {
