@@ -22,7 +22,7 @@ import { QuarterClock } from '../../../core/domain';
         [mode]="viewMode"
         [quarterLabel]="displayedQuarterId()"
         [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
-        [canGoToNextQuarter]="canGoToNextQuarter()"
+        [showNextButton]="canGoToNextQuarter()"
         (modeChange)="viewMode = $event"
         (homeClicked)="goHome()"
         (previousQuarterClicked)="goToPreviousQuarter()"

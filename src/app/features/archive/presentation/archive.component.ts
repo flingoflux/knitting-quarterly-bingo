@@ -16,7 +16,6 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
         [showPreviousButton]="false"
         [showNextButton]="true"
         [showViewToggle]="false"
-        [canGoToNextQuarter]="true"
         (homeClicked)="goHome()"
         (nextQuarterClicked)="goToCurrentQuarter()"
       />

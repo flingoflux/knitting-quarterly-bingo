@@ -9,7 +9,7 @@ import { ButtonComponent } from '../../atoms/button/button.component';
   template: `
     <div class="toolbar-left">
       <kq-button variant="icon" (click)="homeClicked.emit()" title="Zur Startseite" ariaLabel="Zur Startseite">
-        <kq-icon name="home" [size]="22"/>
+        <kq-icon name="home" [size]="20"/>
       </kq-button>
     </div>
 
@@ -23,7 +23,7 @@ import { ButtonComponent } from '../../atoms/button/button.component';
             title="Vorheriges Quartal"
             ariaLabel="Vorheriges Quartal"
           >
-            <kq-icon name="chevron-left" [size]="20"/>
+            <kq-icon name="chevron-left" [size]="16"/>
           </kq-button>
         } @else {
           <span class="nav-placeholder" aria-hidden="true"></span>
@@ -32,13 +32,14 @@ import { ButtonComponent } from '../../atoms/button/button.component';
         @if (showNextButton) {
           <kq-button
             variant="icon"
-            [disabled]="!canGoToNextQuarter"
             (click)="nextQuarterClicked.emit()"
             title="Naechstes Quartal"
             ariaLabel="Naechstes Quartal"
           >
-            <kq-icon name="chevron-right" [size]="20"/>
+            <kq-icon name="chevron-right" [size]="16"/>
           </kq-button>
+        } @else {
+          <span class="nav-placeholder" aria-hidden="true"></span>
         }
       </div>
       <ng-content />
@@ -85,6 +86,12 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       align-items: center;
       justify-content: flex-start;
     }
+    .toolbar-left kq-button {
+      opacity: 0.7;
+    }
+    .toolbar-left kq-button:hover {
+      opacity: 1;
+    }
     .toolbar-center {
       display: flex;
       align-items: center;
@@ -94,7 +101,13 @@ import { ButtonComponent } from '../../atoms/button/button.component';
     .quarter-nav {
       display: inline-flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.5rem;
+    }
+    .quarter-nav kq-button {
+      opacity: 0.75;
+    }
+    .quarter-nav kq-button:hover {
+      opacity: 1;
     }
     .nav-placeholder {
       width: 42px;
@@ -106,14 +119,14 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       align-items: center;
       justify-content: center;
       width: 10.5rem;
-      height: 42px;
+      height: 36px;
       border-radius: 999px;
-      border: 1px solid var(--kq-outline, #c79362);
-      background: #fff7ec;
+      border: 1px solid rgba(199, 147, 98, 0.5);
+      background: rgba(255, 247, 236, 0.6);
       color: #7b371f;
-      font-size: 0.84rem;
+      font-size: 0.78rem;
       font-weight: 700;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
     .toolbar-end {
@@ -171,7 +184,6 @@ export class PageToolbarComponent {
   @Input() mode: 'polaroid' | 'horizontal' = 'polaroid';
   @Input() quarterLabel: string | null = null;
   @Input() canGoToPreviousQuarter = false;
-  @Input() canGoToNextQuarter = false;
   @Input() showPreviousButton = true;
   @Input() showNextButton = true;
   @Input() showViewToggle = true;
