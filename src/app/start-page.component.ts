@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { ButtonComponent } from './shared/ui/atoms/button/button.component';
 import { BINGO_GAME_REPOSITORY } from './features/bingo-game/domain/bingo-game.repository';
 import { QuarterLifecycleService } from './features/quarter-lifecycle/application/quarter-lifecycle.service';
+import { QuarterClock } from './features/quarter-lifecycle/domain/quarter-clock';
 
 @Component({
   selector: 'app-start-page',
@@ -157,6 +158,7 @@ import { QuarterLifecycleService } from './features/quarter-lifecycle/applicatio
 export class StartPageComponent {
   private readonly bingoGameRepository = inject(BINGO_GAME_REPOSITORY);
   private readonly quarterLifecycleService = inject(QuarterLifecycleService);
+  private readonly quarterClock = new QuarterClock();
 
   readonly daysUntilNextQuarterly = this.getDaysUntilNextQuarterly(new Date());
   readonly hasBingo = this.hasAnyBingoFromStoredProgress();
@@ -208,7 +210,8 @@ export class StartPageComponent {
   }
 
   private hasAnyBingoFromStoredProgress(): boolean {
-    const progress = this.bingoGameRepository.load();
+    const currentQuarterId = this.quarterClock.getQuarterId(new Date());
+    const progress = this.bingoGameRepository.load(currentQuarterId);
     if (progress === null) {
       return false;
     }

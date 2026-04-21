@@ -2,11 +2,14 @@ import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { Challenge } from '../../../shared/domain/challenge';
 import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from '../domain/quarterly-plan.repository';
 import { QuarterlyPlan } from '../domain/quarterly-plan';
+import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
 
 @Injectable()
 export class BoardConfigurationService {
   private readonly boardState = signal<QuarterlyPlan>(QuarterlyPlan.createDefault());
   private readonly previewMode = signal(false);
+  private readonly quarterClock = new QuarterClock();
+  private readonly activeQuarterId = signal(this.quarterClock.getQuarterId(new Date()));
   readonly challenges: Signal<Challenge[]> = computed(() => this.boardState().challenges as Challenge[]);
   readonly isPreviewMode = computed(() => this.previewMode());
 
@@ -14,7 +17,7 @@ export class BoardConfigurationService {
   private readonly writer = inject(QUARTERLY_PLAN_WRITER);
 
   constructor() {
-    const result = this.reader.load();
+    const result = this.reader.load(this.activeQuarterId());
     if (result.ok && result.value.challenges.length > 0) {
       this.boardState.set(QuarterlyPlan.fromChallenges(result.value.challenges, result.value.id));
       return;
@@ -25,10 +28,21 @@ export class BoardConfigurationService {
 
   setPreviewMode(enabled: boolean, quarterId?: string): void {
     this.previewMode.set(enabled);
+    this.activeQuarterId.set(quarterId ?? this.quarterClock.getQuarterId(new Date()));
+
+    const result = this.reader.load(this.activeQuarterId());
+    if (result.ok && result.value.challenges.length > 0) {
+      this.boardState.set(QuarterlyPlan.fromChallenges(result.value.challenges, result.value.id));
+      return;
+    }
+
     if (enabled) {
       const id = quarterId || 'preview-quarter';
       this.boardState.set(QuarterlyPlan.createDefault(id));
+      return;
     }
+
+    this.resetBoard();
   }
 
   resetBoard(): void {
@@ -55,6 +69,6 @@ export class BoardConfigurationService {
     if (this.previewMode()) {
       return; // Keine Persistierung im Vorschau-Modus
     }
-    this.writer.save(this.boardState().toPersistable());
+    this.writer.save(this.activeQuarterId(), this.boardState().toPersistable());
   }
 }

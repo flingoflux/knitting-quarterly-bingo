@@ -30,7 +30,7 @@ export class QuarterLifecycleService {
       return;
     }
 
-    const activeGame = this.bingoGameRepository.load();
+    const activeGame = this.bingoGameRepository.load(state.activeQuarterId);
     if (activeGame !== null && activeGame.challenges.length > 0) {
       this.archiveRepository.append(
         createArchiveEntry({
@@ -48,9 +48,9 @@ export class QuarterLifecycleService {
       );
     }
 
-    this.bingoGameRepository.clear();
-    this.boardWriter.save({
-      id: crypto.randomUUID(),
+    this.bingoGameRepository.clear(state.activeQuarterId);
+    this.boardWriter.save(currentQuarterId, {
+      id: currentQuarterId,
       challenges: DEFAULT_CHALLENGES.map(challenge => ({ ...challenge })),
     });
     this.lifecycleStateRepository.save(createQuarterLifecycleState(currentQuarterId, nowIso));

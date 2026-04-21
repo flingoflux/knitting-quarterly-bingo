@@ -4,11 +4,14 @@ import { QUARTERLY_PLAN_READER } from '../../board-configuration/domain/quarterl
 import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
 import { BingoGame, createBoardSignature } from '../domain/bingo-game';
 import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
+import { QuarterClock } from '../../quarter-lifecycle/domain/quarter-clock';
 
 @Injectable()
 export class BingoGameService {
   private readonly gameState = signal<BingoGame>(BingoGame.empty());
   private readonly previewMode = signal(false);
+  private readonly quarterClock = new QuarterClock();
+  private readonly activeQuarterId = signal(this.quarterClock.getQuarterId(new Date()));
 
   readonly challenges: Signal<ChallengeProgress[]> = computed(() => this.gameState().challenges as ChallengeProgress[]);
   readonly completed: Signal<boolean[]> = computed(() => this.gameState().completed as boolean[]);
@@ -19,11 +22,14 @@ export class BingoGameService {
   private readonly bingoGameRepository = inject(BINGO_GAME_REPOSITORY);
 
   constructor() {
-    this.refreshFromDefinition();
+    this.refreshFromDefinition(this.activeQuarterId());
   }
 
   setPreviewMode(enabled: boolean, quarterId?: string): void {
     this.previewMode.set(enabled);
+    this.activeQuarterId.set(quarterId ?? this.quarterClock.getQuarterId(new Date()));
+    this.refreshFromDefinition(this.activeQuarterId());
+
     if (enabled) {
       const id = quarterId || 'preview-quarter';
       const game = BingoGame.fromDefinition(id, DEFAULT_CHALLENGES);
@@ -31,8 +37,11 @@ export class BingoGameService {
     }
   }
 
-  hasPlayableBoard(): boolean {
-    this.refreshFromDefinition();
+  hasPlayableBoard(quarterId?: string): boolean {
+    if (quarterId) {
+      this.activeQuarterId.set(quarterId);
+    }
+    this.refreshFromDefinition(this.activeQuarterId());
     return !this.gameState().isEmpty;
   }
 
@@ -66,15 +75,15 @@ export class BingoGameService {
     this.gameState.set(toggled);
   }
 
-  private refreshFromDefinition(): void {
-    const result = this.quarterlyPlanRepository.load();
+  private refreshFromDefinition(quarterId: string): void {
+    const result = this.quarterlyPlanRepository.load(quarterId);
     if (!result.ok || result.value.challenges.length === 0) {
       this.gameState.set(BingoGame.empty());
       return;
     }
 
     const { id: boardDefinitionId, challenges } = result.value;
-    const persistedProgress = this.bingoGameRepository.load();
+    const persistedProgress = this.bingoGameRepository.load(quarterId);
 
     if (
       persistedProgress !== null &&
@@ -94,6 +103,6 @@ export class BingoGameService {
     if (this.previewMode()) {
       return; // Keine Persistierung im Vorschau-Modus
     }
-    this.bingoGameRepository.save(game.toProgress());
+    this.bingoGameRepository.save(this.activeQuarterId(), game.toProgress());
   }
 }
