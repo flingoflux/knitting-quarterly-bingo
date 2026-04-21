@@ -13,12 +13,15 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
   template: `
     <div class="feature-shell">
       <header class="top-row">
-        <kq-button variant="icon" (click)="goHome()" title="Zur Startseite" ariaLabel="Zur Startseite">
-          <kq-icon name="home" [size]="22"/>
-        </kq-button>
+        <div class="top-row-left">
+          <kq-button variant="icon" (click)="goHome()" title="Zur Startseite" ariaLabel="Zur Startseite">
+            <kq-icon name="home" [size]="22"/>
+          </kq-button>
+        </div>
 
         <div class="top-row-center">
           <div class="quarter-nav">
+            <span class="nav-placeholder" aria-hidden="true"></span>
             <span class="quarter-label">Archiv</span>
             <kq-button
               variant="icon"
@@ -30,6 +33,8 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
             </kq-button>
           </div>
         </div>
+
+        <div class="top-row-right"></div>
       </header>
 
       <section class="archive-header">
@@ -66,25 +71,36 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
   `,
   styles: [`
     .feature-shell {
-      max-width: 52rem;
+      max-width: 72rem;
       margin: 0 auto;
       padding: 1.4rem 1.1rem 2rem;
       color: #412a22;
     }
 
     .top-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0.6rem;
+      align-items: center;
+      margin-bottom: 1.1rem;
+    }
+
+    .top-row-left {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
-      margin-bottom: 1.1rem;
-      flex-wrap: wrap;
+      justify-content: flex-start;
     }
 
     .top-row-center {
       display: flex;
       align-items: center;
-      flex: 1;
       justify-content: center;
+    }
+
+    .top-row-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
     }
 
     .quarter-nav {
@@ -93,13 +109,18 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
       gap: 0.45rem;
     }
 
+    .nav-placeholder {
+      width: 42px;
+      height: 42px;
+      visibility: hidden;
+    }
+
     .quarter-label {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 6.6rem;
+      width: 10.5rem;
       height: 42px;
-      padding: 0 0.9rem;
       border-radius: 999px;
       border: 1px solid #c79362;
       background: #fff7ec;
@@ -153,6 +174,8 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
     .archive-list {
       display: grid;
       gap: 0.75rem;
+      max-width: 52rem;
+      margin: 0 auto;
     }
 
     .archive-card {
@@ -207,9 +230,21 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
     }
 
     .empty-state {
-      margin-top: 1rem;
+      margin: 1rem auto 0;
+      max-width: 52rem;
       text-align: center;
       color: #6c5445;
+    }
+
+    @media (max-width: 768px) {
+      .top-row {
+        grid-template-columns: 1fr;
+        justify-items: center;
+      }
+      .top-row-left,
+      .top-row-right {
+        display: none;
+      }
     }
   `],
 })

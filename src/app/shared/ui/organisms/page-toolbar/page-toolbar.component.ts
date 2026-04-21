@@ -7,9 +7,11 @@ import { ButtonComponent } from '../../atoms/button/button.component';
   standalone: true,
   imports: [IconComponent, ButtonComponent],
   template: `
-    <kq-button variant="icon" (click)="homeClicked.emit()" title="Zur Startseite" ariaLabel="Zur Startseite">
-      <kq-icon name="home" [size]="22"/>
-    </kq-button>
+    <div class="toolbar-left">
+      <kq-button variant="icon" (click)="homeClicked.emit()" title="Zur Startseite" ariaLabel="Zur Startseite">
+        <kq-icon name="home" [size]="22"/>
+      </kq-button>
+    </div>
 
     <div class="toolbar-center">
       <div class="quarter-nav">
@@ -64,17 +66,21 @@ import { ButtonComponent } from '../../atoms/button/button.component';
   `,
   styles: [`
     :host {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
       gap: 0.6rem;
       align-items: center;
       margin-bottom: 1.1rem;
-      flex-wrap: wrap;
+    }
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
     }
     .toolbar-center {
       display: flex;
       align-items: center;
       gap: 0.6rem;
-      flex: 1;
       justify-content: center;
     }
     .quarter-nav {
@@ -86,9 +92,8 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 6.6rem;
+      width: 10.5rem;
       height: 42px;
-      padding: 0 0.9rem;
       border-radius: 999px;
       border: 1px solid var(--kq-outline, #c79362);
       background: #fff7ec;
@@ -102,6 +107,7 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       display: flex;
       align-items: center;
       gap: 0.6rem;
+      justify-content: flex-end;
     }
     .view-toggle {
       display: flex;
@@ -135,6 +141,16 @@ import { ButtonComponent } from '../../atoms/button/button.component';
     .mode-btn:focus-visible {
       outline: 3px solid rgba(196, 110, 53, 0.3);
       outline-offset: -2px;
+    }
+    @media (max-width: 768px) {
+      :host {
+        grid-template-columns: 1fr;
+        justify-items: center;
+      }
+      .toolbar-left,
+      .toolbar-end {
+        display: none;
+      }
     }
   `]
 })
