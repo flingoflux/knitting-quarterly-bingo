@@ -161,10 +161,7 @@ export class BingoGameComponent implements OnInit {
   );
   readonly isPreviewMode = computed(() => this.quarterly().isFuturePreview());
   readonly canGoToNextQuarter = computed(() => true);
-  readonly canGoToPreviousQuarter = computed(() => {
-    const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
-    return !this.quarterClock.isPastQuarter(previousQuarter, this.actualCurrentQuarterId);
-  });
+  readonly canGoToPreviousQuarter = computed(() => true);
 
   ngOnInit(): void {
     this.route.queryParamMap
@@ -210,10 +207,19 @@ export class BingoGameComponent implements OnInit {
     const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
     const currentQuarter = this.quarterClock.getQuarterId(new Date());
     
+    console.log('[BingoGame] goToPreviousQuarter:', {
+      displayedQuarter: this.displayedQuarterId(),
+      previousQuarter,
+      currentQuarter,
+      isPast: this.quarterClock.isPastQuarter(previousQuarter, currentQuarter),
+    });
+    
     // Past quarter → Archive
     if (this.quarterClock.isPastQuarter(previousQuarter, currentQuarter)) {
+      console.log('[BingoGame] → Navigate to /archive');
       void this.router.navigate(['/archive'], { queryParams: { returnTo: 'play' } });
     } else {
+      console.log('[BingoGame] → Navigate to /play with quarter:', previousQuarter);
       void this.router.navigate(['/play'], { queryParams: { quarter: previousQuarter } });
     }
   }

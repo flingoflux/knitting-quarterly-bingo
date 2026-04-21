@@ -114,10 +114,7 @@ export class BoardConfigurationComponent implements OnInit {
   readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
   readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
   readonly canGoToNextQuarter = computed(() => true);
-  readonly canGoToPreviousQuarter = computed(() => {
-    const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
-    return !this.quarterClock.isPastQuarter(previousQuarter, this.actualCurrentQuarterId);
-  });
+  readonly canGoToPreviousQuarter = computed(() => true);
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
 
