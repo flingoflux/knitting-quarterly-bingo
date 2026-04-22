@@ -91,7 +91,7 @@ Die kanonische Fachsprache in der Domäne lautet:
 - **Challenge**: Einzelnes Vorhaben mit optionalem Planungsbild.
 - **BingoGame**: Spiel-Fortschritt fuer einen gespeicherten Planstand.
 - **KnittingQuarterly**: Sicht auf ein Quartal inklusive Phase (`past`, `current`, `future`) und erlaubter Aktionen.
-- **QuarterLifecycleState**: Persistierter Lebenszyklus-Zustand des aktiven Quartals (`activeQuarterId`, `lastRolloverAt`).
+- **QuarterRolloverCursor**: Technischer Persistenz-Cursor fuer bereits verarbeitete Quartalswechsel (`activeQuarterId`).
 - **ArchiveEntry**: Historischer Snapshot eines abgeschlossenen Quartals.
 
 Begriffe wie `boardDefinition` bleiben derzeit als technische Altbezeichnung in Persistenzschluesseln und einigen IDs erhalten. Fachlich wird dieser Begriff als Synonym zu `QuarterlyPlan` behandelt.
@@ -139,9 +139,8 @@ classDiagram
     +boolean completed
   }
 
-  class QuarterLifecycleState {
+  class QuarterRolloverCursor {
     +string activeQuarterId
-    +string lastRolloverAt
   }
 
   class ArchiveEntry {
@@ -155,7 +154,7 @@ classDiagram
   QuarterlyPlan "1" o-- "16" Challenge
   BingoGame "1" o-- "16" ChallengeProgress
   ChallengeProgress ..> Challenge : aus QuarterlyPlan abgeleitet
-  QuarterLifecycleState --> KnittingQuarterly : steuert aktives Quartal
+  QuarterRolloverCursor --> KnittingQuarterly : liefert aktives Quartal fuer Rollover
   ArchiveEntry --> BingoGame : Snapshot aus abgeschlossener Runde
 
   note for BingoGame "Immutable Aggregat:\nalle Mutationen liefern\nneue Instanzen."
@@ -172,13 +171,13 @@ flowchart TB
   QPR[[QuarterlyPlanReader]]
   QPW[[QuarterlyPlanWriter]]
   BGR[[BingoGameRepository]]
-  QLSR[[QuarterLifecycleStateRepository]]
+  QRC[[QuarterRolloverCursorRepository]]
   AR[[ArchiveRepository]]
   IR[[ImageRepository]]
 
   LSBR[LocalStorageBoardRepository]
   LSBGR[LocalStorageBingoGameRepository]
-  LSQLSR[LocalStorageQuarterLifecycleStateRepository]
+  LSQRC[LocalStorageQuarterLifecycleStateRepository]
   LSAR[LocalStorageArchiveRepository]
   IDBR[IndexedDbImageRepositoryService]
   LS[(LocalStorage)]
@@ -190,20 +189,20 @@ flowchart TB
   APPLICATION --> QPR
   APPLICATION --> QPW
   APPLICATION --> BGR
-  APPLICATION --> QLSR
+  APPLICATION --> QRC
   APPLICATION --> AR
   APPLICATION --> IR
 
   LSBR -. implements .-> QPR
   LSBR -. implements .-> QPW
   LSBGR -. implements .-> BGR
-  LSQLSR -. implements .-> QLSR
+  LSQRC -. implements .-> QRC
   LSAR -. implements .-> AR
   IDBR -. implements .-> IR
 
   LSBR --> LS
   LSBGR --> LS
-  LSQLSR --> LS
+  LSQRC --> LS
   LSAR --> LS
   IDBR --> IDB
 ```
@@ -215,9 +214,9 @@ Abhaengigkeitsregel: innen kennt nichts von aussen. Adapter haengen von Ports ab
 - `KnittingQuarterly`: Domaenenobjekt fuer Quartalsphase und freigegebene Aktionen (edit/play/archive-view).
 - `QuarterlyPlan`: Unveraenderliches Planungs-Aggregat fuer die 16 Challenges (Bearbeiten, Umordnen).
 - `BingoGame`: Unveraenderliches Spiel-Aggregat fuer Fortschritt und Bingo-Erkennung.
-- `QuarterLifecycleState`: Persistierter Zustand, welcher Quartalswechsel bereits verarbeitet wurde.
+- `QuarterRolloverCursor`: Technischer Zustand, welcher Quartalswechsel bereits verarbeitet wurde.
 - `ArchiveEntry`: Historischer Snapshot fuer abgeschlossene Quartale.
-- Ports (`QuarterlyPlanReader/Writer`, `BingoGameRepository`, `QuarterLifecycleStateRepository`, `ArchiveRepository`, `ImageRepository`): Definieren die von der Applikation benoetigte Persistenz.
+- Ports (`QuarterlyPlanReader/Writer`, `BingoGameRepository`, `QuarterRolloverCursorRepository`, `ArchiveRepository`, `ImageRepository`): Definieren die von der Applikation benoetigte Persistenz.
 - Adapter (`LocalStorage...`, `IndexedDb...`): Implementieren Ports und kapseln Browser-APIs inklusive Migrationen.
 - Presentation + Application: UI loest Use Cases aus; Services orchestrieren Domain + Ports.
 
@@ -653,9 +652,8 @@ classDiagram
     +key: kq-bingo-active-game-v4:{quarterId}
   }
 
-  class QuarterLifecycleStateSnapshot {
+  class QuarterRolloverCursorSnapshot {
     +string activeQuarterId
-    +string lastRolloverAt
     +key: kq-bingo-quarter-lifecycle-v1
   }
 
@@ -761,7 +759,7 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 | IndexedDB | Browser-Datenbank für größere Binärdaten, hier für Bilder. |
 | LocalStorage | Browser-Speicher für kompakte strukturierte Daten wie Plan und Spielstand. |
 | QuarterlyPlan | Fachbegriff fuer den Plan eines Quartals; technisch teilweise noch als `boardDefinition` benannt. |
-| QuarterLifecycleState | Persistierter Lebenszyklus-Zustand des aktiven Quartals fuer Rollover-Orchestrierung. |
+| QuarterRolloverCursor | Technischer Cursor fuer bereits verarbeitete Quartalswechsel im Rollover-Prozess. |
 | Port | Abstrakte Schnittstelle, über die die Application-Schicht Infrastruktur anspricht. |
 | Progress-Bild | Während der Spielphase aufgenommenes Foto (`progressImageId`). |
 | Planungsbild | In der Planungsphase hinterlegtes Referenzbild (`planningImageId`). |

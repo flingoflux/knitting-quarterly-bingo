@@ -159,11 +159,11 @@ export class BingoGameComponent implements OnInit {
   readonly quarterly = computed(() =>
     KnittingQuarterly.create({
       quarterId: this.displayedQuarterId(),
-      currentQuarterId: this.actualCurrentQuarterId,
       boardDefinitionId: this.displayedQuarterId(),
+      lifecycleState: 'play',
     })
   );
-  readonly isPreviewMode = computed(() => this.quarterly().isFuturePreview());
+  readonly isPreviewMode = computed(() => this.quarterly().isFuturePreview(this.actualCurrentQuarterId));
   readonly canGoToNextQuarter = computed(() => {
     const nextQuarterId = this.quarterClock.getNextQuarterIdFromQuarterId(this.actualCurrentQuarterId);
     return this.displayedQuarterId() !== nextQuarterId;
@@ -177,7 +177,7 @@ export class BingoGameComponent implements OnInit {
         const quarterParam = queryParams.get('quarter');
         if (quarterParam) {
           this.displayedQuarterId.set(quarterParam);
-          this.state.setPreviewMode(this.quarterly().isFuturePreview(), quarterParam);
+          this.state.setPreviewMode(this.quarterly().isFuturePreview(this.actualCurrentQuarterId), quarterParam);
         } else {
           this.displayedQuarterId.set(this.actualCurrentQuarterId);
           this.state.setPreviewMode(false);

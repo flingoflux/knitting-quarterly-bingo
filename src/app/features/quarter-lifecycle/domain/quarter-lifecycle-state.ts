@@ -1,20 +1,18 @@
-export interface QuarterLifecycleState {
+export interface QuarterRolloverCursor {
   activeQuarterId: string;
-  lastRolloverAt: string;
 }
 
-export function createQuarterLifecycleState(activeQuarterId: string, nowIso: string): QuarterLifecycleState {
+export function createQuarterRolloverCursor(activeQuarterId: string): QuarterRolloverCursor {
   return {
     activeQuarterId,
-    lastRolloverAt: nowIso,
   };
 }
 
-export function isQuarterLifecycleState(value: unknown): value is QuarterLifecycleState {
+export function isQuarterRolloverCursor(value: unknown): value is QuarterRolloverCursor {
   if (typeof value !== 'object' || value === null) {
     return false;
   }
 
-  const candidate = value as Partial<QuarterLifecycleState>;
-  return typeof candidate.activeQuarterId === 'string' && typeof candidate.lastRolloverAt === 'string';
+  const candidate = value as Partial<QuarterRolloverCursor>;
+  return typeof candidate.activeQuarterId === 'string';
 }

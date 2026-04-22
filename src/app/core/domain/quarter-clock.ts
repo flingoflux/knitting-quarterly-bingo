@@ -1,62 +1,24 @@
+import { QuarterId } from './quarter-id';
+
 export class QuarterClock {
   getQuarterId(date: Date): string {
-    const quarter = Math.floor(date.getMonth() / 3) + 1;
-    return `${date.getFullYear()}-Q${quarter}`;
+    return QuarterId.fromDate(date).toString();
   }
 
   getNextQuarterId(date: Date): string {
-    let quarter = Math.floor(date.getMonth() / 3) + 1;
-    let year = date.getFullYear();
-    if (quarter === 4) {
-      quarter = 1;
-      year += 1;
-    } else {
-      quarter += 1;
-    }
-    return `${year}-Q${quarter}`;
+    return QuarterId.fromDate(date).next().toString();
   }
 
   getNextQuarterIdFromQuarterId(quarterId: string): string {
-    const match = quarterId.match(/(\d{4})-Q(\d)/);
-    if (!match) {
-      throw new Error(`Invalid quarter ID: ${quarterId}`);
-    }
-    let year = parseInt(match[1], 10);
-    let quarter = parseInt(match[2], 10);
-    if (quarter === 4) {
-      quarter = 1;
-      year += 1;
-    } else {
-      quarter += 1;
-    }
-    return `${year}-Q${quarter}`;
+    return QuarterId.parse(quarterId).next().toString();
   }
 
   getPreviousQuarterIdFromQuarterId(quarterId: string): string {
-    const match = quarterId.match(/(\d{4})-Q(\d)/);
-    if (!match) {
-      throw new Error(`Invalid quarter ID: ${quarterId}`);
-    }
-    let year = parseInt(match[1], 10);
-    let quarter = parseInt(match[2], 10);
-    if (quarter === 1) {
-      quarter = 4;
-      year -= 1;
-    } else {
-      quarter -= 1;
-    }
-    return `${year}-Q${quarter}`;
+    return QuarterId.parse(quarterId).previous().toString();
   }
 
   compareQuarterIds(a: string, b: string): number {
-    const parsedA = this.parseQuarterId(a);
-    const parsedB = this.parseQuarterId(b);
-
-    if (parsedA.year !== parsedB.year) {
-      return parsedA.year - parsedB.year;
-    }
-
-    return parsedA.quarter - parsedB.quarter;
+    return QuarterId.parse(a).compareTo(QuarterId.parse(b));
   }
 
   isPastQuarter(quarterId: string, currentQuarterId: string): boolean {
@@ -64,18 +26,6 @@ export class QuarterClock {
   }
 
   isRolloverDue(activeQuarterId: string, currentQuarterId: string): boolean {
-    return activeQuarterId !== currentQuarterId;
-  }
-
-  private parseQuarterId(quarterId: string): { year: number; quarter: number } {
-    const match = quarterId.match(/^(\d{4})-Q([1-4])$/);
-    if (!match) {
-      throw new Error(`Invalid quarter ID: ${quarterId}`);
-    }
-
-    return {
-      year: Number.parseInt(match[1], 10),
-      quarter: Number.parseInt(match[2], 10),
-    };
+    return !QuarterId.parse(activeQuarterId).equals(QuarterId.parse(currentQuarterId));
   }
 }

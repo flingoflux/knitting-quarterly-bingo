@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { StorageService } from '../../../core/infrastructure/storage.service';
-import { LocalStorageQuarterLifecycleStateRepository } from './local-storage-quarter-lifecycle-state.repository';
+import { LocalStorageQuarterRolloverCursorRepository } from './local-storage-quarter-rollover-cursor.repository';
 
 let store: Record<string, string>;
 const localStorageMock = {
@@ -10,15 +10,15 @@ const localStorageMock = {
   clear: () => { store = {}; },
 };
 
-describe('LocalStorageQuarterLifecycleStateRepository', () => {
+describe('LocalStorageQuarterRolloverCursorRepository', () => {
   let storage: StorageService;
-  let repository: LocalStorageQuarterLifecycleStateRepository;
+  let repository: LocalStorageQuarterRolloverCursorRepository;
 
   beforeEach(() => {
     store = {};
     vi.stubGlobal('localStorage', localStorageMock);
     storage = new StorageService();
-    repository = new LocalStorageQuarterLifecycleStateRepository(storage);
+    repository = new LocalStorageQuarterRolloverCursorRepository(storage);
   });
 
   it('liefert null ohne gespeicherten state', () => {
@@ -26,9 +26,9 @@ describe('LocalStorageQuarterLifecycleStateRepository', () => {
   });
 
   it('speichert und laedt state', () => {
-    repository.save({ activeQuarterId: '2026-Q2', lastRolloverAt: '2026-04-01T00:00:00.000Z' });
+    repository.save({ activeQuarterId: '2026-Q2' });
 
-    expect(repository.load()).toEqual({ activeQuarterId: '2026-Q2', lastRolloverAt: '2026-04-01T00:00:00.000Z' });
+    expect(repository.load()).toEqual({ activeQuarterId: '2026-Q2' });
   });
 
   it('ignoriert invalide Daten', () => {

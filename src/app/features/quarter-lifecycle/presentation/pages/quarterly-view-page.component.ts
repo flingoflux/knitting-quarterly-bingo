@@ -1,7 +1,7 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { KnittingQuarterly, QuarterClock, type QuarterlyPhase } from '../../../../core/domain';
+import { KnittingQuarterly, QuarterClock, type QuarterlyMode } from '../../../../core/domain';
 import { BingoGameComponent } from '../../../bingo-game/presentation/bingo-game.component';
 import { BoardConfigurationComponent } from '../../../board-configuration/presentation/board-configuration.component';
 import { QuarterlyViewTemplateComponent } from '../../../../shared/ui/templates/quarterly-view/quarterly-view.component';
@@ -35,12 +35,12 @@ export class QuarterlyViewPageComponent {
       return null;
     }
 
-    const phase = KnittingQuarterly.classifyPhase(quarterId, this.currentQuarterId);
-    if (phase === 'past') {
+    const mode = this.modeForQuarter(quarterId);
+    if (mode === 'archive') {
       return null;
     }
 
-    return phase === 'current' ? 'play' : 'edit';
+    return mode;
   });
 
   constructor() {
@@ -58,7 +58,7 @@ export class QuarterlyViewPageComponent {
           return;
         }
 
-        if (this.classifyPhase(quarterId) === 'past') {
+        if (this.modeForQuarter(quarterId) === 'archive') {
           void this.router.navigate(['/archive']);
           return;
         }
@@ -67,7 +67,12 @@ export class QuarterlyViewPageComponent {
       });
   }
 
-  private classifyPhase(quarterId: string): QuarterlyPhase {
-    return KnittingQuarterly.classifyPhase(quarterId, this.currentQuarterId);
+  private modeForQuarter(quarterId: string): QuarterlyMode {
+    const quarterly = KnittingQuarterly.create({
+      quarterId,
+      boardDefinitionId: quarterId,
+      lifecycleState: 'play',
+    });
+    return quarterly.modeAt(this.currentQuarterId);
   }
 }

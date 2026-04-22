@@ -1,79 +1,118 @@
+import { QuarterId } from './quarter-id';
+
 export type QuarterlyPhase = 'past' | 'current' | 'future';
+export type QuarterlyLifecycleState = 'edit' | 'play' | 'archive';
+export type QuarterlyMode = 'edit' | 'play' | 'archive';
 
 export class KnittingQuarterly {
   private constructor(
     readonly quarterId: string,
     readonly boardDefinitionId: string,
-    readonly gameBoardDefinitionId: string | null,
-    readonly phase: QuarterlyPhase,
+    readonly lifecycleState: QuarterlyLifecycleState,
   ) {}
 
   static create(params: {
     quarterId: string;
-    currentQuarterId: string;
     boardDefinitionId: string;
+    lifecycleState?: QuarterlyLifecycleState;
+    currentQuarterId?: string;
     gameBoardDefinitionId?: string | null;
   }): KnittingQuarterly {
-    const phase = KnittingQuarterly.classifyPhase(params.quarterId, params.currentQuarterId);
+    const lifecycleState = KnittingQuarterly.resolveLifecycleState(params);
 
-    return new KnittingQuarterly(
-      params.quarterId,
-      params.boardDefinitionId,
-      params.gameBoardDefinitionId ?? null,
-      phase,
-    );
+    return new KnittingQuarterly(params.quarterId, params.boardDefinitionId, lifecycleState);
   }
 
   static classifyPhase(quarterId: string, currentQuarterId: string): QuarterlyPhase {
-    const comparison = compareQuarterIds(quarterId, currentQuarterId);
-    if (comparison < 0) {
+    const candidate = QuarterId.parse(quarterId);
+    const current = QuarterId.parse(currentQuarterId);
+
+    if (candidate.isBefore(current)) {
       return 'past';
     }
-    if (comparison > 0) {
+    if (candidate.isAfter(current)) {
       return 'future';
     }
+
     return 'current';
   }
 
-  canEditBoard(): boolean {
-    if (this.phase === 'past') {
-      return false;
+  phaseAt(currentQuarterId: string): QuarterlyPhase {
+    return KnittingQuarterly.classifyPhase(this.quarterId, currentQuarterId);
+  }
+
+  modeAt(currentQuarterId: string): QuarterlyMode {
+    const phase = this.phaseAt(currentQuarterId);
+    if (phase === 'past' || this.lifecycleState === 'archive') {
+      return 'archive';
     }
-    return this.gameBoardDefinitionId === null;
+
+    if (phase === 'future') {
+      return 'edit';
+    }
+
+    return this.lifecycleState === 'play' ? 'play' : 'edit';
   }
 
-  canPlayBoard(): boolean {
-    return this.phase !== 'past';
+  canStartGame(currentQuarterId: string): boolean {
+    return this.modeAt(currentQuarterId) === 'edit';
   }
 
-  isArchivedViewRequired(): boolean {
-    return this.phase === 'past';
+  canArchive(_currentQuarterId: string): boolean {
+    return this.lifecycleState !== 'archive';
   }
 
-  isFuturePreview(): boolean {
-    return this.phase === 'future';
-  }
-}
+  startGame(currentQuarterId: string): KnittingQuarterly {
+    if (!this.canStartGame(currentQuarterId)) {
+      throw new Error('Quarterly cannot transition to play from current state');
+    }
 
-function compareQuarterIds(a: string, b: string): number {
-  const parsedA = parseQuarterId(a);
-  const parsedB = parseQuarterId(b);
-
-  if (parsedA.year !== parsedB.year) {
-    return parsedA.year - parsedB.year;
+    return new KnittingQuarterly(this.quarterId, this.boardDefinitionId, 'play');
   }
 
-  return parsedA.quarter - parsedB.quarter;
-}
+  archive(currentQuarterId: string): KnittingQuarterly {
+    if (!this.canArchive(currentQuarterId)) {
+      throw new Error('Quarterly cannot transition to archive from current state');
+    }
 
-function parseQuarterId(quarterId: string): { year: number; quarter: number } {
-  const match = quarterId.match(/^(\d{4})-Q([1-4])$/);
-  if (!match) {
-    throw new Error(`Invalid quarter ID: ${quarterId}`);
+    return new KnittingQuarterly(this.quarterId, this.boardDefinitionId, 'archive');
   }
 
-  return {
-    year: Number.parseInt(match[1], 10),
-    quarter: Number.parseInt(match[2], 10),
-  };
+  canEditBoard(currentQuarterId: string): boolean {
+    return this.modeAt(currentQuarterId) === 'edit';
+  }
+
+  canPlayBoard(currentQuarterId: string): boolean {
+    return this.modeAt(currentQuarterId) === 'play';
+  }
+
+  isArchivedViewRequired(currentQuarterId: string): boolean {
+    return this.modeAt(currentQuarterId) === 'archive';
+  }
+
+  isFuturePreview(currentQuarterId: string): boolean {
+    return this.phaseAt(currentQuarterId) === 'future';
+  }
+
+  private static resolveLifecycleState(params: {
+    quarterId: string;
+    boardDefinitionId: string;
+    lifecycleState?: QuarterlyLifecycleState;
+    currentQuarterId?: string;
+    gameBoardDefinitionId?: string | null;
+  }): QuarterlyLifecycleState {
+    if (params.lifecycleState) {
+      return params.lifecycleState;
+    }
+
+    if (params.currentQuarterId && KnittingQuarterly.classifyPhase(params.quarterId, params.currentQuarterId) === 'past') {
+      return 'archive';
+    }
+
+    if (params.gameBoardDefinitionId !== null && params.gameBoardDefinitionId !== undefined) {
+      return 'play';
+    }
+
+    return 'edit';
+  }
 }
