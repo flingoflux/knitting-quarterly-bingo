@@ -14,11 +14,7 @@ export class KnittingQuarterly {
     boardDefinitionId: string;
     gameBoardDefinitionId?: string | null;
   }): KnittingQuarterly {
-    const phase = compareQuarterIds(params.quarterId, params.currentQuarterId) < 0
-      ? 'past'
-      : compareQuarterIds(params.quarterId, params.currentQuarterId) > 0
-        ? 'future'
-        : 'current';
+    const phase = KnittingQuarterly.classifyPhase(params.quarterId, params.currentQuarterId);
 
     return new KnittingQuarterly(
       params.quarterId,
@@ -26,6 +22,17 @@ export class KnittingQuarterly {
       params.gameBoardDefinitionId ?? null,
       phase,
     );
+  }
+
+  static classifyPhase(quarterId: string, currentQuarterId: string): QuarterlyPhase {
+    const comparison = compareQuarterIds(quarterId, currentQuarterId);
+    if (comparison < 0) {
+      return 'past';
+    }
+    if (comparison > 0) {
+      return 'future';
+    }
+    return 'current';
   }
 
   canEditBoard(): boolean {

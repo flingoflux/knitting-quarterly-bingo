@@ -1,15 +1,15 @@
 import { Injectable, inject } from '@angular/core';
-import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
-import { ARCHIVE_REPOSITORY } from '../../archive/domain/archive.repository';
-import { createArchiveEntry } from '../../archive/domain/archive-entry';
-import { QUARTERLY_PLAN_WRITER } from '../../board-configuration/domain/quarterly-plan.repository';
-import { BINGO_GAME_REPOSITORY } from '../../bingo-game/domain/bingo-game.repository';
-import { QuarterClock } from '../../../core/domain';
-import { createQuarterLifecycleState } from '../domain/quarter-lifecycle-state';
-import { QUARTER_LIFECYCLE_STATE_REPOSITORY } from '../domain/quarter-lifecycle-state.repository';
+import { DEFAULT_CHALLENGES } from '../../shared/domain/default-challenges';
+import { ARCHIVE_REPOSITORY } from '../../features/archive/domain/archive.repository';
+import { createArchiveEntry } from '../../features/archive/domain/archive-entry';
+import { QUARTERLY_PLAN_WRITER } from '../../features/board-configuration/domain/quarterly-plan.repository';
+import { BINGO_GAME_REPOSITORY } from '../../features/bingo-game/domain/bingo-game.repository';
+import { QuarterClock } from '../domain';
+import { createQuarterLifecycleState } from '../../features/quarter-lifecycle/domain/quarter-lifecycle-state';
+import { QUARTER_LIFECYCLE_STATE_REPOSITORY } from '../../features/quarter-lifecycle/domain/quarter-lifecycle-state.repository';
 
 @Injectable({ providedIn: 'root' })
-export class QuarterLifecycleService {
+export class QuarterRolloverOrchestratorService {
   private readonly quarterClock = new QuarterClock();
   private readonly lifecycleStateRepository = inject(QUARTER_LIFECYCLE_STATE_REPOSITORY);
   private readonly archiveRepository = inject(ARCHIVE_REPOSITORY);

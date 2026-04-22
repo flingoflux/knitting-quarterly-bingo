@@ -87,7 +87,7 @@ describe('BingoGameService', () => {
 
     const service = createService(boardRepo, bingoRepo);
 
-    expect(service.hasPlayableBoard()).toBe(false);
+    expect(service.isQuarterPlayable('2026-Q2', false)).toBe(false);
     expect(service.challenges()).toHaveLength(0);
   });
 

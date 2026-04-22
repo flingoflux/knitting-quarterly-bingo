@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { StorageService } from '../../../core/services/storage.service';
+import { StorageService } from '../../../core/infrastructure/storage.service';
 import { ArchiveEntry, isArchiveEntry } from '../domain/archive-entry';
 import { ArchiveRepository } from '../domain/archive.repository';
 

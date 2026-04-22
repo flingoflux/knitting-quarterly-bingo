@@ -9,7 +9,7 @@ import { ARCHIVE_REPOSITORY } from './features/archive/domain/archive.repository
 import { LocalStorageArchiveRepository } from './features/archive/infrastructure/local-storage-archive.repository';
 import { QUARTER_LIFECYCLE_STATE_REPOSITORY } from './features/quarter-lifecycle/domain/quarter-lifecycle-state.repository';
 import { LocalStorageQuarterLifecycleStateRepository } from './features/quarter-lifecycle/infrastructure/local-storage-quarter-lifecycle-state.repository';
-import { IndexedDbImageRepository } from './core/services/indexed-db-image-repository.service';
+import { IndexedDbImageRepository } from './core/infrastructure/indexed-db-image-repository.service';
 import { IMAGE_REPOSITORY } from './shared/ports/image-repository';
 
 export const appConfig: ApplicationConfig = {

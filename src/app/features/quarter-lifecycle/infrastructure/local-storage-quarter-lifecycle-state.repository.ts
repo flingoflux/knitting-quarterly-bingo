@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { StorageService } from '../../../core/services/storage.service';
+import { StorageService } from '../../../core/infrastructure/storage.service';
 import { QuarterLifecycleState, isQuarterLifecycleState } from '../domain/quarter-lifecycle-state';
 import { QuarterLifecycleStateRepository } from '../domain/quarter-lifecycle-state.repository';
 

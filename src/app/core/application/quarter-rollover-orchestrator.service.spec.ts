@@ -1,14 +1,14 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
-import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
-import { ARCHIVE_REPOSITORY } from '../../archive/domain/archive.repository';
-import { ArchiveEntry } from '../../archive/domain/archive-entry';
-import { QUARTERLY_PLAN_WRITER, QuarterlyPlanData } from '../../board-configuration/domain/quarterly-plan.repository';
-import { BINGO_GAME_REPOSITORY } from '../../bingo-game/domain/bingo-game.repository';
-import { BingoGameProgress } from '../../bingo-game/domain/bingo-game';
-import { QuarterLifecycleService } from './quarter-lifecycle.service';
-import { QUARTER_LIFECYCLE_STATE_REPOSITORY } from '../domain/quarter-lifecycle-state.repository';
-import { QuarterLifecycleState } from '../domain/quarter-lifecycle-state';
+import { DEFAULT_CHALLENGES } from '../../shared/domain/default-challenges';
+import { ARCHIVE_REPOSITORY } from '../../features/archive/domain/archive.repository';
+import { ArchiveEntry } from '../../features/archive/domain/archive-entry';
+import { QUARTERLY_PLAN_WRITER, QuarterlyPlanData } from '../../features/board-configuration/domain/quarterly-plan.repository';
+import { BINGO_GAME_REPOSITORY } from '../../features/bingo-game/domain/bingo-game.repository';
+import { BingoGameProgress } from '../../features/bingo-game/domain/bingo-game';
+import { QUARTER_LIFECYCLE_STATE_REPOSITORY } from '../../features/quarter-lifecycle/domain/quarter-lifecycle-state.repository';
+import { QuarterLifecycleState } from '../../features/quarter-lifecycle/domain/quarter-lifecycle-state';
+import { QuarterRolloverOrchestratorService } from './quarter-rollover-orchestrator.service';
 
 class MockQuarterLifecycleStateRepository {
   state: QuarterLifecycleState | null = null;
@@ -73,7 +73,7 @@ function createService(deps: {
   archiveRepository: MockArchiveRepository;
   boardWriter: MockBoardWriter;
   bingoGameRepository: MockBingoGameRepository;
-}): QuarterLifecycleService {
+}): QuarterRolloverOrchestratorService {
   const injector = Injector.create({
     providers: [
       { provide: QUARTER_LIFECYCLE_STATE_REPOSITORY, useValue: deps.lifecycleStateRepository },
@@ -83,10 +83,10 @@ function createService(deps: {
     ],
   });
 
-  return runInInjectionContext(injector, () => new QuarterLifecycleService());
+  return runInInjectionContext(injector, () => new QuarterRolloverOrchestratorService());
 }
 
-describe('QuarterLifecycleService', () => {
+describe('QuarterRolloverOrchestratorService', () => {
   it('initialisiert beim ersten Start nur den lifecycle state', () => {
     const lifecycleStateRepository = new MockQuarterLifecycleStateRepository();
     const archiveRepository = new MockArchiveRepository();
