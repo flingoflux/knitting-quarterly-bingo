@@ -83,19 +83,19 @@ export class BingoGameService {
       return;
     }
 
-    const { id: boardDefinitionId, challenges } = result.value;
+    const { challenges } = result.value;
     const persistedProgress = this.bingoGameRepository.load(quarterId);
 
     if (
       persistedProgress !== null &&
-      persistedProgress.boardDefinitionId === boardDefinitionId &&
+      persistedProgress.quarterId === quarterId &&
       persistedProgress.boardSignature === createBoardSignature(challenges)
     ) {
       this.gameState.set(BingoGame.restore(challenges, persistedProgress));
       return;
     }
 
-    const game = BingoGame.fromDefinition(boardDefinitionId, challenges);
+    const game = BingoGame.fromDefinition(quarterId, challenges);
     this.persist(game);
     this.gameState.set(game);
   }

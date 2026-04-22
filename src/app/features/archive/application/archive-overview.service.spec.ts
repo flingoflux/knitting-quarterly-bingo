@@ -21,17 +21,17 @@ class MockArchiveRepository {
   }
 }
 
-function createEntry(id: string, archivedAt: string): ArchiveEntry {
+function createEntry(quarterId: string, archivedAt: string): ArchiveEntry {
   return {
-    id,
-    quarterId: '2026-Q1',
-    boardDefinitionId: 'board-1',
+    quarterId,
     startedAt: '2026-01-01T00:00:00.000Z',
     archivedAt,
     completedCount: 3,
     totalCount: 16,
     hasBingo: false,
     completedChallengeNames: ['A'],
+    completed: [],
+    bingoCells: [],
   };
 }
 
@@ -52,7 +52,7 @@ describe('ArchiveOverviewService', () => {
 
     const service = createService(repository);
 
-    expect(service.entries().map(entry => entry.id)).toEqual(['new', 'old']);
+    expect(service.entries().map(entry => entry.quarterId)).toEqual(['new', 'old']);
     expect(service.hasEntries()).toBe(true);
   });
 
@@ -77,7 +77,7 @@ describe('ArchiveOverviewService', () => {
     ];
     service.reload();
 
-    expect(service.entries().map(entry => entry.id)).toEqual(['new', 'old']);
+    expect(service.entries().map(entry => entry.quarterId)).toEqual(['new', 'old']);
     expect(service.isShowingPrototype()).toBe(false);
   });
 });

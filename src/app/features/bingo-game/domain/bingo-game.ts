@@ -6,7 +6,7 @@ export interface ChallengeProgress {
 }
 
 export interface BingoGameProgress {
-  boardDefinitionId: string;
+  quarterId: string;
   boardSignature: string;
   challenges: ChallengeProgress[];
   startedAt: string;
@@ -18,7 +18,7 @@ export function createBoardSignature(cells: readonly { name: string }[]): string
 
 export class BingoGame {
   private constructor(
-    readonly boardDefinitionId: string,
+    readonly quarterId: string,
     private readonly _challenges: readonly ChallengeProgress[],
     readonly startedAt: string,
   ) {}
@@ -27,9 +27,9 @@ export class BingoGame {
     return new BingoGame('', [], new Date().toISOString());
   }
 
-  static fromDefinition(boardDefinitionId: string, cells: readonly { name: string; imageId?: string }[]): BingoGame {
+  static fromDefinition(quarterId: string, cells: readonly { name: string; imageId?: string }[]): BingoGame {
     return new BingoGame(
-      boardDefinitionId,
+      quarterId,
       cells.map(c => ({
         name: c.name,
         planningImageId: c.imageId,
@@ -43,10 +43,10 @@ export class BingoGame {
   static restore(cells: readonly { name: string; imageId?: string }[], saved: BingoGameProgress): BingoGame {
     const signature = createBoardSignature(cells);
     if (saved.boardSignature !== signature) {
-      return BingoGame.fromDefinition(saved.boardDefinitionId, cells);
+      return BingoGame.fromDefinition(saved.quarterId, cells);
     }
     return new BingoGame(
-      saved.boardDefinitionId,
+      saved.quarterId,
       saved.challenges.map((c, i) => ({
         name: c.name,
         planningImageId: c.planningImageId ?? cells[i]?.imageId,
@@ -75,16 +75,16 @@ export class BingoGame {
 
   toggle(index: number): BingoGame {
     if (!isValidIndex(index, this._challenges.length)) {
-      return new BingoGame(this.boardDefinitionId, [...this._challenges], this.startedAt);
+      return new BingoGame(this.quarterId, [...this._challenges], this.startedAt);
     }
     const next = [...this._challenges];
     next[index] = { ...next[index], completed: !next[index].completed };
-    return new BingoGame(this.boardDefinitionId, next, this.startedAt);
+    return new BingoGame(this.quarterId, next, this.startedAt);
   }
 
   resetProgress(): BingoGame {
     return new BingoGame(
-      this.boardDefinitionId,
+      this.quarterId,
       this._challenges.map(c => ({ ...c, completed: false })),
       this.startedAt,
     );
@@ -92,16 +92,16 @@ export class BingoGame {
 
   updateProgressImage(index: number, imageId: string | undefined): BingoGame {
     if (!isValidIndex(index, this._challenges.length)) {
-      return new BingoGame(this.boardDefinitionId, [...this._challenges], this.startedAt);
+      return new BingoGame(this.quarterId, [...this._challenges], this.startedAt);
     }
     const next = [...this._challenges];
     next[index] = { ...next[index], progressImageId: imageId };
-    return new BingoGame(this.boardDefinitionId, next, this.startedAt);
+    return new BingoGame(this.quarterId, next, this.startedAt);
   }
 
   toProgress(): BingoGameProgress {
     return {
-      boardDefinitionId: this.boardDefinitionId,
+      quarterId: this.quarterId,
       boardSignature: createBoardSignature(this._challenges),
       challenges: [...this._challenges] as ChallengeProgress[],
       startedAt: this.startedAt,

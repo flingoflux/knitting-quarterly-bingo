@@ -47,7 +47,7 @@ class MockBoardWriter {
   savedPlans: QuarterlyPlanData[] = [];
 
   save(_quarterId: string, plan: QuarterlyPlanData): void {
-    this.savedPlans.push({ id: plan.id, challenges: [...plan.challenges] });
+    this.savedPlans.push({ quarterId: plan.quarterId, challenges: [...plan.challenges] });
   }
 }
 
@@ -90,7 +90,7 @@ function createService(deps: {
 describe('QuarterRolloverOrchestratorService', () => {
   it('tut nichts wenn Board fuer aktuelles Quartal schon existiert', () => {
     const boardReader = new MockBoardReader();
-    boardReader.set('2026-Q2', { id: '2026-Q2', challenges: [] });
+    boardReader.set('2026-Q2', { quarterId: '2026-Q2', challenges: [] });
     const archiveRepository = new MockArchiveRepository();
     const boardWriter = new MockBoardWriter();
     const bingoGameRepository = new MockBingoGameRepository();
@@ -114,7 +114,6 @@ describe('QuarterRolloverOrchestratorService', () => {
 
     expect(archiveRepository.entries).toEqual([]);
     expect(boardWriter.savedPlans).toHaveLength(1);
-    expect(boardWriter.savedPlans[0]?.id).toBe('2026-Q2');
     expect(boardWriter.savedPlans[0]?.challenges).toEqual(DEFAULT_CHALLENGES);
     expect(bingoGameRepository.clearCalls).toBe(1);
   });
@@ -125,7 +124,7 @@ describe('QuarterRolloverOrchestratorService', () => {
     const boardWriter = new MockBoardWriter();
     const bingoGameRepository = new MockBingoGameRepository();
     bingoGameRepository.progress = {
-      boardDefinitionId: 'board-q1',
+      quarterId: '2026-Q1',
       boardSignature: 'sig',
       startedAt: '2026-01-05T00:00:00.000Z',
       challenges: [
@@ -141,11 +140,10 @@ describe('QuarterRolloverOrchestratorService', () => {
 
     expect(archiveRepository.entries).toHaveLength(1);
     expect(archiveRepository.entries[0]?.quarterId).toBe('2026-Q1');
-    expect(archiveRepository.entries[0]?.boardDefinitionId).toBe('board-q1');
     expect(archiveRepository.entries[0]?.hasBingo).toBe(true);
     expect(bingoGameRepository.clearCalls).toBe(1);
     expect(boardWriter.savedPlans).toHaveLength(1);
-    expect(boardWriter.savedPlans[0]?.id).toBe('2026-Q2');
+    expect(boardWriter.savedPlans[0]?.quarterId).toBe('2026-Q2');
     expect(boardWriter.savedPlans[0]?.challenges).toEqual(DEFAULT_CHALLENGES);
   });
 
@@ -160,7 +158,7 @@ describe('QuarterRolloverOrchestratorService', () => {
 
     expect(archiveRepository.entries).toEqual([]);
     expect(boardWriter.savedPlans).toHaveLength(1);
-    expect(boardWriter.savedPlans[0]?.id).toBe('2026-Q3');
+    expect(boardWriter.savedPlans[0]?.quarterId).toBe('2026-Q3');
     expect(bingoGameRepository.clearCalls).toBe(1);
   });
 });

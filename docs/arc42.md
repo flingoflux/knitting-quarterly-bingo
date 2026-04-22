@@ -89,12 +89,11 @@ Die kanonische Fachsprache in der Domäne lautet:
 
 - **QuarterlyPlan**: Plan fuer genau ein Quartal mit 16 Challenges.
 - **Challenge**: Einzelnes Vorhaben mit optionalem Planungsbild.
-- **BingoGame**: Spiel-Fortschritt fuer einen gespeicherten Planstand.
-- **KnittingQuarterly**: Sicht auf ein Quartal inklusive Phase (`past`, `current`, `future`) und erlaubter Aktionen.
-- **QuarterRolloverCursor**: Technischer Persistenz-Cursor fuer bereits verarbeitete Quartalswechsel (`activeQuarterId`).
+- **BingoGame**: Spiel-Fortschritt eines Quartals auf Basis eines gespeicherten Plans (`QuarterlyPlan`).
+- **KnittingQuarterly**: Fachobjekt fuer ein Quartal, dessen Phase (`past` | `current` | `future`) aus `quarterId` und aktuellem Quartal abgeleitet wird; die Phase steuert, ob ein Quartal spielbar ist.
 - **ArchiveEntry**: Historischer Snapshot eines abgeschlossenen Quartals.
 
-Begriffe wie `boardDefinition` bleiben derzeit als technische Altbezeichnung in Persistenzschluesseln und einigen IDs erhalten. Fachlich wird dieser Begriff als Synonym zu `QuarterlyPlan` behandelt.
+`quarterId` ist der natürliche fachliche Schlüssel fuer `QuarterlyPlan`, `BingoGame` und `ArchiveEntry`. Zusätzliche Objekt-IDs werden im Domänenmodell nicht benötigt.
 
 ---
 
@@ -104,26 +103,23 @@ Begriffe wie `boardDefinition` bleiben derzeit als technische Altbezeichnung in 
 
 ```mermaid
 classDiagram
-  class KnittingQuarterly {
-    +string quarterId
-    +QuarterlyPhase phase
-    +boolean canEditBoard()
-    +boolean canPlayBoard()
-  }
-
   class QuarterlyPlan {
-    +UUID id
+    <<Aggregate Root>>
+    +string quarterId
     +Challenge[16] challenges
     +QuarterlyPlan update(index, challenge)
     +QuarterlyPlan reorder(from, to)
   }
 
   class Challenge {
+    <<Value Type>>
     +string name
     +UUID imageId?
   }
 
   class BingoGame {
+    <<Aggregate Root>>
+    +string quarterId
     +string boardSignature
     +ChallengeProgress[16] challenges
     +BingoGame toggle(index)
@@ -133,29 +129,52 @@ classDiagram
   }
 
   class ChallengeProgress {
+    <<Value Type>>
     +string name
     +UUID planningImageId?
     +UUID progressImageId?
     +boolean completed
   }
 
-  class QuarterRolloverCursor {
-    +string activeQuarterId
-  }
-
   class ArchiveEntry {
+    <<Aggregate Root>>
     +string quarterId
+    +string startedAt
+    +string archivedAt
     +int completedCount
     +int totalCount
     +boolean hasBingo
   }
 
-  KnittingQuarterly --> QuarterlyPlan : nutzt
-  QuarterlyPlan "1" o-- "16" Challenge
-  BingoGame "1" o-- "16" ChallengeProgress
-  ChallengeProgress ..> Challenge : aus QuarterlyPlan abgeleitet
-  QuarterRolloverCursor --> KnittingQuarterly : liefert aktives Quartal fuer Rollover
-  ArchiveEntry --> BingoGame : Snapshot aus abgeschlossener Runde
+  class KnittingQuarterly {
+    <<Value Type>>
+    +string quarterId
+    +QuarterlyPhase phaseAt(currentQuarterId)
+    +boolean isFuturePreview(currentQuarterId)
+  }
+
+  class QuarterId {
+    <<Value Type>>
+    +parse(value)
+    +fromDate(date)
+    +next()
+    +previous()
+    +compareTo(other)
+  }
+
+  class QuarterlyPhase {
+    <<Value Type>>
+    past
+    current
+    future
+  }
+
+  class EntityMarker {
+    <<keine eigenstaendigen Entities>>
+  }
+
+  QuarterlyPlan *-- "16" Challenge
+  BingoGame *-- "16" ChallengeProgress
 
   note for BingoGame "Immutable Aggregat:\nalle Mutationen liefern\nneue Instanzen."
 ```
@@ -171,13 +190,11 @@ flowchart TB
   QPR[[QuarterlyPlanReader]]
   QPW[[QuarterlyPlanWriter]]
   BGR[[BingoGameRepository]]
-  QRC[[QuarterRolloverCursorRepository]]
   AR[[ArchiveRepository]]
   IR[[ImageRepository]]
 
   LSBR[LocalStorageBoardRepository]
   LSBGR[LocalStorageBingoGameRepository]
-  LSQRC[LocalStorageQuarterLifecycleStateRepository]
   LSAR[LocalStorageArchiveRepository]
   IDBR[IndexedDbImageRepositoryService]
   LS[(LocalStorage)]
@@ -189,20 +206,17 @@ flowchart TB
   APPLICATION --> QPR
   APPLICATION --> QPW
   APPLICATION --> BGR
-  APPLICATION --> QRC
   APPLICATION --> AR
   APPLICATION --> IR
 
   LSBR -. implements .-> QPR
   LSBR -. implements .-> QPW
   LSBGR -. implements .-> BGR
-  LSQRC -. implements .-> QRC
   LSAR -. implements .-> AR
   IDBR -. implements .-> IR
 
   LSBR --> LS
   LSBGR --> LS
-  LSQRC --> LS
   LSAR --> LS
   IDBR --> IDB
 ```
@@ -211,12 +225,14 @@ Abhaengigkeitsregel: innen kennt nichts von aussen. Adapter haengen von Ports ab
 
 **Kernelemente und Verantwortlichkeiten:**
 
-- `KnittingQuarterly`: Domaenenobjekt fuer Quartalsphase und freigegebene Aktionen (edit/play/archive-view).
-- `QuarterlyPlan`: Unveraenderliches Planungs-Aggregat fuer die 16 Challenges (Bearbeiten, Umordnen).
-- `BingoGame`: Unveraenderliches Spiel-Aggregat fuer Fortschritt und Bingo-Erkennung.
-- `QuarterRolloverCursor`: Technischer Zustand, welcher Quartalswechsel bereits verarbeitet wurde.
-- `ArchiveEntry`: Historischer Snapshot fuer abgeschlossene Quartale.
-- Ports (`QuarterlyPlanReader/Writer`, `BingoGameRepository`, `QuarterRolloverCursorRepository`, `ArchiveRepository`, `ImageRepository`): Definieren die von der Applikation benoetigte Persistenz.
+- **Aggregates:** `QuarterlyPlan`, `BingoGame`, `ArchiveEntry`.
+- **Entities:** Im aktuellen Domänenmodell gibt es keine eigenstaendigen Entities mit eigener fachlicher Identitaet unterhalb der Aggregate.
+- **Value Types:** `KnittingQuarterly`, `QuarterId`, `QuarterlyPhase`, `Challenge`, `ChallengeProgress`.
+- `KnittingQuarterly`: Fachobjekt fuer die zeitliche Einordnung eines Quartals. Die abgeleitete Phase steuert die erlaubte Sicht: `past` -> Archiv, `current` -> Spielen, `future` -> Planbearbeitung.
+- `QuarterlyPlan`: Unveraenderliches Planungs-Aggregat eines Quartals mit 16 Challenges (Bearbeiten, Umordnen).
+- `BingoGame`: Unveraenderliches Spiel-Aggregat eines Quartals fuer Fortschritt und Bingo-Erkennung.
+- `ArchiveEntry`: Historischer Snapshot eines abgeschlossenen Quartals.
+- Ports (`QuarterlyPlanReader/Writer`, `BingoGameRepository`, `ArchiveRepository`, `ImageRepository`): Definieren die von der Applikation benoetigte Persistenz.
 - Adapter (`LocalStorage...`, `IndexedDb...`): Implementieren Ports und kapseln Browser-APIs inklusive Migrationen.
 - Presentation + Application: UI loest Use Cases aus; Services orchestrieren Domain + Ports.
 
@@ -252,6 +268,44 @@ sequenceDiagram
   BCS->>BCS: QuarterlyPlan.createDefault()
   BCS->>LocalStorage: save(default plan)
 ```
+
+### Szenario 1b: Quartalswechsel (Rollover)
+
+Der `QuarterRolloverOrchestratorService` wird beim App-Start aufgerufen und prueft, ob fuer das aktuelle Quartal bereits ein Board existiert. Die **Existenz des Boards als Domänen-Invariante** ersetzt einen separaten technischen Cursor.
+
+```mermaid
+sequenceDiagram
+  participant APP as AppComponent
+  participant ORC as QuarterRolloverOrchestratorService
+  participant QPR as QuarterlyPlanReader
+  participant BGAR as BingoGameRepository
+  participant AR as ArchiveRepository
+  participant QPW as QuarterlyPlanWriter
+  participant LocalStorage
+
+  APP->>ORC: ensureCurrentQuarter(now)
+  ORC->>ORC: currentQuarterId = QuarterClock.getQuarterId(now)
+  ORC->>QPR: load(currentQuarterId)
+  QPR->>LocalStorage: read(board-definition:{currentQuarterId})
+  alt Board existiert bereits
+    LocalStorage-->>QPR: QuarterlyPlanData
+    QPR-->>ORC: Result.ok(plan)
+    ORC-->>APP: nichts zu tun
+  else Kein Board fuer aktuelles Quartal
+    LocalStorage-->>QPR: kein Eintrag
+    QPR-->>ORC: Result.err
+    ORC->>ORC: previousQuarterId = QuarterId.parse(currentQuarterId).previous()
+    ORC->>BGAR: load(previousQuarterId)
+    alt Altes Spiel vorhanden
+      BGAR-->>ORC: BingoGameProgress
+      ORC->>AR: append(ArchiveEntry)
+    end
+    ORC->>BGAR: clear(previousQuarterId)
+    ORC->>QPW: save(currentQuarterId, defaultPlan)
+  end
+```
+
+**Entscheidung:** Kein separater `QuarterRolloverCursor` nötig – die Abwesenheit eines Boards für das aktuelle Quartal ist die natürliche Invariante dafür, dass ein Rollover noch aussteht.
 
 ### Szenario 2: Plan bearbeiten
 
@@ -406,8 +460,8 @@ Bilder werden **nie** direkt im Plan oder Spielstand gespeichert – nur ihre UU
 
 Beide Repositories enthalten automatische Migrationslogik beim Laden:
 
-- `LocalStorageBoardRepository`: v1 (kein `id`-Feld) → v2 (mit UUID)
-- `LocalStorageBingoGameRepository`: v2 (separate `cellImages[]` + `completed[]`-Arrays) → v3 (`ChallengeProgress[]`)
+- `LocalStorageBoardRepository`: Legacy-Daten ohne `quarterId` werden auf das quartalsbezogene v3-Format migriert.
+- `LocalStorageBingoGameRepository`: v2 (separate `cellImages[]` + `completed[]`-Arrays) → v3/v4 (`ChallengeProgress[]`, quartalsbezogen)
 
 Migrationen laufen transparent beim ersten Laden nach einem Update. Alte Schlüssel werden nicht gelöscht, um einen Rollback nicht zu verunmöglichen.
 
@@ -641,20 +695,16 @@ Vorteil: Themeing oder Brand-Anpassungen erfordern nur Änderung der Token-Varia
 ```mermaid
 classDiagram
   class QuarterlyPlanSnapshot {
-    +UUID id
+    +string quarterId
     +Challenge[16] challenges
     +key: kq-bingo-board-definition-v3:{quarterId}
   }
 
   class ActiveGame {
+    +string quarterId
     +string boardSignature
     +ChallengeProgress[16] challenges
     +key: kq-bingo-active-game-v4:{quarterId}
-  }
-
-  class QuarterRolloverCursorSnapshot {
-    +string activeQuarterId
-    +key: kq-bingo-quarter-lifecycle-v1
   }
 
   class ArchiveSnapshot {
@@ -755,11 +805,10 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 | ChallengeProgress | Persistenznahes Value Object mit `name`, `planningImageId`, `progressImageId` und `completed` innerhalb von `BingoGame`. |
 | Domain-Layer | Schicht mit fachlichen Regeln und domänennahen Objekten ohne Angular- oder Storage-Abhängigkeiten. |
 | Fallback | Definierter Ersatzpfad bei Fehlern, z. B. Default-Plan oder Platzhalterbild. |
-| KnittingQuarterly | Fachobjekt fuer ein Quartal mit Phase (`past`, `current`, `future`) und Aktionsregeln. |
+| KnittingQuarterly | Fachobjekt fuer die zeitliche Quartalseinordnung; aus der Phase (`past` | `current` | `future`) ergeben sich die erlaubten Sichten/Aktionen. |
 | IndexedDB | Browser-Datenbank für größere Binärdaten, hier für Bilder. |
 | LocalStorage | Browser-Speicher für kompakte strukturierte Daten wie Plan und Spielstand. |
-| QuarterlyPlan | Fachbegriff fuer den Plan eines Quartals; technisch teilweise noch als `boardDefinition` benannt. |
-| QuarterRolloverCursor | Technischer Cursor fuer bereits verarbeitete Quartalswechsel im Rollover-Prozess. |
+| QuarterlyPlan | Fachbegriff fuer den Plan eines Quartals; identifiziert ueber `quarterId`. |
 | Port | Abstrakte Schnittstelle, über die die Application-Schicht Infrastruktur anspricht. |
 | Progress-Bild | Während der Spielphase aufgenommenes Foto (`progressImageId`). |
 | Planungsbild | In der Planungsphase hinterlegtes Referenzbild (`planningImageId`). |

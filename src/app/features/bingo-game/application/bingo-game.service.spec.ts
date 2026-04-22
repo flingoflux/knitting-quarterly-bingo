@@ -38,7 +38,7 @@ class MockBingoGameRepository {
 
   save(_quarterId: string, progress: BingoGameProgress): void {
     this.lastSavedProgress = {
-      boardDefinitionId: progress.boardDefinitionId,
+      quarterId: progress.quarterId,
       boardSignature: progress.boardSignature,
       challenges: [...progress.challenges],
       startedAt: progress.startedAt,
@@ -93,7 +93,7 @@ describe('BingoGameService', () => {
 
   it('laedt Board-Definition beim Start', () => {
     const boardRepo = new MockBoardDefinitionRepository();
-    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, challenges: createChallenges(16) };
+    boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges: createChallenges(16) };
     const bingoRepo = new MockBingoGameRepository();
 
     const service = createService(boardRepo, bingoRepo);
@@ -106,11 +106,11 @@ describe('BingoGameService', () => {
   it('laedt persistierten Spielfortschritt bei passender Signatur', () => {
     const challenges = createChallenges(16);
     const boardRepo = new MockBoardDefinitionRepository();
-    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, challenges };
+    boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges };
     const bingoRepo = new MockBingoGameRepository();
     const overrides: Partial<ChallengeProgress>[] = [{ completed: true }];
     bingoRepo.loadedProgress = {
-      boardDefinitionId: TEST_BOARD_ID,
+      quarterId: '2026-Q2',
       boardSignature: createBoardSignature(challenges),
       challenges: createProgressChallenges(challenges, overrides),
       startedAt: new Date().toISOString(),
@@ -124,10 +124,10 @@ describe('BingoGameService', () => {
 
   it('setzt Fortschritt zurück bei geänderter Board-Signatur', () => {
     const boardRepo = new MockBoardDefinitionRepository();
-    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, challenges: createChallenges(16) };
+    boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges: createChallenges(16) };
     const bingoRepo = new MockBingoGameRepository();
     bingoRepo.loadedProgress = {
-      boardDefinitionId: TEST_BOARD_ID,
+      quarterId: '2026-Q2',
       boardSignature: 'old-signature',
       challenges: [],
       startedAt: new Date().toISOString(),
@@ -141,7 +141,7 @@ describe('BingoGameService', () => {
   it('toggled ein Feld und persistiert', () => {
     const challenges = createChallenges(16);
     const boardRepo = new MockBoardDefinitionRepository();
-    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, challenges };
+    boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges };
     const bingoRepo = new MockBingoGameRepository();
 
     const service = createService(boardRepo, bingoRepo);
@@ -154,7 +154,7 @@ describe('BingoGameService', () => {
   it('erkennt Bingo in der ersten Zeile', () => {
     const challenges = createChallenges(16);
     const boardRepo = new MockBoardDefinitionRepository();
-    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, challenges };
+    boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges };
     const bingoRepo = new MockBingoGameRepository();
     const overrides: Partial<ChallengeProgress>[] = [
       { completed: true },
@@ -163,7 +163,7 @@ describe('BingoGameService', () => {
       { completed: true },
     ];
     bingoRepo.loadedProgress = {
-      boardDefinitionId: TEST_BOARD_ID,
+      quarterId: '2026-Q2',
       boardSignature: createBoardSignature(challenges),
       challenges: createProgressChallenges(challenges, overrides),
       startedAt: new Date().toISOString(),
@@ -180,7 +180,7 @@ describe('BingoGameService', () => {
     const challenges = createChallenges(16);
     const challengesWithImage = challenges.map((c, i) => ({ ...c, imageId: i === 0 ? 'plan-img' : undefined }));
     const boardRepo = new MockBoardDefinitionRepository();
-    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, challenges: challengesWithImage };
+    boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges: challengesWithImage };
     const bingoRepo = new MockBingoGameRepository();
 
     const service = createService(boardRepo, bingoRepo);
@@ -194,11 +194,11 @@ describe('BingoGameService', () => {
   it('setzt alle Challenges bei resetProgress zurück', () => {
     const challenges = createChallenges(16);
     const boardRepo = new MockBoardDefinitionRepository();
-    boardRepo.loadedDefinition = { id: TEST_BOARD_ID, challenges };
+    boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges };
     const bingoRepo = new MockBingoGameRepository();
     const overrides: Partial<ChallengeProgress>[] = Array.from({ length: 16 }, () => ({ completed: true }));
     bingoRepo.loadedProgress = {
-      boardDefinitionId: TEST_BOARD_ID,
+      quarterId: '2026-Q2',
       boardSignature: createBoardSignature(challenges),
       challenges: createProgressChallenges(challenges, overrides),
       startedAt: new Date().toISOString(),

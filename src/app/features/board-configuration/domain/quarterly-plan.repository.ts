@@ -3,7 +3,7 @@ import { Challenge } from '../../../shared/domain/challenge';
 import { Result } from '../../../shared/domain/result';
 
 export interface QuarterlyPlanData {
-  id: string;
+  quarterId: string;
   challenges: Challenge[];
 }
 

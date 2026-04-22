@@ -27,9 +27,7 @@ describe('LocalStorageArchiveRepository', () => {
 
   it('speichert Eintrag via append und laedt ihn wieder', () => {
     repository.append({
-      id: 'entry-1',
       quarterId: '2026-Q1',
-      boardDefinitionId: 'board-1',
       startedAt: '2026-01-01T00:00:00.000Z',
       archivedAt: '2026-04-01T00:00:00.000Z',
       completedCount: 7,
@@ -41,15 +39,13 @@ describe('LocalStorageArchiveRepository', () => {
     });
 
     expect(repository.loadAll()).toHaveLength(1);
-    expect(repository.loadAll()[0]?.id).toBe('entry-1');
+    expect(repository.loadAll()[0]?.quarterId).toBe('2026-Q1');
   });
 
   it('ignoriert invalide Datensaetze aus dem Storage', () => {
     storage.setItem('kq-bingo-archive-v1', [
       {
-        id: 'valid',
         quarterId: '2026-Q1',
-        boardDefinitionId: 'board-1',
         startedAt: '2026-01-01T00:00:00.000Z',
         archivedAt: '2026-04-01T00:00:00.000Z',
         completedCount: 2,
@@ -60,11 +56,11 @@ describe('LocalStorageArchiveRepository', () => {
         bingoCells: [],
       },
       {
-        id: 123,
+        quarterId: 123,
       },
     ]);
 
     expect(repository.loadAll()).toHaveLength(1);
-    expect(repository.loadAll()[0]?.id).toBe('valid');
+    expect(repository.loadAll()[0]?.quarterId).toBe('2026-Q1');
   });
 });

@@ -31,7 +31,6 @@ export class QuarterRolloverOrchestratorService {
           quarterId: previousQuarterId,
           archivedAt: nowIso,
           game: {
-            boardDefinitionId: activeGame.boardDefinitionId,
             startedAt: activeGame.startedAt,
             challenges: activeGame.challenges.map(challenge => ({
               name: challenge.name,
@@ -44,7 +43,7 @@ export class QuarterRolloverOrchestratorService {
 
     this.bingoGameRepository.clear(previousQuarterId);
     this.boardWriter.save(currentQuarterId, {
-      id: currentQuarterId,
+      quarterId: currentQuarterId,
       challenges: DEFAULT_CHALLENGES.map(challenge => ({ ...challenge })),
     });
   }

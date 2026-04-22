@@ -6,7 +6,7 @@ import { Result } from '../../../shared/domain/result';
 import { QuarterClock } from '../../../core/domain';
 
 export interface PersistedQuarterlyPlan {
-  id: string;
+  quarterId: string;
   challenges: Challenge[];
 }
 
@@ -19,16 +19,20 @@ export class LocalStorageBoardRepository implements QuarterlyPlanReader, Quarter
   constructor(private readonly storage: StorageService) {}
 
   load(quarterId: string): Result<QuarterlyPlanData, string> {
-    const rawV3 = this.storage.getItem<{ id: unknown; challenges: unknown[] }>(this.getStorageKeyV3(quarterId));
+    const rawV3 = this.storage.getItem<{ quarterId?: unknown; challenges: unknown[] }>(this.getStorageKeyV3(quarterId));
     if (rawV3 !== null) {
       if (
-        typeof rawV3.id !== 'string' ||
         !Array.isArray(rawV3.challenges) ||
         !rawV3.challenges.every(isValidChallenge)
       ) {
         return Result.err('invalid-data');
       }
-      return Result.ok({ id: rawV3.id, challenges: rawV3.challenges });
+      const resolvedQuarterId = typeof rawV3.quarterId === 'string' ? rawV3.quarterId : quarterId;
+      const plan: PersistedQuarterlyPlan = { quarterId: resolvedQuarterId, challenges: rawV3.challenges };
+      if (rawV3.quarterId !== resolvedQuarterId) {
+        this.storage.setItem(this.getStorageKeyV3(quarterId), plan);
+      }
+      return Result.ok(plan);
     }
 
     // Migrate legacy single-board storage only for the current quarter.
@@ -36,16 +40,15 @@ export class LocalStorageBoardRepository implements QuarterlyPlanReader, Quarter
       return Result.err('not-found');
     }
 
-    const rawV2 = this.storage.getItem<{ id: unknown; challenges: unknown[] }>(this.storageKeyV2);
+    const rawV2 = this.storage.getItem<{ id?: unknown; challenges: unknown[] }>(this.storageKeyV2);
     if (rawV2 !== null) {
       if (
-        typeof rawV2.id !== 'string' ||
         !Array.isArray(rawV2.challenges) ||
         !rawV2.challenges.every(isValidChallenge)
       ) {
         return Result.err('invalid-data');
       }
-      const migrated: PersistedQuarterlyPlan = { id: rawV2.id, challenges: rawV2.challenges };
+      const migrated: PersistedQuarterlyPlan = { quarterId, challenges: rawV2.challenges };
       this.storage.setItem(this.getStorageKeyV3(quarterId), migrated);
       return Result.ok(migrated);
     }
@@ -56,7 +59,7 @@ export class LocalStorageBoardRepository implements QuarterlyPlanReader, Quarter
         .filter((p): p is { title: string; imageId?: string } =>
           typeof p === 'object' && p !== null && typeof (p as { title?: unknown }).title === 'string')
         .map(p => ({ name: p.title, imageId: p.imageId }));
-      const plan: PersistedQuarterlyPlan = { id: crypto.randomUUID(), challenges: migrated };
+      const plan: PersistedQuarterlyPlan = { quarterId, challenges: migrated };
       this.storage.setItem(this.getStorageKeyV3(quarterId), plan);
       return Result.ok(plan);
     }
@@ -67,13 +70,13 @@ export class LocalStorageBoardRepository implements QuarterlyPlanReader, Quarter
   findById(id: string): Result<QuarterlyPlanData, string> {
     const result = this.load(id);
     if (!result.ok) return result;
-    if (result.value.id !== id) return Result.err('not-found');
+    if (result.value.quarterId !== id) return Result.err('not-found');
     return result;
   }
 
   save(quarterId: string, plan: QuarterlyPlanData): void {
     this.storage.setItem(this.getStorageKeyV3(quarterId), {
-      id: plan.id,
+      quarterId,
       challenges: [...plan.challenges],
     });
   }

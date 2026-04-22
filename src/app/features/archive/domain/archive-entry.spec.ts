@@ -7,7 +7,6 @@ describe('createArchiveEntry', () => {
       quarterId: '2026-Q1',
       archivedAt: '2026-04-01T00:00:00.000Z',
       game: {
-        boardDefinitionId: 'board-1',
         startedAt: '2026-01-01T00:00:00.000Z',
         challenges: [
           { name: 'A', completed: true },
@@ -27,7 +26,6 @@ describe('createArchiveEntry', () => {
     const entry = createArchiveEntry({
       quarterId: '2026-Q1',
       game: {
-        boardDefinitionId: 'board-1',
         startedAt: '2026-01-01T00:00:00.000Z',
         challenges: [
           { name: '1', completed: true },
@@ -45,7 +43,6 @@ describe('createArchiveEntry', () => {
     const entry = createArchiveEntry({
       quarterId: '2026-Q1',
       game: {
-        boardDefinitionId: 'board-1',
         startedAt: '2026-01-01T00:00:00.000Z',
         challenges: [
           { name: '1', completed: true },
@@ -59,14 +56,11 @@ describe('createArchiveEntry', () => {
     expect(entry.hasBingo).toBe(false);
   });
 
-  it('verwendet provided archivedAt und erzeugt eine id', () => {
-    vi.stubGlobal('crypto', { randomUUID: () => 'archive-id-1' });
-
+  it('verwendet provided archivedAt', () => {
     const entry = createArchiveEntry({
       quarterId: '2026-Q1',
       archivedAt: '2026-04-01T00:00:00.000Z',
       game: {
-        boardDefinitionId: 'board-1',
         startedAt: '2026-01-01T00:00:00.000Z',
         challenges: [
           { name: 'A', completed: false },
@@ -77,7 +71,6 @@ describe('createArchiveEntry', () => {
       },
     });
 
-    expect(entry.id).toBe('archive-id-1');
     expect(entry.archivedAt).toBe('2026-04-01T00:00:00.000Z');
   });
 });
@@ -86,29 +79,29 @@ describe('sortArchiveEntriesNewestFirst', () => {
   it('sortiert nach archivedAt absteigend', () => {
     const sorted = sortArchiveEntriesNewestFirst([
       {
-        id: 'a',
         quarterId: '2025-Q4',
-        boardDefinitionId: 'b1',
         startedAt: '2025-10-01T00:00:00.000Z',
         archivedAt: '2026-01-01T00:00:00.000Z',
         completedCount: 4,
         totalCount: 16,
         hasBingo: false,
         completedChallengeNames: [],
+        completed: [],
+        bingoCells: [],
       },
       {
-        id: 'b',
         quarterId: '2026-Q1',
-        boardDefinitionId: 'b2',
         startedAt: '2026-01-01T00:00:00.000Z',
         archivedAt: '2026-04-01T00:00:00.000Z',
         completedCount: 8,
         totalCount: 16,
         hasBingo: true,
         completedChallengeNames: [],
+        completed: [],
+        bingoCells: [],
       },
     ]);
 
-    expect(sorted.map(entry => entry.id)).toEqual(['b', 'a']);
+    expect(sorted.map(entry => entry.quarterId)).toEqual(['2026-Q1', '2025-Q4']);
   });
 });

@@ -2,18 +2,14 @@ import { Challenge } from '../../../shared/domain/challenge';
 import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
 
 export class QuarterlyPlan {
-  private constructor(
-    readonly id: string,
-    private readonly _challenges: readonly Challenge[],
-  ) {}
+  private constructor(readonly quarterId: string, private readonly _challenges: readonly Challenge[]) {}
 
-  static createDefault(id?: string): QuarterlyPlan {
-    const planId = id || crypto.randomUUID();
-    return new QuarterlyPlan(planId, [...DEFAULT_CHALLENGES]);
+  static createDefault(quarterId: string): QuarterlyPlan {
+    return new QuarterlyPlan(quarterId, [...DEFAULT_CHALLENGES]);
   }
 
-  static fromChallenges(challenges: readonly Challenge[], id: string): QuarterlyPlan {
-    return new QuarterlyPlan(id, [...challenges]);
+  static fromChallenges(challenges: readonly Challenge[], quarterId: string): QuarterlyPlan {
+    return new QuarterlyPlan(quarterId, [...challenges]);
   }
 
   get challenges(): readonly Challenge[] {
@@ -23,28 +19,28 @@ export class QuarterlyPlan {
   reorder(startIndex: number, targetIndex: number): QuarterlyPlan {
     const { length } = this._challenges;
     if (!isValidIndex(startIndex, length) || !isValidIndex(targetIndex, length)) {
-      return new QuarterlyPlan(this.id, [...this._challenges]);
+      return new QuarterlyPlan(this.quarterId, [...this._challenges]);
     }
     const reordered = [...this._challenges];
     [reordered[startIndex], reordered[targetIndex]] = [reordered[targetIndex], reordered[startIndex]];
-    return new QuarterlyPlan(this.id, reordered);
+    return new QuarterlyPlan(this.quarterId, reordered);
   }
 
   update(index: number, challenge: Challenge): QuarterlyPlan {
     if (!isValidIndex(index, this._challenges.length)) {
-      return new QuarterlyPlan(this.id, [...this._challenges]);
+      return new QuarterlyPlan(this.quarterId, [...this._challenges]);
     }
     const updated = [...this._challenges];
     updated[index] = { ...challenge };
-    return new QuarterlyPlan(this.id, updated);
+    return new QuarterlyPlan(this.quarterId, updated);
   }
 
-  toPersistable(): { id: string; challenges: Challenge[] } {
-    return { id: this.id, challenges: [...this._challenges] as Challenge[] };
+  toPersistable(): { quarterId: string; challenges: Challenge[] } {
+    return { quarterId: this.quarterId, challenges: [...this._challenges] as Challenge[] };
   }
 
-  toPlain(): { id: string; challenges: Challenge[] } {
-    return { id: this.id, challenges: [...this._challenges] as Challenge[] };
+  toPlain(): { quarterId: string; challenges: Challenge[] } {
+    return { quarterId: this.quarterId, challenges: [...this._challenges] as Challenge[] };
   }
 }
 

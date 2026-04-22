@@ -23,7 +23,13 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
 
   load(quarterId: string): BingoGameProgress | null {
     const v4 = this.storage.getItem<BingoGameProgress>(this.getStorageKeyV4(quarterId));
-    if (v4 !== null) return v4;
+    if (v4 !== null) {
+      const resolved = { ...v4, quarterId: v4.quarterId ?? quarterId };
+      if (v4.quarterId !== resolved.quarterId) {
+        this.storage.setItem(this.getStorageKeyV4(quarterId), resolved);
+      }
+      return resolved;
+    }
 
     // Migrate legacy single-game storage only for the current quarter.
     if (quarterId !== new QuarterClock().getQuarterId(new Date())) {
@@ -31,7 +37,11 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
     }
 
     const v3 = this.storage.getItem<BingoGameProgress>(this.storageKeyV3);
-    if (v3 !== null) return v3;
+    if (v3 !== null) {
+      const migrated = { ...v3, quarterId };
+      this.storage.setItem(this.getStorageKeyV4(quarterId), migrated);
+      return migrated;
+    }
 
     const v2 = this.storage.getItem<LegacyV2Progress>(this.storageKeyV2);
     if (
@@ -41,7 +51,7 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
       Array.isArray(v2.completed)
     ) {
       const migrated: BingoGameProgress = {
-        boardDefinitionId: v2.boardDefinitionId,
+        quarterId,
         boardSignature: v2.boardSignature,
         challenges: v2.challenges.map((c, i): ChallengeProgress => ({
           name: c.name ?? '',
@@ -60,7 +70,7 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
 
   save(quarterId: string, progress: BingoGameProgress): void {
     this.storage.setItem(this.getStorageKeyV4(quarterId), {
-      boardDefinitionId: progress.boardDefinitionId,
+      quarterId,
       boardSignature: progress.boardSignature,
       challenges: [...progress.challenges],
       startedAt: progress.startedAt,

@@ -18,7 +18,7 @@ describe('BingoGame.fromDefinition', () => {
   it('überträgt imageId als planningImageId', () => {
     const cells = makeCells(16, ['img-0', undefined, 'img-2']);
 
-    const game = BingoGame.fromDefinition('board-1', cells);
+    const game = BingoGame.fromDefinition('2026-Q2', cells);
 
     expect(game.challenges[0].planningImageId).toBe('img-0');
     expect(game.challenges[1].planningImageId).toBeUndefined();
@@ -26,13 +26,13 @@ describe('BingoGame.fromDefinition', () => {
   });
 
   it('setzt progressImageId initial auf undefined', () => {
-    const game = BingoGame.fromDefinition('board-1', makeCells(16, ['img-0']));
+    const game = BingoGame.fromDefinition('2026-Q2', makeCells(16, ['img-0']));
 
     expect(game.challenges[0].progressImageId).toBeUndefined();
   });
 
   it('startet mit allen Challenges nicht abgeschlossen', () => {
-    const game = BingoGame.fromDefinition('board-1', makeCells(16));
+    const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     expect(game.completed.every(c => !c)).toBe(true);
   });
@@ -42,7 +42,7 @@ describe('BingoGame.restore', () => {
   it('übernimmt planningImageId aus gespeichertem Fortschritt', () => {
     const cells = makeCells(16);
     const saved = {
-      boardDefinitionId: 'board-1',
+      quarterId: '2026-Q2',
       boardSignature: createBoardSignature(cells),
       challenges: cells.map((c): ChallengeProgress => ({
         name: c.name,
@@ -61,7 +61,7 @@ describe('BingoGame.restore', () => {
   it('fällt auf cells[i].imageId zurück wenn planningImageId im Fortschritt fehlt', () => {
     const cells = makeCells(16, ['definition-img']);
     const saved = {
-      boardDefinitionId: 'board-1',
+      quarterId: '2026-Q2',
       boardSignature: createBoardSignature(cells),
       challenges: cells.map((c): ChallengeProgress => ({
         name: c.name,
@@ -80,7 +80,7 @@ describe('BingoGame.restore', () => {
   it('behält progressImageId aus gespeichertem Fortschritt', () => {
     const cells = makeCells(16);
     const saved = {
-      boardDefinitionId: 'board-1',
+      quarterId: '2026-Q2',
       boardSignature: createBoardSignature(cells),
       challenges: cells.map((c, i): ChallengeProgress => ({
         name: c.name,
@@ -100,7 +100,7 @@ describe('BingoGame.restore', () => {
   it('startet neu wenn Signatur nicht passt', () => {
     const cells = makeCells(16);
     const saved = {
-      boardDefinitionId: 'board-1',
+      quarterId: '2026-Q2',
       boardSignature: 'outdated-signature',
       challenges: cells.map((c): ChallengeProgress => ({
         name: c.name,
@@ -119,7 +119,7 @@ describe('BingoGame.restore', () => {
 
 describe('BingoGame.toggle', () => {
   it('setzt Challenge auf abgeschlossen', () => {
-    const game = BingoGame.fromDefinition('board-1', makeCells(16));
+    const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     const toggled = game.toggle(0);
 
@@ -127,7 +127,7 @@ describe('BingoGame.toggle', () => {
   });
 
   it('zweimaliges Togglen kehrt Zustand zurück', () => {
-    const game = BingoGame.fromDefinition('board-1', makeCells(16));
+    const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     const result = game.toggle(0).toggle(0);
 
@@ -135,7 +135,7 @@ describe('BingoGame.toggle', () => {
   });
 
   it('lässt andere Challenges unberührt', () => {
-    const game = BingoGame.fromDefinition('board-1', makeCells(16));
+    const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     const toggled = game.toggle(5);
 
@@ -144,7 +144,7 @@ describe('BingoGame.toggle', () => {
   });
 
   it('ignoriert ungültigen Index', () => {
-    const game = BingoGame.fromDefinition('board-1', makeCells(16));
+    const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     const result = game.toggle(99);
 
@@ -156,7 +156,7 @@ describe('BingoGame.resetProgress', () => {
   it('setzt alle abgeschlossenen Challenges zurück', () => {
     const cells = makeCells(16);
     const saved = {
-      boardDefinitionId: 'board-1',
+      quarterId: '2026-Q2',
       boardSignature: createBoardSignature(cells),
       challenges: cells.map((c): ChallengeProgress => ({
         name: c.name,
@@ -176,7 +176,7 @@ describe('BingoGame.resetProgress', () => {
   it('behält planningImageId und progressImageId nach Reset', () => {
     const cells = makeCells(16, ['plan-img']);
     const saved = {
-      boardDefinitionId: 'board-1',
+      quarterId: '2026-Q2',
       boardSignature: createBoardSignature(cells),
       challenges: cells.map((c, i): ChallengeProgress => ({
         name: c.name,
@@ -197,7 +197,7 @@ describe('BingoGame.resetProgress', () => {
 
 describe('BingoGame.updateProgressImage', () => {
   it('setzt progressImageId für die Challenge', () => {
-    const game = BingoGame.fromDefinition('board-1', makeCells(16));
+    const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     const updated = game.updateProgressImage(0, 'new-photo');
 
@@ -205,7 +205,7 @@ describe('BingoGame.updateProgressImage', () => {
   });
 
   it('berührt planningImageId nicht', () => {
-    const game = BingoGame.fromDefinition('board-1', makeCells(16, ['plan-img']));
+    const game = BingoGame.fromDefinition('2026-Q2', makeCells(16, ['plan-img']));
 
     const updated = game.updateProgressImage(0, 'new-photo');
 
@@ -215,7 +215,7 @@ describe('BingoGame.updateProgressImage', () => {
   it('kann progressImageId auf undefined setzen', () => {
     const cells = makeCells(16);
     const saved = {
-      boardDefinitionId: 'board-1',
+      quarterId: '2026-Q2',
       boardSignature: createBoardSignature(cells),
       challenges: cells.map((c, i): ChallengeProgress => ({
         name: c.name,
@@ -233,7 +233,7 @@ describe('BingoGame.updateProgressImage', () => {
   });
 
   it('ignoriert ungültigen Index', () => {
-    const game = BingoGame.fromDefinition('board-1', makeCells(16));
+    const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     const result = game.updateProgressImage(99, 'photo');
 
@@ -249,7 +249,7 @@ describe('BingoGame.bingoCells', () => {
   function gameWithCompleted(trueIndices: number[]): BingoGame {
     const cells = makeCells(16);
     const saved = {
-      boardDefinitionId: 'board-1',
+      quarterId: '2026-Q2',
       boardSignature: createBoardSignature(cells),
       challenges: cells.map((c, i): ChallengeProgress => ({
         name: c.name,

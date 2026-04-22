@@ -11,20 +11,20 @@ describe('QuarterlyPlan', () => {
   it('createDefault verwendet die Default-Challenges', () => {
     const plan = QuarterlyPlan.createDefault('2026-Q3');
 
-    expect(plan.id).toBe('2026-Q3');
+    expect(plan.quarterId).toBe('2026-Q3');
     expect(plan.challenges).toEqual(DEFAULT_CHALLENGES);
   });
 
   it('fromChallenges kopiert die Eingabeliste', () => {
     const input = createChallenges(4);
-    const plan = QuarterlyPlan.fromChallenges(input, 'board-id');
+    const plan = QuarterlyPlan.fromChallenges(input, '2026-Q2');
 
     input[0] = { name: 'Mutated after create' };
     expect(plan.challenges[0]?.name).toBe('Challenge 0');
   });
 
   it('reorder vertauscht zwei Einträge und bleibt immutable', () => {
-    const plan = QuarterlyPlan.fromChallenges(createChallenges(4), 'board-id');
+    const plan = QuarterlyPlan.fromChallenges(createChallenges(4), '2026-Q2');
 
     const reordered = plan.reorder(0, 3);
 
@@ -34,7 +34,7 @@ describe('QuarterlyPlan', () => {
   });
 
   it('reorder mit ungültigem Index behält Daten unverändert', () => {
-    const plan = QuarterlyPlan.fromChallenges(createChallenges(4), 'board-id');
+    const plan = QuarterlyPlan.fromChallenges(createChallenges(4), '2026-Q2');
 
     const reordered = plan.reorder(-1, 2);
 
@@ -43,7 +43,7 @@ describe('QuarterlyPlan', () => {
   });
 
   it('update ersetzt die Challenge an gültigem Index immutable', () => {
-    const plan = QuarterlyPlan.fromChallenges(createChallenges(4), 'board-id');
+    const plan = QuarterlyPlan.fromChallenges(createChallenges(4), '2026-Q2');
 
     const updated = plan.update(1, { name: 'Updated', imageId: 'img-1' });
 
@@ -51,11 +51,11 @@ describe('QuarterlyPlan', () => {
     expect(updated.challenges[1]).toEqual({ name: 'Updated', imageId: 'img-1' });
   });
 
-  it('toPersistable liefert Plain-Objekt mit id und challenges', () => {
-    const plan = QuarterlyPlan.fromChallenges(createChallenges(2), 'board-id');
+  it('toPersistable liefert Plain-Objekt mit quarterId und challenges', () => {
+    const plan = QuarterlyPlan.fromChallenges(createChallenges(2), '2026-Q2');
 
     expect(plan.toPersistable()).toEqual({
-      id: 'board-id',
+      quarterId: '2026-Q2',
       challenges: createChallenges(2),
     });
   });

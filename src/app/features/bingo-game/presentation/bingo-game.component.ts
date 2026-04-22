@@ -159,8 +159,6 @@ export class BingoGameComponent implements OnInit {
   readonly quarterly = computed(() =>
     KnittingQuarterly.create({
       quarterId: this.displayedQuarterId(),
-      boardDefinitionId: this.displayedQuarterId(),
-      lifecycleState: 'play',
     })
   );
   readonly isPreviewMode = computed(() => this.quarterly().isFuturePreview(this.actualCurrentQuarterId));

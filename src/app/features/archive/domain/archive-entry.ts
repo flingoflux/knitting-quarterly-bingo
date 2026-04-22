@@ -4,9 +4,7 @@ export interface ArchiveChallengeSnapshot {
 }
 
 export interface ArchiveEntry {
-  id: string;
   quarterId: string;
-  boardDefinitionId: string;
   startedAt: string;
   archivedAt: string;
   completedCount: number;
@@ -18,7 +16,6 @@ export interface ArchiveEntry {
 }
 
 export interface ArchiveSourceGame {
-  boardDefinitionId: string;
   startedAt: string;
   challenges: readonly ArchiveChallengeSnapshot[];
 }
@@ -36,9 +33,7 @@ export function createArchiveEntry(params: {
   const bingoCells = calculateBingoCells(completed);
 
   return {
-    id: crypto.randomUUID(),
     quarterId: params.quarterId,
-    boardDefinitionId: params.game.boardDefinitionId,
     startedAt: params.game.startedAt,
     archivedAt: params.archivedAt ?? new Date().toISOString(),
     completedCount: completedChallengeNames.length,
@@ -61,9 +56,7 @@ export function isArchiveEntry(value: unknown): value is ArchiveEntry {
 
   const candidate = value as Partial<ArchiveEntry>;
   return (
-    typeof candidate.id === 'string' &&
     typeof candidate.quarterId === 'string' &&
-    typeof candidate.boardDefinitionId === 'string' &&
     typeof candidate.startedAt === 'string' &&
     typeof candidate.archivedAt === 'string' &&
     typeof candidate.completedCount === 'number' &&

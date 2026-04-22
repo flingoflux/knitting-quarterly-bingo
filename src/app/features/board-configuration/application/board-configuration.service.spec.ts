@@ -27,7 +27,7 @@ class MockBoardDefinitionRepository {
 
   save(_quarterId: string, definition: PersistedQuarterlyPlan): void {
     this.lastSavedDefinition = {
-      id: definition.id,
+      quarterId: definition.quarterId,
       challenges: [...definition.challenges],
     };
     this.loadedDefinition = this.lastSavedDefinition;
@@ -62,7 +62,7 @@ describe('BoardConfigurationService', () => {
 
   it('laedt persistierte Definition beim Start', () => {
     const repository = new MockBoardDefinitionRepository();
-    repository.loadedDefinition = { id: 'test-id', challenges: createChallenges(4) };
+    repository.loadedDefinition = { quarterId: '2026-Q2', challenges: createChallenges(4) };
 
     const service = createService(repository);
 
@@ -72,7 +72,7 @@ describe('BoardConfigurationService', () => {
 
   it('tauscht Challenges und persistiert das Ergebnis', () => {
     const repository = new MockBoardDefinitionRepository();
-    repository.loadedDefinition = { id: 'test-id', challenges: createChallenges(4) };
+    repository.loadedDefinition = { quarterId: '2026-Q2', challenges: createChallenges(4) };
     const service = createService(repository);
 
     service.swapChallenges(0, 3);
@@ -84,7 +84,7 @@ describe('BoardConfigurationService', () => {
 
   it('aktualisiert eine einzelne Challenge', () => {
     const repository = new MockBoardDefinitionRepository();
-    repository.loadedDefinition = { id: 'test-id', challenges: createChallenges(4) };
+    repository.loadedDefinition = { quarterId: '2026-Q2', challenges: createChallenges(4) };
     const service = createService(repository);
 
     service.updateChallenge(1, { name: 'Updated' });
@@ -94,7 +94,7 @@ describe('BoardConfigurationService', () => {
 
   it('setzt das Board auf Defaults zurueck', () => {
     const repository = new MockBoardDefinitionRepository();
-    repository.loadedDefinition = { id: 'test-id', challenges: createChallenges(4) };
+    repository.loadedDefinition = { quarterId: '2026-Q2', challenges: createChallenges(4) };
     const service = createService(repository);
 
     service.resetBoard();
