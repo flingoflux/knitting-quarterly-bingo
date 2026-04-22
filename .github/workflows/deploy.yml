@@ -40,8 +40,26 @@ jobs:
 
       - name: Prepare SPA fallback
         run: |
-          cp dist/index.html dist/404.html
           touch dist/.nojekyll
+          cat > dist/404.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <title>Knitting Quarterly Bingo</title>
+              <script>
+                var l = window.location;
+                l.replace(
+                  l.protocol + '//' + l.host + l.pathname.split('/').slice(0, 2).join('/') +
+                  '/?p=/' + l.pathname.slice(1).replace(/&/g, '~and~') +
+                  (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+                  l.hash
+                );
+              </script>
+            </head>
+            <body></body>
+          </html>
+          EOF
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
