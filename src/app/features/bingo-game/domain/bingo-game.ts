@@ -48,7 +48,7 @@ export class BingoGame {
       return BingoGame.fromDefinition(saved.quarterId, cells);
     }
     return new BingoGame(
-      saved.quarterId,
+      QuarterId.from(saved.quarterId),
       saved.challenges.map((c, i) => ({
         name: c.name,
         planningImageId: c.planningImageId ?? cells[i]?.imageId,

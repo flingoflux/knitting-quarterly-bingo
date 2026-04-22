@@ -90,8 +90,9 @@ export function restoreArchiveEntry(value: unknown): ArchiveEntry | null {
     return null;
   }
 
+  const validated = candidate as PersistedArchiveEntry;
   return {
-    ...candidate,
+    ...validated,
     quarterId,
   };
 }
