@@ -40,9 +40,6 @@ export class QuarterlyPlan {
     return { quarterId: this.quarterId.toString(), challenges: [...this._challenges] as Challenge[] };
   }
 
-  toPlain(): { quarterId: string; challenges: Challenge[] } {
-    return { quarterId: this.quarterId.toString(), challenges: [...this._challenges] as Challenge[] };
-  }
 }
 
 function isValidIndex(index: number, length: number): boolean {

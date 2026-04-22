@@ -17,14 +17,6 @@ export class QuarterClock {
     return QuarterId.parse(quarterId).previous().toString();
   }
 
-  compareQuarterIds(a: string, b: string): number {
-    return QuarterId.parse(a).compareTo(QuarterId.parse(b));
-  }
-
-  isPastQuarter(quarterId: string, currentQuarterId: string): boolean {
-    return this.compareQuarterIds(quarterId, currentQuarterId) < 0;
-  }
-
   isRolloverDue(activeQuarterId: string, currentQuarterId: string): boolean {
     return !QuarterId.parse(activeQuarterId).equals(QuarterId.parse(currentQuarterId));
   }

@@ -169,10 +169,6 @@ classDiagram
     future
   }
 
-  class EntityMarker {
-    <<keine eigenstaendigen Entities>>
-  }
-
   QuarterlyPlan *-- "16" Challenge
   BingoGame *-- "16" ChallengeProgress
 
