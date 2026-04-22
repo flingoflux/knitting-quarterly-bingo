@@ -1,5 +1,6 @@
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { Challenge } from '../../../shared/domain/challenge';
+import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
 import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from '../domain/quarterly-plan.repository';
 import { QuarterlyPlan } from '../domain/quarterly-plan';
 import { QuarterClock } from '../../../core/domain';
@@ -62,6 +63,12 @@ export class BoardConfigurationService {
 
   updateChallenge(index: number, challenge: Challenge): void {
     this.boardState.set(this.boardState().update(index, challenge));
+    this.persist();
+  }
+
+  resetToDefaultChallengesWithoutImages(): void {
+    const defaultChallenges = DEFAULT_CHALLENGES.map(challenge => ({ name: challenge.name }));
+    this.boardState.set(QuarterlyPlan.fromChallenges(defaultChallenges, this.boardState().id));
     this.persist();
   }
 

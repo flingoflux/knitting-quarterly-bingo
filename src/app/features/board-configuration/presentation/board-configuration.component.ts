@@ -39,6 +39,14 @@ import { QuarterClock } from '../../../core/domain';
         [mode]="viewMode"
         (modeChange)="viewMode = $event"
       >
+        <kq-button
+          variant="icon"
+          (click)="resetToDefaultBoard()"
+          title="Board auf Standard-Challenges zurücksetzen und Bilder entfernen"
+          ariaLabel="Board auf Standard-Challenges zurücksetzen"
+        >
+          <kq-icon name="plus-feather" [size]="18"/>
+        </kq-button>
         <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
           <kq-icon name="shuffle" [size]="22"/>
         </kq-button>
@@ -158,6 +166,10 @@ export class BoardConfigurationComponent implements OnInit {
     const challenges = this.challenges;
     const shuffled = shuffleArray(challenges);
     this.state.setChallenges(shuffled as Challenge[]);
+  }
+
+  resetToDefaultBoard() {
+    this.state.resetToDefaultChallengesWithoutImages();
   }
 
   onDragStart(i: number) {
