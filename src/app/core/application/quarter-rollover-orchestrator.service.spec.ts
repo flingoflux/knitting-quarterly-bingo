@@ -139,7 +139,7 @@ describe('QuarterRolloverOrchestratorService', () => {
     service.ensureCurrentQuarter(new Date('2026-04-01T08:00:00.000Z'));
 
     expect(archiveRepository.entries).toHaveLength(1);
-    expect(archiveRepository.entries[0]?.quarterId).toBe('2026-Q1');
+    expect(archiveRepository.entries[0]?.quarterId.toString()).toBe('2026-Q1');
     expect(archiveRepository.entries[0]?.hasBingo).toBe(true);
     expect(bingoGameRepository.clearCalls).toBe(1);
     expect(boardWriter.savedPlans).toHaveLength(1);

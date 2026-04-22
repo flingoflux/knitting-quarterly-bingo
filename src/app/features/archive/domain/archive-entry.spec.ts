@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { QuarterId } from '../../../core/domain';
 import { createArchiveEntry, sortArchiveEntriesNewestFirst } from './archive-entry';
 
 describe('createArchiveEntry', () => {
@@ -79,7 +80,7 @@ describe('sortArchiveEntriesNewestFirst', () => {
   it('sortiert nach archivedAt absteigend', () => {
     const sorted = sortArchiveEntriesNewestFirst([
       {
-        quarterId: '2025-Q4',
+        quarterId: QuarterId.parse('2025-Q4'),
         startedAt: '2025-10-01T00:00:00.000Z',
         archivedAt: '2026-01-01T00:00:00.000Z',
         completedCount: 4,
@@ -90,7 +91,7 @@ describe('sortArchiveEntriesNewestFirst', () => {
         bingoCells: [],
       },
       {
-        quarterId: '2026-Q1',
+        quarterId: QuarterId.parse('2026-Q1'),
         startedAt: '2026-01-01T00:00:00.000Z',
         archivedAt: '2026-04-01T00:00:00.000Z',
         completedCount: 8,
@@ -102,6 +103,6 @@ describe('sortArchiveEntriesNewestFirst', () => {
       },
     ]);
 
-    expect(sorted.map(entry => entry.quarterId)).toEqual(['2026-Q1', '2025-Q4']);
+    expect(sorted.map(entry => entry.quarterId.toString())).toEqual(['2026-Q1', '2025-Q4']);
   });
 });

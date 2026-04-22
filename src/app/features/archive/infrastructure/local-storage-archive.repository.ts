@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { StorageService } from '../../../core/infrastructure/storage.service';
-import { ArchiveEntry, isArchiveEntry } from '../domain/archive-entry';
+import { ArchiveEntry, restoreArchiveEntry, toPersistedArchiveEntry } from '../domain/archive-entry';
 import { ArchiveRepository } from '../domain/archive.repository';
 
 @Injectable({ providedIn: 'root' })
@@ -15,12 +15,14 @@ export class LocalStorageArchiveRepository implements ArchiveRepository {
       return [];
     }
 
-    return raw.filter(isArchiveEntry);
+    return raw
+      .map(restoreArchiveEntry)
+      .filter((entry): entry is ArchiveEntry => entry !== null);
   }
 
   append(entry: ArchiveEntry): void {
     const existing = this.loadAll();
-    this.storage.setItem(this.storageKeyV1, [...existing, entry]);
+    this.storage.setItem(this.storageKeyV1, [...existing, entry].map(toPersistedArchiveEntry));
   }
 
   clear(): void {

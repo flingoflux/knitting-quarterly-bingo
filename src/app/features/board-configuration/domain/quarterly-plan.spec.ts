@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { QuarterId } from '../../../core/domain';
 import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
 import { type Challenge } from '../../../shared/domain/challenge';
 import { QuarterlyPlan } from './quarterly-plan';
@@ -11,7 +12,7 @@ describe('QuarterlyPlan', () => {
   it('createDefault verwendet die Default-Challenges', () => {
     const plan = QuarterlyPlan.createDefault('2026-Q3');
 
-    expect(plan.quarterId).toBe('2026-Q3');
+    expect(plan.quarterId.equals(QuarterId.parse('2026-Q3'))).toBe(true);
     expect(plan.challenges).toEqual(DEFAULT_CHALLENGES);
   });
 

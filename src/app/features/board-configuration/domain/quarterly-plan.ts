@@ -1,15 +1,16 @@
+import { QuarterId } from '../../../core/domain';
 import { Challenge } from '../../../shared/domain/challenge';
 import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
 
 export class QuarterlyPlan {
-  private constructor(readonly quarterId: string, private readonly _challenges: readonly Challenge[]) {}
+  private constructor(readonly quarterId: QuarterId, private readonly _challenges: readonly Challenge[]) {}
 
-  static createDefault(quarterId: string): QuarterlyPlan {
-    return new QuarterlyPlan(quarterId, [...DEFAULT_CHALLENGES]);
+  static createDefault(quarterId: QuarterId | string): QuarterlyPlan {
+    return new QuarterlyPlan(QuarterId.from(quarterId), [...DEFAULT_CHALLENGES]);
   }
 
-  static fromChallenges(challenges: readonly Challenge[], quarterId: string): QuarterlyPlan {
-    return new QuarterlyPlan(quarterId, [...challenges]);
+  static fromChallenges(challenges: readonly Challenge[], quarterId: QuarterId | string): QuarterlyPlan {
+    return new QuarterlyPlan(QuarterId.from(quarterId), [...challenges]);
   }
 
   get challenges(): readonly Challenge[] {
@@ -36,11 +37,11 @@ export class QuarterlyPlan {
   }
 
   toPersistable(): { quarterId: string; challenges: Challenge[] } {
-    return { quarterId: this.quarterId, challenges: [...this._challenges] as Challenge[] };
+    return { quarterId: this.quarterId.toString(), challenges: [...this._challenges] as Challenge[] };
   }
 
   toPlain(): { quarterId: string; challenges: Challenge[] } {
-    return { quarterId: this.quarterId, challenges: [...this._challenges] as Challenge[] };
+    return { quarterId: this.quarterId.toString(), challenges: [...this._challenges] as Challenge[] };
   }
 }
 

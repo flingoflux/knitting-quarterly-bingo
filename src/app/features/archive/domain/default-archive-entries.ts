@@ -1,8 +1,9 @@
+import { QuarterId } from '../../../core/domain';
 import { ArchiveEntry } from './archive-entry';
 
 export const DEFAULT_ARCHIVE_ENTRIES: ArchiveEntry[] = [
   {
-    quarterId: '2026-Q1',
+    quarterId: QuarterId.parse('2026-Q1'),
     startedAt: '2026-01-01T00:00:00.000Z',
     archivedAt: '2026-03-31T18:00:00.000Z',
     completedCount: 11,
@@ -13,7 +14,7 @@ export const DEFAULT_ARCHIVE_ENTRIES: ArchiveEntry[] = [
     bingoCells: [0, 1, 3, 4, 5, 6, 7, 9, 12, 14, 15],
   },
   {
-    quarterId: '2025-Q4',
+    quarterId: QuarterId.parse('2025-Q4'),
     startedAt: '2025-10-01T00:00:00.000Z',
     archivedAt: '2025-12-31T18:00:00.000Z',
     completedCount: 7,
@@ -24,7 +25,7 @@ export const DEFAULT_ARCHIVE_ENTRIES: ArchiveEntry[] = [
     bingoCells: [],
   },
   {
-    quarterId: '2025-Q3',
+    quarterId: QuarterId.parse('2025-Q3'),
     startedAt: '2025-07-01T00:00:00.000Z',
     archivedAt: '2025-09-30T18:00:00.000Z',
     completedCount: 13,

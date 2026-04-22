@@ -1,10 +1,12 @@
+import { QuarterId } from '../../../core/domain';
+
 export interface ArchiveChallengeSnapshot {
   name: string;
   completed: boolean;
 }
 
 export interface ArchiveEntry {
-  quarterId: string;
+  quarterId: QuarterId;
   startedAt: string;
   archivedAt: string;
   completedCount: number;
@@ -15,13 +17,17 @@ export interface ArchiveEntry {
   bingoCells: number[];
 }
 
+export interface PersistedArchiveEntry extends Omit<ArchiveEntry, 'quarterId'> {
+  quarterId: string;
+}
+
 export interface ArchiveSourceGame {
   startedAt: string;
   challenges: readonly ArchiveChallengeSnapshot[];
 }
 
 export function createArchiveEntry(params: {
-  quarterId: string;
+  quarterId: QuarterId | string;
   archivedAt?: string;
   game: ArchiveSourceGame;
 }): ArchiveEntry {
@@ -33,7 +39,7 @@ export function createArchiveEntry(params: {
   const bingoCells = calculateBingoCells(completed);
 
   return {
-    quarterId: params.quarterId,
+    quarterId: QuarterId.from(params.quarterId),
     startedAt: params.game.startedAt,
     archivedAt: params.archivedAt ?? new Date().toISOString(),
     completedCount: completedChallengeNames.length,
@@ -49,13 +55,20 @@ export function sortArchiveEntriesNewestFirst(entries: readonly ArchiveEntry[]):
   return [...entries].sort((a, b) => b.archivedAt.localeCompare(a.archivedAt));
 }
 
-export function isArchiveEntry(value: unknown): value is ArchiveEntry {
+export function toPersistedArchiveEntry(entry: ArchiveEntry): PersistedArchiveEntry {
+  return {
+    ...entry,
+    quarterId: entry.quarterId.toString(),
+  };
+}
+
+export function restoreArchiveEntry(value: unknown): ArchiveEntry | null {
   if (typeof value !== 'object' || value === null) {
-    return false;
+    return null;
   }
 
-  const candidate = value as Partial<ArchiveEntry>;
-  return (
+  const candidate = value as Partial<PersistedArchiveEntry>;
+  if (!(
     typeof candidate.quarterId === 'string' &&
     typeof candidate.startedAt === 'string' &&
     typeof candidate.archivedAt === 'string' &&
@@ -68,7 +81,19 @@ export function isArchiveEntry(value: unknown): value is ArchiveEntry {
     candidate.completed.every(c => typeof c === 'boolean') &&
     Array.isArray(candidate.bingoCells) &&
     candidate.bingoCells.every(c => typeof c === 'number')
-  );
+  )) {
+    return null;
+  }
+
+  const quarterId = QuarterId.tryParse(candidate.quarterId);
+  if (quarterId === null) {
+    return null;
+  }
+
+  return {
+    ...candidate,
+    quarterId,
+  };
 }
 
 function hasBingoLine(completed: readonly boolean[]): boolean {

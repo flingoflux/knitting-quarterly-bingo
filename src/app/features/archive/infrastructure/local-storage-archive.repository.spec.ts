@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { QuarterId } from '../../../core/domain';
 import { StorageService } from '../../../core/infrastructure/storage.service';
 import { LocalStorageArchiveRepository } from './local-storage-archive.repository';
 
@@ -27,7 +28,7 @@ describe('LocalStorageArchiveRepository', () => {
 
   it('speichert Eintrag via append und laedt ihn wieder', () => {
     repository.append({
-      quarterId: '2026-Q1',
+      quarterId: QuarterId.parse('2026-Q1'),
       startedAt: '2026-01-01T00:00:00.000Z',
       archivedAt: '2026-04-01T00:00:00.000Z',
       completedCount: 7,
@@ -39,7 +40,7 @@ describe('LocalStorageArchiveRepository', () => {
     });
 
     expect(repository.loadAll()).toHaveLength(1);
-    expect(repository.loadAll()[0]?.quarterId).toBe('2026-Q1');
+    expect(repository.loadAll()[0]?.quarterId.toString()).toBe('2026-Q1');
   });
 
   it('ignoriert invalide Datensaetze aus dem Storage', () => {
@@ -61,6 +62,6 @@ describe('LocalStorageArchiveRepository', () => {
     ]);
 
     expect(repository.loadAll()).toHaveLength(1);
-    expect(repository.loadAll()[0]?.quarterId).toBe('2026-Q1');
+    expect(repository.loadAll()[0]?.quarterId.toString()).toBe('2026-Q1');
   });
 });

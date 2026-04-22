@@ -1,3 +1,5 @@
+import { QuarterId } from '../../../core/domain';
+
 export interface ChallengeProgress {
   name: string;
   planningImageId?: string;
@@ -18,18 +20,18 @@ export function createBoardSignature(cells: readonly { name: string }[]): string
 
 export class BingoGame {
   private constructor(
-    readonly quarterId: string,
+    readonly quarterId: QuarterId | null,
     private readonly _challenges: readonly ChallengeProgress[],
     readonly startedAt: string,
   ) {}
 
   static empty(): BingoGame {
-    return new BingoGame('', [], new Date().toISOString());
+    return new BingoGame(null, [], new Date().toISOString());
   }
 
-  static fromDefinition(quarterId: string, cells: readonly { name: string; imageId?: string }[]): BingoGame {
+  static fromDefinition(quarterId: QuarterId | string, cells: readonly { name: string; imageId?: string }[]): BingoGame {
     return new BingoGame(
-      quarterId,
+      QuarterId.from(quarterId),
       cells.map(c => ({
         name: c.name,
         planningImageId: c.imageId,
@@ -100,8 +102,12 @@ export class BingoGame {
   }
 
   toProgress(): BingoGameProgress {
+    if (this.quarterId === null) {
+      throw new Error('Cannot persist an empty bingo game without quarter ID');
+    }
+
     return {
-      quarterId: this.quarterId,
+      quarterId: this.quarterId.toString(),
       boardSignature: createBoardSignature(this._challenges),
       challenges: [...this._challenges] as ChallengeProgress[],
       startedAt: this.startedAt,

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
+import { QuarterId } from '../../../core/domain';
 import { ArchiveEntry } from '../domain/archive-entry';
 import { ARCHIVE_REPOSITORY } from '../domain/archive.repository';
 import { ArchiveOverviewService } from './archive-overview.service';
@@ -23,7 +24,7 @@ class MockArchiveRepository {
 
 function createEntry(quarterId: string, archivedAt: string): ArchiveEntry {
   return {
-    quarterId,
+    quarterId: QuarterId.parse(quarterId),
     startedAt: '2026-01-01T00:00:00.000Z',
     archivedAt,
     completedCount: 3,
@@ -46,13 +47,13 @@ describe('ArchiveOverviewService', () => {
   it('laedt Eintraege initial sortiert neu nach alt', () => {
     const repository = new MockArchiveRepository();
     repository.entries = [
-      createEntry('old', '2026-01-01T00:00:00.000Z'),
-      createEntry('new', '2026-04-01T00:00:00.000Z'),
+      createEntry('2025-Q4', '2026-01-01T00:00:00.000Z'),
+      createEntry('2026-Q1', '2026-04-01T00:00:00.000Z'),
     ];
 
     const service = createService(repository);
 
-    expect(service.entries().map(entry => entry.quarterId)).toEqual(['new', 'old']);
+    expect(service.entries().map(entry => entry.quarterId.toString())).toEqual(['2026-Q1', '2025-Q4']);
     expect(service.hasEntries()).toBe(true);
   });
 
@@ -68,16 +69,16 @@ describe('ArchiveOverviewService', () => {
 
   it('reload liest den aktuellen Repository-Stand neu ein', () => {
     const repository = new MockArchiveRepository();
-    repository.entries = [createEntry('old', '2026-01-01T00:00:00.000Z')];
+    repository.entries = [createEntry('2025-Q4', '2026-01-01T00:00:00.000Z')];
     const service = createService(repository);
 
     repository.entries = [
-      createEntry('new', '2026-04-01T00:00:00.000Z'),
-      createEntry('old', '2026-01-01T00:00:00.000Z'),
+      createEntry('2026-Q1', '2026-04-01T00:00:00.000Z'),
+      createEntry('2025-Q4', '2026-01-01T00:00:00.000Z'),
     ];
     service.reload();
 
-    expect(service.entries().map(entry => entry.quarterId)).toEqual(['new', 'old']);
+    expect(service.entries().map(entry => entry.quarterId.toString())).toEqual(['2026-Q1', '2025-Q4']);
     expect(service.isShowingPrototype()).toBe(false);
   });
 });

@@ -4,6 +4,10 @@ export class QuarterId {
     private readonly quarter: number,
   ) {}
 
+  static from(value: QuarterId | string): QuarterId {
+    return value instanceof QuarterId ? value : QuarterId.parse(value);
+  }
+
   static parse(value: string): QuarterId {
     const match = value.match(/^(\d{4})-Q([1-4])$/);
     if (!match) {

@@ -3,17 +3,17 @@ import { QuarterId } from './quarter-id';
 export type QuarterlyPhase = 'past' | 'current' | 'future';
 
 export class KnittingQuarterly {
-  private constructor(readonly quarterId: string) {}
+  private constructor(readonly quarterId: QuarterId) {}
 
   static create(params: {
-    quarterId: string;
+    quarterId: QuarterId | string;
   }): KnittingQuarterly {
-    return new KnittingQuarterly(params.quarterId);
+    return new KnittingQuarterly(QuarterId.from(params.quarterId));
   }
 
-  static classifyPhase(quarterId: string, currentQuarterId: string): QuarterlyPhase {
-    const candidate = QuarterId.parse(quarterId);
-    const current = QuarterId.parse(currentQuarterId);
+  static classifyPhase(quarterId: QuarterId | string, currentQuarterId: QuarterId | string): QuarterlyPhase {
+    const candidate = QuarterId.from(quarterId);
+    const current = QuarterId.from(currentQuarterId);
 
     if (candidate.isBefore(current)) {
       return 'past';
@@ -25,11 +25,11 @@ export class KnittingQuarterly {
     return 'current';
   }
 
-  phaseAt(currentQuarterId: string): QuarterlyPhase {
+  phaseAt(currentQuarterId: QuarterId | string): QuarterlyPhase {
     return KnittingQuarterly.classifyPhase(this.quarterId, currentQuarterId);
   }
 
-  isFuturePreview(currentQuarterId: string): boolean {
+  isFuturePreview(currentQuarterId: QuarterId | string): boolean {
     return this.phaseAt(currentQuarterId) === 'future';
   }
 }
