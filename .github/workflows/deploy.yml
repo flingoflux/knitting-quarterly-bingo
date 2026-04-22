@@ -36,7 +36,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build app
-        run: pnpm build
+        run: pnpm build -- --base-href /knitting-quarterly-bingo/
+
+      - name: Prepare SPA fallback
+        run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
