@@ -8,7 +8,7 @@
     "build": "ng build",
     "test": "vitest run",
     "test:ui": "vitest --ui",
-    "lint": "eslint . --ext .ts,.html",
+    "lint": "eslint .",
     "format": "prettier --write ."
   },
   "dependencies": {
