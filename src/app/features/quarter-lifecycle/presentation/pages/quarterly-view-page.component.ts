@@ -1,10 +1,10 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { KnittingQuarterly, QuarterClock, type QuarterlyPhase } from '../../../core/domain';
-import { BingoGameComponent } from '../../bingo-game/presentation/bingo-game.component';
-import { BoardConfigurationComponent } from '../../board-configuration/presentation/board-configuration.component';
-import { QuarterlyViewTemplateComponent } from '../../../shared/ui/templates/quarterly-view/quarterly-view.component';
+import { KnittingQuarterly, QuarterClock, type QuarterlyPhase } from '../../../../core/domain';
+import { BingoGameComponent } from '../../../bingo-game/presentation/bingo-game.component';
+import { BoardConfigurationComponent } from '../../../board-configuration/presentation/board-configuration.component';
+import { QuarterlyViewTemplateComponent } from '../../../../shared/ui/templates/quarterly-view/quarterly-view.component';
 
 @Component({
   selector: 'app-quarterly-view-page',

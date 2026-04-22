@@ -1,9 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ButtonComponent } from './shared/ui/atoms/button/button.component';
-import { BINGO_GAME_REPOSITORY } from './features/bingo-game/domain/bingo-game.repository';
-import { QuarterRolloverOrchestratorService } from './core/application/quarter-rollover-orchestrator.service';
-import { QuarterClock } from './core/domain';
+import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
+import { BINGO_GAME_REPOSITORY } from '../../../../features/bingo-game/domain/bingo-game.repository';
+import { QuarterRolloverOrchestratorService } from '../../../../core/application/quarter-rollover-orchestrator.service';
+import { QuarterClock } from '../../../../core/domain';
 
 @Component({
   selector: 'app-start-page',
