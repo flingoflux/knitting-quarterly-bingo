@@ -6,7 +6,7 @@ import { QuarterClock } from '../../../core/domain';
 
 interface LegacyV2Progress {
   boardDefinitionId: string;
-  boardSignature: string;
+  planSignature: string;
   challenges: { name: string }[];
   cellImages: (string | undefined)[];
   completed: boolean[];
@@ -24,7 +24,12 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
   load(quarterId: string): BingoGameProgress | null {
     const v4 = this.storage.getItem<BingoGameProgress>(this.getStorageKeyV4(quarterId));
     if (v4 !== null) {
-      const resolved = { ...v4, quarterId: v4.quarterId ?? quarterId };
+      const rawV4 = v4 as BingoGameProgress & { boardSignature?: string };
+      const resolved: BingoGameProgress = {
+        ...v4,
+        quarterId: v4.quarterId ?? quarterId,
+        planSignature: v4.planSignature ?? rawV4.boardSignature ?? '',
+      };
       if (v4.quarterId !== resolved.quarterId) {
         this.storage.setItem(this.getStorageKeyV4(quarterId), resolved);
       }
@@ -52,7 +57,7 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
     ) {
       const migrated: BingoGameProgress = {
         quarterId,
-        boardSignature: v2.boardSignature,
+        planSignature: v2.planSignature,
         challenges: v2.challenges.map((c, i): ChallengeProgress => ({
           name: c.name ?? '',
           planningImageId: undefined,
@@ -71,7 +76,7 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
   save(quarterId: string, progress: BingoGameProgress): void {
     this.storage.setItem(this.getStorageKeyV4(quarterId), {
       quarterId,
-      boardSignature: progress.boardSignature,
+      planSignature: progress.planSignature,
       challenges: [...progress.challenges],
       startedAt: progress.startedAt,
     });

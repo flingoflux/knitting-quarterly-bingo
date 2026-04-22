@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BingoGame, ChallengeProgress, createBoardSignature } from './bingo-game';
+import { BingoGame, ChallengeProgress, createPlanSignature } from './bingo-game';
 
 // 4x4 Spielfeld:
 //  0  1  2  3
@@ -43,7 +43,7 @@ describe('BingoGame.restore', () => {
     const cells = makeCells(16);
     const saved = {
       quarterId: '2026-Q2',
-      boardSignature: createBoardSignature(cells),
+      planSignature: createPlanSignature(cells),
       challenges: cells.map((c): ChallengeProgress => ({
         name: c.name,
         planningImageId: 'saved-planning-img',
@@ -62,7 +62,7 @@ describe('BingoGame.restore', () => {
     const cells = makeCells(16, ['definition-img']);
     const saved = {
       quarterId: '2026-Q2',
-      boardSignature: createBoardSignature(cells),
+      planSignature: createPlanSignature(cells),
       challenges: cells.map((c): ChallengeProgress => ({
         name: c.name,
         planningImageId: undefined,
@@ -81,7 +81,7 @@ describe('BingoGame.restore', () => {
     const cells = makeCells(16);
     const saved = {
       quarterId: '2026-Q2',
-      boardSignature: createBoardSignature(cells),
+      planSignature: createPlanSignature(cells),
       challenges: cells.map((c, i): ChallengeProgress => ({
         name: c.name,
         planningImageId: undefined,
@@ -101,7 +101,7 @@ describe('BingoGame.restore', () => {
     const cells = makeCells(16);
     const saved = {
       quarterId: '2026-Q2',
-      boardSignature: 'outdated-signature',
+      planSignature: 'outdated-signature',
       challenges: cells.map((c): ChallengeProgress => ({
         name: c.name,
         planningImageId: undefined,
@@ -157,7 +157,7 @@ describe('BingoGame.resetProgress', () => {
     const cells = makeCells(16);
     const saved = {
       quarterId: '2026-Q2',
-      boardSignature: createBoardSignature(cells),
+      planSignature: createPlanSignature(cells),
       challenges: cells.map((c): ChallengeProgress => ({
         name: c.name,
         planningImageId: undefined,
@@ -177,7 +177,7 @@ describe('BingoGame.resetProgress', () => {
     const cells = makeCells(16, ['plan-img']);
     const saved = {
       quarterId: '2026-Q2',
-      boardSignature: createBoardSignature(cells),
+      planSignature: createPlanSignature(cells),
       challenges: cells.map((c, i): ChallengeProgress => ({
         name: c.name,
         planningImageId: i === 0 ? 'plan-img' : undefined,
@@ -216,7 +216,7 @@ describe('BingoGame.updateProgressImage', () => {
     const cells = makeCells(16);
     const saved = {
       quarterId: '2026-Q2',
-      boardSignature: createBoardSignature(cells),
+      planSignature: createPlanSignature(cells),
       challenges: cells.map((c, i): ChallengeProgress => ({
         name: c.name,
         planningImageId: undefined,
@@ -250,7 +250,7 @@ describe('BingoGame.bingoCells', () => {
     const cells = makeCells(16);
     const saved = {
       quarterId: '2026-Q2',
-      boardSignature: createBoardSignature(cells),
+      planSignature: createPlanSignature(cells),
       challenges: cells.map((c, i): ChallengeProgress => ({
         name: c.name,
         planningImageId: undefined,

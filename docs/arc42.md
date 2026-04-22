@@ -120,7 +120,7 @@ classDiagram
   class BingoGame {
     <<Aggregate Root>>
     +string quarterId
-    +string boardSignature
+    +string planSignature
     +ChallengeProgress[16] challenges
     +BingoGame toggle(index)
     +BingoGame updateProgressImage(index, imageId)
@@ -189,7 +189,7 @@ flowchart TB
   AR[[ArchiveRepository]]
   IR[[ImageRepository]]
 
-  LSBR[LocalStorageBoardRepository]
+  LSBR[LocalStorageQuarterlyPlanRepository]
   LSBGR[LocalStorageBingoGameRepository]
   LSAR[LocalStorageArchiveRepository]
   IDBR[IndexedDbImageRepositoryService]
@@ -245,8 +245,8 @@ sequenceDiagram
   participant SPC as StartPageComponent
   participant BGG as BingoGameGuard
   participant BGS as BingoGameService
-  participant BCC as BoardConfigurationComponent
-  participant BCS as BoardConfigurationService
+  participant BCC as QuarterlyPlanComponent
+  participant BCS as QuarterlyPlanService
   participant LocalStorage
 
   Benutzer->>Browser: Oeffnet /
@@ -308,8 +308,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   actor Benutzer
-  participant BCC as BoardConfigurationComponent
-  participant BCS as BoardConfigurationService
+  participant BCC as QuarterlyPlanComponent
+  participant BCS as QuarterlyPlanService
   participant QP as QuarterlyPlan
   participant IDB as IndexedDbImageRepository
   participant LocalStorage
@@ -456,7 +456,7 @@ Bilder werden **nie** direkt im Plan oder Spielstand gespeichert – nur ihre UU
 
 Beide Repositories enthalten automatische Migrationslogik beim Laden:
 
-- `LocalStorageBoardRepository`: Legacy-Daten ohne `quarterId` werden auf das quartalsbezogene v3-Format migriert.
+- `LocalStorageQuarterlyPlanRepository`: Legacy-Daten ohne `quarterId` werden auf das quartalsbezogene v3-Format migriert.
 - `LocalStorageBingoGameRepository`: v2 (separate `cellImages[]` + `completed[]`-Arrays) → v3/v4 (`ChallengeProgress[]`, quartalsbezogen)
 
 Migrationen laufen transparent beim ersten Laden nach einem Update. Alte Schlüssel werden nicht gelöscht, um einen Rollback nicht zu verunmöglichen.
@@ -492,7 +492,7 @@ Gibt ein `Set<number>` zurück. Mehrere gleichzeitige Bingos sind möglich (ein 
 
 ### 8.6 Signatur-basierte Spielstand-Validierung
 
-Wenn der Benutzer den Plan nach dem Start eines Spiels ändert, würde der alte Spielstand nicht mehr passen. `createBoardSignature()` serialisiert die Namen aller Challenges als JSON-String. Beim Laden des Spielstands wird die gespeicherte Signatur gegen die aktuelle verglichen – bei Abweichung wird ein neues Spiel gestartet.
+Wenn der Benutzer den Plan nach dem Start eines Spiels ändert, würde der alte Spielstand nicht mehr passen. `createPlanSignature()` serialisiert die Namen aller Challenges als JSON-String. Beim Laden des Spielstands wird die gespeicherte Signatur gegen die aktuelle verglichen – bei Abweichung wird ein neues Spiel gestartet.
 
 ### 8.7 Fehlerbehandlung
 
@@ -530,7 +530,7 @@ flowchart TD
 
 | Fehlerfall | Betroffene Komponente | Reaktion/Fallback | Ergebnis |
 |---|---|---|---|
-| Plan kann nicht aus LocalStorage geladen werden | `BoardConfigurationService` + `LocalStorageBoardRepository` | `QuarterlyPlan.createDefault()` und Persistenz mit Default-Werten | Edit-Flow bleibt nutzbar |
+| Plan kann nicht aus LocalStorage geladen werden | `QuarterlyPlanService` + `LocalStorageQuarterlyPlanRepository` | `QuarterlyPlan.createDefault()` und Persistenz mit Default-Werten | Edit-Flow bleibt nutzbar |
 | Spielstand kann nicht geladen werden | `BingoGameService` + `LocalStorageBingoGameRepository` | `BingoGame.fromDefinition()` statt Restore | Spiel startet konsistent neu |
 | Signatur passt nicht (Plan geaendert) | `BingoGameService` | Gespeicherten Fortschritt verwerfen, neues Spiel aus aktueller Definition | Kein inkonsistenter Mischzustand |
 | Bild kann nicht aus IndexedDB geladen werden | `IndexedDbImageRepositoryService` + UI-Komponenten (`ChallengeCard`, `ProjectComparisonDialog`) | Platzhalter statt Bild anzeigen | Kerninteraktion bleibt erhalten |
@@ -623,9 +623,9 @@ Größere, oft zusammengesetzte Komponenten mit komplexerer Logik:
 
 Standalone Angular Components, die Organisms und kleinere Feature-spezifische Komponenten kombinieren:
 
-**`board-configuration.component.ts` (/edit)**
+**`quarterly-plan.component.ts` (/edit)**
 - Nutzt: `BoardGridComponent`, `EditableBoardComponent` (nicht in Atoms/Molecules), `CardDetailDialogComponent`
-- State: `BoardConfigurationService`
+- State: `QuarterlyPlanService`
 
 **`bingo-game.component.ts` (/play)**
 - Nutzt: `BoardGridComponent`, `PlayableBoardComponent`, `ProjectComparisonDialogComponent`
@@ -698,7 +698,7 @@ classDiagram
 
   class ActiveGame {
     +string quarterId
-    +string boardSignature
+    +string planSignature
     +ChallengeProgress[16] challenges
     +key: kq-bingo-active-game-v4:{quarterId}
   }

@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BingoGameService } from '../application/bingo-game.service';
 import { PlayableBoardComponent } from './components/playable-board.component';
 import { ProjectComparisonDialogComponent } from './components/project-comparison-dialog.component';
-import { ImageChangedEvent } from '../../board-configuration/presentation/components/card-detail-dialog.component';
+import { ImageChangedEvent } from '../../quarterly-plan/presentation/components/card-detail-dialog.component';
 import { ChallengeProgress } from '../domain/bingo-game';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';

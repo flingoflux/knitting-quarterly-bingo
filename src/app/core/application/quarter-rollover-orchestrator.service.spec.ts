@@ -3,7 +3,7 @@ import { Injector, runInInjectionContext } from '@angular/core';
 import { DEFAULT_CHALLENGES } from '../../shared/domain/default-challenges';
 import { ARCHIVE_REPOSITORY } from '../../features/archive/domain/archive.repository';
 import { ArchiveEntry } from '../../features/archive/domain/archive-entry';
-import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER, QuarterlyPlanData } from '../../features/board-configuration/domain/quarterly-plan.repository';
+import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER, QuarterlyPlanData } from '../../features/quarterly-plan/domain/quarterly-plan.repository';
 import { BINGO_GAME_REPOSITORY } from '../../features/bingo-game/domain/bingo-game.repository';
 import { BingoGameProgress } from '../../features/bingo-game/domain/bingo-game';
 import { Result } from '../../shared/domain/result';
@@ -125,7 +125,7 @@ describe('QuarterRolloverOrchestratorService', () => {
     const bingoGameRepository = new MockBingoGameRepository();
     bingoGameRepository.progress = {
       quarterId: '2026-Q1',
-      boardSignature: 'sig',
+      planSignature: 'sig',
       startedAt: '2026-01-05T00:00:00.000Z',
       challenges: [
         { name: 'A', completed: true },

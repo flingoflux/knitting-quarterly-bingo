@@ -2,7 +2,7 @@ import { Component, ViewChild, inject, OnInit, signal, computed, DestroyRef } fr
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BoardConfigurationService } from '../application/board-configuration.service';
+import { QuarterlyPlanService } from '../application/quarterly-plan.service';
 import { EditableBoardComponent } from './components/editable-board.component';
 import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-detail-dialog.component';
 import { shuffleArray } from '../../../shared/utils/array-utils';
@@ -14,7 +14,7 @@ import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolba
 import { QuarterClock } from '../../../core/domain';
 
 @Component({
-  selector: 'app-board-configuration',
+  selector: 'app-quarterly-plan',
   standalone: true,
   imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent, BoardToolbarComponent],
   template: `
@@ -113,10 +113,10 @@ import { QuarterClock } from '../../../core/domain';
     }
   `],
 })
-export class BoardConfigurationComponent implements OnInit {
+export class QuarterlyPlanComponent implements OnInit {
   @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
   @ViewChild('editableBoard') private readonly editableBoardRef!: EditableBoardComponent;
-  state = inject(BoardConfigurationService);
+  state = inject(QuarterlyPlanService);
   router = inject(Router);
   route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);

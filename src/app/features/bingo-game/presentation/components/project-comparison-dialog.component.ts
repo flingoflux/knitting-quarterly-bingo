@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
-import { ImageChangedEvent } from '../../../board-configuration/presentation/components/card-detail-dialog.component';
+import { ImageChangedEvent } from '../../../quarterly-plan/presentation/components/card-detail-dialog.component';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 
 interface CropState {

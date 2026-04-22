@@ -6,12 +6,12 @@ import { QuarterlyPlan } from '../domain/quarterly-plan';
 import { QuarterClock } from '../../../core/domain';
 
 @Injectable()
-export class BoardConfigurationService {
+export class QuarterlyPlanService {
   private readonly quarterClock = new QuarterClock();
   private readonly activeQuarterId = signal(this.quarterClock.getQuarterId(new Date()));
-  private readonly boardState = signal<QuarterlyPlan>(QuarterlyPlan.createDefault(this.activeQuarterId()));
+  private readonly planState = signal<QuarterlyPlan>(QuarterlyPlan.createDefault(this.activeQuarterId()));
   private readonly previewMode = signal(false);
-  readonly challenges: Signal<Challenge[]> = computed(() => this.boardState().challenges as Challenge[]);
+  readonly challenges: Signal<Challenge[]> = computed(() => this.planState().challenges as Challenge[]);
   readonly isPreviewMode = computed(() => this.previewMode());
 
   private readonly reader = inject(QUARTERLY_PLAN_READER);
@@ -20,11 +20,11 @@ export class BoardConfigurationService {
   constructor() {
     const result = this.reader.load(this.activeQuarterId());
     if (result.ok && result.value.challenges.length > 0) {
-      this.boardState.set(QuarterlyPlan.fromChallenges(result.value.challenges, result.value.quarterId));
+      this.planState.set(QuarterlyPlan.fromChallenges(result.value.challenges, result.value.quarterId));
       return;
     }
 
-    this.resetBoard();
+    this.resetPlan();
   }
 
   setPreviewMode(enabled: boolean, quarterId?: string): void {
@@ -33,42 +33,42 @@ export class BoardConfigurationService {
 
     const result = this.reader.load(this.activeQuarterId());
     if (result.ok && result.value.challenges.length > 0) {
-      this.boardState.set(QuarterlyPlan.fromChallenges(result.value.challenges, result.value.quarterId));
+      this.planState.set(QuarterlyPlan.fromChallenges(result.value.challenges, result.value.quarterId));
       return;
     }
 
     if (enabled) {
       const previewQuarterId = quarterId || 'preview-quarter';
-      this.boardState.set(QuarterlyPlan.createDefault(previewQuarterId));
+      this.planState.set(QuarterlyPlan.createDefault(previewQuarterId));
       return;
     }
 
-    this.resetBoard();
+    this.resetPlan();
   }
 
-  resetBoard(): void {
-    this.boardState.set(QuarterlyPlan.createDefault(this.activeQuarterId()));
+  resetPlan(): void {
+    this.planState.set(QuarterlyPlan.createDefault(this.activeQuarterId()));
     this.persist();
   }
 
   setChallenges(challenges: Challenge[]): void {
-    this.boardState.set(QuarterlyPlan.fromChallenges(challenges, this.boardState().quarterId));
+    this.planState.set(QuarterlyPlan.fromChallenges(challenges, this.planState().quarterId));
     this.persist();
   }
 
   swapChallenges(startIndex: number, targetIndex: number): void {
-    this.boardState.set(this.boardState().reorder(startIndex, targetIndex));
+    this.planState.set(this.planState().reorder(startIndex, targetIndex));
     this.persist();
   }
 
   updateChallenge(index: number, challenge: Challenge): void {
-    this.boardState.set(this.boardState().update(index, challenge));
+    this.planState.set(this.planState().update(index, challenge));
     this.persist();
   }
 
   resetToDefaultChallengesWithoutImages(): void {
     const defaultChallenges = DEFAULT_CHALLENGES.map(challenge => ({ name: challenge.name }));
-    this.boardState.set(QuarterlyPlan.fromChallenges(defaultChallenges, this.boardState().quarterId));
+    this.planState.set(QuarterlyPlan.fromChallenges(defaultChallenges, this.planState().quarterId));
     this.persist();
   }
 
@@ -77,7 +77,7 @@ export class BoardConfigurationService {
       return; // Keine Persistierung im Vorschau-Modus
     }
     this.writer.save(this.activeQuarterId(), {
-      ...this.boardState().toPersistable(),
+      ...this.planState().toPersistable(),
     });
   }
 }

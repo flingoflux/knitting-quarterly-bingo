@@ -9,12 +9,12 @@ export interface ChallengeProgress {
 
 export interface BingoGameProgress {
   quarterId: string;
-  boardSignature: string;
+  planSignature: string;
   challenges: ChallengeProgress[];
   startedAt: string;
 }
 
-export function createBoardSignature(cells: readonly { name: string }[]): string {
+export function createPlanSignature(cells: readonly { name: string }[]): string {
   return JSON.stringify(cells.map(c => ({ name: c.name })));
 }
 
@@ -43,8 +43,8 @@ export class BingoGame {
   }
 
   static restore(cells: readonly { name: string; imageId?: string }[], saved: BingoGameProgress): BingoGame {
-    const signature = createBoardSignature(cells);
-    if (saved.boardSignature !== signature) {
+    const signature = createPlanSignature(cells);
+    if (saved.planSignature !== signature) {
       return BingoGame.fromDefinition(saved.quarterId, cells);
     }
     return new BingoGame(
@@ -108,7 +108,7 @@ export class BingoGame {
 
     return {
       quarterId: this.quarterId.toString(),
-      boardSignature: createBoardSignature(this._challenges),
+      planSignature: createPlanSignature(this._challenges),
       challenges: [...this._challenges] as ChallengeProgress[],
       startedAt: this.startedAt,
     };

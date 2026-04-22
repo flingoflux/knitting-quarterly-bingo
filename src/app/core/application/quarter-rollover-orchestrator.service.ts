@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { DEFAULT_CHALLENGES } from '../../shared/domain/default-challenges';
 import { ARCHIVE_REPOSITORY } from '../../features/archive/domain/archive.repository';
 import { createArchiveEntry } from '../../features/archive/domain/archive-entry';
-import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from '../../features/board-configuration/domain/quarterly-plan.repository';
+import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from '../../features/quarterly-plan/domain/quarterly-plan.repository';
 import { BINGO_GAME_REPOSITORY } from '../../features/bingo-game/domain/bingo-game.repository';
 import { QuarterClock, QuarterId } from '../domain';
 

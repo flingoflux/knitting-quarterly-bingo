@@ -11,7 +11,7 @@ export interface PersistedQuarterlyPlan {
 }
 
 @Injectable({ providedIn: 'root' })
-export class LocalStorageBoardRepository implements QuarterlyPlanReader, QuarterlyPlanWriter {
+export class LocalStorageQuarterlyPlanRepository implements QuarterlyPlanReader, QuarterlyPlanWriter {
   private readonly storageKeyPrefixV3 = 'kq-bingo-board-definition-v3:';
   private readonly storageKeyV2 = 'kq-bingo-board-definition-v2';
   private readonly storageKeyV1 = 'kq-bingo-board-definition-v1';

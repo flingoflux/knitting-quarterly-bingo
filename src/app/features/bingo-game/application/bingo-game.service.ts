@@ -1,8 +1,8 @@
 import { Injectable, inject, Signal, computed, signal } from '@angular/core';
 import { ChallengeProgress } from '../domain/bingo-game';
-import { QUARTERLY_PLAN_READER } from '../../board-configuration/domain/quarterly-plan.repository';
+import { QUARTERLY_PLAN_READER } from '../../quarterly-plan/domain/quarterly-plan.repository';
 import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
-import { BingoGame, createBoardSignature } from '../domain/bingo-game';
+import { BingoGame, createPlanSignature } from '../domain/bingo-game';
 import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
 import { QuarterClock } from '../../../core/domain';
 
@@ -89,7 +89,7 @@ export class BingoGameService {
     if (
       persistedProgress !== null &&
       persistedProgress.quarterId === quarterId &&
-      persistedProgress.boardSignature === createBoardSignature(challenges)
+      persistedProgress.planSignature === createPlanSignature(challenges)
     ) {
       this.gameState.set(BingoGame.restore(challenges, persistedProgress));
       return;

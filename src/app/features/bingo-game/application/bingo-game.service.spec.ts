@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 import { Challenge } from '../../../shared/domain/challenge';
 import { Result } from '../../../shared/domain/result';
-import { PersistedQuarterlyPlan } from '../../board-configuration/infrastructure/local-storage-board.repository';
-import { QUARTERLY_PLAN_READER } from '../../board-configuration/domain/quarterly-plan.repository';
+import { PersistedQuarterlyPlan } from '../../quarterly-plan/infrastructure/local-storage-quarterly-plan.repository';
+import { QUARTERLY_PLAN_READER } from '../../quarterly-plan/domain/quarterly-plan.repository';
 import { BingoGameService } from './bingo-game.service';
 import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
-import { BingoGameProgress, ChallengeProgress, createBoardSignature } from '../domain/bingo-game';
+import { BingoGameProgress, ChallengeProgress, createPlanSignature } from '../domain/bingo-game';
 
 const TEST_BOARD_ID = 'test-board-id';
 
@@ -39,7 +39,7 @@ class MockBingoGameRepository {
   save(_quarterId: string, progress: BingoGameProgress): void {
     this.lastSavedProgress = {
       quarterId: progress.quarterId,
-      boardSignature: progress.boardSignature,
+      planSignature: progress.planSignature,
       challenges: [...progress.challenges],
       startedAt: progress.startedAt,
     };
@@ -111,7 +111,7 @@ describe('BingoGameService', () => {
     const overrides: Partial<ChallengeProgress>[] = [{ completed: true }];
     bingoRepo.loadedProgress = {
       quarterId: '2026-Q2',
-      boardSignature: createBoardSignature(challenges),
+      planSignature: createPlanSignature(challenges),
       challenges: createProgressChallenges(challenges, overrides),
       startedAt: new Date().toISOString(),
     };
@@ -128,7 +128,7 @@ describe('BingoGameService', () => {
     const bingoRepo = new MockBingoGameRepository();
     bingoRepo.loadedProgress = {
       quarterId: '2026-Q2',
-      boardSignature: 'old-signature',
+      planSignature: 'old-signature',
       challenges: [],
       startedAt: new Date().toISOString(),
     };
@@ -164,7 +164,7 @@ describe('BingoGameService', () => {
     ];
     bingoRepo.loadedProgress = {
       quarterId: '2026-Q2',
-      boardSignature: createBoardSignature(challenges),
+      planSignature: createPlanSignature(challenges),
       challenges: createProgressChallenges(challenges, overrides),
       startedAt: new Date().toISOString(),
     };
@@ -199,7 +199,7 @@ describe('BingoGameService', () => {
     const overrides: Partial<ChallengeProgress>[] = Array.from({ length: 16 }, () => ({ completed: true }));
     bingoRepo.loadedProgress = {
       quarterId: '2026-Q2',
-      boardSignature: createBoardSignature(challenges),
+      planSignature: createPlanSignature(challenges),
       challenges: createProgressChallenges(challenges, overrides),
       startedAt: new Date().toISOString(),
     };
