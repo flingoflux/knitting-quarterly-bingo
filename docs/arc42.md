@@ -8,11 +8,11 @@
 
 ### 1.1 Aufgabenstellung
 
-Knitting Quarterly Bingo ist eine browserbasierte Einzelplatz-Webanwendung, mit der Strickerinnen und Stricker ein persönliches Bingo-Spielfeld für einen Strick-Quartal befüllen und während des Quartals ihren Fortschritt verfolgen können.
+Knitting Quarterly Bingo ist eine browserbasierte Einzelplatz-Webanwendung, mit der Strickerinnen und Stricker ein persönliches Bingo-Spielfeld fuer ein Strick-Quartal befuellen und waehrend des Quartals ihren Fortschritt verfolgen koennen.
 
 Die Anwendung unterstützt zwei Phasen:
 
-1. **Planungsphase**: Der Jahresplan wird als Liste von Challenges (Strick-Vorhaben) zusammengestellt. Zu jeder Challenge kann ein Planungsbild (z. B. Inspirationsfoto aus Ravelry) hinterlegt werden.
+1. **Planungsphase**: Der Quartalsplan wird als Liste von Challenges (Strick-Vorhaben) zusammengestellt. Zu jeder Challenge kann ein Planungsbild (z. B. Inspirationsfoto aus Ravelry) hinterlegt werden.
 2. **Spielphase**: Das Bingo-Brett wird angezeigt. Erfüllte Challenges werden abgehakt. Zu jeder erfüllten Challenge kann ein Fortschrittsfoto hochgeladen werden. Werden genug Challenges in einer Zeile, Spalte oder Diagonale abgehakt, entsteht Bingo.
 
 ### 1.2 Qualitätsziele
@@ -78,10 +78,23 @@ flowchart TB
 |---|---|
 | **Domain-Driven Design** | Komplexe Domänenlogik (Bingo-Erkennung, Spielstand-Validierung, Bild-Konzepte) lebt isoliert im Domain-Layer |
 | **Ports and Adapters** | Storage-Technologien (LocalStorage, IndexedDB) sind austauschbar; Domäne kennt nur Interfaces (Ports) |
-| **Immutable Value Objects** | `BingoGame` und `QuarterlyPlan` sind unveränderliche Aggregate; jede Mutation liefert eine neue Instanz |
+| **Immutable Aggregate + Value Objects** | `QuarterlyPlan`, `BingoGame` und `KnittingQuarterly` kapseln fachliche Regeln ohne Seiteneffekte; jede Mutation liefert eine neue Instanz |
 | **Angular Signals** | Reaktiver State ohne RxJS-Overhead; Services halten `signal<Aggregate>()` und leiten `computed()`-Werte ab |
 | **Feature-Slice-Struktur** | Klare Trennung nach Features mit eigenem domain/application/infrastructure/presentation-Stack |
 | **Atomic Design (UI)** | UI-Komponenten sind als Tokens, Atoms, Molecules und Organisms strukturiert; fördert Wiederverwendung, konsistentes Design und klare Verantwortlichkeiten in der Presentation-Schicht |
+
+### 4.1 Ubiquitous Language (aktuell)
+
+Die kanonische Fachsprache in der Domäne lautet:
+
+- **QuarterlyPlan**: Plan fuer genau ein Quartal mit 16 Challenges.
+- **Challenge**: Einzelnes Vorhaben mit optionalem Planungsbild.
+- **BingoGame**: Spiel-Fortschritt fuer einen gespeicherten Planstand.
+- **KnittingQuarterly**: Sicht auf ein Quartal inklusive Phase (`past`, `current`, `future`) und erlaubter Aktionen.
+- **QuarterLifecycleState**: Persistierter Lebenszyklus-Zustand des aktiven Quartals (`activeQuarterId`, `lastRolloverAt`).
+- **ArchiveEntry**: Historischer Snapshot eines abgeschlossenen Quartals.
+
+Begriffe wie `boardDefinition` bleiben derzeit als technische Altbezeichnung in Persistenzschluesseln und einigen IDs erhalten. Fachlich wird dieser Begriff als Synonym zu `QuarterlyPlan` behandelt.
 
 ---
 
@@ -91,6 +104,13 @@ flowchart TB
 
 ```mermaid
 classDiagram
+  class KnittingQuarterly {
+    +string quarterId
+    +QuarterlyPhase phase
+    +boolean canEditBoard()
+    +boolean canPlayBoard()
+  }
+
   class QuarterlyPlan {
     +UUID id
     +Challenge[16] challenges
@@ -105,7 +125,7 @@ classDiagram
 
   class BingoGame {
     +string boardSignature
-    +ChallengeProgress[16] progress
+    +ChallengeProgress[16] challenges
     +BingoGame toggle(index)
     +BingoGame updateProgressImage(index, imageId)
     +BingoGame resetProgress()
@@ -119,9 +139,24 @@ classDiagram
     +boolean completed
   }
 
+  class QuarterLifecycleState {
+    +string activeQuarterId
+    +string lastRolloverAt
+  }
+
+  class ArchiveEntry {
+    +string quarterId
+    +int completedCount
+    +int totalCount
+    +boolean hasBingo
+  }
+
+  KnittingQuarterly --> QuarterlyPlan : nutzt
   QuarterlyPlan "1" o-- "16" Challenge
   BingoGame "1" o-- "16" ChallengeProgress
-  ChallengeProgress ..> Challenge : aus Plan abgeleitet
+  ChallengeProgress ..> Challenge : aus QuarterlyPlan abgeleitet
+  QuarterLifecycleState --> KnittingQuarterly : steuert aktives Quartal
+  ArchiveEntry --> BingoGame : Snapshot aus abgeschlossener Runde
 
   note for BingoGame "Immutable Aggregat:\nalle Mutationen liefern\nneue Instanzen."
 ```
@@ -137,10 +172,14 @@ flowchart TB
   QPR[[QuarterlyPlanReader]]
   QPW[[QuarterlyPlanWriter]]
   BGR[[BingoGameRepository]]
+  QLSR[[QuarterLifecycleStateRepository]]
+  AR[[ArchiveRepository]]
   IR[[ImageRepository]]
 
   LSBR[LocalStorageBoardRepository]
   LSBGR[LocalStorageBingoGameRepository]
+  LSQLSR[LocalStorageQuarterLifecycleStateRepository]
+  LSAR[LocalStorageArchiveRepository]
   IDBR[IndexedDbImageRepositoryService]
   LS[(LocalStorage)]
   IDB[(IndexedDB)]
@@ -151,15 +190,21 @@ flowchart TB
   APPLICATION --> QPR
   APPLICATION --> QPW
   APPLICATION --> BGR
+  APPLICATION --> QLSR
+  APPLICATION --> AR
   APPLICATION --> IR
 
   LSBR -. implements .-> QPR
   LSBR -. implements .-> QPW
   LSBGR -. implements .-> BGR
+  LSQLSR -. implements .-> QLSR
+  LSAR -. implements .-> AR
   IDBR -. implements .-> IR
 
   LSBR --> LS
   LSBGR --> LS
+  LSQLSR --> LS
+  LSAR --> LS
   IDBR --> IDB
 ```
 
@@ -167,9 +212,12 @@ Abhaengigkeitsregel: innen kennt nichts von aussen. Adapter haengen von Ports ab
 
 **Kernelemente und Verantwortlichkeiten:**
 
+- `KnittingQuarterly`: Domaenenobjekt fuer Quartalsphase und freigegebene Aktionen (edit/play/archive-view).
 - `QuarterlyPlan`: Unveraenderliches Planungs-Aggregat fuer die 16 Challenges (Bearbeiten, Umordnen).
 - `BingoGame`: Unveraenderliches Spiel-Aggregat fuer Fortschritt und Bingo-Erkennung.
-- Ports (`QuarterlyPlanReader/Writer`, `BingoGameRepository`, `ImageRepository`): Definieren die von der Applikation benoetigte Persistenz.
+- `QuarterLifecycleState`: Persistierter Zustand, welcher Quartalswechsel bereits verarbeitet wurde.
+- `ArchiveEntry`: Historischer Snapshot fuer abgeschlossene Quartale.
+- Ports (`QuarterlyPlanReader/Writer`, `BingoGameRepository`, `QuarterLifecycleStateRepository`, `ArchiveRepository`, `ImageRepository`): Definieren die von der Applikation benoetigte Persistenz.
 - Adapter (`LocalStorage...`, `IndexedDb...`): Implementieren Ports und kapseln Browser-APIs inklusive Migrationen.
 - Presentation + Application: UI loest Use Cases aus; Services orchestrieren Domain + Ports.
 
@@ -349,8 +397,8 @@ Zwei Storage-Technologien, klar nach Datentyp getrennt:
 
 | Daten | Technologie | Schlüssel |
 |---|---|---|
-| Quartalsplan | LocalStorage | `kq-bingo-board-definition-v2` |
-| Spielfortschritt | LocalStorage | `kq-bingo-active-game-v3` |
+| Quartalsplan | LocalStorage | `kq-bingo-board-definition-v3:{quarterId}` (Legacy: `...-v2`) |
+| Spielfortschritt | LocalStorage | `kq-bingo-active-game-v4:{quarterId}` (Legacy: `...-v3`) |
 | Challenge-Bilder (Planung + Fortschritt) | IndexedDB | UUIDs als Objekt-Store-Keys |
 
 Bilder werden **nie** direkt im Plan oder Spielstand gespeichert – nur ihre UUIDs. Das hält LocalStorage klein und ermöglicht große Bilder in IndexedDB.
@@ -366,7 +414,7 @@ Migrationen laufen transparent beim ersten Laden nach einem Update. Alte Schlüs
 
 ### 8.3 Unveränderliche Domänen-Aggregate
 
-Alle Aggregate (`BingoGame`, `QuarterlyPlan`) sind immutable:
+Alle Aggregate (`KnittingQuarterly`, `BingoGame`, `QuarterlyPlan`) sind immutable:
 
 - Private Konstruktoren, nur statische Factory-Methoden
 - Jede Mutation erzeugt eine neue Instanz
@@ -376,7 +424,7 @@ Vorteil: keine defensive Kopien nötig, keine unbeabsichtigten Seiteneffekte, di
 
 ### 8.4 Bild-Konzept: Planungsbild vs. Fortschrittsfoto
 
-`ChallengeProgress` unterscheidet explizit zwei Bildkonzepte:
+`ChallengeProgress` (persistenznahes Value Object innerhalb von `BingoGame`) unterscheidet explizit zwei Bildkonzepte:
 
 - **`planningImageId`**: Bild, das in der Planungsphase zur Challenge hinterlegt wurde (z. B. Inspirationsbild). Wird beim Spielstart aus dem `QuarterlyPlan` kopiert.
 - **`progressImageId`**: Foto, das der Benutzer während des Spiels aufnimmt, wenn er die Challenge erfüllt.
@@ -593,16 +641,27 @@ Vorteil: Themeing oder Brand-Anpassungen erfordern nur Änderung der Token-Varia
 
 ```mermaid
 classDiagram
-  class BoardDef {
+  class QuarterlyPlanSnapshot {
     +UUID id
     +Challenge[16] challenges
-    +key: kq-bingo-board-definition-v2
+    +key: kq-bingo-board-definition-v3:{quarterId}
   }
 
   class ActiveGame {
     +string boardSignature
-    +ChallengeProgress[16] progress
-    +key: kq-bingo-active-game-v3
+    +ChallengeProgress[16] challenges
+    +key: kq-bingo-active-game-v4:{quarterId}
+  }
+
+  class QuarterLifecycleStateSnapshot {
+    +string activeQuarterId
+    +string lastRolloverAt
+    +key: kq-bingo-quarter-lifecycle-v1
+  }
+
+  class ArchiveSnapshot {
+    +ArchiveEntry[] entries
+    +key: kq-bingo-archive-v1
   }
 
   class ImageBlob {
@@ -622,7 +681,7 @@ classDiagram
     +boolean completed
   }
 
-  BoardDef "1" o-- "16" Challenge
+  QuarterlyPlanSnapshot "1" o-- "16" Challenge
   ActiveGame "1" o-- "16" ChallengeProgress
 
   Challenge --> ImageBlob : imageId
@@ -657,7 +716,7 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 ### ADR-004: ChallengeProgress als Value Object statt paralleler Arrays
 
 **Kontext:** Vorherige Implementierung hielt `challenges[]`, `cellImages[]` und `completed[]` als separate parallele Arrays.  
-**Entscheidung:** Value Object `ChallengeProgress { name, planningImageId?, progressImageId?, completed }` fasst alle Daten einer Challenge zusammen.  
+**Entscheidung:** Persistenznahes Value Object `ChallengeProgress { name, planningImageId?, progressImageId?, completed }` fasst alle Daten einer Challenge im `BingoGame` zusammen.  
 **Konsequenzen:** Kein Index-Synchronisationsproblem mehr. Klare semantische Trennung zwischen Planungsbild und Fortschrittsfoto. LocalStorage-Migration v2→v3 notwendig.
 
 ---
@@ -690,16 +749,19 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 | Begriff | Definition |
 |---|---|
 | Adapter | Technische Implementierung eines Ports, z. B. LocalStorage- oder IndexedDB-Zugriff. |
-| Aggregate | Konsistenzgrenze im Domänenmodell; hier v. a. `QuarterlyPlan` und `BingoGame`. |
+| Aggregate | Konsistenzgrenze im Domänenmodell; hier v. a. `KnittingQuarterly`, `QuarterlyPlan` und `BingoGame`. |
 | Atomic Design | UI-Strukturierung in Tokens, Atoms, Molecules, Organisms und Templates. |
 | Bingo-Linie | Vollständig abgehakte Reihe, Spalte oder Diagonale im 4x4-Board. |
 | Board-Signatur | Serialisierte Darstellung der Challenge-Namen zur Validierung, ob ein Spielstand noch zum aktuellen Plan passt. |
 | Challenge | Einzelne Bingo-Aufgabe mit Name und optionalem Planungsbild. |
-| ChallengeProgress | Value Object mit `name`, `planningImageId`, `progressImageId` und `completed`. |
+| ChallengeProgress | Persistenznahes Value Object mit `name`, `planningImageId`, `progressImageId` und `completed` innerhalb von `BingoGame`. |
 | Domain-Layer | Schicht mit fachlichen Regeln und domänennahen Objekten ohne Angular- oder Storage-Abhängigkeiten. |
 | Fallback | Definierter Ersatzpfad bei Fehlern, z. B. Default-Plan oder Platzhalterbild. |
+| KnittingQuarterly | Fachobjekt fuer ein Quartal mit Phase (`past`, `current`, `future`) und Aktionsregeln. |
 | IndexedDB | Browser-Datenbank für größere Binärdaten, hier für Bilder. |
 | LocalStorage | Browser-Speicher für kompakte strukturierte Daten wie Plan und Spielstand. |
+| QuarterlyPlan | Fachbegriff fuer den Plan eines Quartals; technisch teilweise noch als `boardDefinition` benannt. |
+| QuarterLifecycleState | Persistierter Lebenszyklus-Zustand des aktiven Quartals fuer Rollover-Orchestrierung. |
 | Port | Abstrakte Schnittstelle, über die die Application-Schicht Infrastruktur anspricht. |
 | Progress-Bild | Während der Spielphase aufgenommenes Foto (`progressImageId`). |
 | Planungsbild | In der Planungsphase hinterlegtes Referenzbild (`planningImageId`). |
