@@ -1,37 +1,56 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, ViewChild, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BoardConfigurationService } from '../application/board-configuration.service';
 import { EditableBoardComponent } from './components/editable-board.component';
 import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-detail-dialog.component';
 import { shuffleArray } from '../../../shared/utils/array-utils';
 import { Challenge } from '../../../shared/domain/challenge';
-import { Router } from '@angular/router';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
+import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
+import { QuarterClock } from '../../../core/domain';
 
 @Component({
   selector: 'app-board-configuration',
   standalone: true,
-  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent],
+  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent, BoardToolbarComponent],
   template: `
     <div class="feature-shell">
-      <kq-page-toolbar [mode]="viewMode" (modeChange)="viewMode = $event" (homeClicked)="goHome()">
-        <ng-container toolbar-actions>
-          <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
-            <kq-icon name="shuffle" [size]="22"/>
-          </kq-button>
-          <kq-button variant="icon" (click)="playBingo()" title="Als Bingo spielen" ariaLabel="Als Bingo spielen">
-            <kq-icon name="play" [size]="22"/>
-          </kq-button>
-        </ng-container>
-      </kq-page-toolbar>
+      <kq-page-toolbar
+        [maxWidth]="viewMode === 'horizontal' ? '58rem' : '52rem'"
+        [quarterLabel]="displayedQuarterId()"
+        [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
+        [showNextButton]="canGoToNextQuarter()"
+        (homeClicked)="goHome()"
+        (previousQuarterClicked)="goToPreviousQuarter()"
+        (nextQuarterClicked)="goToNextQuarter()"
+      ></kq-page-toolbar>
 
       <div class="edit-board-header" [class.compact-header]="viewMode === 'horizontal'">
         <p class="eyebrow">Knitting Quarterly - Board Studio</p>
         <h2>Challenges und Projekte planen</h2>
         <p class="subtitle" *ngIf="viewMode === 'polaroid'">Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden.</p>
       </div>
+
+      <kq-board-toolbar
+        [mode]="viewMode"
+        (modeChange)="viewMode = $event"
+      >
+        <kq-button
+          variant="icon"
+          (click)="resetToDefaultBoard()"
+          title="Board auf Standard-Challenges zurücksetzen und Bilder entfernen"
+          ariaLabel="Board auf Standard-Challenges zurücksetzen"
+        >
+          <kq-icon name="plus-feather" [size]="18"/>
+        </kq-button>
+        <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
+          <kq-icon name="shuffle" [size]="22"/>
+        </kq-button>
+      </kq-board-toolbar>
 
       <app-editable-board
         #editableBoard
@@ -94,14 +113,36 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
     }
   `],
 })
-export class BoardConfigurationComponent {
+export class BoardConfigurationComponent implements OnInit {
   @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
   @ViewChild('editableBoard') private readonly editableBoardRef!: EditableBoardComponent;
   state = inject(BoardConfigurationService);
   router = inject(Router);
+  route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
+  private readonly quarterClock = new QuarterClock();
+  readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
+  readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
+  readonly canGoToNextQuarter = computed(() => {
+    const nextQuarterId = this.quarterClock.getNextQuarterIdFromQuarterId(this.actualCurrentQuarterId);
+    return this.displayedQuarterId() !== nextQuarterId;
+  });
+  readonly canGoToPreviousQuarter = computed(() => true);
   dragTargetIndex: number | null = null;
   dragStartIndex: number | null = null;
+
+  ngOnInit(): void {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(queryParams => {
+        const quarterParam = queryParams.get('quarter');
+        const planningQuarterId = quarterParam
+          ?? this.quarterClock.getNextQuarterIdFromQuarterId(this.actualCurrentQuarterId);
+        this.displayedQuarterId.set(planningQuarterId);
+        this.state.setPreviewMode(false, planningQuarterId);
+      });
+  }
 
   get challenges(): Challenge[] {
     return this.state.challenges();
@@ -111,14 +152,24 @@ export class BoardConfigurationComponent {
     this.router.navigate(['/']);
   }
 
+  goToNextQuarter() {
+    const nextQuarter = this.quarterClock.getNextQuarterIdFromQuarterId(this.displayedQuarterId());
+    void this.router.navigate(['/quarterly'], { queryParams: { quarter: nextQuarter } });
+  }
+
+  goToPreviousQuarter() {
+    const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
+    void this.router.navigate(['/quarterly'], { queryParams: { quarter: previousQuarter } });
+  }
+
   shuffle() {
     const challenges = this.challenges;
     const shuffled = shuffleArray(challenges);
     this.state.setChallenges(shuffled as Challenge[]);
   }
 
-  playBingo() {
-    void this.router.navigate(['/play'], { queryParams: { new: 'true' } });
+  resetToDefaultBoard() {
+    this.state.resetToDefaultChallengesWithoutImages();
   }
 
   onDragStart(i: number) {

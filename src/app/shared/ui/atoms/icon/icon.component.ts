@@ -4,7 +4,10 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 export type KqIconName =
   | 'home'
   | 'shuffle'
+  | 'plus-feather'
   | 'play'
+  | 'chevron-left'
+  | 'chevron-right'
   | 'polaroid'
   | 'horizontal'
   | 'camera'
@@ -18,7 +21,10 @@ export type KqIconName =
 const ICONS: Record<KqIconName, string> = {
   home: `<path d="M3 9l9-7 9 7"/><path d="M9 22V12h6v10"/><path d="M21 22H3"/>`,
   shuffle: `<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>`,
+  'plus-feather': `<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>`,
   play: `<polygon points="5 3 19 12 5 21 5 3"/>`,
+  'chevron-left': `<polyline points="15 18 9 12 15 6"/>`,
+  'chevron-right': `<polyline points="9 18 15 12 9 6"/>`,
   polaroid: `<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="16" x2="21" y2="16"/>`,
   horizontal: `<rect x="2" y="3" width="7" height="7" rx="1"/><line x1="12" y1="6.5" x2="22" y2="6.5"/><rect x="2" y="14" width="7" height="7" rx="1"/><line x1="12" y1="17.5" x2="22" y2="17.5"/>`,
   camera: `<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>`,

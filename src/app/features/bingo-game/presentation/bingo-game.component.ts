@@ -1,21 +1,47 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, ViewChild, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BingoGameService } from '../application/bingo-game.service';
 import { PlayableBoardComponent } from './components/playable-board.component';
 import { ProjectComparisonDialogComponent } from './components/project-comparison-dialog.component';
 import { ImageChangedEvent } from '../../board-configuration/presentation/components/card-detail-dialog.component';
-import { Router } from '@angular/router';
 import { ChallengeProgress } from '../domain/bingo-game';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
+import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
+import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
 
 @Component({
   selector: 'app-bingo-game',
   standalone: true,
-  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent],
+  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent, BoardToolbarComponent],
   template: `
     <div class="feature-shell">
-      <kq-page-toolbar [mode]="viewMode" (modeChange)="viewMode = $event" (homeClicked)="goHome()">
+      <kq-page-toolbar
+        [maxWidth]="viewMode === 'horizontal' ? '58rem' : '52rem'"
+        [quarterLabel]="displayedQuarterId()"
+        [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
+        [showNextButton]="canGoToNextQuarter()"
+        (homeClicked)="goHome()"
+        (previousQuarterClicked)="goToPreviousQuarter()"
+        (nextQuarterClicked)="goToNextQuarter()"
+      ></kq-page-toolbar>
+
+      <div class="preview-banner" *ngIf="isPreviewMode()">
+        💡 Du schaust dir das <strong>{{ displayedQuarterId() }}</strong> an. Fortschritt wird hier nicht gespeichert.
+      </div>
+
+      <div class="play-bingo-header" [class.compact-header]="viewMode === 'horizontal'">
+        <p class="eyebrow">Knitting Quarterly - Bingo</p>
+        <h2>Happy crafting</h2>
+        <p class="subtitle" *ngIf="viewMode === 'polaroid'">Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen.</p>
+      </div>
+
+      <kq-board-toolbar
+        [mode]="viewMode"
+        (modeChange)="viewMode = $event"
+      >
         <div class="status-grid" aria-label="Fortschritt">
           <div
             *ngFor="let d of completed; let i = index"
@@ -25,13 +51,7 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
             [attr.title]="challenges[i]?.name"
           ></div>
         </div>
-      </kq-page-toolbar>
-
-      <div class="play-bingo-header" [class.compact-header]="viewMode === 'horizontal'">
-        <p class="eyebrow">Knitting Quarterly - Bingo</p>
-        <h2>Happy crafting</h2>
-        <p class="subtitle" *ngIf="viewMode === 'polaroid'">Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen.</p>
-      </div>
+      </kq-board-toolbar>
 
       <app-playable-board
         #playableBoard
@@ -52,13 +72,22 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
       margin: 0 auto;
       padding: 1.4rem 1.1rem 2rem;
     }
+    .preview-banner {
+      background: #fff7ec;
+      border: 1px solid #c79362;
+      border-radius: 0.5rem;
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 1.1rem;
+      color: #5a2d1a;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
     .status-grid {
       display: grid;
       grid-template-columns: repeat(4, 14px);
       grid-template-rows: repeat(4, 8px);
       gap: 3px;
-      align-self: center;
-      margin-left: 0.4rem;
+      margin: 0;
     }
     .status-cell {
       width: 14px;
@@ -115,13 +144,46 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
     }
   `]
 })
-export class BingoGameComponent {
+export class BingoGameComponent implements OnInit {
   @ViewChild('comparisonDialog') private readonly comparisonDialog!: ProjectComparisonDialogComponent;
   @ViewChild('playableBoard') private readonly playableBoardRef!: PlayableBoardComponent;
   state = inject(BingoGameService);
   router = inject(Router);
+  route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
 
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
+  private readonly quarterClock = new QuarterClock();
+  readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
+  readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
+  readonly quarterly = computed(() =>
+    KnittingQuarterly.create({
+      quarterId: this.displayedQuarterId(),
+      currentQuarterId: this.actualCurrentQuarterId,
+      boardDefinitionId: this.displayedQuarterId(),
+    })
+  );
+  readonly isPreviewMode = computed(() => this.quarterly().isFuturePreview());
+  readonly canGoToNextQuarter = computed(() => {
+    const nextQuarterId = this.quarterClock.getNextQuarterIdFromQuarterId(this.actualCurrentQuarterId);
+    return this.displayedQuarterId() !== nextQuarterId;
+  });
+  readonly canGoToPreviousQuarter = computed(() => true);
+
+  ngOnInit(): void {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(queryParams => {
+        const quarterParam = queryParams.get('quarter');
+        if (quarterParam) {
+          this.displayedQuarterId.set(quarterParam);
+          this.state.setPreviewMode(this.quarterly().isFuturePreview(), quarterParam);
+        } else {
+          this.displayedQuarterId.set(this.actualCurrentQuarterId);
+          this.state.setPreviewMode(false);
+        }
+      });
+  }
 
   get challenges(): ChallengeProgress[] {
     return this.state.challenges();
@@ -141,6 +203,16 @@ export class BingoGameComponent {
 
   goHome() {
     this.router.navigate(['/']);
+  }
+
+  goToNextQuarter() {
+    const nextQuarter = this.quarterClock.getNextQuarterIdFromQuarterId(this.displayedQuarterId());
+    void this.router.navigate(['/quarterly'], { queryParams: { quarter: nextQuarter } });
+  }
+
+  goToPreviousQuarter() {
+    const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
+    void this.router.navigate(['/quarterly'], { queryParams: { quarter: previousQuarter } });
   }
 
   onToggle(i: number) {
