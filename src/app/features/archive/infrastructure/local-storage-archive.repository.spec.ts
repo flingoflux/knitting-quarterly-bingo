@@ -36,6 +36,8 @@ describe('LocalStorageArchiveRepository', () => {
       totalCount: 16,
       hasBingo: true,
       completedChallengeNames: ['A', 'B'],
+      completed: [true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+      bingoCells: [],
     });
 
     expect(repository.loadAll()).toHaveLength(1);
@@ -54,6 +56,8 @@ describe('LocalStorageArchiveRepository', () => {
         totalCount: 16,
         hasBingo: false,
         completedChallengeNames: ['A'],
+        completed: [true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+        bingoCells: [],
       },
       {
         id: 123,

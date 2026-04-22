@@ -11,7 +11,7 @@ class MockBoardDefinitionRepository {
   loadedDefinition: PersistedQuarterlyPlan | null = null;
   lastSavedDefinition: PersistedQuarterlyPlan | null = null;
 
-  load(): Result<PersistedQuarterlyPlan, string> {
+  load(_quarterId: string): Result<PersistedQuarterlyPlan, string> {
     if (this.loadedDefinition === null) {
       return Result.err('not-found');
     }
@@ -19,10 +19,13 @@ class MockBoardDefinitionRepository {
   }
 
   findById(_id: string): Result<PersistedQuarterlyPlan, string> {
-    return this.load();
+    if (this.loadedDefinition === null) {
+      return Result.err('not-found');
+    }
+    return Result.ok(this.loadedDefinition);
   }
 
-  save(definition: PersistedQuarterlyPlan): void {
+  save(_quarterId: string, definition: PersistedQuarterlyPlan): void {
     this.lastSavedDefinition = {
       id: definition.id,
       challenges: [...definition.challenges],

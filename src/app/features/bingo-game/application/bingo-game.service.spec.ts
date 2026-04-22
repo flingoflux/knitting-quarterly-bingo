@@ -13,7 +13,7 @@ const TEST_BOARD_ID = 'test-board-id';
 class MockBoardDefinitionRepository {
   loadedDefinition: PersistedQuarterlyPlan | null = null;
 
-  load(): Result<PersistedQuarterlyPlan, string> {
+  load(_quarterId: string): Result<PersistedQuarterlyPlan, string> {
     if (this.loadedDefinition === null) {
       return Result.err('not-found');
     }
@@ -21,7 +21,10 @@ class MockBoardDefinitionRepository {
   }
 
   findById(_id: string): Result<PersistedQuarterlyPlan, string> {
-    return this.load();
+    if (this.loadedDefinition === null) {
+      return Result.err('not-found');
+    }
+    return Result.ok(this.loadedDefinition);
   }
 }
 
@@ -29,11 +32,11 @@ class MockBingoGameRepository {
   loadedProgress: BingoGameProgress | null = null;
   lastSavedProgress: BingoGameProgress | null = null;
 
-  load(): BingoGameProgress | null {
+  load(_quarterId: string): BingoGameProgress | null {
     return this.loadedProgress;
   }
 
-  save(progress: BingoGameProgress): void {
+  save(_quarterId: string, progress: BingoGameProgress): void {
     this.lastSavedProgress = {
       boardDefinitionId: progress.boardDefinitionId,
       boardSignature: progress.boardSignature,
@@ -41,6 +44,10 @@ class MockBingoGameRepository {
       startedAt: progress.startedAt,
     };
     this.loadedProgress = this.lastSavedProgress;
+  }
+
+  clear(_quarterId: string): void {
+    this.loadedProgress = null;
   }
 }
 

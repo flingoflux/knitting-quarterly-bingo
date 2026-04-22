@@ -45,7 +45,7 @@ class MockArchiveRepository {
 class MockBoardWriter {
   savedPlans: QuarterlyPlanData[] = [];
 
-  save(plan: QuarterlyPlanData): void {
+  save(_quarterId: string, plan: QuarterlyPlanData): void {
     this.savedPlans.push({ id: plan.id, challenges: [...plan.challenges] });
   }
 }
@@ -54,15 +54,15 @@ class MockBingoGameRepository {
   progress: BingoGameProgress | null = null;
   clearCalls = 0;
 
-  load(): BingoGameProgress | null {
+  load(_quarterId: string): BingoGameProgress | null {
     return this.progress;
   }
 
-  save(progress: BingoGameProgress): void {
+  save(_quarterId: string, progress: BingoGameProgress): void {
     this.progress = progress;
   }
 
-  clear(): void {
+  clear(_quarterId: string): void {
     this.clearCalls += 1;
     this.progress = null;
   }
@@ -124,7 +124,6 @@ describe('QuarterLifecycleService', () => {
   });
 
   it('archiviert aktives spiel und legt neues default-board an', () => {
-    vi.stubGlobal('crypto', { randomUUID: () => 'new-board-id' });
     const lifecycleStateRepository = new MockQuarterLifecycleStateRepository();
     lifecycleStateRepository.state = {
       activeQuarterId: '2026-Q1',
@@ -154,13 +153,12 @@ describe('QuarterLifecycleService', () => {
     expect(archiveRepository.entries[0]?.hasBingo).toBe(true);
     expect(bingoGameRepository.clearCalls).toBe(1);
     expect(boardWriter.savedPlans).toHaveLength(1);
-    expect(boardWriter.savedPlans[0]?.id).toBe('new-board-id');
+    expect(boardWriter.savedPlans[0]?.id).toBe('2026-Q2');
     expect(boardWriter.savedPlans[0]?.challenges).toEqual(DEFAULT_CHALLENGES);
     expect(lifecycleStateRepository.state?.activeQuarterId).toBe('2026-Q2');
   });
 
   it('legt auch ohne aktives spiel ein neues default-board an', () => {
-    vi.stubGlobal('crypto', { randomUUID: () => 'new-board-id-2' });
     const lifecycleStateRepository = new MockQuarterLifecycleStateRepository();
     lifecycleStateRepository.state = {
       activeQuarterId: '2026-Q2',
@@ -175,7 +173,7 @@ describe('QuarterLifecycleService', () => {
 
     expect(archiveRepository.entries).toEqual([]);
     expect(boardWriter.savedPlans).toHaveLength(1);
-    expect(boardWriter.savedPlans[0]?.id).toBe('new-board-id-2');
+    expect(boardWriter.savedPlans[0]?.id).toBe('2026-Q3');
     expect(bingoGameRepository.clearCalls).toBe(1);
     expect(lifecycleStateRepository.state?.activeQuarterId).toBe('2026-Q3');
   });
