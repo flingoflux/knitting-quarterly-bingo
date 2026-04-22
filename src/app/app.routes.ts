@@ -12,7 +12,7 @@ export const routes: Routes = [
   {
     path: 'quarterly',
     providers: [BingoGameService, BoardConfigurationService],
-    loadComponent: () => import('./shared/ui/templates/quarterly-view/quarterly-view.component').then(m => m.QuarterlyViewComponent),
+    loadComponent: () => import('./features/quarter-lifecycle/presentation/quarterly-view-page.component').then(m => m.QuarterlyViewPageComponent),
   },
   {
     path: 'play',
