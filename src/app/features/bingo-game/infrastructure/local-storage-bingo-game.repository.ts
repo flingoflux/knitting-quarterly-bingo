@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { StorageService } from '../../../core/services/storage.service';
+import { StorageService } from '../../../core/infrastructure/storage.service';
 import { BingoGameProgress, ChallengeProgress } from '../domain/bingo-game';
 import { BingoGameRepository } from '../domain/bingo-game.repository';
 import { QuarterClock } from '../../../core/domain';

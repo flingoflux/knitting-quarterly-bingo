@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { StorageService } from '../../../core/services/storage.service';
+import { StorageService } from '../../../core/infrastructure/storage.service';
 import { LocalStorageQuarterLifecycleStateRepository } from './local-storage-quarter-lifecycle-state.repository';
 
 let store: Record<string, string>;

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { StorageService } from '../../../core/services/storage.service';
+import { StorageService } from '../../../core/infrastructure/storage.service';
 import { Challenge, isValidChallenge } from '../../../shared/domain/challenge';
 import { QuarterlyPlanData, QuarterlyPlanReader, QuarterlyPlanWriter } from '../domain/quarterly-plan.repository';
 import { Result } from '../../../shared/domain/result';
