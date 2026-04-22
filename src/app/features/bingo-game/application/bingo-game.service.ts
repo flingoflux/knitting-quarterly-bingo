@@ -37,11 +37,12 @@ export class BingoGameService {
     }
   }
 
-  hasPlayableBoard(quarterId?: string): boolean {
-    if (quarterId) {
-      this.activeQuarterId.set(quarterId);
+  isQuarterPlayable(quarterId: string, restartRequested: boolean): boolean {
+    this.activeQuarterId.set(quarterId);
+    if (restartRequested) {
+      this.bingoGameRepository.clear(quarterId);
     }
-    this.refreshFromDefinition(this.activeQuarterId());
+    this.refreshFromDefinition(quarterId);
     return !this.gameState().isEmpty;
   }
 
