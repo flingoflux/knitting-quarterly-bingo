@@ -23,6 +23,7 @@ interface CardDetailOpenedEvent {
         [mode]="mode"
         [done]="completed[i]"
         [inBingo]="isCellInBingo(i)"
+        [hoverable]="false"
         [showCameraButton]="true"
         (click)="onToggle(i)"
         (cameraClicked)="openDetail(i, p, $event)"

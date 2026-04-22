@@ -31,6 +31,7 @@ export type KqCardMode = 'polaroid' | 'horizontal';
       [class.card--horizontal]="mode === 'horizontal'"
       [class.card--done]="done"
       [class.card--bingo]="inBingo"
+      [class.card--hoverable]="hoverable"
     >
       <div class="card__photo" [class.card__photo--editing]="editing">
         <img
@@ -83,11 +84,14 @@ export type KqCardMode = 'polaroid' | 'horizontal';
       box-shadow: 0 2px 5px rgba(60, 30, 10, 0.14), 0 8px 20px rgba(60, 30, 10, 0.10);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .card:hover {
+    .card--hoverable:hover {
       transform: translateY(-3px) rotate(0.3deg);
       box-shadow: 0 6px 14px rgba(60, 30, 10, 0.18), 0 16px 32px rgba(60, 30, 10, 0.13);
     }
     .card--bingo {
+      box-shadow: 0 0 0 3px #145906, 0 8px 22px rgba(20, 89, 6, 0.22);
+    }
+    .card--bingo:hover {
       box-shadow: 0 0 0 3px #145906, 0 8px 22px rgba(20, 89, 6, 0.22);
     }
 
@@ -195,7 +199,7 @@ export type KqCardMode = 'polaroid' | 'horizontal';
       align-items: stretch;
       height: 4.8rem;
     }
-    .card--horizontal:hover {
+    .card--horizontal.card--hoverable:hover {
       transform: translateY(-2px) rotate(0deg);
     }
     .card--horizontal .card__photo {
@@ -236,6 +240,7 @@ export class ChallengeCardComponent {
   @Input() inBingo = false;
   @Input() showCameraButton = true;
   @Input() editing = false;
+  @Input() hoverable = true;
 
   @Output() cameraClicked = new EventEmitter<MouseEvent>();
 
