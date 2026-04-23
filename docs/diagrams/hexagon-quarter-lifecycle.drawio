@@ -1,89 +1,55 @@
-<mxfile host="app.diagrams.net">
-  <diagram name="quarter-lifecycle">
-    <mxGraphModel dx="1100" dy="700" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1000" pageHeight="650" math="0" shadow="0">
-      <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-
-        <!-- Titel -->
-        <mxCell id="title" value="5.4.4 core / quarter-lifecycle – Hexagonale Sicht" style="text;html=1;fontSize=14;fontStyle=1;align=center;" vertex="1" parent="1">
-          <mxGeometry x="100" y="15" width="780" height="25" as="geometry" />
-        </mxCell>
-
-        <!-- PRIMARY ADAPTER -->
-        <mxCell id="pri-bg" value="Primary Adapter" style="swimlane;startSize=25;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="20" y="55" width="170" height="150" as="geometry" />
-        </mxCell>
-        <mxCell id="ui" value="StartPage&#xa;Component" style="rounded=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="pri-bg">
-          <mxGeometry x="15" y="55" width="140" height="50" as="geometry" />
-        </mxCell>
-
-        <!-- HEXAGON -->
-        <mxCell id="hex-bg" value="Rollover Hexagon" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="220" y="55" width="310" height="420" as="geometry" />
-        </mxCell>
-        <mxCell id="inport" value="&lt;&lt;InPort&gt;&gt;&#xa;EnsureQuarterRolloverInPort" style="shape=parallelogram;perimeter=parallelogramPerimeter;fixedSize=1;size=10;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="hex-bg">
-          <mxGeometry x="15" y="50" width="165" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="core" value="EnsureQuarterRolloverUseCase&#xa;+ Domain" style="shape=hexagon;perimeter=hexagonPerimeter2;fixedSize=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;fontStyle=1;" vertex="1" parent="hex-bg">
-          <mxGeometry x="80" y="115" width="150" height="65" as="geometry" />
-        </mxCell>
-        <mxCell id="qp1" value="&lt;&lt;OutPort (fremd)&gt;&gt;&#xa;LoadQuarterlyPlanOutPort" style="shape=parallelogram;perimeter=parallelogramPerimeter;fixedSize=1;size=10;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="hex-bg">
-          <mxGeometry x="145" y="200" width="155" height="45" as="geometry" />
-        </mxCell>
-        <mxCell id="qp2" value="&lt;&lt;OutPort (fremd)&gt;&gt;&#xa;PersistQuarterlyPlanOutPort" style="shape=parallelogram;perimeter=parallelogramPerimeter;fixedSize=1;size=10;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="hex-bg">
-          <mxGeometry x="145" y="255" width="155" height="45" as="geometry" />
-        </mxCell>
-        <mxCell id="bg1" value="&lt;&lt;OutPort (fremd)&gt;&gt;&#xa;LoadBingoProgressOutPort" style="shape=parallelogram;perimeter=parallelogramPerimeter;fixedSize=1;size=10;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="hex-bg">
-          <mxGeometry x="145" y="310" width="155" height="45" as="geometry" />
-        </mxCell>
-        <mxCell id="bg2" value="&lt;&lt;OutPort (fremd)&gt;&gt;&#xa;PersistBingoProgressOutPort" style="shape=parallelogram;perimeter=parallelogramPerimeter;fixedSize=1;size=10;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="hex-bg">
-          <mxGeometry x="145" y="363" width="155" height="45" as="geometry" />
-        </mxCell>
-        <mxCell id="e-in-core" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="inport" target="core" parent="hex-bg">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-c-qp1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="core" target="qp1" parent="hex-bg">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-c-qp2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="core" target="qp2" parent="hex-bg">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-c-bg1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="core" target="bg1" parent="hex-bg">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-c-bg2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="core" target="bg2" parent="hex-bg">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-
-        <!-- SECONDARY ADAPTER -->
-        <mxCell id="sec-bg" value="Secondary Adapter" style="swimlane;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="560" y="55" width="210" height="420" as="geometry" />
-        </mxCell>
-        <mxCell id="qp-repo" value="LocalStorageQuarterlyPlan&#xa;Repository" style="rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="sec-bg">
-          <mxGeometry x="15" y="70" width="180" height="55" as="geometry" />
-        </mxCell>
-        <mxCell id="bg-repo" value="LocalStorageBingoGame&#xa;Repository" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="sec-bg">
-          <mxGeometry x="15" y="160" width="180" height="55" as="geometry" />
-        </mxCell>
-
-        <!-- EXTERNE PFEILE -->
-        <mxCell id="e-ui-in" value="calls" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" edge="1" source="ui" target="inport" parent="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-qp-qp1" value="implements" style="edgeStyle=orthogonalEdgeStyle;dashed=1;fontSize=9;endArrow=open;endFill=0;" edge="1" source="qp-repo" target="qp1" parent="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-qp-qp2" value="implements" style="edgeStyle=orthogonalEdgeStyle;dashed=1;fontSize=9;endArrow=open;endFill=0;" edge="1" source="qp-repo" target="qp2" parent="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-bg-bg1" value="implements" style="edgeStyle=orthogonalEdgeStyle;dashed=1;fontSize=9;endArrow=open;endFill=0;" edge="1" source="bg-repo" target="bg1" parent="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-bg-bg2" value="implements" style="edgeStyle=orthogonalEdgeStyle;dashed=1;fontSize=9;endArrow=open;endFill=0;" edge="1" source="bg-repo" target="bg2" parent="1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
+<mxfile host="65bd71144e">
+    <diagram name="quarter-lifecycle" id="0">
+        <mxGraphModel dx="469" dy="563" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1080" pageHeight="680" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="core" value="EnsureQuarterRolloverUseCase&#xa;+ Domain" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#fff8e6;strokeColor=#c08a2a;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="180" width="360" height="260" as="geometry"/>
+                </mxCell>
+                <mxCell id="ui" value="StartPageComponent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fb;strokeColor=#5b7db1;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="25" y="282" width="175" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="inport" value="EnsureQuarterRolloverInPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5b7db1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="240" y="287" width="160" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="feature" value="quarter-lifecycle" style="text;html=1;fontSize=11;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="190" width="120" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="qp1" value="LoadQuarterlyPlanOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="639" y="230" width="195" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="qp2" value="PersistQuarterlyPlanOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="639" y="272" width="195" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="bg1" value="LoadBingoProgressOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="639" y="314" width="195" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="bg2" value="PersistBingoProgressOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="639" y="356" width="195" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="qp-repo" value="LocalStorageQuarterlyPlanRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="854" y="251" width="190" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="bg-repo" value="LocalStorageBingoGameRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="854" y="335" width="190" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-ui-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" parent="1" source="ui" target="inport" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-qp-qp1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;" parent="1" source="qp-repo" target="qp1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-qp-qp2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;" parent="1" source="qp-repo" target="qp2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-bg-bg1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;" parent="1" source="bg-repo" target="bg1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-bg-bg2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;" parent="1" source="bg-repo" target="bg2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
 </mxfile>
