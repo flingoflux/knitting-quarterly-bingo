@@ -7,6 +7,8 @@ import { LOAD_QUARTERLY_PLAN_OUT_PORT } from './features/quarterly-plan/applicat
 import { PERSIST_QUARTERLY_PLAN_OUT_PORT } from './features/quarterly-plan/application/ports/out/persist-quarterly-plan.out-port';
 import { LocalStorageBingoGameRepository } from './features/bingo-game/infrastructure/local-storage-bingo-game.repository';
 import { BINGO_GAME_REPOSITORY } from './features/bingo-game/domain/bingo-game.repository';
+import { LOAD_BINGO_PROGRESS_OUT_PORT } from './features/bingo-game/application/ports/out/load-bingo-progress.out-port';
+import { PERSIST_BINGO_PROGRESS_OUT_PORT } from './features/bingo-game/application/ports/out/persist-bingo-progress.out-port';
 import { ARCHIVE_REPOSITORY } from './features/archive/domain/archive.repository';
 import { LocalStorageArchiveRepository } from './features/archive/infrastructure/local-storage-archive.repository';
 import { IndexedDbImageRepository } from './core/infrastructure/indexed-db-image-repository.service';
@@ -20,6 +22,8 @@ export const appConfig: ApplicationConfig = {
     { provide: LOAD_QUARTERLY_PLAN_OUT_PORT, useExisting: LocalStorageQuarterlyPlanRepository },
     { provide: PERSIST_QUARTERLY_PLAN_OUT_PORT, useExisting: LocalStorageQuarterlyPlanRepository },
     { provide: BINGO_GAME_REPOSITORY, useExisting: LocalStorageBingoGameRepository },
+    { provide: LOAD_BINGO_PROGRESS_OUT_PORT, useExisting: LocalStorageBingoGameRepository },
+    { provide: PERSIST_BINGO_PROGRESS_OUT_PORT, useExisting: LocalStorageBingoGameRepository },
     { provide: ARCHIVE_REPOSITORY, useExisting: LocalStorageArchiveRepository },
     { provide: IMAGE_REPOSITORY, useExisting: IndexedDbImageRepository },
   ],

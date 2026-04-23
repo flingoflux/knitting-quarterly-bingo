@@ -1,13 +1,14 @@
-import { Injectable, inject, Signal, computed, signal } from '@angular/core';
-import { ChallengeProgress } from '../domain/bingo-game';
-import { QUARTERLY_PLAN_READER } from '../../quarterly-plan/domain/quarterly-plan.repository';
-import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
-import { BingoGame, createPlanSignature } from '../domain/bingo-game';
-import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
+import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { QuarterClock, QuarterId } from '../../../core/domain';
+import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
+import { LOAD_QUARTERLY_PLAN_OUT_PORT } from '../../quarterly-plan/application/ports/out/load-quarterly-plan.out-port';
+import { BingoGame, ChallengeProgress, createPlanSignature } from '../domain/bingo-game';
+import { PlayBingoInPort } from './ports/in/play-bingo.in-port';
+import { LOAD_BINGO_PROGRESS_OUT_PORT } from './ports/out/load-bingo-progress.out-port';
+import { PERSIST_BINGO_PROGRESS_OUT_PORT } from './ports/out/persist-bingo-progress.out-port';
 
 @Injectable()
-export class BingoGameService {
+export class PlayBingoUseCase implements PlayBingoInPort {
   private readonly gameState = signal<BingoGame>(BingoGame.empty());
   private readonly previewMode = signal(false);
   private readonly quarterClock = new QuarterClock();
@@ -18,8 +19,9 @@ export class BingoGameService {
   readonly bingoCells: Signal<Set<number>> = computed(() => this.gameState().bingoCells);
   readonly isPreviewMode = computed(() => this.previewMode());
 
-  private readonly quarterlyPlanRepository = inject(QUARTERLY_PLAN_READER);
-  private readonly bingoGameRepository = inject(BINGO_GAME_REPOSITORY);
+  private readonly quarterlyPlanLoader = inject(LOAD_QUARTERLY_PLAN_OUT_PORT);
+  private readonly bingoProgressLoader = inject(LOAD_BINGO_PROGRESS_OUT_PORT);
+  private readonly bingoProgressPersister = inject(PERSIST_BINGO_PROGRESS_OUT_PORT);
 
   constructor() {
     this.refreshFromDefinition(this.activeQuarterId());
@@ -41,51 +43,53 @@ export class BingoGameService {
     const resolvedQuarterId = QuarterId.from(quarterId);
     this.activeQuarterId.set(resolvedQuarterId);
     if (restartRequested) {
-      this.bingoGameRepository.clear(resolvedQuarterId);
+      this.bingoProgressPersister.clear(resolvedQuarterId);
     }
     this.refreshFromDefinition(resolvedQuarterId);
     return !this.gameState().isEmpty;
   }
 
-  updateProgressImage(index: number, imageId: string | undefined): void {
+  persistProgressImage(index: number, imageId: string | undefined): void {
     if (this.previewMode()) {
-      return; // Keine Persistierung im Vorschau-Modus
+      return;
     }
+
     const updated = this.gameState().updateProgressImage(index, imageId);
-    this.persist(updated);
+    this.persistBingoProgress(updated);
     this.gameState.set(updated);
   }
 
-  resetProgress(): void {
+  persistResetProgress(): void {
     if (this.previewMode()) {
-      return; // Keine Persistierung im Vorschau-Modus
+      return;
     }
+
     const reset = this.gameState().resetProgress();
-    this.persist(reset);
+    this.persistBingoProgress(reset);
     this.gameState.set(reset);
   }
 
-  toggle(index: number): void {
+  persistToggledChallenge(index: number): void {
     if (this.previewMode()) {
-      // Im Vorschau-Modus: toggle lokal, aber nicht persistieren
       const toggled = this.gameState().toggle(index);
       this.gameState.set(toggled);
       return;
     }
+
     const toggled = this.gameState().toggle(index);
-    this.persist(toggled);
+    this.persistBingoProgress(toggled);
     this.gameState.set(toggled);
   }
 
   private refreshFromDefinition(quarterId: QuarterId): void {
-    const result = this.quarterlyPlanRepository.load(quarterId);
+    const result = this.quarterlyPlanLoader.load(quarterId);
     if (!result.ok || result.value.challenges.length === 0) {
       this.gameState.set(BingoGame.empty());
       return;
     }
 
     const { challenges } = result.value;
-    const persistedProgress = this.bingoGameRepository.load(quarterId);
+    const persistedProgress = this.bingoProgressLoader.load(quarterId);
 
     if (
       persistedProgress !== null &&
@@ -97,14 +101,15 @@ export class BingoGameService {
     }
 
     const game = BingoGame.fromDefinition(quarterId, challenges);
-    this.persist(game);
+    this.persistBingoProgress(game);
     this.gameState.set(game);
   }
 
-  private persist(game: BingoGame): void {
+  private persistBingoProgress(game: BingoGame): void {
     if (this.previewMode()) {
-      return; // Keine Persistierung im Vorschau-Modus
+      return;
     }
-    this.bingoGameRepository.save(this.activeQuarterId(), game.toProgress());
+
+    this.bingoProgressPersister.persist(this.activeQuarterId(), game.toProgress());
   }
 }

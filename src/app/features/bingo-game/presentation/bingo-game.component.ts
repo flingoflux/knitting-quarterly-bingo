@@ -2,7 +2,7 @@ import { Component, ViewChild, inject, OnInit, signal, computed, DestroyRef } fr
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BingoGameService } from '../application/bingo-game.service';
+import { PLAY_BINGO_IN_PORT } from '../application/ports/in/play-bingo.in-port';
 import { PlayableBoardComponent } from './components/playable-board.component';
 import { ProjectComparisonDialogComponent } from './components/project-comparison-dialog.component';
 import { ImageChangedEvent } from '../../quarterly-plan/presentation/components/card-detail-dialog.component';
@@ -158,7 +158,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 export class BingoGameComponent implements OnInit {
   @ViewChild('comparisonDialog') private readonly comparisonDialog!: ProjectComparisonDialogComponent;
   @ViewChild('playableBoard') private readonly playableBoardRef!: PlayableBoardComponent;
-  state = inject(BingoGameService);
+  state = inject(PLAY_BINGO_IN_PORT);
   router = inject(Router);
   route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -232,7 +232,7 @@ export class BingoGameComponent implements OnInit {
   }
 
   onToggle(i: number) {
-    this.state.toggle(i);
+    this.state.persistToggledChallenge(i);
   }
 
   onCardDetailOpen(event: { index: number; challenge: ChallengeProgress }) {
@@ -246,7 +246,7 @@ export class BingoGameComponent implements OnInit {
 
   onImageChanged(event: ImageChangedEvent): void {
     if (this._openCardIndex !== null) {
-      this.state.updateProgressImage(this._openCardIndex, event.imageId ?? undefined);
+      this.state.persistProgressImage(this._openCardIndex, event.imageId ?? undefined);
     }
     void this.playableBoardRef.refreshImage(event.imageId);
   }

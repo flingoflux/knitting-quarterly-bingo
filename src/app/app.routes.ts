@@ -1,6 +1,7 @@
 import { StartPageComponent } from './features/start-page/presentation/pages/start-page.component';
 import { Routes } from '@angular/router';
-import { BingoGameService } from './features/bingo-game/application/bingo-game.service';
+import { PLAY_BINGO_IN_PORT } from './features/bingo-game/application/ports/in/play-bingo.in-port';
+import { PlayBingoUseCase } from './features/bingo-game/application/play-bingo.use-case';
 import { PLAN_QUARTERLY_IN_PORT } from './features/quarterly-plan/application/ports/in/plan-quarterly.in-port';
 import { PlanQuarterlyUseCase } from './features/quarterly-plan/application/plan-quarterly.use-case';
 import { ArchiveOverviewService } from './features/archive/application/archive-overview.service';
@@ -13,7 +14,8 @@ export const routes: Routes = [
   {
     path: 'quarterly',
     providers: [
-      BingoGameService,
+      PlayBingoUseCase,
+      { provide: PLAY_BINGO_IN_PORT, useExisting: PlayBingoUseCase },
       PlanQuarterlyUseCase,
       { provide: PLAN_QUARTERLY_IN_PORT, useExisting: PlanQuarterlyUseCase },
     ],
