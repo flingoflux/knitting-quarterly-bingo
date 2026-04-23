@@ -839,6 +839,24 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 **Entscheidung:** Persistenznahes Value Object `ChallengeProgress { name, planningImageId?, progressImageId?, completed }` fasst alle Daten einer Challenge im `BingoGame` zusammen.  
 **Konsequenzen:** Kein Index-Synchronisationsproblem mehr. Klare semantische Trennung zwischen Planungsbild und Fortschrittsfoto. LocalStorage-Migration v2→v3 notwendig.
 
+### ADR-005: Intentionale Port-/UseCase-Benennung und Persistenz-Semantik
+
+**Kontext:** Die bisherige Benennung mischt technische und fachliche Begriffe (z. B. `...Service`, `...Repository`, uneinheitliche Verben). Fuer Ports-and-Adapters soll die Absicht klar erkennbar sein und die Richtung (inbound/outbound) in Namen und Struktur sichtbar werden.
+
+**Entscheidung:**
+- Inbound-Ports verwenden das Suffix `InPort` und beschreiben eine fachliche Intention, z. B. `PlanQuarterlyInPort`, `PlayBingoInPort`.
+- Application-Implementierungen verwenden das Suffix `UseCase` und implementieren den passenden Inbound-Port, z. B. `PlanQuarterlyUseCase`, `PlayBingoUseCase`.
+- Outbound-Ports verwenden das Suffix `OutPort`.
+- In Ports und UseCases wird fuer Schreibvorgaenge das Verb `persist...` verwendet.
+- Repositories behalten fuer Schreibvorgaenge das Verb `save...` (z. B. `save(...)`).
+- Namen folgen einer intentionale Benennung im Muster `Verb + Fachobjekt + Suffix` statt technischer Sammelbegriffe.
+
+**Konsequenzen:**
+- Lesbarkeit steigt, weil Richtung und Verantwortung aus dem Namen direkt ersichtlich sind.
+- Primäre Adapter (Presentation/Guards) koppeln an `InPort` statt an konkrete Klassen.
+- UseCases bleiben austauschbar und testbar; Outbound-Abhaengigkeiten bleiben ueber `OutPort` entkoppelt.
+- Migrationsaufwand entsteht durch schrittweises Umbenennen bestehender Services/Ports; empfohlen ist eine inkrementelle Migration pro Feature.
+
 ---
 
 ## 10. Qualitätsszenarien
