@@ -29,4 +29,8 @@ export const routes: Routes = [
     providers: [ArchiveOverviewService],
     loadComponent: () => import('./features/archive/presentation/archive.component').then(m => m.ArchiveComponent),
   },
+  {
+    path: 'how-it-works',
+    loadComponent: () => import('./features/start-page/presentation/pages/how-it-works.component').then(m => m.HowItWorksComponent),
+  },
 ];

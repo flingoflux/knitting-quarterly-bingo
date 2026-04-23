@@ -4,21 +4,29 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ArchiveOverviewService } from '../application/archive-overview.service';
 import { ArchiveEntry } from '../domain/archive-entry';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
+import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
+import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
+import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
 
 @Component({
   selector: 'app-archive',
   standalone: true,
-  imports: [CommonModule, PageToolbarComponent],
+  imports: [CommonModule, PageToolbarComponent, IconComponent, ButtonComponent, PageContainerComponent],
   template: `
-    <div class="feature-shell">
+    <kq-page-container>
       <kq-page-toolbar
         quarterLabel="Archiv"
         [showPreviousButton]="false"
         [showNextButton]="true"
         (homeClicked)="goHome()"
         (nextQuarterClicked)="goToCurrentQuarter()"
-      />
+      >
+        <kq-button toolbar-actions variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
+          <kq-icon name="question" [size]="24"/>
+        </kq-button>
+      </kq-page-toolbar>
 
+      <div class="feature-shell">
       <section class="archive-header">
         <p class="eyebrow">Knitting Quarterly - Archiv</p>
         <h2>Bisher erledigte Runden</h2>
@@ -50,12 +58,14 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
           <p>Noch keine archivierten Runden vorhanden.</p>
         </section>
       </ng-template>
-    </div>
+      </div>
+    </kq-page-container>
   `,
   styles: [`
     .feature-shell {
-      max-width: 72rem;
-      margin: 0 auto;
+      max-width: none;
+      width: 100%;
+      margin: 0;
       padding: 1.4rem 1.1rem 2rem;
       color: #412a22;
     }
@@ -184,6 +194,10 @@ export class ArchiveComponent {
   readonly hasEntries = this.state.hasEntries;
   readonly isShowingPrototype = this.state.isShowingPrototype;
   readonly returnTarget = this.route.snapshot.queryParamMap.get('returnTo') === 'edit' ? 'edit' : 'play';
+
+  goToHelp(): void {
+    this.router.navigate(['/how-it-works']);
+  }
 
   goHome(): void {
     void this.router.navigate(['/']);

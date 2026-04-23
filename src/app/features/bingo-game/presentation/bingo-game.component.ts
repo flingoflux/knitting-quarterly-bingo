@@ -8,25 +8,34 @@ import { ProjectComparisonDialogComponent } from './components/project-compariso
 import { ImageChangedEvent } from '../../quarterly-plan/presentation/components/card-detail-dialog.component';
 import { ChallengeProgress } from '../domain/bingo-game';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
+import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
+import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
 import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
+
+const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
+const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 
 @Component({
   selector: 'app-bingo-game',
   standalone: true,
-  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent, BoardToolbarComponent],
+  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent, BoardToolbarComponent, IconComponent, ButtonComponent, PageContainerComponent],
   template: `
-    <div class="feature-shell">
+    <kq-page-container>
       <kq-page-toolbar
-        [maxWidth]="viewMode === 'horizontal' ? '58rem' : '52rem'"
+        [maxWidth]="viewMode === 'horizontal' ? PAGE_TOOLBAR_WIDTH_HORIZONTAL : PAGE_TOOLBAR_WIDTH_MOBILE"
         [quarterLabel]="displayedQuarterId()"
         [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
         [showNextButton]="canGoToNextQuarter()"
         (homeClicked)="goHome()"
         (previousQuarterClicked)="goToPreviousQuarter()"
         (nextQuarterClicked)="goToNextQuarter()"
-      ></kq-page-toolbar>
+      >
+        <kq-button toolbar-actions variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
+          <kq-icon name="question" [size]="24"/>
+        </kq-button>
+      </kq-page-toolbar>
 
       <div class="preview-banner" *ngIf="isPreviewMode()">
         💡 Du schaust dir das <strong>{{ displayedQuarterId() }}</strong> an. Fortschritt wird hier nicht gespeichert.
@@ -64,12 +73,14 @@ import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
       ></app-playable-board>
 
       <app-project-comparison-dialog #comparisonDialog (imageChanged)="onImageChanged($event)"></app-project-comparison-dialog>
-    </div>
+    </kq-page-container>
   `,
   styles: [
-    `.feature-shell {
-      max-width: 72rem;
-      margin: 0 auto;
+    `
+    .feature-shell {
+      max-width: none;
+      width: 100%;
+      margin: 0;
       padding: 1.4rem 1.1rem 2rem;
     }
     .preview-banner {
@@ -152,6 +163,9 @@ export class BingoGameComponent implements OnInit {
   route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 
+  readonly PAGE_TOOLBAR_WIDTH_MOBILE = PAGE_TOOLBAR_WIDTH_MOBILE;
+  readonly PAGE_TOOLBAR_WIDTH_HORIZONTAL = PAGE_TOOLBAR_WIDTH_HORIZONTAL;
+
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
   private readonly quarterClock = new QuarterClock();
   readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
@@ -201,6 +215,10 @@ export class BingoGameComponent implements OnInit {
 
   goHome() {
     this.router.navigate(['/']);
+  }
+
+  goToHelp() {
+    this.router.navigate(['/how-it-works']);
   }
 
   goToNextQuarter() {

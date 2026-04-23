@@ -11,23 +11,31 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
+import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
 import { QuarterClock } from '../../../core/domain';
+
+const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
+const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 
 @Component({
   selector: 'app-quarterly-plan',
   standalone: true,
-  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent, BoardToolbarComponent],
+  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent, BoardToolbarComponent, PageContainerComponent],
   template: `
-    <div class="feature-shell">
+    <kq-page-container>
       <kq-page-toolbar
-        [maxWidth]="viewMode === 'horizontal' ? '58rem' : '52rem'"
+        [maxWidth]="viewMode === 'horizontal' ? PAGE_TOOLBAR_WIDTH_HORIZONTAL : PAGE_TOOLBAR_WIDTH_MOBILE"
         [quarterLabel]="displayedQuarterId()"
         [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
         [showNextButton]="canGoToNextQuarter()"
         (homeClicked)="goHome()"
         (previousQuarterClicked)="goToPreviousQuarter()"
         (nextQuarterClicked)="goToNextQuarter()"
-      ></kq-page-toolbar>
+      >
+        <kq-button toolbar-actions variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
+          <kq-icon name="question" [size]="24"/>
+        </kq-button>
+      </kq-page-toolbar>
 
       <div class="edit-board-header" [class.compact-header]="viewMode === 'horizontal'">
         <p class="eyebrow">Knitting Quarterly - Board Studio</p>
@@ -66,12 +74,13 @@ import { QuarterClock } from '../../../core/domain';
       ></app-editable-board>
 
       <app-card-detail-dialog #detailDialog (imageChanged)="onImageChanged($event)"></app-card-detail-dialog>
-    </div>
+    </kq-page-container>
   `,
   styles: [`
     .feature-shell {
-      max-width: 72rem;
-      margin: 0 auto;
+      max-width: none;
+      width: 100%;
+      margin: 0;
       padding: 1.4rem 1.1rem 2rem;
     }
     .edit-board-header {
@@ -120,6 +129,10 @@ export class QuarterlyPlanComponent implements OnInit {
   router = inject(Router);
   route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
+
+  readonly PAGE_TOOLBAR_WIDTH_MOBILE = PAGE_TOOLBAR_WIDTH_MOBILE;
+  readonly PAGE_TOOLBAR_WIDTH_HORIZONTAL = PAGE_TOOLBAR_WIDTH_HORIZONTAL;
+
   viewMode: 'polaroid' | 'horizontal' = 'polaroid';
   private readonly quarterClock = new QuarterClock();
   readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
@@ -150,6 +163,10 @@ export class QuarterlyPlanComponent implements OnInit {
 
   goHome() {
     this.router.navigate(['/']);
+  }
+
+  goToHelp() {
+    this.router.navigate(['/how-it-works']);
   }
 
   goToNextQuarter() {

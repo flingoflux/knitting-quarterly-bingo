@@ -1,0 +1,21 @@
+// Layout Tokens – Breiten und Spacing-Einheiten
+$feature-shell-max-width: 52rem;
+$page-toolbar-max-width: 52rem;
+$page-toolbar-max-width-horizontal: 58rem;
+
+// Padding/Margins
+$feature-shell-padding-vertical: 1.4rem;
+$feature-shell-padding-horizontal: 1.1rem;
+$feature-shell-padding-bottom: 2rem;
+
+$feature-shell-mobile-padding-vertical: 1rem;
+$feature-shell-mobile-padding-horizontal: 1rem;
+
+// Container Layout Mixin – zentriert Inhalt auf max. $feature-shell-max-width
+@mixin feature-page-container {
+  display: block;
+  width: 100%;
+  max-width: $feature-shell-max-width;
+  margin-left: auto;
+  margin-right: auto;
+}

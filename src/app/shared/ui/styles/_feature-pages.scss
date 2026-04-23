@@ -1,0 +1,10 @@
+// Feature Page Grid Layout – zentrale Definition
+@use '../tokens/layout' as *;
+
+:host.feature-page {
+  @include feature-page-grid;
+}
+
+.feature-shell-grid-item {
+  @include feature-page-grid-child;
+}
