@@ -13,6 +13,7 @@ import { PageContainerComponent } from '../../../../shared/ui/templates/page-con
     <kq-page-container>
       <kq-page-toolbar
         [maxWidth]="pageToolbarWidth"
+        [showQuarterNav]="false"
         (homeClicked)="goHome()"
       ></kq-page-toolbar>
 
