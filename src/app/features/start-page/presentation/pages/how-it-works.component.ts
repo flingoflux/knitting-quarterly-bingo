@@ -2,11 +2,14 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { PageToolbarComponent } from '../../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 import { PageContainerComponent } from '../../../../shared/ui/templates/page-container/page-container.component';
+import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
+import { StorageService } from '../../../../core/infrastructure/storage.service';
+import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexed-db-image-repository.service';
 
 @Component({
   selector: 'app-how-to',
   standalone: true,
-  imports: [PageToolbarComponent, PageContainerComponent],
+  imports: [PageToolbarComponent, PageContainerComponent, ButtonComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -80,6 +83,12 @@ import { PageContainerComponent } from '../../../../shared/ui/templates/page-con
             <li>Fotos sollten <strong>quadratisch</strong> sein — beim Hochladen kannst du den Ausschnitt direkt zuschneiden.</li>
             <li>Du kannst vergangene und zukünftige Quartale über die Navigationspfeile in der Toolbar aufrufen.</li>
           </ul>
+        </section>
+
+        <section class="section danger-zone">
+          <h2>⚠️ Daten zurücksetzen</h2>
+          <p>Löscht alle lokal gespeicherten Daten: Spielstände, Pläne, Archiv und Fotos. Diese Aktion kann nicht rückgängig gemacht werden.</p>
+          <kq-button variant="ghost" (click)="clearAllData()">Spielstand löschen</kq-button>
         </section>
 
       </div>
@@ -212,6 +221,22 @@ import { PageContainerComponent } from '../../../../shared/ui/templates/page-con
       display: none;
     }
 
+    .danger-zone {
+      border-top: 1px solid #ebd5c5;
+      padding-top: 1.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .danger-zone h2 {
+      color: #8b2e0f;
+    }
+
+    .danger-zone p {
+      color: #6b4035;
+      font-size: 0.92rem;
+      margin-bottom: 1rem;
+    }
+
     @media (max-width: 640px) {
       .feature-shell {
         padding: 1rem;
@@ -233,10 +258,23 @@ import { PageContainerComponent } from '../../../../shared/ui/templates/page-con
 })
 export class HowItWorksComponent {
   private readonly router = inject(Router);
+  private readonly storage = inject(StorageService);
+  private readonly imageRepo = inject(IndexedDbImageRepository);
 
   readonly pageToolbarWidth = '52rem';
 
   goHome(): void {
     this.router.navigate(['/']);
+  }
+
+  async clearAllData(): Promise<void> {
+    const confirmed = window.confirm(
+      'Alle Spielstände, Pläne, Archiv-Einträge und Fotos werden unwiderruflich gelöscht. Fortfahren?'
+    );
+    if (!confirmed) return;
+
+    this.storage.clearAppData();
+    await this.imageRepo.clearAllImages();
+    window.location.href = '/';
   }
 }

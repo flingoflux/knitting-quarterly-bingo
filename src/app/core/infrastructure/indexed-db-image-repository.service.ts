@@ -49,4 +49,14 @@ export class IndexedDbImageRepository implements ImageRepository {
       req.onerror = () => reject(req.error);
     });
   }
+
+  clearAllImages(): Promise<void> {
+    this.dbPromise = null;
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.deleteDatabase(DB_NAME);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+      req.onblocked = () => reject(new Error('Database deletion blocked'));
+    });
+  }
 }
