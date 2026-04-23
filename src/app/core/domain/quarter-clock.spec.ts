@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { QuarterClock } from './quarter-clock';
 
 describe('QuarterClock', () => {
-  it('should berechnet das erste Quartal korrekt', () => {
+  it('should return Q1 when date is in the first quarter', () => {
     // given
     const clock = new QuarterClock();
 
@@ -10,7 +10,7 @@ describe('QuarterClock', () => {
     expect(clock.getQuarterId(new Date('2026-01-15T12:00:00.000Z'))).toBe('2026-Q1');
   });
 
-  it('should berechnet Quartalsgrenzen korrekt', () => {
+  it('should resolve quarter boundaries correctly when date is at edge days', () => {
     // given
     const clock = new QuarterClock();
 
@@ -19,7 +19,7 @@ describe('QuarterClock', () => {
     expect(clock.getQuarterId(new Date('2026-04-01T12:00:00.000Z'))).toBe('2026-Q2');
   });
 
-  it('should erkennt einen Quartalswechsel', () => {
+  it('should report rollover when previous and current quarters differ', () => {
     // given
     const clock = new QuarterClock();
 
@@ -28,7 +28,7 @@ describe('QuarterClock', () => {
     expect(clock.isRolloverDue('2026-Q2', '2026-Q2')).toBe(false);
   });
 
-  it('should berechnet das nächste Quartal korrekt', () => {
+  it('should return next quarter when calculating from a given date', () => {
     // given
     const clock = new QuarterClock();
 

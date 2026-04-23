@@ -3,7 +3,7 @@ import { QuarterId } from '../../../core/domain';
 import { createArchiveEntry, sortArchiveEntriesNewestFirst } from './archive-entry';
 
 describe('createArchiveEntry', () => {
-  it('should berechnet completedCount und completedChallengeNames', () => {
+  it('should calculate completed count and names when building archive entry', () => {
     // given
     const entry = createArchiveEntry({
       quarterId: '2026-Q1',
@@ -26,7 +26,7 @@ describe('createArchiveEntry', () => {
     expect(entry.completedChallengeNames).toEqual(['A', 'C']);
   });
 
-  it('should setzt hasBingo auf true bei kompletter Reihe', () => {
+  it('should set hasBingo to true when a full line is completed', () => {
     // given
     const entry = createArchiveEntry({
       quarterId: '2026-Q1',
@@ -46,7 +46,7 @@ describe('createArchiveEntry', () => {
     expect(entry.hasBingo).toBe(true);
   });
 
-  it('should setzt hasBingo auf false wenn keine komplette Linie vorliegt', () => {
+  it('should set hasBingo to false when no full line is completed', () => {
     // given
     const entry = createArchiveEntry({
       quarterId: '2026-Q1',
@@ -66,7 +66,7 @@ describe('createArchiveEntry', () => {
     expect(entry.hasBingo).toBe(false);
   });
 
-  it('should verwendet provided archivedAt', () => {
+  it('should keep provided archivedAt when value is passed', () => {
     // given
     const entry = createArchiveEntry({
       quarterId: '2026-Q1',
@@ -89,7 +89,7 @@ describe('createArchiveEntry', () => {
 });
 
 describe('sortArchiveEntriesNewestFirst', () => {
-  it('should sortiert nach archivedAt absteigend', () => {
+  it('should sort archive entries by archivedAt descending when timestamps differ', () => {
     // given
     const sorted = sortArchiveEntriesNewestFirst([
       {

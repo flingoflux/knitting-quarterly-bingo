@@ -61,6 +61,29 @@ Interaktive E2E-Ausführung:
 pnpm test:e2e:ui
 ```
 
+### Unit-Test-Konventionen
+
+Testnamen folgen dem Schema `should <erwartetes Verhalten> when/for/on/with <Kontext>`:
+
+```ts
+it('should load persisted progress when plan signature matches', () => {
+  // given
+  ...
+
+  // when
+  ...
+
+  // then
+  expect(...);
+});
+```
+
+- Namen beginnen immer mit `should` und beschreiben das erwartete Verhalten.
+- Der Kontext steht nach `when`, `for`, `on`, `with` oder `without`.
+- Testnamen sind auf Englisch.
+- Testköörper sind mit `// given`, `// when`, `// then` gegliedert.
+- Wenn es keinen eigenen Aktionsschritt gibt, werden `// when` und `// then` zu `// when + then` zusammengefasst.
+
 ### E2E-Konventionen (Playwright)
 
 - Selektoren in E2E-Tests sollen bevorzugt `data-testid` nutzen statt sichtbarem Text.

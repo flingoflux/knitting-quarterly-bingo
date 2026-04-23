@@ -44,7 +44,7 @@ function createUseCase(repository: MockArchiveRepository): ShowArchiveOverviewUs
 }
 
 describe('ShowArchiveOverviewUseCase', () => {
-  it('should laedt Eintraege initial sortiert neu nach alt', () => {
+  it('should load archive entries sorted from newest to oldest on initialization', () => {
     // given
     const repository = new MockArchiveRepository();
     repository.entries = [
@@ -59,7 +59,7 @@ describe('ShowArchiveOverviewUseCase', () => {
     expect(useCase.hasEntries()).toBe(true);
   });
 
-  it('should meldet leeres Archiv korrekt', () => {
+  it('should expose prototype entries when archive is empty', () => {
     // given
     const repository = new MockArchiveRepository();
 
@@ -71,7 +71,7 @@ describe('ShowArchiveOverviewUseCase', () => {
     expect(useCase.isShowingPrototype()).toBe(true);
   });
 
-  it('should reload liest den aktuellen Repository-Stand neu ein', () => {
+  it('should reload entries when repository state changes', () => {
     // given
     const repository = new MockArchiveRepository();
     repository.entries = [createEntry('2025-Q4', '2026-01-01T00:00:00.000Z')];

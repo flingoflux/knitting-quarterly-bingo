@@ -9,7 +9,7 @@ function createChallenges(length = 4): Challenge[] {
 }
 
 describe('QuarterlyPlan', () => {
-  it('should createDefault verwendet die Default-Challenges', () => {
+  it('should use default challenges when creating a default plan', () => {
     // given
     const plan = QuarterlyPlan.createDefault('2026-Q3');
 
@@ -18,7 +18,7 @@ describe('QuarterlyPlan', () => {
     expect(plan.challenges).toEqual(DEFAULT_CHALLENGES);
   });
 
-  it('should fromChallenges kopiert die Eingabeliste', () => {
+  it('should copy input challenges when creating plan from list', () => {
     // given
     const input = createChallenges(4);
     const plan = QuarterlyPlan.fromChallenges(input, '2026-Q2');
@@ -28,7 +28,7 @@ describe('QuarterlyPlan', () => {
     expect(plan.challenges[0]?.name).toBe('Challenge 0');
   });
 
-  it('should reorder vertauscht zwei Einträge und bleibt immutable', () => {
+  it('should reorder challenges immutably when source and target indexes are valid', () => {
     // given
     const plan = QuarterlyPlan.fromChallenges(createChallenges(4), '2026-Q2');
 
@@ -40,7 +40,7 @@ describe('QuarterlyPlan', () => {
     expect(reordered.challenges[3]?.name).toBe('Challenge 0');
   });
 
-  it('should reorder mit ungültigem Index behält Daten unverändert', () => {
+  it('should keep data unchanged when reorder index is invalid', () => {
     // given
     const plan = QuarterlyPlan.fromChallenges(createChallenges(4), '2026-Q2');
 
@@ -51,7 +51,7 @@ describe('QuarterlyPlan', () => {
     expect(reordered.challenges).toEqual(plan.challenges);
   });
 
-  it('should update ersetzt die Challenge an gültigem Index immutable', () => {
+  it('should replace challenge immutably when update index is valid', () => {
     // given
     const plan = QuarterlyPlan.fromChallenges(createChallenges(4), '2026-Q2');
 
@@ -62,7 +62,7 @@ describe('QuarterlyPlan', () => {
     expect(updated.challenges[1]).toEqual({ name: 'Updated', imageId: 'img-1' });
   });
 
-  it('should toPersistable liefert Plain-Objekt mit quarterId und challenges', () => {
+  it('should return plain persistable object when serializing plan', () => {
     // given
     const plan = QuarterlyPlan.fromChallenges(createChallenges(2), '2026-Q2');
 

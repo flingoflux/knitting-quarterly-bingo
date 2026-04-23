@@ -22,13 +22,13 @@ describe('LocalStorageArchiveRepository', () => {
     repository = new LocalStorageArchiveRepository(storage);
   });
 
-  it('should liefert leeres Array ohne gespeicherte Daten', () => {
+  it('should return empty array when no archive data is stored', () => {
     // given
     // when + then
     expect(repository.loadAll()).toEqual([]);
   });
 
-  it('should speichert Eintrag via append und laedt ihn wieder', () => {
+  it('should persist entry when append is called and load it afterward', () => {
     // given
     repository.append({
       quarterId: QuarterId.parse('2026-Q1'),
@@ -48,7 +48,7 @@ describe('LocalStorageArchiveRepository', () => {
     expect(repository.loadAll()[0]?.quarterId.toString()).toBe('2026-Q1');
   });
 
-  it('should ignoriert invalide Datensaetze aus dem Storage', () => {
+  it('should ignore invalid records when loading from storage', () => {
     // given
     storage.setItem('kq-bingo-archive-v1', [
       {

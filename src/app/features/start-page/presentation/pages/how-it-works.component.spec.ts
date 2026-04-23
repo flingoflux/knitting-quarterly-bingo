@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 describe('HowItWorksComponent clearAllData regression', () => {
-  it('should verwendet Router-Navigation statt window.location-Redirect', () => {
+  it('should use router navigation when clearing all data', () => {
     // given
     const componentPath = resolve(
       process.cwd(),

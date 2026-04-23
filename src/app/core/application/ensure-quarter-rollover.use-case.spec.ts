@@ -89,7 +89,7 @@ function createService(deps: {
 }
 
 describe('EnsureQuarterRolloverUseCase', () => {
-  it('should tut nichts wenn Board fuer aktuelles Quartal schon existiert', () => {
+  it('should not create a new board when current quarter board already exists', () => {
     // given
     const boardReader = new MockBoardReader();
     // when
@@ -107,7 +107,7 @@ describe('EnsureQuarterRolloverUseCase', () => {
     expect(bingoGameRepository.clearCalls).toBe(0);
   });
 
-  it('should legt Default-Board an wenn kein Board fuer aktuelles Quartal existiert', () => {
+  it('should create default board when current quarter board is missing', () => {
     // given
     const boardReader = new MockBoardReader();
     const archiveRepository = new MockArchiveRepository();
@@ -125,7 +125,7 @@ describe('EnsureQuarterRolloverUseCase', () => {
     expect(bingoGameRepository.clearCalls).toBe(1);
   });
 
-  it('should archiviert aktives spiel und legt neues default-board an', () => {
+  it('should archive active game and create default board when rollover happens', () => {
     // given
     const boardReader = new MockBoardReader();
     const archiveRepository = new MockArchiveRepository();
@@ -157,7 +157,7 @@ describe('EnsureQuarterRolloverUseCase', () => {
     expect(boardWriter.savedPlans[0]?.challenges).toEqual(DEFAULT_CHALLENGES);
   });
 
-  it('should legt auch ohne aktives spiel ein neues default-board an', () => {
+  it('should create default board when rollover happens without active game', () => {
     // given
     const boardReader = new MockBoardReader();
     const archiveRepository = new MockArchiveRepository();

@@ -22,7 +22,7 @@ describe('StorageService', () => {
     service = new StorageService();
   });
 
-  it('should speichert und lädt ein Objekt', () => {
+  it('should store and load an object when key exists', () => {
     // given
     // when
     service.setItem('test', testObj);
@@ -31,13 +31,13 @@ describe('StorageService', () => {
     expect(result).toEqual(testObj);
   });
 
-  it('should liefert null für nicht vorhandenen Key', () => {
+  it('should return null when key does not exist', () => {
     // given
     // when + then
     expect(service.getItem('notfound')).toBeNull();
   });
 
-  it('should liefert null bei ungültigem JSON', () => {
+  it('should return null when stored json is invalid', () => {
     // given
     // when
     localStorage.setItem('broken', 'not-json');
@@ -45,7 +45,7 @@ describe('StorageService', () => {
     expect(service.getItem('broken')).toBeNull();
   });
 
-  it('should überschreibt vorhandene Werte', () => {
+  it('should overwrite existing value when same key is used again', () => {
     // given
     // when
     service.setItem('dup', { a: 1 });
@@ -54,7 +54,7 @@ describe('StorageService', () => {
     expect(service.getItem<{ a: number }>('dup')).toEqual({ a: 2 });
   });
 
-  it('should kann verschiedene Typen speichern', () => {
+  it('should store and load different value types when serialized', () => {
     // given
     // when
     service.setItem('num', 123);

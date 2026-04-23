@@ -15,7 +15,7 @@ function makeCells(length = 16, imageIds?: (string | undefined)[]) {
 }
 
 describe('BingoGame.fromDefinition', () => {
-  it('should überträgt imageId als planningImageId', () => {
+  it('should copy imageId as planningImageId when creating game from definition', () => {
     // given
     const cells = makeCells(16, ['img-0', undefined, 'img-2']);
 
@@ -27,7 +27,7 @@ describe('BingoGame.fromDefinition', () => {
     expect(game.challenges[2].planningImageId).toBe('img-2');
   });
 
-  it('should setzt progressImageId initial auf undefined', () => {
+  it('should initialize progressImageId as undefined when game is created', () => {
     // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16, ['img-0']));
 
@@ -35,7 +35,7 @@ describe('BingoGame.fromDefinition', () => {
     expect(game.challenges[0].progressImageId).toBeUndefined();
   });
 
-  it('should startet mit allen Challenges nicht abgeschlossen', () => {
+  it('should mark all challenges as incomplete when game is created', () => {
     // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
@@ -45,7 +45,7 @@ describe('BingoGame.fromDefinition', () => {
 });
 
 describe('BingoGame.restore', () => {
-  it('should übernimmt planningImageId aus gespeichertem Fortschritt', () => {
+  it('should restore planningImageId when saved progress contains it', () => {
     // given
     const cells = makeCells(16);
     const saved = {
@@ -66,7 +66,7 @@ describe('BingoGame.restore', () => {
     expect(game.challenges[0].planningImageId).toBe('saved-planning-img');
   });
 
-  it('should fällt auf cells[i].imageId zurück wenn planningImageId im Fortschritt fehlt', () => {
+  it('should fallback to definition imageId when saved planningImageId is missing', () => {
     // given
     const cells = makeCells(16, ['definition-img']);
     const saved = {
@@ -87,7 +87,7 @@ describe('BingoGame.restore', () => {
     expect(game.challenges[0].planningImageId).toBe('definition-img');
   });
 
-  it('should behält progressImageId aus gespeichertem Fortschritt', () => {
+  it('should keep progressImageId when restoring from saved progress', () => {
     // given
     const cells = makeCells(16);
     const saved = {
@@ -109,7 +109,7 @@ describe('BingoGame.restore', () => {
     expect(game.challenges[1].progressImageId).toBeUndefined();
   });
 
-  it('should startet neu wenn Signatur nicht passt', () => {
+  it('should start a fresh game when saved signature does not match', () => {
     // given
     const cells = makeCells(16);
     const saved = {
@@ -132,7 +132,7 @@ describe('BingoGame.restore', () => {
 });
 
 describe('BingoGame.toggle', () => {
-  it('should setzt Challenge auf abgeschlossen', () => {
+  it('should mark challenge as completed when toggled once', () => {
     // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
@@ -142,7 +142,7 @@ describe('BingoGame.toggle', () => {
     expect(toggled.completed[0]).toBe(true);
   });
 
-  it('should zweimaliges Togglen kehrt Zustand zurück', () => {
+  it('should restore original completion state when toggled twice', () => {
     // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
@@ -152,7 +152,7 @@ describe('BingoGame.toggle', () => {
     expect(result.completed[0]).toBe(false);
   });
 
-  it('should lässt andere Challenges unberührt', () => {
+  it('should keep other challenges unchanged when toggling one challenge', () => {
     // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
@@ -163,7 +163,7 @@ describe('BingoGame.toggle', () => {
     expect(toggled.completed[6]).toBe(false);
   });
 
-  it('should ignoriert ungültigen Index', () => {
+  it('should ignore update when index is out of range', () => {
     // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
@@ -175,7 +175,7 @@ describe('BingoGame.toggle', () => {
 });
 
 describe('BingoGame.resetProgress', () => {
-  it('should setzt alle abgeschlossenen Challenges zurück', () => {
+  it('should clear all completed flags when resetting progress', () => {
     // given
     const cells = makeCells(16);
     const saved = {
@@ -197,7 +197,7 @@ describe('BingoGame.resetProgress', () => {
     expect(reset.completed.every(c => !c)).toBe(true);
   });
 
-  it('should behält planningImageId und progressImageId nach Reset', () => {
+  it('should keep planning and progress image ids when resetting progress', () => {
     // given
     const cells = makeCells(16, ['plan-img']);
     const saved = {
@@ -222,7 +222,7 @@ describe('BingoGame.resetProgress', () => {
 });
 
 describe('BingoGame.updateProgressImage', () => {
-  it('should setzt progressImageId für die Challenge', () => {
+  it('should update progressImageId when valid challenge index is provided', () => {
     // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
@@ -232,7 +232,7 @@ describe('BingoGame.updateProgressImage', () => {
     expect(updated.challenges[0].progressImageId).toBe('new-photo');
   });
 
-  it('should berührt planningImageId nicht', () => {
+  it('should not modify planningImageId when updating progress image', () => {
     // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16, ['plan-img']));
 
@@ -242,7 +242,7 @@ describe('BingoGame.updateProgressImage', () => {
     expect(updated.challenges[0].planningImageId).toBe('plan-img');
   });
 
-  it('should kann progressImageId auf undefined setzen', () => {
+  it('should allow clearing progressImageId when undefined is provided', () => {
     // given
     const cells = makeCells(16);
     const saved = {
@@ -264,7 +264,7 @@ describe('BingoGame.updateProgressImage', () => {
     expect(updated.challenges[0].progressImageId).toBeUndefined();
   });
 
-  it('should ignoriert ungültigen Index', () => {
+  it('should ignore update when index is out of range', () => {
     // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
@@ -296,7 +296,7 @@ describe('BingoGame.bingoCells', () => {
     return BingoGame.restore(cells, saved);
   }
 
-  it('should liefert leeres Set ohne Bingo', () => {
+  it('should return empty bingo set when no bingo line exists', () => {
     // given
     const game = gameWithCompleted([0, 1, 2]);
 
@@ -304,7 +304,7 @@ describe('BingoGame.bingoCells', () => {
     expect(game.bingoCells.size).toBe(0);
   });
 
-  it('should erkennt Bingo in der ersten Spalte', () => {
+  it('should detect bingo cells when first column is completed', () => {
     // given
     // Spalte 0: Indices 0, 4, 8, 12
     const game = gameWithCompleted([0, 4, 8, 12]);
@@ -314,7 +314,7 @@ describe('BingoGame.bingoCells', () => {
     expect(game.bingoCells.has(1)).toBe(false);
   });
 
-  it('should erkennt Bingo in der zweiten Zeile', () => {
+  it('should detect bingo cells when second row is completed', () => {
     // given
     // Zeile 1: Indices 4, 5, 6, 7
     const game = gameWithCompleted([4, 5, 6, 7]);
@@ -324,7 +324,7 @@ describe('BingoGame.bingoCells', () => {
     expect(game.bingoCells.has(0)).toBe(false);
   });
 
-  it('should erkennt Bingo auf der Hauptdiagonale', () => {
+  it('should detect bingo cells when main diagonal is completed', () => {
     // given
     // Hauptdiagonale: 0, 5, 10, 15
     const game = gameWithCompleted([0, 5, 10, 15]);
@@ -334,7 +334,7 @@ describe('BingoGame.bingoCells', () => {
     expect(game.bingoCells.has(1)).toBe(false);
   });
 
-  it('should erkennt Bingo auf der Nebendiagonale', () => {
+  it('should detect bingo cells when anti diagonal is completed', () => {
     // given
     // Nebendiagonale: 3, 6, 9, 12
     const game = gameWithCompleted([3, 6, 9, 12]);
@@ -344,7 +344,7 @@ describe('BingoGame.bingoCells', () => {
     expect(game.bingoCells.has(0)).toBe(false);
   });
 
-  it('should enthält Indices aus mehreren Bingo-Linien', () => {
+  it('should include indices from multiple bingo lines when overlaps exist', () => {
     // given
     // Zeile 0 + Spalte 0 → Index 0 ist in beiden
     const game = gameWithCompleted([0, 1, 2, 3, 4, 8, 12]);

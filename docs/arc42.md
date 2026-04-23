@@ -733,6 +733,29 @@ Die Testpyramide wird in diesem Projekt wie folgt umgesetzt:
 - E2E-Tests mit Playwright (`pnpm test:e2e`) fuer zentrale Nutzerfluesse, Routing und Persistenzintegration
 - CI-Ausfuehrung von E2E in GitHub Actions inklusive Playwright-Report als Artefakt
 
+#### Unit-Test-Konventionen
+
+Testnamen folgen dem Schema `should <erwartetes Verhalten> when/for/on/with <Kontext>`:
+
+```ts
+it('should load persisted progress when plan signature matches', () => {
+  // given
+  ...
+
+  // when
+  ...
+
+  // then
+  expect(...)
+});
+```
+
+- Jeder Testname beginnt mit `should` und beschreibt das erwartete Verhalten des Testobjekts.
+- Der Kontext (Vorbedingung, Eingabe, Szenario) steht nach `when`, `for`, `on`, `with` oder `without`.
+- Testnamen sind auf Englisch.
+- Der Testkoerper ist mit `// given`, `// when`, `// then` strukturiert.
+- Gibt es keinen eigenen Aktionsschritt (z. B. bei reinen Zustandsabfragen direkt nach der Initialisierung), werden `// when` und `// then` zu `// when + then` zusammengefasst.
+
 #### E2E-Selektor-Strategie
 
 Fuer robuste E2E-Tests werden Selektoren auf `data-testid` standardisiert. Sichtbarer Text wird nur dann verwendet, wenn kein stabiler technischer Anker vorhanden ist.

@@ -38,7 +38,7 @@ function previousQuarterId(quarterId: string): string {
   return `${year}-Q${quarter - 1}`;
 }
 
-test('should Startseite zeigt Kernaktionen', async ({ page }) => {
+test('should show core actions on the start page', async ({ page }) => {
   // given
   // when
   await page.goto('/');
@@ -51,7 +51,7 @@ test('should Startseite zeigt Kernaktionen', async ({ page }) => {
   await expect(page.getByTestId('action-start-open-archive')).toBeVisible();
 });
 
-test('should Spielen fuehrt in die aktuelle Quartalsansicht', async ({ page }) => {
+test('should navigate to the current quarter view when starting play', async ({ page }) => {
   // given
   // when
   await page.goto('/');
@@ -63,7 +63,7 @@ test('should Spielen fuehrt in die aktuelle Quartalsansicht', async ({ page }) =
   await expect(page.getByTestId('page-bingo-title')).toBeVisible();
 });
 
-test('should Planen fuehrt in die Edit-Ansicht', async ({ page }) => {
+test('should navigate to the planning view when starting planning', async ({ page }) => {
   // given
   // when
   await page.goto('/');
@@ -75,7 +75,7 @@ test('should Planen fuehrt in die Edit-Ansicht', async ({ page }) => {
   await expect(page.getByTestId('page-quarterly-plan-title')).toBeVisible();
 });
 
-test('should Vergangenes Quartal leitet ins Archiv um', async ({ page }) => {
+test('should redirect to archive when opening a past quarter', async ({ page }) => {
   // given
   const current = currentQuarterId();
   const pastQuarter = previousQuarterId(current);
@@ -88,7 +88,7 @@ test('should Vergangenes Quartal leitet ins Archiv um', async ({ page }) => {
   await expect(page.getByTestId('page-archive-title')).toBeVisible();
 });
 
-test('should Quarter-Navigation wechselt zwischen Play und Plan', async ({ page }) => {
+test('should switch between play and plan views when navigating quarters', async ({ page }) => {
   // given
   // when
   await page.goto('/');
@@ -105,7 +105,7 @@ test('should Quarter-Navigation wechselt zwischen Play und Plan', async ({ page 
   await expect(page.getByTestId('page-bingo-title')).toBeVisible();
 });
 
-test('should Help und Home funktionieren ueber die Toolbar', async ({ page }) => {
+test('should open help and return home when using toolbar actions', async ({ page }) => {
   // given
   // when
   await page.goto('/');

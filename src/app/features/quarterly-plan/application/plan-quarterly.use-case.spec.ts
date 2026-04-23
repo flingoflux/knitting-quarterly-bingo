@@ -57,7 +57,7 @@ function createUseCase(repository: MockQuarterlyPlanRepository): PlanQuarterlyUs
 }
 
 describe('PlanQuarterlyUseCase', () => {
-  it('should initialize defaults when no persisted board exists', () => {
+  it('should initialize default challenges when persisted board is missing', () => {
     // given
     const repository = new MockQuarterlyPlanRepository();
 
@@ -68,7 +68,7 @@ describe('PlanQuarterlyUseCase', () => {
     expect(repository.lastSavedPlan?.challenges).toEqual(DEFAULT_CHALLENGES);
   });
 
-  it('should load persisted definition on startup', () => {
+  it('should load persisted plan when one exists on startup', () => {
     // given
     const repository = new MockQuarterlyPlanRepository();
     repository.loadedPlan = { quarterId: '2026-Q2', challenges: createChallenges(4) };
@@ -80,7 +80,7 @@ describe('PlanQuarterlyUseCase', () => {
     expect(useCase.challenges()[0].name).toBe('Challenge 0');
   });
 
-  it('should swap challenges and persist the result', () => {
+  it('should swap challenges and persist result when reorder is requested', () => {
     // given
     const repository = new MockQuarterlyPlanRepository();
     repository.loadedPlan = { quarterId: '2026-Q2', challenges: createChallenges(4) };
@@ -95,7 +95,7 @@ describe('PlanQuarterlyUseCase', () => {
     expect(repository.lastSavedPlan?.challenges[0].name).toBe('Challenge 3');
   });
 
-  it('should update a single challenge', () => {
+  it('should update a single challenge and persist changes when editing', () => {
     // given
     const repository = new MockQuarterlyPlanRepository();
     repository.loadedPlan = { quarterId: '2026-Q2', challenges: createChallenges(4) };
@@ -108,7 +108,7 @@ describe('PlanQuarterlyUseCase', () => {
     expect(useCase.challenges()[1].name).toBe('Updated');
   });
 
-  it('should reset board to defaults', () => {
+  it('should reset board to default challenges when reset is requested', () => {
     // given
     const repository = new MockQuarterlyPlanRepository();
     repository.loadedPlan = { quarterId: '2026-Q2', challenges: createChallenges(4) };
