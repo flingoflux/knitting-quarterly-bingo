@@ -1,20 +1,21 @@
 import { Injectable, inject } from '@angular/core';
-import { DEFAULT_CHALLENGES } from '../../shared/domain/default-challenges';
 import { ARCHIVE_REPOSITORY } from '../../features/archive/domain/archive.repository';
 import { createArchiveEntry } from '../../features/archive/domain/archive-entry';
-import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from '../../features/quarterly-plan/domain/quarterly-plan.repository';
 import { BINGO_GAME_REPOSITORY } from '../../features/bingo-game/domain/bingo-game.repository';
+import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from '../../features/quarterly-plan/domain/quarterly-plan.repository';
+import { DEFAULT_CHALLENGES } from '../../shared/domain/default-challenges';
 import { QuarterClock, QuarterId } from '../domain';
+import { EnsureQuarterRolloverInPort } from './ports/in/ensure-quarter-rollover.in-port';
 
 @Injectable({ providedIn: 'root' })
-export class QuarterRolloverOrchestratorService {
+export class EnsureQuarterRolloverUseCase implements EnsureQuarterRolloverInPort {
   private readonly quarterClock = new QuarterClock();
   private readonly archiveRepository = inject(ARCHIVE_REPOSITORY);
   private readonly boardReader = inject(QUARTERLY_PLAN_READER);
   private readonly boardWriter = inject(QUARTERLY_PLAN_WRITER);
   private readonly bingoGameRepository = inject(BINGO_GAME_REPOSITORY);
 
-  ensureCurrentQuarter(now: Date = new Date()): void {
+  persistQuarterRollover(now: Date = new Date()): void {
     const currentQuarterId = QuarterId.parse(this.quarterClock.getQuarterId(now));
     const nowIso = now.toISOString();
 

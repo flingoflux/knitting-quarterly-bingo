@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 import { QuarterId } from '../../../core/domain';
 import { ArchiveEntry } from '../domain/archive-entry';
-import { ARCHIVE_REPOSITORY } from '../domain/archive.repository';
-import { ArchiveOverviewService } from './archive-overview.service';
+import { LOAD_ARCHIVE_ENTRIES_OUT_PORT } from './ports/out/load-archive-entries.out-port';
+import { ShowArchiveOverviewUseCase } from './show-archive-overview.use-case';
 import { DEFAULT_ARCHIVE_ENTRIES } from '../domain/default-archive-entries';
 
 class MockArchiveRepository {
@@ -36,14 +36,14 @@ function createEntry(quarterId: string, archivedAt: string): ArchiveEntry {
   };
 }
 
-function createService(repository: MockArchiveRepository): ArchiveOverviewService {
+function createUseCase(repository: MockArchiveRepository): ShowArchiveOverviewUseCase {
   const injector = Injector.create({
-    providers: [{ provide: ARCHIVE_REPOSITORY, useValue: repository }],
+    providers: [{ provide: LOAD_ARCHIVE_ENTRIES_OUT_PORT, useValue: repository }],
   });
-  return runInInjectionContext(injector, () => new ArchiveOverviewService());
+  return runInInjectionContext(injector, () => new ShowArchiveOverviewUseCase());
 }
 
-describe('ArchiveOverviewService', () => {
+describe('ShowArchiveOverviewUseCase', () => {
   it('laedt Eintraege initial sortiert neu nach alt', () => {
     const repository = new MockArchiveRepository();
     repository.entries = [
@@ -51,34 +51,34 @@ describe('ArchiveOverviewService', () => {
       createEntry('2026-Q1', '2026-04-01T00:00:00.000Z'),
     ];
 
-    const service = createService(repository);
+    const useCase = createUseCase(repository);
 
-    expect(service.entries().map(entry => entry.quarterId.toString())).toEqual(['2026-Q1', '2025-Q4']);
-    expect(service.hasEntries()).toBe(true);
+    expect(useCase.entries().map(entry => entry.quarterId.toString())).toEqual(['2026-Q1', '2025-Q4']);
+    expect(useCase.hasEntries()).toBe(true);
   });
 
   it('meldet leeres Archiv korrekt', () => {
     const repository = new MockArchiveRepository();
 
-    const service = createService(repository);
+    const useCase = createUseCase(repository);
 
-    expect(service.entries()).toEqual(DEFAULT_ARCHIVE_ENTRIES);
-    expect(service.hasEntries()).toBe(true);
-    expect(service.isShowingPrototype()).toBe(true);
+    expect(useCase.entries()).toEqual(DEFAULT_ARCHIVE_ENTRIES);
+    expect(useCase.hasEntries()).toBe(true);
+    expect(useCase.isShowingPrototype()).toBe(true);
   });
 
   it('reload liest den aktuellen Repository-Stand neu ein', () => {
     const repository = new MockArchiveRepository();
     repository.entries = [createEntry('2025-Q4', '2026-01-01T00:00:00.000Z')];
-    const service = createService(repository);
+    const useCase = createUseCase(repository);
 
     repository.entries = [
       createEntry('2026-Q1', '2026-04-01T00:00:00.000Z'),
       createEntry('2025-Q4', '2026-01-01T00:00:00.000Z'),
     ];
-    service.reload();
+    useCase.reload();
 
-    expect(service.entries().map(entry => entry.quarterId.toString())).toEqual(['2026-Q1', '2025-Q4']);
-    expect(service.isShowingPrototype()).toBe(false);
+    expect(useCase.entries().map(entry => entry.quarterId.toString())).toEqual(['2026-Q1', '2025-Q4']);
+    expect(useCase.isShowingPrototype()).toBe(false);
   });
 });

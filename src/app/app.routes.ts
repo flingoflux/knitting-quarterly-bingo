@@ -4,7 +4,8 @@ import { PLAY_BINGO_IN_PORT } from './features/bingo-game/application/ports/in/p
 import { PlayBingoUseCase } from './features/bingo-game/application/play-bingo.use-case';
 import { PLAN_QUARTERLY_IN_PORT } from './features/quarterly-plan/application/ports/in/plan-quarterly.in-port';
 import { PlanQuarterlyUseCase } from './features/quarterly-plan/application/plan-quarterly.use-case';
-import { ArchiveOverviewService } from './features/archive/application/archive-overview.service';
+import { SHOW_ARCHIVE_OVERVIEW_IN_PORT } from './features/archive/application/ports/in/show-archive-overview.in-port';
+import { ShowArchiveOverviewUseCase } from './features/archive/application/show-archive-overview.use-case';
 
 export const routes: Routes = [
   {
@@ -33,7 +34,10 @@ export const routes: Routes = [
   },
   {
     path: 'archive',
-    providers: [ArchiveOverviewService],
+    providers: [
+      ShowArchiveOverviewUseCase,
+      { provide: SHOW_ARCHIVE_OVERVIEW_IN_PORT, useExisting: ShowArchiveOverviewUseCase },
+    ],
     loadComponent: () => import('./features/archive/presentation/archive.component').then(m => m.ArchiveComponent),
   },
   {

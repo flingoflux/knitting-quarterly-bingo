@@ -1,6 +1,8 @@
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
+import { EnsureQuarterRolloverUseCase } from './core/application/ensure-quarter-rollover.use-case';
+import { ENSURE_QUARTER_ROLLOVER_IN_PORT } from './core/application/ports/in/ensure-quarter-rollover.in-port';
 import { LocalStorageQuarterlyPlanRepository } from './features/quarterly-plan/infrastructure/local-storage-quarterly-plan.repository';
 import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from './features/quarterly-plan/domain/quarterly-plan.repository';
 import { LOAD_QUARTERLY_PLAN_OUT_PORT } from './features/quarterly-plan/application/ports/out/load-quarterly-plan.out-port';
@@ -11,12 +13,14 @@ import { LOAD_BINGO_PROGRESS_OUT_PORT } from './features/bingo-game/application/
 import { PERSIST_BINGO_PROGRESS_OUT_PORT } from './features/bingo-game/application/ports/out/persist-bingo-progress.out-port';
 import { ARCHIVE_REPOSITORY } from './features/archive/domain/archive.repository';
 import { LocalStorageArchiveRepository } from './features/archive/infrastructure/local-storage-archive.repository';
+import { LOAD_ARCHIVE_ENTRIES_OUT_PORT } from './features/archive/application/ports/out/load-archive-entries.out-port';
 import { IndexedDbImageRepository } from './core/infrastructure/indexed-db-image-repository.service';
 import { IMAGE_REPOSITORY } from './shared/ports/image-repository';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
+    { provide: ENSURE_QUARTER_ROLLOVER_IN_PORT, useExisting: EnsureQuarterRolloverUseCase },
     { provide: QUARTERLY_PLAN_READER, useExisting: LocalStorageQuarterlyPlanRepository },
     { provide: QUARTERLY_PLAN_WRITER, useExisting: LocalStorageQuarterlyPlanRepository },
     { provide: LOAD_QUARTERLY_PLAN_OUT_PORT, useExisting: LocalStorageQuarterlyPlanRepository },
@@ -25,6 +29,7 @@ export const appConfig: ApplicationConfig = {
     { provide: LOAD_BINGO_PROGRESS_OUT_PORT, useExisting: LocalStorageBingoGameRepository },
     { provide: PERSIST_BINGO_PROGRESS_OUT_PORT, useExisting: LocalStorageBingoGameRepository },
     { provide: ARCHIVE_REPOSITORY, useExisting: LocalStorageArchiveRepository },
+    { provide: LOAD_ARCHIVE_ENTRIES_OUT_PORT, useExisting: LocalStorageArchiveRepository },
     { provide: IMAGE_REPOSITORY, useExisting: IndexedDbImageRepository },
   ],
 };

@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ArchiveOverviewService } from '../application/archive-overview.service';
+import { SHOW_ARCHIVE_OVERVIEW_IN_PORT } from '../application/ports/in/show-archive-overview.in-port';
 import { ArchiveEntry } from '../domain/archive-entry';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
@@ -186,7 +186,7 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
   `],
 })
 export class ArchiveComponent {
-  private readonly state = inject(ArchiveOverviewService);
+  private readonly state = inject(SHOW_ARCHIVE_OVERVIEW_IN_PORT);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
