@@ -6,7 +6,7 @@ import { PageToolbarComponent } from '../../../../shared/ui/organisms/page-toolb
 import { PageContainerComponent } from '../../../../shared/ui/templates/page-container/page-container.component';
 
 @Component({
-  selector: 'app-how-it-works',
+  selector: 'app-how-to',
   standalone: true,
   imports: [CommonModule, ButtonComponent, PageToolbarComponent, PageContainerComponent],
   template: `
@@ -19,7 +19,7 @@ import { PageContainerComponent } from '../../../../shared/ui/templates/page-con
 
       <div class="feature-shell">
         <div class="how-it-works-header">
-          <p class="eyebrow">Dokumentation</p>
+          <p class="eyebrow">How-to</p>
           <h1>Wie funktioniert Knitting Quarterly Bingo?</h1>
         </div>
 
@@ -27,34 +27,40 @@ import { PageContainerComponent } from '../../../../shared/ui/templates/page-con
         <section class="section">
           <h2>🎯 Das Konzept</h2>
           <p>
-            Knitting Quarterly Bingo ist ein Langzeitprojekt für Strickfans. Alle 3 Monate (ein Quartal)
-            gibt es ein neues Bingo-Board mit 16 Strickprojekten. Deine Aufgabe: Versuche, möglichst viele
-            dieser Projekte in einem Quartal zu stricken und erhalte Bingos!
+            Knitting Quarterly Bingo ist Gamification fürs Stricken. Alle 3 Monate startet ein neues
+            Quartal mit einem Board aus 16 Challenges — Strickprojekten, die dich inspirieren und motivieren sollen.
+          </p>
+          <p>
+            Das Ziel ist nicht, möglichst viele Projekte abzuhaken. Es geht darum, durch das Spiel
+            in Bewegung zu kommen. Ein einziges Bingo wäre schon ein Erfolg — aber auch wer keins schafft,
+            hat trotzdem Projekte fertiggestellt, auf die man stolz sein kann.
           </p>
         </section>
 
         <section class="section">
-          <h2>📋 Die Phasen eines Quartals</h2>
+          <h2>📋 Die Phasen des Spiels</h2>
           <div class="phase-list">
             <div class="phase">
-              <div class="phase-name">1. Planung (Wochen 1-2)</div>
+              <div class="phase-name">1. Planen</div>
               <p>
-                Das Board wird veröffentlicht. Du planst deine Projekte und notierst deine Bilder
-                zum "Vorher"-Stand jedes Projekts im Board.
+                Richte dein Board ein — fast wie ein Moodboard. Wähle Challenges aus, auf die du Lust hast,
+                und suche dir passende Patterns, Wolle oder UFOs heraus. Ordne die Felder per
+                Drag &amp; Drop an oder würfle sie zufällig. Zu jeder Challenge kannst du
+                optional ein Inspirationsfoto hinterlegen.
               </p>
             </div>
             <div class="phase">
-              <div class="phase-name">2. Spielphase (Wochen 3-12)</div>
+              <div class="phase-name">2. Spielen</div>
               <p>
-                Es ist Zeit zu stricken! Während du deine Projekte voranbringst, markierst du sie im
-                Board als "fertig" und ladest Fotos von deinem Fortschritt hoch.
+                Stricke und hake Challenges ab. Per Klick auf ein Feld markierst du es als erledigt.
+                Per Langklick öffnet sich die Detailansicht, wo du ein Fortschrittsfoto hochladen und
+                mit dem Planungsfoto vergleichen kannst.
               </p>
             </div>
             <div class="phase">
-              <div class="phase-name">3. Archivierung</div>
+              <div class="phase-name">3. Archivieren</div>
               <p>
-                Am Ende des Quartals wird dein Board ins Archiv verschoben. Du kannst deine Erfolge
-                später anschauen und Statistiken einsehen.
+                Nach dem Quartal wird dein Board automatisch ins Archiv verschoben.
               </p>
             </div>
           </div>
@@ -63,36 +69,18 @@ import { PageContainerComponent } from '../../../../shared/ui/templates/page-con
         <section class="section">
           <h2>🎲 Bingo gewinnen</h2>
           <p>
-            Ein <strong>Bingo</strong> entsteht, wenn du 5 Projekte in einer Reihe, Spalte oder Diagonale
-            fertigstellst. Mit jedem abgeschlossenen Projekt kommst du näher zu deinen Bingos!
+            Ein <strong>Bingo</strong> entsteht, wenn du alle 4 Projekte einer vollständigen
+            Reihe, Spalte oder Diagonale abschließt. Es gibt insgesamt <strong>10 mögliche Bingo-Linien</strong>:
+            4 Reihen + 4 Spalten + 2 Diagonalen.
           </p>
-          <p>
-            Das Board ist eine 4×4 Matrix, also gibt es 8 mögliche Bingo-Linien:
-            <strong>4 Reihen + 4 Spalten = 8 Bingos möglich</strong> (bei 5 Feldern pro Linie).
-          </p>
-        </section>
-
-        <section class="section">
-          <h2>🎮 Wie benutzt du die App?</h2>
-          <div class="feature-list">
-            <div class="feature">
-              <strong>Spielen-Modus:</strong> Markiere deine Fortschritte und lade Fotos hoch.
-            </div>
-            <div class="feature">
-              <strong>Planen-Modus:</strong> Arrangiere deine Projekte im Board und passe sie an.
-            </div>
-            <div class="feature">
-              <strong>Archiv:</strong> Schaue dir deine abgeschlossenen Quartale an.
-            </div>
-          </div>
         </section>
 
         <section class="section">
           <h2>💡 Tipps</h2>
           <ul>
-            <li>Nutze die <strong>Vorschau</strong>, um dein Board vor dem Spielstart zu überprüfen.</li>
-            <li>Du kannst deine Projekte jederzeit verschieben und bearbeiten — solange der Quarter aktiv ist.</li>
-            <li>Speichere regelmäßig Fotos deiner Fortschritte, um tolle Erinnerungen festzuhalten.</li>
+            <li>Dein Fortschritt wird <strong>automatisch gespeichert</strong> — kein manuelles Speichern nötig.</li>
+            <li>Fotos sollten <strong>quadratisch</strong> sein — beim Hochladen kannst du den Ausschnitt direkt zuschneiden.</li>
+            <li>Du kannst vergangene und zukünftige Quartale über die Navigationspfeile in der Toolbar aufrufen.</li>
           </ul>
         </section>
 
