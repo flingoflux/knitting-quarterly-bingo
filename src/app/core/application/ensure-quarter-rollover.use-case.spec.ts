@@ -89,8 +89,10 @@ function createService(deps: {
 }
 
 describe('EnsureQuarterRolloverUseCase', () => {
-  it('tut nichts wenn Board fuer aktuelles Quartal schon existiert', () => {
+  it('should tut nichts wenn Board fuer aktuelles Quartal schon existiert', () => {
+    // given
     const boardReader = new MockBoardReader();
+    // when
     boardReader.set('2026-Q2', { quarterId: '2026-Q2', challenges: [] });
     const archiveRepository = new MockArchiveRepository();
     const boardWriter = new MockBoardWriter();
@@ -99,27 +101,32 @@ describe('EnsureQuarterRolloverUseCase', () => {
 
     service.persistQuarterRollover(new Date('2026-05-02T10:00:00.000Z'));
 
+    // then
     expect(archiveRepository.entries).toEqual([]);
     expect(boardWriter.savedPlans).toEqual([]);
     expect(bingoGameRepository.clearCalls).toBe(0);
   });
 
-  it('legt Default-Board an wenn kein Board fuer aktuelles Quartal existiert', () => {
+  it('should legt Default-Board an wenn kein Board fuer aktuelles Quartal existiert', () => {
+    // given
     const boardReader = new MockBoardReader();
     const archiveRepository = new MockArchiveRepository();
     const boardWriter = new MockBoardWriter();
     const bingoGameRepository = new MockBingoGameRepository();
     const service = createService({ boardReader, archiveRepository, boardWriter, bingoGameRepository });
 
+    // when
     service.persistQuarterRollover(new Date('2026-04-21T10:00:00.000Z'));
 
+    // then
     expect(archiveRepository.entries).toEqual([]);
     expect(boardWriter.savedPlans).toHaveLength(1);
     expect(boardWriter.savedPlans[0]?.challenges).toEqual(DEFAULT_CHALLENGES);
     expect(bingoGameRepository.clearCalls).toBe(1);
   });
 
-  it('archiviert aktives spiel und legt neues default-board an', () => {
+  it('should archiviert aktives spiel und legt neues default-board an', () => {
+    // given
     const boardReader = new MockBoardReader();
     const archiveRepository = new MockArchiveRepository();
     const boardWriter = new MockBoardWriter();
@@ -137,8 +144,10 @@ describe('EnsureQuarterRolloverUseCase', () => {
     };
     const service = createService({ boardReader, archiveRepository, boardWriter, bingoGameRepository });
 
+    // when
     service.persistQuarterRollover(new Date('2026-04-01T08:00:00.000Z'));
 
+    // then
     expect(archiveRepository.entries).toHaveLength(1);
     expect(archiveRepository.entries[0]?.quarterId.toString()).toBe('2026-Q1');
     expect(archiveRepository.entries[0]?.hasBingo).toBe(true);
@@ -148,15 +157,18 @@ describe('EnsureQuarterRolloverUseCase', () => {
     expect(boardWriter.savedPlans[0]?.challenges).toEqual(DEFAULT_CHALLENGES);
   });
 
-  it('legt auch ohne aktives spiel ein neues default-board an', () => {
+  it('should legt auch ohne aktives spiel ein neues default-board an', () => {
+    // given
     const boardReader = new MockBoardReader();
     const archiveRepository = new MockArchiveRepository();
     const boardWriter = new MockBoardWriter();
     const bingoGameRepository = new MockBingoGameRepository();
     const service = createService({ boardReader, archiveRepository, boardWriter, bingoGameRepository });
 
+    // when
     service.persistQuarterRollover(new Date('2026-07-01T08:00:00.000Z'));
 
+    // then
     expect(archiveRepository.entries).toEqual([]);
     expect(boardWriter.savedPlans).toHaveLength(1);
     expect(boardWriter.savedPlans[0]?.quarterId).toBe('2026-Q3');

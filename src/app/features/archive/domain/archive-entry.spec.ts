@@ -3,7 +3,8 @@ import { QuarterId } from '../../../core/domain';
 import { createArchiveEntry, sortArchiveEntriesNewestFirst } from './archive-entry';
 
 describe('createArchiveEntry', () => {
-  it('berechnet completedCount und completedChallengeNames', () => {
+  it('should berechnet completedCount und completedChallengeNames', () => {
+    // given
     const entry = createArchiveEntry({
       quarterId: '2026-Q1',
       archivedAt: '2026-04-01T00:00:00.000Z',
@@ -16,14 +17,17 @@ describe('createArchiveEntry', () => {
           { name: 'D', completed: false },
         ],
       },
+    // when
     });
 
+    // then
     expect(entry.completedCount).toBe(2);
     expect(entry.totalCount).toBe(4);
     expect(entry.completedChallengeNames).toEqual(['A', 'C']);
   });
 
-  it('setzt hasBingo auf true bei kompletter Reihe', () => {
+  it('should setzt hasBingo auf true bei kompletter Reihe', () => {
+    // given
     const entry = createArchiveEntry({
       quarterId: '2026-Q1',
       game: {
@@ -35,12 +39,15 @@ describe('createArchiveEntry', () => {
           { name: '4', completed: true },
         ],
       },
+    // when
     });
 
+    // then
     expect(entry.hasBingo).toBe(true);
   });
 
-  it('setzt hasBingo auf false wenn keine komplette Linie vorliegt', () => {
+  it('should setzt hasBingo auf false wenn keine komplette Linie vorliegt', () => {
+    // given
     const entry = createArchiveEntry({
       quarterId: '2026-Q1',
       game: {
@@ -52,12 +59,15 @@ describe('createArchiveEntry', () => {
           { name: '4', completed: false },
         ],
       },
+    // when
     });
 
+    // then
     expect(entry.hasBingo).toBe(false);
   });
 
-  it('verwendet provided archivedAt', () => {
+  it('should verwendet provided archivedAt', () => {
+    // given
     const entry = createArchiveEntry({
       quarterId: '2026-Q1',
       archivedAt: '2026-04-01T00:00:00.000Z',
@@ -70,14 +80,17 @@ describe('createArchiveEntry', () => {
           { name: 'D', completed: false },
         ],
       },
+    // when
     });
 
+    // then
     expect(entry.archivedAt).toBe('2026-04-01T00:00:00.000Z');
   });
 });
 
 describe('sortArchiveEntriesNewestFirst', () => {
-  it('sortiert nach archivedAt absteigend', () => {
+  it('should sortiert nach archivedAt absteigend', () => {
+    // given
     const sorted = sortArchiveEntriesNewestFirst([
       {
         quarterId: QuarterId.parse('2025-Q4'),
@@ -101,8 +114,10 @@ describe('sortArchiveEntriesNewestFirst', () => {
         completed: [],
         bingoCells: [],
       },
+    // when
     ]);
 
+    // then
     expect(sorted.map(entry => entry.quarterId.toString())).toEqual(['2026-Q1', '2025-Q4']);
   });
 });

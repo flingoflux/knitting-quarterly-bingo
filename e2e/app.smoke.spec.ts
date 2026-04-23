@@ -38,9 +38,12 @@ function previousQuarterId(quarterId: string): string {
   return `${year}-Q${quarter - 1}`;
 }
 
-test('Startseite zeigt Kernaktionen', async ({ page }) => {
+test('should Startseite zeigt Kernaktionen', async ({ page }) => {
+  // given
+  // when
   await page.goto('/');
 
+  // then
   await expect(page.getByTestId('page-start-root')).toBeVisible();
   await expect(page.getByTestId('page-start-logo')).toBeVisible();
   await expect(page.getByTestId('action-start-play')).toBeVisible();
@@ -48,38 +51,50 @@ test('Startseite zeigt Kernaktionen', async ({ page }) => {
   await expect(page.getByTestId('action-start-open-archive')).toBeVisible();
 });
 
-test('Spielen fuehrt in die aktuelle Quartalsansicht', async ({ page }) => {
+test('should Spielen fuehrt in die aktuelle Quartalsansicht', async ({ page }) => {
+  // given
+  // when
   await page.goto('/');
 
   await page.getByTestId('action-start-play').click();
 
+  // then
   await expect(page).toHaveURL(/\/quarterly\?quarter=\d{4}-Q[1-4]/);
   await expect(page.getByTestId('page-bingo-title')).toBeVisible();
 });
 
-test('Planen fuehrt in die Edit-Ansicht', async ({ page }) => {
+test('should Planen fuehrt in die Edit-Ansicht', async ({ page }) => {
+  // given
+  // when
   await page.goto('/');
 
   await page.getByTestId('action-start-plan').click();
 
+  // then
   await expect(page).toHaveURL(/\/quarterly\?quarter=\d{4}-Q[1-4]/);
   await expect(page.getByTestId('page-quarterly-plan-title')).toBeVisible();
 });
 
-test('Vergangenes Quartal leitet ins Archiv um', async ({ page }) => {
+test('should Vergangenes Quartal leitet ins Archiv um', async ({ page }) => {
+  // given
   const current = currentQuarterId();
   const pastQuarter = previousQuarterId(current);
 
+  // when
   await page.goto(`/quarterly?quarter=${pastQuarter}`);
 
+  // then
   await expect(page).toHaveURL(/\/archive/);
   await expect(page.getByTestId('page-archive-title')).toBeVisible();
 });
 
-test('Quarter-Navigation wechselt zwischen Play und Plan', async ({ page }) => {
+test('should Quarter-Navigation wechselt zwischen Play und Plan', async ({ page }) => {
+  // given
+  // when
   await page.goto('/');
 
   await page.getByTestId('action-start-play').click();
+  // then
   await expect(page.getByTestId('page-bingo-title')).toBeVisible();
 
   await page.getByTestId('action-toolbar-quarter-next').click();
@@ -90,11 +105,14 @@ test('Quarter-Navigation wechselt zwischen Play und Plan', async ({ page }) => {
   await expect(page.getByTestId('page-bingo-title')).toBeVisible();
 });
 
-test('Help und Home funktionieren ueber die Toolbar', async ({ page }) => {
+test('should Help und Home funktionieren ueber die Toolbar', async ({ page }) => {
+  // given
+  // when
   await page.goto('/');
 
   await page.getByTestId('action-start-play').click();
   await page.getByTestId('action-toolbar-help').click();
+  // then
   await expect(page.getByTestId('page-howto-title')).toBeVisible();
 
   await page.getByTestId('action-toolbar-home').click();

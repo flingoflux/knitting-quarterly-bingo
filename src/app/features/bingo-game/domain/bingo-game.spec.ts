@@ -15,31 +15,38 @@ function makeCells(length = 16, imageIds?: (string | undefined)[]) {
 }
 
 describe('BingoGame.fromDefinition', () => {
-  it('überträgt imageId als planningImageId', () => {
+  it('should überträgt imageId als planningImageId', () => {
+    // given
     const cells = makeCells(16, ['img-0', undefined, 'img-2']);
 
     const game = BingoGame.fromDefinition('2026-Q2', cells);
 
+    // when + then
     expect(game.challenges[0].planningImageId).toBe('img-0');
     expect(game.challenges[1].planningImageId).toBeUndefined();
     expect(game.challenges[2].planningImageId).toBe('img-2');
   });
 
-  it('setzt progressImageId initial auf undefined', () => {
+  it('should setzt progressImageId initial auf undefined', () => {
+    // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16, ['img-0']));
 
+    // when + then
     expect(game.challenges[0].progressImageId).toBeUndefined();
   });
 
-  it('startet mit allen Challenges nicht abgeschlossen', () => {
+  it('should startet mit allen Challenges nicht abgeschlossen', () => {
+    // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
+    // when + then
     expect(game.completed.every(c => !c)).toBe(true);
   });
 });
 
 describe('BingoGame.restore', () => {
-  it('übernimmt planningImageId aus gespeichertem Fortschritt', () => {
+  it('should übernimmt planningImageId aus gespeichertem Fortschritt', () => {
+    // given
     const cells = makeCells(16);
     const saved = {
       quarterId: '2026-Q2',
@@ -55,10 +62,12 @@ describe('BingoGame.restore', () => {
 
     const game = BingoGame.restore(cells, saved);
 
+    // when + then
     expect(game.challenges[0].planningImageId).toBe('saved-planning-img');
   });
 
-  it('fällt auf cells[i].imageId zurück wenn planningImageId im Fortschritt fehlt', () => {
+  it('should fällt auf cells[i].imageId zurück wenn planningImageId im Fortschritt fehlt', () => {
+    // given
     const cells = makeCells(16, ['definition-img']);
     const saved = {
       quarterId: '2026-Q2',
@@ -74,10 +83,12 @@ describe('BingoGame.restore', () => {
 
     const game = BingoGame.restore(cells, saved);
 
+    // when + then
     expect(game.challenges[0].planningImageId).toBe('definition-img');
   });
 
-  it('behält progressImageId aus gespeichertem Fortschritt', () => {
+  it('should behält progressImageId aus gespeichertem Fortschritt', () => {
+    // given
     const cells = makeCells(16);
     const saved = {
       quarterId: '2026-Q2',
@@ -93,11 +104,13 @@ describe('BingoGame.restore', () => {
 
     const game = BingoGame.restore(cells, saved);
 
+    // when + then
     expect(game.challenges[0].progressImageId).toBe('progress-photo');
     expect(game.challenges[1].progressImageId).toBeUndefined();
   });
 
-  it('startet neu wenn Signatur nicht passt', () => {
+  it('should startet neu wenn Signatur nicht passt', () => {
+    // given
     const cells = makeCells(16);
     const saved = {
       quarterId: '2026-Q2',
@@ -113,47 +126,57 @@ describe('BingoGame.restore', () => {
 
     const game = BingoGame.restore(cells, saved);
 
+    // when + then
     expect(game.completed.every(c => !c)).toBe(true);
   });
 });
 
 describe('BingoGame.toggle', () => {
-  it('setzt Challenge auf abgeschlossen', () => {
+  it('should setzt Challenge auf abgeschlossen', () => {
+    // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     const toggled = game.toggle(0);
 
+    // when + then
     expect(toggled.completed[0]).toBe(true);
   });
 
-  it('zweimaliges Togglen kehrt Zustand zurück', () => {
+  it('should zweimaliges Togglen kehrt Zustand zurück', () => {
+    // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     const result = game.toggle(0).toggle(0);
 
+    // when + then
     expect(result.completed[0]).toBe(false);
   });
 
-  it('lässt andere Challenges unberührt', () => {
+  it('should lässt andere Challenges unberührt', () => {
+    // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     const toggled = game.toggle(5);
 
+    // when + then
     expect(toggled.completed[4]).toBe(false);
     expect(toggled.completed[6]).toBe(false);
   });
 
-  it('ignoriert ungültigen Index', () => {
+  it('should ignoriert ungültigen Index', () => {
+    // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     const result = game.toggle(99);
 
+    // when + then
     expect(result.completed).toEqual(game.completed);
   });
 });
 
 describe('BingoGame.resetProgress', () => {
-  it('setzt alle abgeschlossenen Challenges zurück', () => {
+  it('should setzt alle abgeschlossenen Challenges zurück', () => {
+    // given
     const cells = makeCells(16);
     const saved = {
       quarterId: '2026-Q2',
@@ -170,10 +193,12 @@ describe('BingoGame.resetProgress', () => {
 
     const reset = game.resetProgress();
 
+    // when + then
     expect(reset.completed.every(c => !c)).toBe(true);
   });
 
-  it('behält planningImageId und progressImageId nach Reset', () => {
+  it('should behält planningImageId und progressImageId nach Reset', () => {
+    // given
     const cells = makeCells(16, ['plan-img']);
     const saved = {
       quarterId: '2026-Q2',
@@ -190,29 +215,35 @@ describe('BingoGame.resetProgress', () => {
 
     const reset = game.resetProgress();
 
+    // when + then
     expect(reset.challenges[0].planningImageId).toBe('plan-img');
     expect(reset.challenges[0].progressImageId).toBe('progress-img');
   });
 });
 
 describe('BingoGame.updateProgressImage', () => {
-  it('setzt progressImageId für die Challenge', () => {
+  it('should setzt progressImageId für die Challenge', () => {
+    // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     const updated = game.updateProgressImage(0, 'new-photo');
 
+    // when + then
     expect(updated.challenges[0].progressImageId).toBe('new-photo');
   });
 
-  it('berührt planningImageId nicht', () => {
+  it('should berührt planningImageId nicht', () => {
+    // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16, ['plan-img']));
 
     const updated = game.updateProgressImage(0, 'new-photo');
 
+    // when + then
     expect(updated.challenges[0].planningImageId).toBe('plan-img');
   });
 
-  it('kann progressImageId auf undefined setzen', () => {
+  it('should kann progressImageId auf undefined setzen', () => {
+    // given
     const cells = makeCells(16);
     const saved = {
       quarterId: '2026-Q2',
@@ -229,14 +260,17 @@ describe('BingoGame.updateProgressImage', () => {
 
     const updated = game.updateProgressImage(0, undefined);
 
+    // when + then
     expect(updated.challenges[0].progressImageId).toBeUndefined();
   });
 
-  it('ignoriert ungültigen Index', () => {
+  it('should ignoriert ungültigen Index', () => {
+    // given
     const game = BingoGame.fromDefinition('2026-Q2', makeCells(16));
 
     const result = game.updateProgressImage(99, 'photo');
 
+    // when + then
     expect(result.challenges).toEqual(game.challenges);
   });
 });
@@ -262,48 +296,60 @@ describe('BingoGame.bingoCells', () => {
     return BingoGame.restore(cells, saved);
   }
 
-  it('liefert leeres Set ohne Bingo', () => {
+  it('should liefert leeres Set ohne Bingo', () => {
+    // given
     const game = gameWithCompleted([0, 1, 2]);
 
+    // when + then
     expect(game.bingoCells.size).toBe(0);
   });
 
-  it('erkennt Bingo in der ersten Spalte', () => {
+  it('should erkennt Bingo in der ersten Spalte', () => {
+    // given
     // Spalte 0: Indices 0, 4, 8, 12
     const game = gameWithCompleted([0, 4, 8, 12]);
 
+    // when + then
     expect([0, 4, 8, 12].every(i => game.bingoCells.has(i))).toBe(true);
     expect(game.bingoCells.has(1)).toBe(false);
   });
 
-  it('erkennt Bingo in der zweiten Zeile', () => {
+  it('should erkennt Bingo in der zweiten Zeile', () => {
+    // given
     // Zeile 1: Indices 4, 5, 6, 7
     const game = gameWithCompleted([4, 5, 6, 7]);
 
+    // when + then
     expect([4, 5, 6, 7].every(i => game.bingoCells.has(i))).toBe(true);
     expect(game.bingoCells.has(0)).toBe(false);
   });
 
-  it('erkennt Bingo auf der Hauptdiagonale', () => {
+  it('should erkennt Bingo auf der Hauptdiagonale', () => {
+    // given
     // Hauptdiagonale: 0, 5, 10, 15
     const game = gameWithCompleted([0, 5, 10, 15]);
 
+    // when + then
     expect([0, 5, 10, 15].every(i => game.bingoCells.has(i))).toBe(true);
     expect(game.bingoCells.has(1)).toBe(false);
   });
 
-  it('erkennt Bingo auf der Nebendiagonale', () => {
+  it('should erkennt Bingo auf der Nebendiagonale', () => {
+    // given
     // Nebendiagonale: 3, 6, 9, 12
     const game = gameWithCompleted([3, 6, 9, 12]);
 
+    // when + then
     expect([3, 6, 9, 12].every(i => game.bingoCells.has(i))).toBe(true);
     expect(game.bingoCells.has(0)).toBe(false);
   });
 
-  it('enthält Indices aus mehreren Bingo-Linien', () => {
+  it('should enthält Indices aus mehreren Bingo-Linien', () => {
+    // given
     // Zeile 0 + Spalte 0 → Index 0 ist in beiden
     const game = gameWithCompleted([0, 1, 2, 3, 4, 8, 12]);
 
+    // when + then
     expect([0, 1, 2, 3].every(i => game.bingoCells.has(i))).toBe(true);
     expect([0, 4, 8, 12].every(i => game.bingoCells.has(i))).toBe(true);
   });

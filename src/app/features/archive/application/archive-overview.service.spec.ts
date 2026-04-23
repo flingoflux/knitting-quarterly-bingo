@@ -44,7 +44,8 @@ function createUseCase(repository: MockArchiveRepository): ShowArchiveOverviewUs
 }
 
 describe('ShowArchiveOverviewUseCase', () => {
-  it('laedt Eintraege initial sortiert neu nach alt', () => {
+  it('should laedt Eintraege initial sortiert neu nach alt', () => {
+    // given
     const repository = new MockArchiveRepository();
     repository.entries = [
       createEntry('2025-Q4', '2026-01-01T00:00:00.000Z'),
@@ -53,21 +54,25 @@ describe('ShowArchiveOverviewUseCase', () => {
 
     const useCase = createUseCase(repository);
 
+    // when + then
     expect(useCase.entries().map(entry => entry.quarterId.toString())).toEqual(['2026-Q1', '2025-Q4']);
     expect(useCase.hasEntries()).toBe(true);
   });
 
-  it('meldet leeres Archiv korrekt', () => {
+  it('should meldet leeres Archiv korrekt', () => {
+    // given
     const repository = new MockArchiveRepository();
 
     const useCase = createUseCase(repository);
 
+    // when + then
     expect(useCase.entries()).toEqual(DEFAULT_ARCHIVE_ENTRIES);
     expect(useCase.hasEntries()).toBe(true);
     expect(useCase.isShowingPrototype()).toBe(true);
   });
 
-  it('reload liest den aktuellen Repository-Stand neu ein', () => {
+  it('should reload liest den aktuellen Repository-Stand neu ein', () => {
+    // given
     const repository = new MockArchiveRepository();
     repository.entries = [createEntry('2025-Q4', '2026-01-01T00:00:00.000Z')];
     const useCase = createUseCase(repository);
@@ -76,8 +81,10 @@ describe('ShowArchiveOverviewUseCase', () => {
       createEntry('2026-Q1', '2026-04-01T00:00:00.000Z'),
       createEntry('2025-Q4', '2026-01-01T00:00:00.000Z'),
     ];
+    // when
     useCase.reload();
 
+    // then
     expect(useCase.entries().map(entry => entry.quarterId.toString())).toEqual(['2026-Q1', '2025-Q4']);
     expect(useCase.isShowingPrototype()).toBe(false);
   });

@@ -88,29 +88,34 @@ function createService(
 }
 
 describe('PlayBingoUseCase', () => {
-  it('hat kein spielbares Board ohne Definition', () => {
+  it('should hat kein spielbares Board ohne Definition', () => {
+    // given
     const boardRepo = new MockBoardDefinitionRepository();
     const bingoRepo = new MockBingoGameRepository();
 
     const service = createService(boardRepo, bingoRepo);
 
+    // when + then
     expect(service.isQuarterPlayable('2026-Q2', false)).toBe(false);
     expect(service.challenges()).toHaveLength(0);
   });
 
-  it('laedt Board-Definition beim Start', () => {
+  it('should laedt Board-Definition beim Start', () => {
+    // given
     const boardRepo = new MockBoardDefinitionRepository();
     boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges: createChallenges(16) };
     const bingoRepo = new MockBingoGameRepository();
 
     const service = createService(boardRepo, bingoRepo);
 
+    // when + then
     expect(service.challenges()).toHaveLength(16);
     expect(service.completed()).toHaveLength(16);
     expect(service.completed().every(d => !d)).toBe(true);
   });
 
-  it('laedt persistierten Spielfortschritt bei passender Signatur', () => {
+  it('should laedt persistierten Spielfortschritt bei passender Signatur', () => {
+    // given
     const challenges = createChallenges(16);
     const boardRepo = new MockBoardDefinitionRepository();
     boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges };
@@ -125,11 +130,13 @@ describe('PlayBingoUseCase', () => {
 
     const service = createService(boardRepo, bingoRepo);
 
+    // when + then
     expect(service.completed()[0]).toBe(true);
     expect(service.completed()[1]).toBe(false);
   });
 
-  it('setzt Fortschritt zurück bei geänderter Board-Signatur', () => {
+  it('should setzt Fortschritt zurück bei geänderter Board-Signatur', () => {
+    // given
     const boardRepo = new MockBoardDefinitionRepository();
     boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges: createChallenges(16) };
     const bingoRepo = new MockBingoGameRepository();
@@ -142,23 +149,28 @@ describe('PlayBingoUseCase', () => {
 
     const service = createService(boardRepo, bingoRepo);
 
+    // when + then
     expect(service.completed().every(d => !d)).toBe(true);
   });
 
-  it('toggled ein Feld und persistiert', () => {
+  it('should toggled ein Feld und persistiert', () => {
+    // given
     const challenges = createChallenges(16);
     const boardRepo = new MockBoardDefinitionRepository();
     boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges };
     const bingoRepo = new MockBingoGameRepository();
 
     const service = createService(boardRepo, bingoRepo);
+    // when
     service.persistToggledChallenge(0);
 
+    // then
     expect(service.completed()[0]).toBe(true);
     expect(bingoRepo.lastSavedProgress?.challenges[0].completed).toBe(true);
   });
 
-  it('erkennt Bingo in der ersten Zeile', () => {
+  it('should erkennt Bingo in der ersten Zeile', () => {
+    // given
     const challenges = createChallenges(16);
     const boardRepo = new MockBoardDefinitionRepository();
     boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges };
@@ -178,12 +190,14 @@ describe('PlayBingoUseCase', () => {
 
     const service = createService(boardRepo, bingoRepo);
 
+    // when + then
     expect(service.bingoCells().has(0)).toBe(true);
     expect(service.bingoCells().has(3)).toBe(true);
     expect(service.bingoCells().has(4)).toBe(false);
   });
 
-  it('speichert progressImageId und behält planningImageId', () => {
+  it('should speichert progressImageId und behält planningImageId', () => {
+    // given
     const challenges = createChallenges(16);
     const challengesWithImage = challenges.map((c, i) => ({ ...c, imageId: i === 0 ? 'plan-img' : undefined }));
     const boardRepo = new MockBoardDefinitionRepository();
@@ -191,14 +205,17 @@ describe('PlayBingoUseCase', () => {
     const bingoRepo = new MockBingoGameRepository();
 
     const service = createService(boardRepo, bingoRepo);
+    // when
     service.persistProgressImage(0, 'progress-photo');
 
+    // then
     expect(service.challenges()[0].progressImageId).toBe('progress-photo');
     expect(service.challenges()[0].planningImageId).toBe('plan-img');
     expect(bingoRepo.lastSavedProgress?.challenges[0].progressImageId).toBe('progress-photo');
   });
 
-  it('setzt alle Challenges bei resetProgress zurück', () => {
+  it('should setzt alle Challenges bei resetProgress zurück', () => {
+    // given
     const challenges = createChallenges(16);
     const boardRepo = new MockBoardDefinitionRepository();
     boardRepo.loadedDefinition = { quarterId: '2026-Q2', challenges };
@@ -212,8 +229,10 @@ describe('PlayBingoUseCase', () => {
     };
 
     const service = createService(boardRepo, bingoRepo);
+    // when
     service.persistResetProgress();
 
+    // then
     expect(service.completed().every(c => !c)).toBe(true);
     expect(bingoRepo.lastSavedProgress?.challenges.every(c => !c.completed)).toBe(true);
   });

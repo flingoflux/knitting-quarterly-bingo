@@ -57,54 +57,67 @@ function createUseCase(repository: MockQuarterlyPlanRepository): PlanQuarterlyUs
 }
 
 describe('PlanQuarterlyUseCase', () => {
-  it('initialisiert Defaults wenn kein persistiertes Board vorhanden ist', () => {
+  it('should initialize defaults when no persisted board exists', () => {
+    // given
     const repository = new MockQuarterlyPlanRepository();
 
     const useCase = createUseCase(repository);
 
+    // when + then
     expect(useCase.challenges()).toEqual(DEFAULT_CHALLENGES);
     expect(repository.lastSavedPlan?.challenges).toEqual(DEFAULT_CHALLENGES);
   });
 
-  it('laedt persistierte Definition beim Start', () => {
+  it('should load persisted definition on startup', () => {
+    // given
     const repository = new MockQuarterlyPlanRepository();
     repository.loadedPlan = { quarterId: '2026-Q2', challenges: createChallenges(4) };
 
     const useCase = createUseCase(repository);
 
+    // when + then
     expect(useCase.challenges()).toHaveLength(4);
     expect(useCase.challenges()[0].name).toBe('Challenge 0');
   });
 
-  it('tauscht Challenges und persistiert das Ergebnis', () => {
+  it('should swap challenges and persist the result', () => {
+    // given
     const repository = new MockQuarterlyPlanRepository();
     repository.loadedPlan = { quarterId: '2026-Q2', challenges: createChallenges(4) };
     const useCase = createUseCase(repository);
 
+    // when
     useCase.persistSwappedChallenges(0, 3);
 
+    // then
     expect(useCase.challenges()[0].name).toBe('Challenge 3');
     expect(useCase.challenges()[3].name).toBe('Challenge 0');
     expect(repository.lastSavedPlan?.challenges[0].name).toBe('Challenge 3');
   });
 
-  it('aktualisiert eine einzelne Challenge', () => {
+  it('should update a single challenge', () => {
+    // given
     const repository = new MockQuarterlyPlanRepository();
     repository.loadedPlan = { quarterId: '2026-Q2', challenges: createChallenges(4) };
     const useCase = createUseCase(repository);
 
+    // when
     useCase.persistUpdatedChallenge(1, { name: 'Updated' });
 
+    // then
     expect(useCase.challenges()[1].name).toBe('Updated');
   });
 
-  it('setzt das Board auf Defaults zurueck', () => {
+  it('should reset board to defaults', () => {
+    // given
     const repository = new MockQuarterlyPlanRepository();
     repository.loadedPlan = { quarterId: '2026-Q2', challenges: createChallenges(4) };
     const useCase = createUseCase(repository);
 
+    // when
     useCase.persistDefaultQuarterlyPlan();
 
+    // then
     expect(useCase.challenges()).toEqual(DEFAULT_CHALLENGES);
   });
 });
