@@ -2,7 +2,7 @@ import { Component, ViewChild, inject, OnInit, signal, computed, DestroyRef } fr
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { QuarterlyPlanService } from '../application/quarterly-plan.service';
+import { PLAN_QUARTERLY_IN_PORT } from '../application/ports/in/plan-quarterly.in-port';
 import { EditableBoardComponent } from './components/editable-board.component';
 import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-detail-dialog.component';
 import { shuffleArray } from '../../../shared/utils/array-utils';
@@ -125,7 +125,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 export class QuarterlyPlanComponent implements OnInit {
   @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
   @ViewChild('editableBoard') private readonly editableBoardRef!: EditableBoardComponent;
-  state = inject(QuarterlyPlanService);
+  state = inject(PLAN_QUARTERLY_IN_PORT);
   router = inject(Router);
   route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -182,11 +182,11 @@ export class QuarterlyPlanComponent implements OnInit {
   shuffle() {
     const challenges = this.challenges;
     const shuffled = shuffleArray(challenges);
-    this.state.setChallenges(shuffled as Challenge[]);
+    this.state.persistChallenges(shuffled as Challenge[]);
   }
 
   resetToDefaultBoard() {
-    this.state.resetToDefaultChallengesWithoutImages();
+    this.state.persistDefaultChallengesWithoutImages();
   }
 
   onDragStart(i: number) {
@@ -206,14 +206,14 @@ export class QuarterlyPlanComponent implements OnInit {
 
   onDrop(i: number) {
     if (this.dragStartIndex !== null && this.dragStartIndex !== i) {
-      this.state.swapChallenges(this.dragStartIndex, i);
+      this.state.persistSwappedChallenges(this.dragStartIndex, i);
     }
     this.dragStartIndex = null;
     this.dragTargetIndex = null;
   }
 
   onChallengeEdited(event: { index: number; challenge: Challenge }) {
-    this.state.updateChallenge(event.index, event.challenge);
+    this.state.persistUpdatedChallenge(event.index, event.challenge);
   }
 
   onCardDetailOpen(event: { index: number; challenge: Challenge }) {
@@ -225,7 +225,7 @@ export class QuarterlyPlanComponent implements OnInit {
     if (this._openCardIndex === null) return;
     const challenge = this.state.challenges()[this._openCardIndex];
     if (challenge && challenge.imageId !== event.imageId) {
-      this.state.updateChallenge(this._openCardIndex, { ...challenge, imageId: event.imageId ?? undefined });
+      this.state.persistUpdatedChallenge(this._openCardIndex, { ...challenge, imageId: event.imageId ?? undefined });
     }
     void this.editableBoardRef.refreshImage(event.imageId);
   }

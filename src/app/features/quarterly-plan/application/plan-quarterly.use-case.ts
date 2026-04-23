@@ -1,30 +1,33 @@
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { QuarterClock, QuarterId } from '../../../core/domain';
 import { Challenge } from '../../../shared/domain/challenge';
 import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
-import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from '../domain/quarterly-plan.repository';
 import { QuarterlyPlan } from '../domain/quarterly-plan';
-import { QuarterClock, QuarterId } from '../../../core/domain';
+import { PlanQuarterlyInPort } from './ports/in/plan-quarterly.in-port';
+import { LOAD_QUARTERLY_PLAN_OUT_PORT } from './ports/out/load-quarterly-plan.out-port';
+import { PERSIST_QUARTERLY_PLAN_OUT_PORT } from './ports/out/persist-quarterly-plan.out-port';
 
 @Injectable()
-export class QuarterlyPlanService {
+export class PlanQuarterlyUseCase implements PlanQuarterlyInPort {
   private readonly quarterClock = new QuarterClock();
   private readonly activeQuarterId = signal(QuarterId.parse(this.quarterClock.getQuarterId(new Date())));
   private readonly planState = signal<QuarterlyPlan>(QuarterlyPlan.createDefault(this.activeQuarterId()));
   private readonly previewMode = signal(false);
+
   readonly challenges: Signal<Challenge[]> = computed(() => this.planState().challenges as Challenge[]);
   readonly isPreviewMode = computed(() => this.previewMode());
 
-  private readonly reader = inject(QUARTERLY_PLAN_READER);
-  private readonly writer = inject(QUARTERLY_PLAN_WRITER);
+  private readonly loader = inject(LOAD_QUARTERLY_PLAN_OUT_PORT);
+  private readonly persister = inject(PERSIST_QUARTERLY_PLAN_OUT_PORT);
 
   constructor() {
-    const result = this.reader.load(this.activeQuarterId());
+    const result = this.loader.load(this.activeQuarterId());
     if (result.ok && result.value.challenges.length > 0) {
       this.planState.set(QuarterlyPlan.fromChallenges(result.value.challenges, result.value.quarterId));
       return;
     }
 
-    this.resetPlan();
+    this.persistDefaultQuarterlyPlan();
   }
 
   setPreviewMode(enabled: boolean, quarterId?: QuarterId | string): void {
@@ -32,7 +35,7 @@ export class QuarterlyPlanService {
     this.previewMode.set(enabled);
     this.activeQuarterId.set(resolvedQuarterId);
 
-    const result = this.reader.load(this.activeQuarterId());
+    const result = this.loader.load(this.activeQuarterId());
     if (result.ok && result.value.challenges.length > 0) {
       this.planState.set(QuarterlyPlan.fromChallenges(result.value.challenges, result.value.quarterId));
       return;
@@ -43,40 +46,41 @@ export class QuarterlyPlanService {
       return;
     }
 
-    this.resetPlan();
+    this.persistDefaultQuarterlyPlan();
   }
 
-  resetPlan(): void {
+  persistDefaultQuarterlyPlan(): void {
     this.planState.set(QuarterlyPlan.createDefault(this.activeQuarterId()));
-    this.persist();
+    this.persistQuarterlyPlan();
   }
 
-  setChallenges(challenges: Challenge[]): void {
+  persistChallenges(challenges: Challenge[]): void {
     this.planState.set(QuarterlyPlan.fromChallenges(challenges, this.planState().quarterId));
-    this.persist();
+    this.persistQuarterlyPlan();
   }
 
-  swapChallenges(startIndex: number, targetIndex: number): void {
+  persistSwappedChallenges(startIndex: number, targetIndex: number): void {
     this.planState.set(this.planState().reorder(startIndex, targetIndex));
-    this.persist();
+    this.persistQuarterlyPlan();
   }
 
-  updateChallenge(index: number, challenge: Challenge): void {
+  persistUpdatedChallenge(index: number, challenge: Challenge): void {
     this.planState.set(this.planState().update(index, challenge));
-    this.persist();
+    this.persistQuarterlyPlan();
   }
 
-  resetToDefaultChallengesWithoutImages(): void {
+  persistDefaultChallengesWithoutImages(): void {
     const defaultChallenges = DEFAULT_CHALLENGES.map(challenge => ({ name: challenge.name }));
     this.planState.set(QuarterlyPlan.fromChallenges(defaultChallenges, this.planState().quarterId));
-    this.persist();
+    this.persistQuarterlyPlan();
   }
 
-  private persist(): void {
+  private persistQuarterlyPlan(): void {
     if (this.previewMode()) {
-      return; // Keine Persistierung im Vorschau-Modus
+      return;
     }
-    this.writer.save(this.activeQuarterId(), {
+
+    this.persister.persist(this.activeQuarterId(), {
       ...this.planState().toPersistable(),
     });
   }
