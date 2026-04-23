@@ -49,6 +49,18 @@ Unit-Tests werden mit [Vitest](https://vitest.dev/) ausgeführt:
 pnpm test
 ```
 
+E2E-Tests werden mit [Playwright](https://playwright.dev/) ausgeführt:
+
+```sh
+pnpm test:e2e
+```
+
+Interaktive E2E-Ausführung:
+
+```sh
+pnpm test:e2e:ui
+```
+
 Ein Beispieltest für den BingoService ist enthalten. Weitere Tests können in `src/**/*.spec.ts` ergänzt werden.
 
 ## Codequalität

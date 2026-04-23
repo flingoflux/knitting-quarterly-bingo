@@ -68,3 +68,8 @@ Thumbs.db
 # Temporäre Dateien
 *.tmp
 *.temp
+
+# Playwright
+playwright-report/
+test-results/
+blob-report/
