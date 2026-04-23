@@ -1,14 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
 import { PageToolbarComponent } from '../../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 import { PageContainerComponent } from '../../../../shared/ui/templates/page-container/page-container.component';
 
 @Component({
   selector: 'app-how-to',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, PageToolbarComponent, PageContainerComponent],
+  imports: [PageToolbarComponent, PageContainerComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -211,9 +209,7 @@ import { PageContainerComponent } from '../../../../shared/ui/templates/page-con
     }
 
     .cta {
-      margin-top: 2rem;
-      display: flex;
-      justify-content: center;
+      display: none;
     }
 
     @media (max-width: 640px) {
