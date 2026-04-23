@@ -39,9 +39,10 @@ export type KqCardMode = 'polaroid' | 'horizontal';
           [src]="imageUrl"
           class="card__img"
           [alt]="name"
+          draggable="false"
         />
         <div *ngIf="!imageUrl" class="card__placeholder">
-          <img src="assets/logo_plain.svg" class="card__logo-placeholder" alt="" />
+          <img src="assets/logo_plain.svg" class="card__logo-placeholder" alt="" draggable="false" />
         </div>
 
         <kq-badge *ngIf="done" variant="done" [compact]="mode === 'horizontal'"/>
@@ -107,6 +108,8 @@ export type KqCardMode = 'polaroid' | 'horizontal';
       height: 100%;
       object-fit: cover;
       display: block;
+      -webkit-user-drag: none;
+      user-select: none;
     }
     .card__placeholder {
       width: 100%;
@@ -120,6 +123,8 @@ export type KqCardMode = 'polaroid' | 'horizontal';
       width: 58px;
       height: 58px;
       object-fit: contain;
+      -webkit-user-drag: none;
+      user-select: none;
       filter: brightness(0) saturate(100%) invert(73%) sepia(28%) saturate(500%)
               hue-rotate(355deg) brightness(94%) contrast(88%) opacity(0.45);
     }
