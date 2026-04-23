@@ -84,11 +84,6 @@ import { PageContainerComponent } from '../../../../shared/ui/templates/page-con
           </ul>
         </section>
 
-        <div class="cta">
-          <kq-button variant="primary" (click)="goHome()">
-            Zurück zur Startseite
-          </kq-button>
-        </div>
       </div>
     </div>
     </kq-page-container>
@@ -103,6 +98,7 @@ import { PageContainerComponent } from '../../../../shared/ui/templates/page-con
 
     .how-it-works-header {
       margin-bottom: 2rem;
+      text-align: center;
     }
 
     .eyebrow {
