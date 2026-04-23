@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
 import { BINGO_GAME_REPOSITORY } from '../../../../features/bingo-game/domain/bingo-game.repository';
-import { QuarterRolloverOrchestratorService } from '../../../../core/application/quarter-rollover-orchestrator.service';
+import { ENSURE_QUARTER_ROLLOVER_IN_PORT } from '../../../../core/application/ports/in/ensure-quarter-rollover.in-port';
 import { QuarterClock, QuarterId } from '../../../../core/domain';
 
 @Component({
@@ -161,7 +161,7 @@ import { QuarterClock, QuarterId } from '../../../../core/domain';
 })
 export class StartPageComponent {
   private readonly bingoGameRepository = inject(BINGO_GAME_REPOSITORY);
-  private readonly quarterRolloverOrchestrator = inject(QuarterRolloverOrchestratorService);
+  private readonly quarterRollover = inject(ENSURE_QUARTER_ROLLOVER_IN_PORT);
   private readonly quarterClock = new QuarterClock();
 
   readonly daysUntilNextQuarterly = this.getDaysUntilNextQuarterly(new Date());
@@ -172,7 +172,7 @@ export class StartPageComponent {
   );
 
   constructor(private router: Router) {
-    this.quarterRolloverOrchestrator.ensureCurrentQuarter();
+    this.quarterRollover.persistQuarterRollover();
   }
 
   goToEdit() {

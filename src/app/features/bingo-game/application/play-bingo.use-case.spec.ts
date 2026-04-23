@@ -3,11 +3,12 @@ import { Injector, runInInjectionContext } from '@angular/core';
 import { Challenge } from '../../../shared/domain/challenge';
 import { Result } from '../../../shared/domain/result';
 import { PersistedQuarterlyPlan } from '../../quarterly-plan/infrastructure/local-storage-quarterly-plan.repository';
-import { QUARTERLY_PLAN_READER } from '../../quarterly-plan/domain/quarterly-plan.repository';
-import { BingoGameService } from './bingo-game.service';
-import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
+import { PlayBingoUseCase } from './play-bingo.use-case';
 import { BingoGameProgress, ChallengeProgress, createPlanSignature } from '../domain/bingo-game';
 import { QuarterId } from '../../../core/domain';
+import { LOAD_QUARTERLY_PLAN_OUT_PORT } from '../../quarterly-plan/application/ports/out/load-quarterly-plan.out-port';
+import { LOAD_BINGO_PROGRESS_OUT_PORT } from './ports/out/load-bingo-progress.out-port';
+import { PERSIST_BINGO_PROGRESS_OUT_PORT } from './ports/out/persist-bingo-progress.out-port';
 
 const TEST_BOARD_ID = 'test-board-id';
 
@@ -47,6 +48,10 @@ class MockBingoGameRepository {
     this.loadedProgress = this.lastSavedProgress;
   }
 
+  persist(quarterId: QuarterId, progress: BingoGameProgress): void {
+    this.save(quarterId, progress);
+  }
+
   clear(_quarterId: QuarterId): void {
     this.loadedProgress = null;
   }
@@ -71,17 +76,18 @@ function createProgressChallenges(challenges: Challenge[], overrides: Partial<Ch
 function createService(
   boardDefinitionRepository: MockBoardDefinitionRepository,
   bingoGameRepository: MockBingoGameRepository,
-): BingoGameService {
+): PlayBingoUseCase {
   const injector = Injector.create({
     providers: [
-      { provide: QUARTERLY_PLAN_READER, useValue: boardDefinitionRepository },
-      { provide: BINGO_GAME_REPOSITORY, useValue: bingoGameRepository },
+      { provide: LOAD_QUARTERLY_PLAN_OUT_PORT, useValue: boardDefinitionRepository },
+      { provide: LOAD_BINGO_PROGRESS_OUT_PORT, useValue: bingoGameRepository },
+      { provide: PERSIST_BINGO_PROGRESS_OUT_PORT, useValue: bingoGameRepository },
     ],
   });
-  return runInInjectionContext(injector, () => new BingoGameService());
+  return runInInjectionContext(injector, () => new PlayBingoUseCase());
 }
 
-describe('BingoGameService', () => {
+describe('PlayBingoUseCase', () => {
   it('hat kein spielbares Board ohne Definition', () => {
     const boardRepo = new MockBoardDefinitionRepository();
     const bingoRepo = new MockBingoGameRepository();
@@ -146,7 +152,7 @@ describe('BingoGameService', () => {
     const bingoRepo = new MockBingoGameRepository();
 
     const service = createService(boardRepo, bingoRepo);
-    service.toggle(0);
+    service.persistToggledChallenge(0);
 
     expect(service.completed()[0]).toBe(true);
     expect(bingoRepo.lastSavedProgress?.challenges[0].completed).toBe(true);
@@ -185,7 +191,7 @@ describe('BingoGameService', () => {
     const bingoRepo = new MockBingoGameRepository();
 
     const service = createService(boardRepo, bingoRepo);
-    service.updateProgressImage(0, 'progress-photo');
+    service.persistProgressImage(0, 'progress-photo');
 
     expect(service.challenges()[0].progressImageId).toBe('progress-photo');
     expect(service.challenges()[0].planningImageId).toBe('plan-img');
@@ -206,7 +212,7 @@ describe('BingoGameService', () => {
     };
 
     const service = createService(boardRepo, bingoRepo);
-    service.resetProgress();
+    service.persistResetProgress();
 
     expect(service.completed().every(c => !c)).toBe(true);
     expect(bingoRepo.lastSavedProgress?.challenges.every(c => !c.completed)).toBe(true);

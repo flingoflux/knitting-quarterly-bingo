@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { StorageService } from '../../../core/infrastructure/storage.service';
 import { Challenge, isValidChallenge } from '../../../shared/domain/challenge';
 import { QuarterlyPlanData, QuarterlyPlanReader, QuarterlyPlanWriter } from '../domain/quarterly-plan.repository';
+import { LoadQuarterlyPlanOutPort } from '../application/ports/out/load-quarterly-plan.out-port';
+import { PersistQuarterlyPlanOutPort } from '../application/ports/out/persist-quarterly-plan.out-port';
 import { Result } from '../../../shared/domain/result';
 import { QuarterClock, QuarterId } from '../../../core/domain';
 
@@ -11,7 +13,8 @@ export interface PersistedQuarterlyPlan {
 }
 
 @Injectable({ providedIn: 'root' })
-export class LocalStorageQuarterlyPlanRepository implements QuarterlyPlanReader, QuarterlyPlanWriter {
+export class LocalStorageQuarterlyPlanRepository
+  implements QuarterlyPlanReader, QuarterlyPlanWriter, LoadQuarterlyPlanOutPort, PersistQuarterlyPlanOutPort {
   private readonly storageKeyPrefixV3 = 'kq-bingo-board-definition-v3:';
   private readonly storageKeyV2 = 'kq-bingo-board-definition-v2';
   private readonly storageKeyV1 = 'kq-bingo-board-definition-v1';
@@ -81,6 +84,10 @@ export class LocalStorageQuarterlyPlanRepository implements QuarterlyPlanReader,
       quarterId: quarterId.toString(),
       challenges: [...plan.challenges],
     });
+  }
+
+  persist(quarterId: QuarterId, plan: QuarterlyPlanData): void {
+    this.save(quarterId, plan);
   }
 
   private getStorageKeyV3(quarterId: QuarterId): string {

@@ -79,7 +79,7 @@ flowchart TB
 | **Domain-Driven Design** | Komplexe Domänenlogik (Bingo-Erkennung, Spielstand-Validierung, Bild-Konzepte) lebt isoliert im Domain-Layer |
 | **Ports and Adapters** | Storage-Technologien (LocalStorage, IndexedDB) sind austauschbar; Domäne kennt nur Interfaces (Ports) |
 | **Immutable Aggregate + Value Objects** | `QuarterlyPlan`, `BingoGame` und `KnittingQuarterly` kapseln fachliche Regeln ohne Seiteneffekte; jede Mutation liefert eine neue Instanz |
-| **Angular Signals** | Reaktiver State ohne RxJS-Overhead; Services halten `signal<Aggregate>()` und leiten `computed()`-Werte ab |
+| **Angular Signals** | Reaktiver State ohne RxJS-Overhead; UseCases halten `signal<Aggregate>()` und leiten `computed()`-Werte ab |
 | **Feature-Slice-Struktur** | Klare Trennung nach Features mit eigenem domain/application/infrastructure/presentation-Stack |
 | **Atomic Design (UI)** | UI-Komponenten sind als Tokens, Atoms, Molecules und Organisms strukturiert; fördert Wiederverwendung, konsistentes Design und klare Verantwortlichkeiten in der Presentation-Schicht |
 
@@ -99,43 +99,106 @@ Die kanonische Fachsprache in der Domäne lautet:
 
 ## 5. Bausteinsicht
 
-### 5.1 Ebene 1 – Gesamtsystem
+### 5.1 Drilldown-Navigation
+
+Die Bausteinsicht ist bewusst mehrstufig aufgebaut, damit ein schrittweises "Reindrillen" moeglich ist:
+
+1. **Ebene 1 (Gesamtsystem):** Ein Hexagon auf Systemebene mit Layern, InPorts, UseCases, OutPorts und Adaptern.
+2. **Ebene 2 (Feature-Slices):** Verantwortlichkeiten je Slice.
+3. **Ebene 3 (Pro Feature):** Eigene hexagonale Sicht mit konkreten InPorts, UseCases, OutPorts, Adaptern und Domain-Objekten.
+4. **Domain-Modell:** Ein globales Modell fuer das gemeinsame Verstaendnis plus fokussierte Sichten pro Feature.
+
+### 5.2 Ebene 1 – Gesamtsystem (Hexagon)
+
+> Diagramm-Quelle: [diagrams/hexagon-overview.drawio](./diagrams/hexagon-overview.drawio) (mit VS Code Extension "Draw.io Integration" oeffnen)
+
+![Gesamtsystem-Hexagon](./diagrams/hexagon-overview.png)
+
+Abhaengigkeitsregel: innen kennt nichts von aussen. Primary und Secondary Adapter haengen von Ports ab, nicht die Domain von Adaptern.
+
+Namensregel: siehe ADR-005 (Kapitel 9) fuer die verbindliche Benennung von InPorts, OutPorts, UseCases sowie `persist...` vs. `save...`.
+
+### 5.3 Ebene 2 – Feature-Slices (Verantwortlichkeiten)
+
+| Slice | InPort | UseCase | OutPorts | Adapter | Domain-Fokus |
+|---|---|---|---|---|---|
+| quarterly-plan | `PlanQuarterlyInPort` | `PlanQuarterlyUseCase` | `LoadQuarterlyPlanOutPort`, `PersistQuarterlyPlanOutPort` | `LocalStorageQuarterlyPlanRepository` | `QuarterlyPlan`, `Challenge` |
+| bingo-game | `PlayBingoInPort` | `PlayBingoUseCase` | `LoadBingoProgressOutPort`, `PersistBingoProgressOutPort`, Nutzung von `LoadQuarterlyPlanOutPort` | `LocalStorageBingoGameRepository` | `BingoGame`, `ChallengeProgress` |
+| archive | `ShowArchiveOverviewInPort` | `ShowArchiveOverviewUseCase` | `LoadArchiveEntriesOutPort` | `LocalStorageArchiveRepository` | `ArchiveEntry` |
+| core / quarter-lifecycle | `EnsureQuarterRolloverInPort` | `EnsureQuarterRolloverUseCase` | nutzt aktuell `QUARTERLY_PLAN_READER`/`QUARTERLY_PLAN_WRITER` und `BINGO_GAME_REPOSITORY` (Migration auf OutPorts folgt) | kein eigener Storage-Adapter | `QuarterClock`, `QuarterId` |
+| shared image storage | n/a (derzeit) | n/a (derzeit) | `ImageRepository` | `IndexedDbImageRepository` | Bild-UUID-Referenzen |
+
+### 5.4 Ebene 3 – Feature-spezifische Hexagon-Sichten
+
+#### 5.4.1 quarterly-plan
+
+> Diagramm-Quelle: [diagrams/hexagon-quarterly-plan.drawio](./diagrams/hexagon-quarterly-plan.drawio)
+
+![quarterly-plan Hexagon](./diagrams/hexagon-quarterly-plan.png)
+
+#### 5.4.2 bingo-game
+
+> Diagramm-Quelle: [diagrams/hexagon-bingo-game.drawio](./diagrams/hexagon-bingo-game.drawio)
+
+![bingo-game Hexagon](./diagrams/hexagon-bingo-game.png)
+
+#### 5.4.3 archive
+
+> Diagramm-Quelle: [diagrams/hexagon-archive.drawio](./diagrams/hexagon-archive.drawio)
+
+![archive Hexagon](./diagrams/hexagon-archive.png)
+
+#### 5.4.4 core / quarter-lifecycle
+
+> Diagramm-Quelle: [diagrams/hexagon-quarter-lifecycle.drawio](./diagrams/hexagon-quarter-lifecycle.drawio)
+
+![quarter-lifecycle Hexagon](./diagrams/hexagon-quarter-lifecycle.png)
+
+### 5.5 Domain-Modell
+
+#### 5.5.1 Globales Domain-Modell (systemweit)
 
 ```mermaid
 classDiagram
   class QuarterId {
     <<Value Type>>
     +parse(value: string) QuarterId
-    +fromDate(date: Date) QuarterId
+    +from(value: string|QuarterId) QuarterId
     +next() QuarterId
     +previous() QuarterId
-    +compareTo(other: QuarterId) int
+  }
+
+  class KnittingQuarterly {
+    <<Value Type>>
+    +QuarterId quarterId
+    +phaseAt(currentQuarterId: QuarterId) QuarterlyPhase
   }
 
   class QuarterlyPlan {
     <<Aggregate Root>>
     +QuarterId quarterId
     +Challenge[16] challenges
-    +QuarterlyPlan update(index, challenge)
-    +QuarterlyPlan reorder(from, to)
-    +PersistedQuarterlyPlan toPersistable()
+  }
+
+  class BingoGame {
+    <<Aggregate Root>>
+    +QuarterId quarterId
+    +ChallengeProgress[16] challenges
+    +Set~int~ bingoCells
+  }
+
+  class ArchiveEntry {
+    <<Aggregate Root>>
+    +QuarterId quarterId
+    +string archivedAt
+    +int completedCount
+    +boolean hasBingo
   }
 
   class Challenge {
     <<Value Type>>
     +string name
     +UUID imageId?
-  }
-
-  class BingoGame {
-    <<Aggregate Root>>
-    +QuarterId? quarterId
-    +ChallengeProgress[16] challenges
-    +BingoGame toggle(index)
-    +BingoGame updateProgressImage(index, imageId)
-    +BingoGame resetProgress()
-    +Set~int~ bingoCells()
-    +BingoGameProgress toProgress()
   }
 
   class ChallengeProgress {
@@ -146,167 +209,20 @@ classDiagram
     +boolean completed
   }
 
-  class ArchiveEntry {
-    <<Aggregate Root>>
-    +QuarterId quarterId
-    +string startedAt
-    +string archivedAt
-    +int completedCount
-    +int totalCount
-    +boolean hasBingo
-  }
-
-  class KnittingQuarterly {
-    <<Value Type>>
-    +QuarterId quarterId
-    +QuarterlyPhase phaseAt(currentQuarterId: QuarterId)
-    +boolean isFuturePreview(currentQuarterId: QuarterId)
-  }
-
-  class BingoGameProgress {
-    <<Persisted DTO>>
-    +string quarterId
-    +string planSignature
-    +ChallengeProgress[] challenges
-    +string startedAt
-  }
-
-  class PersistedQuarterlyPlan {
-    <<Persisted DTO>>
-    +string quarterId
-    +Challenge[] challenges
-  }
-
-  class QuarterlyPhase {
-    <<Value Type>>
-    past
-    current
-    future
-  }
-
-  QuarterlyPlan *-- "16" Challenge
-  BingoGame *-- "16" ChallengeProgress
+  QuarterlyPlan *-- Challenge
+  BingoGame *-- ChallengeProgress
+  KnittingQuarterly ..> QuarterId
   QuarterlyPlan ..> QuarterId
   BingoGame ..> QuarterId
   ArchiveEntry ..> QuarterId
-  KnittingQuarterly ..> QuarterId
-  BingoGame ..> BingoGameProgress
-  QuarterlyPlan ..> PersistedQuarterlyPlan
-
-  note for BingoGame "Immutable Aggregat:\nalle Mutationen liefern\nneue Instanzen."
 ```
 
-### 5.2 Ebene 1b – Port-Signaturen (Application -> Domain)
+#### 5.5.2 Domain-Sichten pro Feature
 
-```mermaid
-classDiagram
-  class QuarterId {
-    <<Value Type>>
-  }
-
-  class QuarterlyPlanReader {
-    <<Port>>
-    +load(quarterId: QuarterId) Result
-    +findById(id: QuarterId) Result
-  }
-
-  class QuarterlyPlanWriter {
-    <<Port>>
-    +save(quarterId: QuarterId, plan: QuarterlyPlanData)
-  }
-
-  class BingoGameRepository {
-    <<Port>>
-    +load(quarterId: QuarterId) BingoGameProgress?
-    +save(quarterId: QuarterId, progress: BingoGameProgress)
-    +clear(quarterId: QuarterId)
-  }
-
-  class LocalStorageQuarterlyPlanRepository {
-    <<Adapter>>
-  }
-
-  class LocalStorageBingoGameRepository {
-    <<Adapter>>
-  }
-
-  class QuarterlyPlanData {
-    <<DTO>>
-    +string quarterId
-    +Challenge[] challenges
-  }
-
-  class BingoGameProgress {
-    <<DTO>>
-    +string quarterId
-    +string planSignature
-  }
-
-  QuarterlyPlanReader ..> QuarterId
-  QuarterlyPlanWriter ..> QuarterId
-  BingoGameRepository ..> QuarterId
-
-  LocalStorageQuarterlyPlanRepository ..|> QuarterlyPlanReader
-  LocalStorageQuarterlyPlanRepository ..|> QuarterlyPlanWriter
-  LocalStorageBingoGameRepository ..|> BingoGameRepository
-```
-
-### 5.3 Architekturbild – Ports and Adapters
-
-```mermaid
-flowchart TB
-  PRESENTATION[Presentation<br/>Angular Components, Guards, Dialoge]
-  APPLICATION[Application<br/>Services / Use Cases]
-  DOMAIN[Domain<br/>Aggregate + Value Objects]
-
-  QPR[[QuarterlyPlanReader]]
-  QPW[[QuarterlyPlanWriter]]
-  BGR[[BingoGameRepository]]
-  AR[[ArchiveRepository]]
-  IR[[ImageRepository]]
-
-  LSBR[LocalStorageQuarterlyPlanRepository]
-  LSBGR[LocalStorageBingoGameRepository]
-  LSAR[LocalStorageArchiveRepository]
-  IDBR[IndexedDbImageRepositoryService]
-  LS[(LocalStorage)]
-  IDB[(IndexedDB)]
-
-  PRESENTATION --> APPLICATION
-  APPLICATION --> DOMAIN
-
-  APPLICATION --> QPR
-  APPLICATION --> QPW
-  APPLICATION --> BGR
-  APPLICATION --> AR
-  APPLICATION --> IR
-
-  LSBR -. implements .-> QPR
-  LSBR -. implements .-> QPW
-  LSBGR -. implements .-> BGR
-  LSAR -. implements .-> AR
-  IDBR -. implements .-> IR
-
-  LSBR --> LS
-  LSBGR --> LS
-  LSAR --> LS
-  IDBR --> IDB
-```
-
-Abhaengigkeitsregel: innen kennt nichts von aussen. Adapter haengen von Ports ab, nicht die Domain von Adaptern.
-
-**Kernelemente und Verantwortlichkeiten:**
-
-- **Aggregates:** `QuarterlyPlan`, `BingoGame`, `ArchiveEntry`.
-- **Entities:** Im aktuellen Domänenmodell gibt es keine eigenstaendigen Entities mit eigener fachlicher Identitaet unterhalb der Aggregate.
-- **Value Types:** `KnittingQuarterly`, `QuarterId`, `QuarterlyPhase`, `Challenge`, `ChallengeProgress`.
-- `KnittingQuarterly`: Fachobjekt fuer die zeitliche Einordnung eines Quartals. Die abgeleitete Phase steuert die erlaubte Sicht: `past` -> Archiv, `current` -> Spielen, `future` -> Planbearbeitung.
-- `QuarterlyPlan`: Unveraenderliches Planungs-Aggregat eines Quartals mit 16 Challenges (Bearbeiten, Umordnen).
-- `BingoGame`: Unveraenderliches Spiel-Aggregat eines Quartals fuer Fortschritt und Bingo-Erkennung.
-- `ArchiveEntry`: Historischer Snapshot eines abgeschlossenen Quartals.
-- Ports (`QuarterlyPlanReader/Writer`, `BingoGameRepository`, `ArchiveRepository`, `ImageRepository`): Definieren die von der Applikation benoetigte Persistenz.
-- Adapter (`LocalStorage...`, `IndexedDb...`): Implementieren Ports und kapseln Browser-APIs inklusive Migrationen.
-- Presentation + Application: UI loest Use Cases aus; Services orchestrieren Domain + Ports.
+- **quarterly-plan:** `QuarterlyPlan`, `Challenge`
+- **bingo-game:** `BingoGame`, `ChallengeProgress` (inkl. Bingo-Erkennung)
+- **archive:** `ArchiveEntry` als historischer Snapshot
+- **core / quarter-lifecycle:** `QuarterClock`, `QuarterId`, `KnittingQuarterly` fuer Zeit-/Phasenlogik
 
 ---
 
@@ -319,61 +235,57 @@ sequenceDiagram
   actor Benutzer
   participant Browser
   participant SPC as StartPageComponent
-  participant BGG as BingoGameGuard
-  participant BGS as BingoGameService
-  participant BCC as QuarterlyPlanComponent
-  participant BCS as QuarterlyPlanService
+  participant QPC as QuarterlyPlanComponent
+  participant PQ as PlanQuarterlyUseCase
   participant LocalStorage
 
   Benutzer->>Browser: Oeffnet /
   Browser->>SPC: Laden
-  Benutzer->>SPC: Klick auf "Spielen"
-  SPC->>BGG: canActivate()
-  BGG->>BGS: hasPlayableBoard()
-  BGS-->>BGG: false
-  BGG-->>Browser: Redirect /edit
+  Benutzer->>SPC: Klick auf "Planen"
+  SPC-->>Browser: Navigation /quarterly?quarter={nextQuarter}
 
-  Browser->>BCC: Laden
-  BCC->>BCS: initialize()
-  BCS->>LocalStorage: read(board-definition)
-  LocalStorage-->>BCS: kein Plan
-  BCS->>BCS: QuarterlyPlan.createDefault()
-  BCS->>LocalStorage: save(default plan)
+  Browser->>QPC: Laden
+  QPC->>PQ: setPreviewMode(false, quarter)
+  PQ->>LocalStorage: load(board-definition)
+  LocalStorage-->>PQ: kein Plan
+  PQ->>PQ: persistDefaultQuarterlyPlan()
+  PQ->>LocalStorage: persist(default plan)
 ```
 
 ### Szenario 1b: Quartalswechsel (Rollover)
 
-Der `QuarterRolloverOrchestratorService` wird beim App-Start aufgerufen und prueft, ob fuer das aktuelle Quartal bereits ein Board existiert. Die **Existenz des Boards als Domänen-Invariante** ersetzt einen separaten technischen Cursor.
+Der `EnsureQuarterRolloverUseCase` wird beim App-Start aufgerufen und prueft, ob fuer das aktuelle Quartal bereits ein Board existiert. Die **Existenz des Boards als Domaenen-Invariante** ersetzt einen separaten technischen Cursor.
 
 ```mermaid
 sequenceDiagram
-  participant APP as AppComponent
-  participant ORC as QuarterRolloverOrchestratorService
-  participant QPR as QuarterlyPlanReader
-  participant BGAR as BingoGameRepository
-  participant AR as ArchiveRepository
-  participant QPW as QuarterlyPlanWriter
+  participant SPC as StartPageComponent
+  participant RUC as EnsureQuarterRolloverUseCase
+  participant QPR as QUARTERLY_PLAN_READER
+  participant QPW as QUARTERLY_PLAN_WRITER
+  participant BGR as BINGO_GAME_REPOSITORY
+  participant AR as ARCHIVE_REPOSITORY
   participant LocalStorage
 
-  APP->>ORC: ensureCurrentQuarter(now)
-  ORC->>ORC: currentQuarterId = QuarterClock.getQuarterId(now)
-  ORC->>QPR: load(currentQuarterId)
+  SPC->>RUC: persistQuarterRollover(now)
+  RUC->>RUC: currentQuarterId = QuarterClock.getQuarterId(now)
+  RUC->>QPR: load(currentQuarterId)
   QPR->>LocalStorage: read(board-definition:{currentQuarterId})
   alt Board existiert bereits
     LocalStorage-->>QPR: QuarterlyPlanData
-    QPR-->>ORC: Result.ok(plan)
-    ORC-->>APP: nichts zu tun
+    QPR-->>RUC: Result.ok(plan)
+    RUC-->>SPC: nichts zu tun
   else Kein Board fuer aktuelles Quartal
     LocalStorage-->>QPR: kein Eintrag
-    QPR-->>ORC: Result.err
-    ORC->>ORC: previousQuarterId = QuarterId.parse(currentQuarterId).previous()
-    ORC->>BGAR: load(previousQuarterId)
+    QPR-->>RUC: Result.err
+    RUC->>RUC: previousQuarterId = QuarterId.parse(currentQuarterId).previous()
+    RUC->>BGR: load(previousQuarterId)
     alt Altes Spiel vorhanden
-      BGAR-->>ORC: BingoGameProgress
-      ORC->>AR: append(ArchiveEntry)
+      BGR-->>RUC: BingoGameProgress
+      RUC->>RUC: createArchiveEntry(...)
+      RUC->>AR: append(entry)
     end
-    ORC->>BGAR: clear(previousQuarterId)
-    ORC->>QPW: save(currentQuarterId, defaultPlan)
+    RUC->>BGR: clear(previousQuarterId)
+    RUC->>QPW: save(currentQuarterId, defaultPlan)
   end
 ```
 
@@ -384,30 +296,30 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   actor Benutzer
-  participant BCC as QuarterlyPlanComponent
-  participant BCS as QuarterlyPlanService
+  participant QPC as QuarterlyPlanComponent
+  participant PQ as PlanQuarterlyUseCase
   participant QP as QuarterlyPlan
   participant IDB as IndexedDbImageRepository
   participant LocalStorage
 
-  Benutzer->>BCC: Drag & Drop Challenge
-  BCC->>BCS: swapChallenges(i, j)
-  BCS->>QP: reorder(i, j)
-  QP-->>BCS: neue Instanz
-  BCS->>LocalStorage: persist(plan)
+  Benutzer->>QPC: Drag & Drop Challenge
+  QPC->>PQ: persistSwappedChallenges(i, j)
+  PQ->>QP: reorder(i, j)
+  QP-->>PQ: neue Instanz
+  PQ->>LocalStorage: persist(plan)
 
-  Benutzer->>BCC: Klick auf Challenge-Karte
-  BCC->>BCC: CardDetailDialog oeffnen
-  Benutzer->>BCC: Bild aufnehmen/hochladen
-  BCC->>IDB: saveImage(uuid, dataUrl)
-  IDB-->>BCC: uuid gespeichert
-  BCC->>BCS: updateChallenge(i, { name, imageId })
-  BCS->>QP: update(i, challenge)
-  QP-->>BCS: neue Instanz
-  BCS->>LocalStorage: persist(plan)
+  Benutzer->>QPC: Klick auf Challenge-Karte
+  QPC->>QPC: CardDetailDialog oeffnen
+  Benutzer->>QPC: Bild aufnehmen/hochladen
+  QPC->>IDB: saveImage(uuid, dataUrl)
+  IDB-->>QPC: uuid gespeichert
+  QPC->>PQ: persistUpdatedChallenge(i, { name, imageId })
+  PQ->>QP: update(i, challenge)
+  QP-->>PQ: neue Instanz
+  PQ->>LocalStorage: persist(plan)
 
-  Benutzer->>BCC: Klick auf "Spielen"
-  BCC-->>Benutzer: Navigation nach /play
+  Benutzer->>QPC: Klick auf "Spielen"
+  QPC-->>Benutzer: Navigation nach /quarterly
 ```
 
 ### Szenario 3: Spiel spielen
@@ -416,31 +328,31 @@ sequenceDiagram
 sequenceDiagram
   actor Benutzer
   participant BGC as BingoGameComponent
-  participant BGS as BingoGameService
+  participant PB as PlayBingoUseCase
   participant BG as BingoGame
   participant PBC as PlayableBoardComponent
   participant PCDC as ProjectComparisonDialogComponent
   participant IDB as IndexedDbImageRepository
   participant LocalStorage
 
-  Benutzer->>BGC: Navigation nach /play
-  BGC->>BGS: refreshFromDefinition()
-  BGS->>LocalStorage: load(plan)
-  BGS->>LocalStorage: load(saved game)
+  Benutzer->>BGC: Navigation nach /quarterly
+  BGC->>PB: setPreviewMode(false, quarter)
+  PB->>LocalStorage: load(plan)
+  PB->>LocalStorage: load(saved game)
   alt Signatur stimmt
-    BGS->>BG: restore(challenges, savedProgress)
+    PB->>BG: restore(challenges, savedProgress)
   else Signatur geaendert
-    BGS->>BG: fromDefinition(challenges)
+    PB->>BG: fromDefinition(challenges)
   end
-  BGS-->>BGC: game state
+  PB-->>BGC: game state
   BGC->>PBC: render(board)
 
   Benutzer->>PBC: Challenge abhaken
-  PBC->>BGS: toggle(index)
-  BGS->>BG: toggle(index)
-  BG-->>BGS: neue Instanz + bingoCells
-  BGS->>LocalStorage: persist(game)
-  BGS-->>PBC: aktualisierter state
+  PBC->>PB: persistToggledChallenge(index)
+  PB->>BG: toggle(index)
+  BG-->>PB: neue Instanz + bingoCells
+  PB->>LocalStorage: persist(game)
+  PB-->>PBC: aktualisierter state
 
   Benutzer->>PBC: Klick auf Karte
   PBC->>PCDC: oeffnen
@@ -448,10 +360,10 @@ sequenceDiagram
 
   Benutzer->>PCDC: Fortschrittsfoto hochladen
   PCDC->>IDB: saveImage(uuid, dataUrl)
-  PCDC->>BGS: updateProgressImage(index, uuid)
-  BGS->>BG: updateProgressImage(index, uuid)
-  BG-->>BGS: neue Instanz
-  BGS->>LocalStorage: persist(game)
+  PCDC->>PB: persistProgressImage(index, uuid)
+  PB->>BG: updateProgressImage(index, uuid)
+  BG-->>PB: neue Instanz
+  PB->>LocalStorage: persist(game)
 ```
 
 ### 6.4 Zustandsmodell – Spiellebenszyklus
@@ -460,43 +372,42 @@ sequenceDiagram
 stateDiagram-v2
   [*] --> KeinPlan
 
-  KeinPlan: Kein gueltiger QuarterlyPlan
-  KeinPlan --> Planung: Nutzer oeffnet /edit
+  KeinPlan --> Planung: future-Quarter oeffnen
+  Planung --> Spielen: current-Quarter mit gueltigem Plan
 
-  Planung: Plan bearbeiten\n(Challenge-Namen/Reihenfolge/Bilder)
-  Planung --> Spielfaehig: Plan mit 16 Challenges gespeichert
+  Spielen --> Bingo: Linie vollstaendig
+  Bingo --> Spielen: weitere Aenderungen
 
-  Spielfaehig: Guard erlaubt /play
-  Spielfaehig --> Spielen: Nutzer startet Spiel
+  Spielen --> Reset: Plan-Signatur ungleich
+  Bingo --> Reset: Plan-Signatur ungleich
+  Reset --> Spielen: neues Game aus Definition
 
-  Spielen: Toggle/Foto-Upload\nProgress wird persistiert
-  Spielen --> BingoErreicht: mindestens eine volle Linie
-  Spielen --> Spielen: weitere Zuege
-
-  BingoErreicht: Bingo markiert, Spiel laeuft weiter
-  BingoErreicht --> Spielen: weitere Aenderungen ohne Reset
-
-  Spielen --> ResetWegenPlanAenderung: Board-Signatur ungleich
-  BingoErreicht --> ResetWegenPlanAenderung: Board-Signatur ungleich
-
-  ResetWegenPlanAenderung: Fortschritt verwerfen\nNeues Game aus Definition
-  ResetWegenPlanAenderung --> Spielfaehig
-
-  Spielen --> Spielfaehig: resetProgress()
-  BingoErreicht --> Spielfaehig: resetProgress()
+  Spielen --> Spielen: resetProgress()
+  Bingo --> Spielen: resetProgress()
 ```
+
+| Zustand | Bedeutung |
+|---|---|
+| `KeinPlan` | Fuer das gewaehlte Quartal existiert noch kein gueltiger `QuarterlyPlan`. |
+| `Planung` | Das Board wird bearbeitet (Challenges, Reihenfolge, Bilder). |
+| `Spielen` | Das aktive Spiel laeuft; Fortschritt wird per Toggle/Foto aktualisiert und persistiert. |
+| `Bingo` | Mindestens eine vollstaendige Linie wurde erreicht. |
+| `Reset` | Der bisherige Spielstand wird verworfen und aus der aktuellen Plan-Definition neu aufgebaut. |
 
 ---
 
 ## 7. Verteilungssicht
 
-Die Anwendung wird als statische Webanwendung ausgeliefert. Es gibt nur eine Laufzeitumgebung: den Browser des Benutzers.
+Die Anwendung wird als statische Webanwendung ausgeliefert.
+
+- Aktueller Betrieb: GitHub Pages
+- Vorbereitet fuer spaeter: Container-Betrieb via Docker/nginx
 
 ```mermaid
 flowchart TB
-  subgraph NGINX[nginx\nDocker-Container]
+  subgraph GHP[GitHub Pages - aktuell]
     DIST[dist/\nstatische Dateien]
-    SPA[SPA-Fallback\nalle Routen -> index.html]
+    STATIC[Statisches Hosting]
   end
 
   subgraph BROWSER[Browser]
@@ -505,12 +416,15 @@ flowchart TB
     IDB2[(IndexedDB\nBilder als Blobs/DataURLs)]
   end
 
-  NGINX -->|HTTPS| BROWSER
+  DIST --> STATIC
+  STATIC -->|HTTPS| BROWSER
   SPAAPP --> LS2
   SPAAPP --> IDB2
 ```
 
-**Deployment:** `docker-compose up` baut die App und startet nginx. Konfiguration in `Dockerfile` und `docker-compose.yml`.
+**Deployment (aktuell):** GitHub Pages mit statischen Build-Artefakten (`dist/`).
+
+**Deployment (vorbereitet):** `Dockerfile` und `docker-compose.yml` sind als zukuenftige Option fuer einen Container-Betrieb mit nginx vorhanden.
 
 ---
 
@@ -533,9 +447,9 @@ Bilder werden **nie** direkt im Plan oder Spielstand gespeichert – nur ihre UU
 Beide Repositories enthalten automatische Migrationslogik beim Laden:
 
 - `LocalStorageQuarterlyPlanRepository`: Legacy-Daten ohne `quarterId` werden auf das quartalsbezogene v3-Format migriert.
-- `LocalStorageBingoGameRepository`: v2 (separate `cellImages[]` + `completed[]`-Arrays) → v3/v4 (`ChallengeProgress[]`, quartalsbezogen)
+- `LocalStorageBingoGameRepository`: v2 (separate `cellImages[]` + `completed[]`-Arrays) -> v3/v4 (`ChallengeProgress[]`, quartalsbezogen)
 
-Migrationen laufen transparent beim ersten Laden nach einem Update. Alte Schlüssel werden nicht gelöscht, um einen Rollback nicht zu verunmöglichen.
+Migrationen laufen transparent beim ersten Laden nach einem Update. Legacy-Schluessel bleiben bei der Migration erhalten; beim expliziten `clear(currentQuarter)` werden v2/v3-Kompatibilitaetsschluessel bereinigt.
 
 ### 8.3 Unveränderliche Domänen-Aggregate
 
@@ -543,7 +457,7 @@ Alle Aggregate (`KnittingQuarterly`, `BingoGame`, `QuarterlyPlan`) sind immutabl
 
 - Private Konstruktoren, nur statische Factory-Methoden
 - Jede Mutation erzeugt eine neue Instanz
-- Services halten Aggregate in Angular-`signal()`-Containern
+- UseCases halten Aggregate in Angular-`signal()`-Containern
 
 Vorteil: keine defensive Kopien nötig, keine unbeabsichtigten Seiteneffekte, direkte Testbarkeit ohne Mocks.
 
@@ -572,7 +486,7 @@ Wenn der Benutzer den Plan nach dem Start eines Spiels ändert, würde der alte 
 
 ### 8.7 Fehlerbehandlung
 
-Fehler aus Storage-Operationen werden als `Result<T, E>` zurückgegeben (typsicheres Either-Pattern). Services reagieren auf `result.ok === false` mit Fallback-Verhalten (leerer Plan / leeres Spiel), nicht mit Exceptions.
+Fehler aus Storage-Operationen werden als `Result<T, E>` zurueckgegeben (typsicheres Either-Pattern). UseCases reagieren auf `result.ok === false` mit Fallback-Verhalten (leerer Plan / leeres Spiel), nicht mit Exceptions.
 
 ### 8.8 Fehler- und Fallback-Sicht
 
@@ -606,16 +520,16 @@ flowchart TD
 
 | Fehlerfall | Betroffene Komponente | Reaktion/Fallback | Ergebnis |
 |---|---|---|---|
-| Plan kann nicht aus LocalStorage geladen werden | `QuarterlyPlanService` + `LocalStorageQuarterlyPlanRepository` | `QuarterlyPlan.createDefault()` und Persistenz mit Default-Werten | Edit-Flow bleibt nutzbar |
-| Spielstand kann nicht geladen werden | `BingoGameService` + `LocalStorageBingoGameRepository` | `BingoGame.fromDefinition()` statt Restore | Spiel startet konsistent neu |
-| Signatur passt nicht (Plan geaendert) | `BingoGameService` | Gespeicherten Fortschritt verwerfen, neues Spiel aus aktueller Definition | Kein inkonsistenter Mischzustand |
-| Bild kann nicht aus IndexedDB geladen werden | `IndexedDbImageRepositoryService` + UI-Komponenten (`ChallengeCard`, `ProjectComparisonDialog`) | Platzhalter statt Bild anzeigen | Kerninteraktion bleibt erhalten |
-| Bildspeicherung schlaegt fehl | `IndexedDbImageRepositoryService` + aufrufender Service | Aktion ohne Bild abschliessen, bestehenden Zustand beibehalten | Keine Blockade des Spielflusses |
-| Schreiben nach LocalStorage schlaegt fehl | `StorageService` + aufrufender Service | Fehler als `Result` propagieren, keine Exception bis in die UI | UI bleibt stabil (degraded mode) |
+| Plan kann nicht aus LocalStorage geladen werden | `PlanQuarterlyUseCase` + `LocalStorageQuarterlyPlanRepository` | `persistDefaultQuarterlyPlan()` mit Default-Werten | Edit-Flow bleibt nutzbar |
+| Spielstand kann nicht geladen werden | `PlayBingoUseCase` + `LocalStorageBingoGameRepository` | `BingoGame.fromDefinition()` statt Restore | Spiel startet konsistent neu |
+| Signatur passt nicht (Plan geaendert) | `PlayBingoUseCase` | Gespeicherten Fortschritt verwerfen, neues Spiel aus aktueller Definition | Kein inkonsistenter Mischzustand |
+| Bild kann nicht aus IndexedDB geladen werden | `IndexedDbImageRepository` + UI-Komponenten (`ChallengeCard`, `ProjectComparisonDialog`) | Platzhalter statt Bild anzeigen | Kerninteraktion bleibt erhalten |
+| Bildspeicherung schlaegt fehl | `IndexedDbImageRepository` + aufrufender UseCase/Komponente | Aktion ohne Bild abschliessen, bestehenden Zustand beibehalten | Keine Blockade des Spielflusses |
+| Schreiben nach LocalStorage schlaegt fehl | `StorageService` + Repository/UseCase | Fehler als `Result` propagieren, keine Exception bis in die UI | UI bleibt stabil (degraded mode) |
 
 ### 8.9 UI-Architektur und Atomic Design
 
-Die Presentation-Schicht folgt dem **Atomic Design**-Modell (nach Brad Frost). Komponenten sind in 4 Ebenen organisiert, von Basislelementen zu ganzen Seiten:
+Die Presentation-Schicht folgt dem **Atomic Design**-Modell (nach Brad Frost). Komponenten sind in 5 Ebenen organisiert, von Basiselementen zu ganzen Seiten:
 
 #### **Tokens** – Design-System-Fundament
 
@@ -699,13 +613,13 @@ Größere, oft zusammengesetzte Komponenten mit komplexerer Logik:
 
 Standalone Angular Components, die Organisms und kleinere Feature-spezifische Komponenten kombinieren:
 
-**`quarterly-plan.component.ts` (/edit)**
+**`quarterly-plan.component.ts` (/quarterly mit future-Quarter)**
 - Nutzt: `BoardGridComponent`, `EditableBoardComponent` (nicht in Atoms/Molecules), `CardDetailDialogComponent`
-- State: `QuarterlyPlanService`
+- State: `PlanQuarterlyInPort` (`PlanQuarterlyUseCase`)
 
-**`bingo-game.component.ts` (/play)**
+**`bingo-game.component.ts` (/quarterly mit current-Quarter)**
 - Nutzt: `BoardGridComponent`, `PlayableBoardComponent`, `ProjectComparisonDialogComponent`
-- State: `BingoGameService`
+- State: `PlayBingoInPort` (`PlayBingoUseCase`)
 
 **`start-page.component.ts` (/)**
 - Einfache Buttons: Primary/Secondary via `KqButtonComponent`
@@ -824,7 +738,7 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 ### ADR-002: DDD mit Ports and Adapters
 
 **Kontext:** Domänenlogik (Bingo-Erkennung, Plan-Verwaltung) soll testbar und framework-unabhängig sein.  
-**Entscheidung:** Feature-Slice-Architektur mit domain/application/infrastructure/presentation-Schichten. Storage-Interfaces als Ports (`QUARTERLY_PLAN_READER`, `BINGO_GAME_REPOSITORY`, `IMAGE_REPOSITORY`).  
+**Entscheidung:** Feature-Slice-Architektur mit domain/application/infrastructure/presentation-Schichten. Storage-Interfaces werden als Ports modelliert; im Code existieren sowohl legacy Domain-Ports (`QUARTERLY_PLAN_READER`, `BINGO_GAME_REPOSITORY`, `IMAGE_REPOSITORY`) als auch feature-spezifische OutPorts (`...OutPort`).  
 **Konsequenzen:** Domäne hat keine Angular-Importe. Adapter können in Tests durch Mocks ersetzt werden.
 
 ### ADR-003: IndexedDB für Bilder, LocalStorage für strukturierte Daten
@@ -839,6 +753,24 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 **Entscheidung:** Persistenznahes Value Object `ChallengeProgress { name, planningImageId?, progressImageId?, completed }` fasst alle Daten einer Challenge im `BingoGame` zusammen.  
 **Konsequenzen:** Kein Index-Synchronisationsproblem mehr. Klare semantische Trennung zwischen Planungsbild und Fortschrittsfoto. LocalStorage-Migration v2→v3 notwendig.
 
+### ADR-005: Intentionale Port-/UseCase-Benennung und Persistenz-Semantik
+
+**Kontext:** Die bisherige Benennung mischt technische und fachliche Begriffe (z. B. `...Service`, `...Repository`, uneinheitliche Verben). Fuer Ports-and-Adapters soll die Absicht klar erkennbar sein und die Richtung (inbound/outbound) in Namen und Struktur sichtbar werden.
+
+**Entscheidung:**
+- Inbound-Ports verwenden das Suffix `InPort` und beschreiben eine fachliche Intention, z. B. `PlanQuarterlyInPort`, `PlayBingoInPort`.
+- Application-Implementierungen verwenden das Suffix `UseCase` und implementieren den passenden Inbound-Port, z. B. `PlanQuarterlyUseCase`, `PlayBingoUseCase`.
+- Outbound-Ports verwenden das Suffix `OutPort`.
+- In Ports und UseCases wird fuer Schreibvorgaenge das Verb `persist...` verwendet.
+- Repositories behalten fuer Schreibvorgaenge das Verb `save...` (z. B. `save(...)`).
+- Namen folgen einer intentionale Benennung im Muster `Verb + Fachobjekt + Suffix` statt technischer Sammelbegriffe.
+
+**Konsequenzen:**
+- Lesbarkeit steigt, weil Richtung und Verantwortung aus dem Namen direkt ersichtlich sind.
+- Primäre Adapter (Presentation/Guards) koppeln an `InPort` statt an konkrete Klassen.
+- UseCases bleiben austauschbar und testbar; Outbound-Abhaengigkeiten bleiben ueber `OutPort` entkoppelt.
+- Migrationsaufwand entsteht durch schrittweises Umbenennen bestehender Services/Ports; empfohlen ist eine inkrementelle Migration pro Feature.
+
 ---
 
 ## 10. Qualitätsszenarien
@@ -849,7 +781,7 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 | Q2 | Benutzer ändert den Plan nach Spielstart | Spielstand wird verworfen, neues Spiel beginnt automatisch |
 | Q3 | Benutzer lädt ein Bild >1 MB hoch | App bleibt responsive; Bild wird in IndexedDB gespeichert |
 | Q4 | Alle 16 Challenges einer Zeile abgehakt | Bingo wird sofort (synchron) erkannt und markiert |
-| Q5 | Domänenlogik-Test | `pnpm test --run` läuft in unter 1 Sekunde; keine Angular-Umgebung nötig |
+| Q5 | Domänenlogik-Test | `pnpm test` läuft in unter 1 Sekunde; keine Angular-Umgebung nötig |
 
 ---
 
@@ -884,5 +816,5 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 | Port | Abstrakte Schnittstelle, über die die Application-Schicht Infrastruktur anspricht. |
 | Progress-Bild | Während der Spielphase aufgenommenes Foto (`progressImageId`). |
 | Planungsbild | In der Planungsphase hinterlegtes Referenzbild (`planningImageId`). |
-| Result<T, E> | Typsicheres Erfolgs-/Fehlerobjekt statt Exception-Flow in Services. |
+| Result<T, E> | Typsicheres Erfolgs-/Fehlerobjekt statt Exception-Flow in UseCases/Repositories. |
 | Value Object | Unveränderliches Objekt ohne eigene Identität, beschrieben über seine Werte. |

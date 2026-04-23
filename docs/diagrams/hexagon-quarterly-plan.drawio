@@ -1,0 +1,40 @@
+<mxfile host="65bd71144e">
+    <diagram name="quarterly-plan" id="0">
+        <mxGraphModel dx="469" dy="563" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1000" pageHeight="560" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="core" value="PlanQuarterlyUseCase&#xa;+ Domain" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#fff8e6;strokeColor=#c08a2a;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="375" y="140" width="300" height="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="ui" value="QuarterlyPlanComponent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fb;strokeColor=#5b7db1;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="90" y="205" width="170" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="inport" value="PlanQuarterlyInPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5b7db1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="315" y="210" width="125" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="feature" value="quarterly-plan" style="text;html=1;fontSize=11;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="455" y="148" width="140" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="out1" value="LoadQuarterlyPlanOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5b7db1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="625" y="188" width="180" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="out2" value="PersistQuarterlyPlanOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5b7db1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="625" y="232" width="180" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="repo" value="LocalStorageQuarterlyPlanRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fb;strokeColor=#4f8b57;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="835" y="204" width="200" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-ui-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" parent="1" source="ui" target="inport" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-repo-out1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;" parent="1" source="repo" target="out1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-repo-out2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;" parent="1" source="repo" target="out2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

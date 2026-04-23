@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { StorageService } from '../../../core/infrastructure/storage.service';
 import { BingoGameProgress, ChallengeProgress } from '../domain/bingo-game';
 import { BingoGameRepository } from '../domain/bingo-game.repository';
+import { LoadBingoProgressOutPort } from '../application/ports/out/load-bingo-progress.out-port';
+import { PersistBingoProgressOutPort } from '../application/ports/out/persist-bingo-progress.out-port';
 import { QuarterClock, QuarterId } from '../../../core/domain';
 
 interface LegacyV2Progress {
@@ -14,7 +16,8 @@ interface LegacyV2Progress {
 }
 
 @Injectable({ providedIn: 'root' })
-export class LocalStorageBingoGameRepository implements BingoGameRepository {
+export class LocalStorageBingoGameRepository
+  implements BingoGameRepository, LoadBingoProgressOutPort, PersistBingoProgressOutPort {
   private readonly storageKeyPrefixV4 = 'kq-bingo-active-game-v4:';
   private readonly storageKeyV3 = 'kq-bingo-active-game-v3';
   private readonly storageKeyV2 = 'kq-bingo-active-game-v2';
@@ -81,6 +84,10 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
       challenges: [...progress.challenges],
       startedAt: progress.startedAt,
     });
+  }
+
+  persist(quarterId: QuarterId, progress: BingoGameProgress): void {
+    this.save(quarterId, progress);
   }
 
   clear(quarterId: QuarterId): void {

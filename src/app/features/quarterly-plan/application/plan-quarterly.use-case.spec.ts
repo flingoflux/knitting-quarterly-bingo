@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 import { Challenge } from '../../../shared/domain/challenge';
 import { Result } from '../../../shared/domain/result';
-import { QuarterlyPlanService } from './quarterly-plan.service';
+import { PlanQuarterlyUseCase } from './plan-quarterly.use-case';
 import { PersistedQuarterlyPlan } from '../infrastructure/local-storage-quarterly-plan.repository';
-import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from '../domain/quarterly-plan.repository';
+import { LOAD_QUARTERLY_PLAN_OUT_PORT } from './ports/out/load-quarterly-plan.out-port';
+import { PERSIST_QUARTERLY_PLAN_OUT_PORT } from './ports/out/persist-quarterly-plan.out-port';
 import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
 import { QuarterId } from '../../../core/domain';
 
@@ -33,6 +34,10 @@ class MockQuarterlyPlanRepository {
     };
     this.loadedPlan = this.lastSavedPlan;
   }
+
+  persist(quarterId: QuarterId, definition: PersistedQuarterlyPlan): void {
+    this.save(quarterId, definition);
+  }
 }
 
 function createChallenges(length = 16): Challenge[] {
@@ -41,23 +46,23 @@ function createChallenges(length = 16): Challenge[] {
   }));
 }
 
-function createService(repository: MockQuarterlyPlanRepository): QuarterlyPlanService {
+function createUseCase(repository: MockQuarterlyPlanRepository): PlanQuarterlyUseCase {
   const injector = Injector.create({
     providers: [
-      { provide: QUARTERLY_PLAN_READER, useValue: repository },
-      { provide: QUARTERLY_PLAN_WRITER, useValue: repository },
+      { provide: LOAD_QUARTERLY_PLAN_OUT_PORT, useValue: repository },
+      { provide: PERSIST_QUARTERLY_PLAN_OUT_PORT, useValue: repository },
     ],
   });
-  return runInInjectionContext(injector, () => new QuarterlyPlanService());
+  return runInInjectionContext(injector, () => new PlanQuarterlyUseCase());
 }
 
-describe('QuarterlyPlanService', () => {
+describe('PlanQuarterlyUseCase', () => {
   it('initialisiert Defaults wenn kein persistiertes Board vorhanden ist', () => {
     const repository = new MockQuarterlyPlanRepository();
 
-    const service = createService(repository);
+    const useCase = createUseCase(repository);
 
-    expect(service.challenges()).toEqual(DEFAULT_CHALLENGES);
+    expect(useCase.challenges()).toEqual(DEFAULT_CHALLENGES);
     expect(repository.lastSavedPlan?.challenges).toEqual(DEFAULT_CHALLENGES);
   });
 
@@ -65,41 +70,41 @@ describe('QuarterlyPlanService', () => {
     const repository = new MockQuarterlyPlanRepository();
     repository.loadedPlan = { quarterId: '2026-Q2', challenges: createChallenges(4) };
 
-    const service = createService(repository);
+    const useCase = createUseCase(repository);
 
-    expect(service.challenges()).toHaveLength(4);
-    expect(service.challenges()[0].name).toBe('Challenge 0');
+    expect(useCase.challenges()).toHaveLength(4);
+    expect(useCase.challenges()[0].name).toBe('Challenge 0');
   });
 
   it('tauscht Challenges und persistiert das Ergebnis', () => {
     const repository = new MockQuarterlyPlanRepository();
     repository.loadedPlan = { quarterId: '2026-Q2', challenges: createChallenges(4) };
-    const service = createService(repository);
+    const useCase = createUseCase(repository);
 
-    service.swapChallenges(0, 3);
+    useCase.persistSwappedChallenges(0, 3);
 
-    expect(service.challenges()[0].name).toBe('Challenge 3');
-    expect(service.challenges()[3].name).toBe('Challenge 0');
+    expect(useCase.challenges()[0].name).toBe('Challenge 3');
+    expect(useCase.challenges()[3].name).toBe('Challenge 0');
     expect(repository.lastSavedPlan?.challenges[0].name).toBe('Challenge 3');
   });
 
   it('aktualisiert eine einzelne Challenge', () => {
     const repository = new MockQuarterlyPlanRepository();
     repository.loadedPlan = { quarterId: '2026-Q2', challenges: createChallenges(4) };
-    const service = createService(repository);
+    const useCase = createUseCase(repository);
 
-    service.updateChallenge(1, { name: 'Updated' });
+    useCase.persistUpdatedChallenge(1, { name: 'Updated' });
 
-    expect(service.challenges()[1].name).toBe('Updated');
+    expect(useCase.challenges()[1].name).toBe('Updated');
   });
 
   it('setzt das Board auf Defaults zurueck', () => {
     const repository = new MockQuarterlyPlanRepository();
     repository.loadedPlan = { quarterId: '2026-Q2', challenges: createChallenges(4) };
-    const service = createService(repository);
+    const useCase = createUseCase(repository);
 
-    service.resetPlan();
+    useCase.persistDefaultQuarterlyPlan();
 
-    expect(service.challenges()).toEqual(DEFAULT_CHALLENGES);
+    expect(useCase.challenges()).toEqual(DEFAULT_CHALLENGES);
   });
 });

@@ -7,7 +7,7 @@ import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER, QuarterlyPlanData } from 
 import { BINGO_GAME_REPOSITORY } from '../../features/bingo-game/domain/bingo-game.repository';
 import { BingoGameProgress } from '../../features/bingo-game/domain/bingo-game';
 import { Result } from '../../shared/domain/result';
-import { QuarterRolloverOrchestratorService } from './quarter-rollover-orchestrator.service';
+import { EnsureQuarterRolloverUseCase } from './ensure-quarter-rollover.use-case';
 import { QuarterId } from '../domain';
 
 class MockBoardReader {
@@ -75,7 +75,7 @@ function createService(deps: {
   archiveRepository: MockArchiveRepository;
   boardWriter: MockBoardWriter;
   bingoGameRepository: MockBingoGameRepository;
-}): QuarterRolloverOrchestratorService {
+}): EnsureQuarterRolloverUseCase {
   const injector = Injector.create({
     providers: [
       { provide: QUARTERLY_PLAN_READER, useValue: deps.boardReader },
@@ -85,10 +85,10 @@ function createService(deps: {
     ],
   });
 
-  return runInInjectionContext(injector, () => new QuarterRolloverOrchestratorService());
+  return runInInjectionContext(injector, () => new EnsureQuarterRolloverUseCase());
 }
 
-describe('QuarterRolloverOrchestratorService', () => {
+describe('EnsureQuarterRolloverUseCase', () => {
   it('tut nichts wenn Board fuer aktuelles Quartal schon existiert', () => {
     const boardReader = new MockBoardReader();
     boardReader.set('2026-Q2', { quarterId: '2026-Q2', challenges: [] });
@@ -97,7 +97,7 @@ describe('QuarterRolloverOrchestratorService', () => {
     const bingoGameRepository = new MockBingoGameRepository();
     const service = createService({ boardReader, archiveRepository, boardWriter, bingoGameRepository });
 
-    service.ensureCurrentQuarter(new Date('2026-05-02T10:00:00.000Z'));
+    service.persistQuarterRollover(new Date('2026-05-02T10:00:00.000Z'));
 
     expect(archiveRepository.entries).toEqual([]);
     expect(boardWriter.savedPlans).toEqual([]);
@@ -111,7 +111,7 @@ describe('QuarterRolloverOrchestratorService', () => {
     const bingoGameRepository = new MockBingoGameRepository();
     const service = createService({ boardReader, archiveRepository, boardWriter, bingoGameRepository });
 
-    service.ensureCurrentQuarter(new Date('2026-04-21T10:00:00.000Z'));
+    service.persistQuarterRollover(new Date('2026-04-21T10:00:00.000Z'));
 
     expect(archiveRepository.entries).toEqual([]);
     expect(boardWriter.savedPlans).toHaveLength(1);
@@ -137,7 +137,7 @@ describe('QuarterRolloverOrchestratorService', () => {
     };
     const service = createService({ boardReader, archiveRepository, boardWriter, bingoGameRepository });
 
-    service.ensureCurrentQuarter(new Date('2026-04-01T08:00:00.000Z'));
+    service.persistQuarterRollover(new Date('2026-04-01T08:00:00.000Z'));
 
     expect(archiveRepository.entries).toHaveLength(1);
     expect(archiveRepository.entries[0]?.quarterId.toString()).toBe('2026-Q1');
@@ -155,7 +155,7 @@ describe('QuarterRolloverOrchestratorService', () => {
     const bingoGameRepository = new MockBingoGameRepository();
     const service = createService({ boardReader, archiveRepository, boardWriter, bingoGameRepository });
 
-    service.ensureCurrentQuarter(new Date('2026-07-01T08:00:00.000Z'));
+    service.persistQuarterRollover(new Date('2026-07-01T08:00:00.000Z'));
 
     expect(archiveRepository.entries).toEqual([]);
     expect(boardWriter.savedPlans).toHaveLength(1);

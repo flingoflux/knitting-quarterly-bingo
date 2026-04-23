@@ -1,0 +1,49 @@
+<mxfile host="65bd71144e">
+    <diagram name="bingo-game" id="0">
+        <mxGraphModel dx="469" dy="563" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1020" pageHeight="620" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="core" value="PlayBingoUseCase&#xa;+ Domain" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#fff8e6;strokeColor=#c08a2a;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="350" y="140" width="320" height="250" as="geometry"/>
+                </mxCell>
+                <mxCell id="ui" value="BingoGameComponent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fb;strokeColor=#5b7db1;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="235" width="175" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="inport" value="PlayBingoInPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5b7db1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="305" y="240" width="125" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="feature" value="bingo-game" style="text;html=1;fontSize=11;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="450" y="150" width="120" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="out1" value="LoadBingoProgressOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5b7db1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="625" y="205" width="190" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="out2" value="PersistBingoProgressOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5b7db1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="625" y="248" width="190" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="out3" value="LoadQuarterlyPlanOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="625" y="291" width="190" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="repo" value="LocalStorageBingoGameRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fb;strokeColor=#4f8b57;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="845" y="220" width="199" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="qp-repo" value="LocalStorageQuarterlyPlanRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="845" y="286" width="200" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-ui-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" parent="1" source="ui" target="inport" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-repo-out1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;" parent="1" source="repo" target="out1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-repo-out2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;" parent="1" source="repo" target="out2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-qp-out3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;" parent="1" source="qp-repo" target="out3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

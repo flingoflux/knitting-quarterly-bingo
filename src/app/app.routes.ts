@@ -1,8 +1,11 @@
 import { StartPageComponent } from './features/start-page/presentation/pages/start-page.component';
 import { Routes } from '@angular/router';
-import { BingoGameService } from './features/bingo-game/application/bingo-game.service';
-import { QuarterlyPlanService } from './features/quarterly-plan/application/quarterly-plan.service';
-import { ArchiveOverviewService } from './features/archive/application/archive-overview.service';
+import { PLAY_BINGO_IN_PORT } from './features/bingo-game/application/ports/in/play-bingo.in-port';
+import { PlayBingoUseCase } from './features/bingo-game/application/play-bingo.use-case';
+import { PLAN_QUARTERLY_IN_PORT } from './features/quarterly-plan/application/ports/in/plan-quarterly.in-port';
+import { PlanQuarterlyUseCase } from './features/quarterly-plan/application/plan-quarterly.use-case';
+import { SHOW_ARCHIVE_OVERVIEW_IN_PORT } from './features/archive/application/ports/in/show-archive-overview.in-port';
+import { ShowArchiveOverviewUseCase } from './features/archive/application/show-archive-overview.use-case';
 
 export const routes: Routes = [
   {
@@ -11,7 +14,12 @@ export const routes: Routes = [
   },
   {
     path: 'quarterly',
-    providers: [BingoGameService, QuarterlyPlanService],
+    providers: [
+      PlayBingoUseCase,
+      { provide: PLAY_BINGO_IN_PORT, useExisting: PlayBingoUseCase },
+      PlanQuarterlyUseCase,
+      { provide: PLAN_QUARTERLY_IN_PORT, useExisting: PlanQuarterlyUseCase },
+    ],
     loadComponent: () => import('./features/quarter-lifecycle/presentation/pages/quarterly-view-page.component').then(m => m.QuarterlyViewPageComponent),
   },
   {
@@ -26,7 +34,10 @@ export const routes: Routes = [
   },
   {
     path: 'archive',
-    providers: [ArchiveOverviewService],
+    providers: [
+      ShowArchiveOverviewUseCase,
+      { provide: SHOW_ARCHIVE_OVERVIEW_IN_PORT, useExisting: ShowArchiveOverviewUseCase },
+    ],
     loadComponent: () => import('./features/archive/presentation/archive.component').then(m => m.ArchiveComponent),
   },
   {

@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core';
 import { StorageService } from '../../../core/infrastructure/storage.service';
 import { ArchiveEntry, restoreArchiveEntry, toPersistedArchiveEntry } from '../domain/archive-entry';
 import { ArchiveRepository } from '../domain/archive.repository';
+import { LoadArchiveEntriesOutPort } from '../application/ports/out/load-archive-entries.out-port';
 
 @Injectable({ providedIn: 'root' })
-export class LocalStorageArchiveRepository implements ArchiveRepository {
+export class LocalStorageArchiveRepository implements ArchiveRepository, LoadArchiveEntriesOutPort {
   private readonly storageKeyV1 = 'kq-bingo-archive-v1';
 
   constructor(private readonly storage: StorageService) {}
