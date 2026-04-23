@@ -110,38 +110,9 @@ Die Bausteinsicht ist bewusst mehrstufig aufgebaut, damit ein schrittweises "Rei
 
 ### 5.2 Ebene 1 – Gesamtsystem (Hexagon)
 
-```mermaid
-flowchart TB
-  subgraph PRIMARY[Primary Adapter]
-    UI[Presentation<br/>Components, Pages, Dialogs]
-  end
+> Diagramm-Quelle: [diagrams/hexagon-overview.drawio](./diagrams/hexagon-overview.drawio) (mit VS Code Extension "Draw.io Integration" oeffnen)
 
-  subgraph APP[Application Layer]
-    INP[[InPorts]]
-    UC[UseCases]
-    OUTP[[OutPorts]]
-  end
-
-  subgraph DOM[Domain Layer]
-    DM[Aggregate + Value Objects + Domain Rules]
-  end
-
-  subgraph SECONDARY[Secondary Adapter]
-    LSA[LocalStorage Adapter]
-    IDBA[IndexedDB Adapter]
-  end
-
-  INFRA[(Browser APIs<br/>LocalStorage / IndexedDB)]
-
-  UI --> INP
-  INP --> UC
-  UC --> DM
-  UC --> OUTP
-  LSA -. implements .-> OUTP
-  IDBA -. implements .-> OUTP
-  LSA --> INFRA
-  IDBA --> INFRA
-```
+![Gesamtsystem-Hexagon](./diagrams/hexagon-overview.png)
 
 Abhaengigkeitsregel: innen kennt nichts von aussen. Primary und Secondary Adapter haengen von Ports ab, nicht die Domain von Adaptern.
 
@@ -166,54 +137,27 @@ Namensregel (ADR-005):
 
 #### 5.4.1 quarterly-plan
 
-```mermaid
-flowchart LR
-  UI[QuarterlyPlanComponent] --> IN[[PlanQuarterlyInPort]]
-  IN --> UC[PlanQuarterlyUseCase]
-  UC --> DOM[QuarterlyPlan + Challenge]
-  UC --> OUT1[[LoadQuarterlyPlanOutPort]]
-  UC --> OUT2[[PersistQuarterlyPlanOutPort]]
-  AD[LocalStorageQuarterlyPlanRepository] -. implements .-> OUT1
-  AD -. implements .-> OUT2
-```
+> Diagramm-Quelle: [diagrams/hexagon-quarterly-plan.drawio](./diagrams/hexagon-quarterly-plan.drawio)
+
+![quarterly-plan Hexagon](./diagrams/hexagon-quarterly-plan.png)
 
 #### 5.4.2 bingo-game
 
-```mermaid
-flowchart LR
-  UI[BingoGameComponent] --> IN[[PlayBingoInPort]]
-  IN --> UC[PlayBingoUseCase]
-  UC --> DOM[BingoGame + ChallengeProgress]
-  UC --> OUT1[[LoadBingoProgressOutPort]]
-  UC --> OUT2[[PersistBingoProgressOutPort]]
-  UC --> OUT3[[LoadQuarterlyPlanOutPort]]
-  AD[LocalStorageBingoGameRepository] -. implements .-> OUT1
-  AD -. implements .-> OUT2
-```
+> Diagramm-Quelle: [diagrams/hexagon-bingo-game.drawio](./diagrams/hexagon-bingo-game.drawio)
+
+![bingo-game Hexagon](./diagrams/hexagon-bingo-game.png)
 
 #### 5.4.3 archive
 
-```mermaid
-flowchart LR
-  UI[ArchiveComponent] --> IN[[ShowArchiveOverviewInPort]]
-  IN --> UC[ShowArchiveOverviewUseCase]
-  UC --> DOM[ArchiveEntry]
-  UC --> OUT[[LoadArchiveEntriesOutPort]]
-  AD[LocalStorageArchiveRepository] -. implements .-> OUT
-```
+> Diagramm-Quelle: [diagrams/hexagon-archive.drawio](./diagrams/hexagon-archive.drawio)
+
+![archive Hexagon](./diagrams/hexagon-archive.png)
 
 #### 5.4.4 core / quarter-lifecycle
 
-```mermaid
-flowchart LR
-  UI[StartPageComponent] --> IN[[EnsureQuarterRolloverInPort]]
-  IN --> UC[EnsureQuarterRolloverUseCase]
-  UC --> DOM[QuarterClock + QuarterId]
-  UC --> QP1[[LoadQuarterlyPlanOutPort]]
-  UC --> QP2[[PersistQuarterlyPlanOutPort]]
-  UC --> BG1[[LoadBingoProgressOutPort]]
-  UC --> BG2[[PersistBingoProgressOutPort]]
-```
+> Diagramm-Quelle: [diagrams/hexagon-quarter-lifecycle.drawio](./diagrams/hexagon-quarter-lifecycle.drawio)
+
+![quarter-lifecycle Hexagon](./diagrams/hexagon-quarter-lifecycle.png)
 
 ### 5.5 Domain-Modell
 
