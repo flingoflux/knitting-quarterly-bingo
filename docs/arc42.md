@@ -79,7 +79,7 @@ flowchart TB
 | **Domain-Driven Design** | Komplexe Domänenlogik (Bingo-Erkennung, Spielstand-Validierung, Bild-Konzepte) lebt isoliert im Domain-Layer |
 | **Ports and Adapters** | Storage-Technologien (LocalStorage, IndexedDB) sind austauschbar; Domäne kennt nur Interfaces (Ports) |
 | **Immutable Aggregate + Value Objects** | `QuarterlyPlan`, `BingoGame` und `KnittingQuarterly` kapseln fachliche Regeln ohne Seiteneffekte; jede Mutation liefert eine neue Instanz |
-| **Angular Signals** | Reaktiver State ohne RxJS-Overhead; Services halten `signal<Aggregate>()` und leiten `computed()`-Werte ab |
+| **Angular Signals** | Reaktiver State ohne RxJS-Overhead; UseCases halten `signal<Aggregate>()` und leiten `computed()`-Werte ab |
 | **Feature-Slice-Struktur** | Klare Trennung nach Features mit eigenem domain/application/infrastructure/presentation-Stack |
 | **Atomic Design (UI)** | UI-Komponenten sind als Tokens, Atoms, Molecules und Organisms strukturiert; fördert Wiederverwendung, konsistentes Design und klare Verantwortlichkeiten in der Presentation-Schicht |
 
@@ -116,12 +116,7 @@ Die Bausteinsicht ist bewusst mehrstufig aufgebaut, damit ein schrittweises "Rei
 
 Abhaengigkeitsregel: innen kennt nichts von aussen. Primary und Secondary Adapter haengen von Ports ab, nicht die Domain von Adaptern.
 
-Namensregel (ADR-005):
-- Inbound Ports enden auf `InPort`.
-- Outbound Ports enden auf `OutPort`.
-- Application-Implementierungen enden auf `UseCase`.
-- In Ports und UseCases wird fuer Schreibvorgaenge `persist...` verwendet.
-- Repositories behalten fuer Schreibvorgaenge `save...`.
+Namensregel: siehe ADR-005 (Kapitel 9) fuer die verbindliche Benennung von InPorts, OutPorts, UseCases sowie `persist...` vs. `save...`.
 
 ### 5.3 Ebene 2 – Feature-Slices (Verantwortlichkeiten)
 
@@ -130,7 +125,7 @@ Namensregel (ADR-005):
 | quarterly-plan | `PlanQuarterlyInPort` | `PlanQuarterlyUseCase` | `LoadQuarterlyPlanOutPort`, `PersistQuarterlyPlanOutPort` | `LocalStorageQuarterlyPlanRepository` | `QuarterlyPlan`, `Challenge` |
 | bingo-game | `PlayBingoInPort` | `PlayBingoUseCase` | `LoadBingoProgressOutPort`, `PersistBingoProgressOutPort`, Nutzung von `LoadQuarterlyPlanOutPort` | `LocalStorageBingoGameRepository` | `BingoGame`, `ChallengeProgress` |
 | archive | `ShowArchiveOverviewInPort` | `ShowArchiveOverviewUseCase` | `LoadArchiveEntriesOutPort` | `LocalStorageArchiveRepository` | `ArchiveEntry` |
-| core / quarter-lifecycle | `EnsureQuarterRolloverInPort` | `EnsureQuarterRolloverUseCase` | nutzt OutPorts aus quarterly-plan und bingo-game | kein eigener Storage-Adapter | `QuarterClock`, `QuarterId` |
+| core / quarter-lifecycle | `EnsureQuarterRolloverInPort` | `EnsureQuarterRolloverUseCase` | nutzt aktuell `QUARTERLY_PLAN_READER`/`QUARTERLY_PLAN_WRITER` und `BINGO_GAME_REPOSITORY` (Migration auf OutPorts folgt) | kein eigener Storage-Adapter | `QuarterClock`, `QuarterId` |
 | shared image storage | n/a (derzeit) | n/a (derzeit) | `ImageRepository` | `IndexedDbImageRepository` | Bild-UUID-Referenzen |
 
 ### 5.4 Ebene 3 – Feature-spezifische Hexagon-Sichten
@@ -265,31 +260,32 @@ Der `EnsureQuarterRolloverUseCase` wird beim App-Start aufgerufen und prueft, ob
 sequenceDiagram
   participant SPC as StartPageComponent
   participant RUC as EnsureQuarterRolloverUseCase
-  participant QPL as LoadQuarterlyPlanOutPort
-  participant BGL as LoadBingoProgressOutPort
-  participant BGP as PersistBingoProgressOutPort
-  participant QPP as PersistQuarterlyPlanOutPort
+  participant QPR as QUARTERLY_PLAN_READER
+  participant QPW as QUARTERLY_PLAN_WRITER
+  participant BGR as BINGO_GAME_REPOSITORY
+  participant AR as ARCHIVE_REPOSITORY
   participant LocalStorage
 
   SPC->>RUC: persistQuarterRollover(now)
   RUC->>RUC: currentQuarterId = QuarterClock.getQuarterId(now)
-  RUC->>QPL: load(currentQuarterId)
-  QPL->>LocalStorage: read(board-definition:{currentQuarterId})
+  RUC->>QPR: load(currentQuarterId)
+  QPR->>LocalStorage: read(board-definition:{currentQuarterId})
   alt Board existiert bereits
-    LocalStorage-->>QPL: QuarterlyPlanData
-    QPL-->>RUC: Result.ok(plan)
+    LocalStorage-->>QPR: QuarterlyPlanData
+    QPR-->>RUC: Result.ok(plan)
     RUC-->>SPC: nichts zu tun
   else Kein Board fuer aktuelles Quartal
-    LocalStorage-->>QPL: kein Eintrag
-    QPL-->>RUC: Result.err
+    LocalStorage-->>QPR: kein Eintrag
+    QPR-->>RUC: Result.err
     RUC->>RUC: previousQuarterId = QuarterId.parse(currentQuarterId).previous()
-    RUC->>BGL: load(previousQuarterId)
+    RUC->>BGR: load(previousQuarterId)
     alt Altes Spiel vorhanden
-      BGL-->>RUC: BingoGameProgress
+      BGR-->>RUC: BingoGameProgress
       RUC->>RUC: createArchiveEntry(...)
+      RUC->>AR: append(entry)
     end
-    RUC->>BGP: clear(previousQuarterId)
-    RUC->>QPP: persist(currentQuarterId, defaultPlan)
+    RUC->>BGR: clear(previousQuarterId)
+    RUC->>QPW: save(currentQuarterId, defaultPlan)
   end
 ```
 
@@ -376,43 +372,42 @@ sequenceDiagram
 stateDiagram-v2
   [*] --> KeinPlan
 
-  KeinPlan: Kein gueltiger QuarterlyPlan
-  KeinPlan --> Planung: Nutzer oeffnet /quarterly mit future-Quarter
+  KeinPlan --> Planung: future-Quarter oeffnen
+  Planung --> Spielen: current-Quarter mit gueltigem Plan
 
-  Planung: Plan bearbeiten\n(Challenge-Namen/Reihenfolge/Bilder)
-  Planung --> Spielfaehig: Plan mit 16 Challenges gespeichert
+  Spielen --> Bingo: Linie vollstaendig
+  Bingo --> Spielen: weitere Aenderungen
 
-  Spielfaehig: Routing waehlt Spielsicht fuer current-Quarter
-  Spielfaehig --> Spielen: Nutzer startet Spiel
+  Spielen --> Reset: Plan-Signatur ungleich
+  Bingo --> Reset: Plan-Signatur ungleich
+  Reset --> Spielen: neues Game aus Definition
 
-  Spielen: Toggle/Foto-Upload\nProgress wird persistiert
-  Spielen --> BingoErreicht: mindestens eine volle Linie
-  Spielen --> Spielen: weitere Zuege
-
-  BingoErreicht: Bingo markiert, Spiel laeuft weiter
-  BingoErreicht --> Spielen: weitere Aenderungen ohne Reset
-
-  Spielen --> ResetWegenPlanAenderung: Board-Signatur ungleich
-  BingoErreicht --> ResetWegenPlanAenderung: Board-Signatur ungleich
-
-  ResetWegenPlanAenderung: Fortschritt verwerfen\nNeues Game aus Definition
-  ResetWegenPlanAenderung --> Spielfaehig
-
-  Spielen --> Spielfaehig: resetProgress()
-  BingoErreicht --> Spielfaehig: resetProgress()
+  Spielen --> Spielen: resetProgress()
+  Bingo --> Spielen: resetProgress()
 ```
+
+| Zustand | Bedeutung |
+|---|---|
+| `KeinPlan` | Fuer das gewaehlte Quartal existiert noch kein gueltiger `QuarterlyPlan`. |
+| `Planung` | Das Board wird bearbeitet (Challenges, Reihenfolge, Bilder). |
+| `Spielen` | Das aktive Spiel laeuft; Fortschritt wird per Toggle/Foto aktualisiert und persistiert. |
+| `Bingo` | Mindestens eine vollstaendige Linie wurde erreicht. |
+| `Reset` | Der bisherige Spielstand wird verworfen und aus der aktuellen Plan-Definition neu aufgebaut. |
 
 ---
 
 ## 7. Verteilungssicht
 
-Die Anwendung wird als statische Webanwendung ausgeliefert. Es gibt nur eine Laufzeitumgebung: den Browser des Benutzers.
+Die Anwendung wird als statische Webanwendung ausgeliefert.
+
+- Aktueller Betrieb: GitHub Pages
+- Vorbereitet fuer spaeter: Container-Betrieb via Docker/nginx
 
 ```mermaid
 flowchart TB
-  subgraph NGINX[nginx\nDocker-Container]
+  subgraph GHP[GitHub Pages - aktuell]
     DIST[dist/\nstatische Dateien]
-    SPA[SPA-Fallback\nalle Routen -> index.html]
+    STATIC[Statisches Hosting]
   end
 
   subgraph BROWSER[Browser]
@@ -421,12 +416,15 @@ flowchart TB
     IDB2[(IndexedDB\nBilder als Blobs/DataURLs)]
   end
 
-  NGINX -->|HTTPS| BROWSER
+  DIST --> STATIC
+  STATIC -->|HTTPS| BROWSER
   SPAAPP --> LS2
   SPAAPP --> IDB2
 ```
 
-**Deployment:** `docker-compose up` baut die App und startet nginx. Konfiguration in `Dockerfile` und `docker-compose.yml`.
+**Deployment (aktuell):** GitHub Pages mit statischen Build-Artefakten (`dist/`).
+
+**Deployment (vorbereitet):** `Dockerfile` und `docker-compose.yml` sind als zukuenftige Option fuer einen Container-Betrieb mit nginx vorhanden.
 
 ---
 
@@ -449,9 +447,9 @@ Bilder werden **nie** direkt im Plan oder Spielstand gespeichert – nur ihre UU
 Beide Repositories enthalten automatische Migrationslogik beim Laden:
 
 - `LocalStorageQuarterlyPlanRepository`: Legacy-Daten ohne `quarterId` werden auf das quartalsbezogene v3-Format migriert.
-- `LocalStorageBingoGameRepository`: v2 (separate `cellImages[]` + `completed[]`-Arrays) → v3/v4 (`ChallengeProgress[]`, quartalsbezogen)
+- `LocalStorageBingoGameRepository`: v2 (separate `cellImages[]` + `completed[]`-Arrays) -> v3/v4 (`ChallengeProgress[]`, quartalsbezogen)
 
-Migrationen laufen transparent beim ersten Laden nach einem Update. Alte Schlüssel werden nicht gelöscht, um einen Rollback nicht zu verunmöglichen.
+Migrationen laufen transparent beim ersten Laden nach einem Update. Legacy-Schluessel bleiben bei der Migration erhalten; beim expliziten `clear(currentQuarter)` werden v2/v3-Kompatibilitaetsschluessel bereinigt.
 
 ### 8.3 Unveränderliche Domänen-Aggregate
 
@@ -459,7 +457,7 @@ Alle Aggregate (`KnittingQuarterly`, `BingoGame`, `QuarterlyPlan`) sind immutabl
 
 - Private Konstruktoren, nur statische Factory-Methoden
 - Jede Mutation erzeugt eine neue Instanz
-- Services halten Aggregate in Angular-`signal()`-Containern
+- UseCases halten Aggregate in Angular-`signal()`-Containern
 
 Vorteil: keine defensive Kopien nötig, keine unbeabsichtigten Seiteneffekte, direkte Testbarkeit ohne Mocks.
 
@@ -488,7 +486,7 @@ Wenn der Benutzer den Plan nach dem Start eines Spiels ändert, würde der alte 
 
 ### 8.7 Fehlerbehandlung
 
-Fehler aus Storage-Operationen werden als `Result<T, E>` zurückgegeben (typsicheres Either-Pattern). Services reagieren auf `result.ok === false` mit Fallback-Verhalten (leerer Plan / leeres Spiel), nicht mit Exceptions.
+Fehler aus Storage-Operationen werden als `Result<T, E>` zurueckgegeben (typsicheres Either-Pattern). UseCases reagieren auf `result.ok === false` mit Fallback-Verhalten (leerer Plan / leeres Spiel), nicht mit Exceptions.
 
 ### 8.8 Fehler- und Fallback-Sicht
 
@@ -525,13 +523,13 @@ flowchart TD
 | Plan kann nicht aus LocalStorage geladen werden | `PlanQuarterlyUseCase` + `LocalStorageQuarterlyPlanRepository` | `persistDefaultQuarterlyPlan()` mit Default-Werten | Edit-Flow bleibt nutzbar |
 | Spielstand kann nicht geladen werden | `PlayBingoUseCase` + `LocalStorageBingoGameRepository` | `BingoGame.fromDefinition()` statt Restore | Spiel startet konsistent neu |
 | Signatur passt nicht (Plan geaendert) | `PlayBingoUseCase` | Gespeicherten Fortschritt verwerfen, neues Spiel aus aktueller Definition | Kein inkonsistenter Mischzustand |
-| Bild kann nicht aus IndexedDB geladen werden | `IndexedDbImageRepositoryService` + UI-Komponenten (`ChallengeCard`, `ProjectComparisonDialog`) | Platzhalter statt Bild anzeigen | Kerninteraktion bleibt erhalten |
-| Bildspeicherung schlaegt fehl | `IndexedDbImageRepositoryService` + aufrufender Service | Aktion ohne Bild abschliessen, bestehenden Zustand beibehalten | Keine Blockade des Spielflusses |
-| Schreiben nach LocalStorage schlaegt fehl | `StorageService` + aufrufender Service | Fehler als `Result` propagieren, keine Exception bis in die UI | UI bleibt stabil (degraded mode) |
+| Bild kann nicht aus IndexedDB geladen werden | `IndexedDbImageRepository` + UI-Komponenten (`ChallengeCard`, `ProjectComparisonDialog`) | Platzhalter statt Bild anzeigen | Kerninteraktion bleibt erhalten |
+| Bildspeicherung schlaegt fehl | `IndexedDbImageRepository` + aufrufender UseCase/Komponente | Aktion ohne Bild abschliessen, bestehenden Zustand beibehalten | Keine Blockade des Spielflusses |
+| Schreiben nach LocalStorage schlaegt fehl | `StorageService` + Repository/UseCase | Fehler als `Result` propagieren, keine Exception bis in die UI | UI bleibt stabil (degraded mode) |
 
 ### 8.9 UI-Architektur und Atomic Design
 
-Die Presentation-Schicht folgt dem **Atomic Design**-Modell (nach Brad Frost). Komponenten sind in 4 Ebenen organisiert, von Basislelementen zu ganzen Seiten:
+Die Presentation-Schicht folgt dem **Atomic Design**-Modell (nach Brad Frost). Komponenten sind in 5 Ebenen organisiert, von Basiselementen zu ganzen Seiten:
 
 #### **Tokens** – Design-System-Fundament
 
@@ -740,7 +738,7 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 ### ADR-002: DDD mit Ports and Adapters
 
 **Kontext:** Domänenlogik (Bingo-Erkennung, Plan-Verwaltung) soll testbar und framework-unabhängig sein.  
-**Entscheidung:** Feature-Slice-Architektur mit domain/application/infrastructure/presentation-Schichten. Storage-Interfaces als Ports (`QUARTERLY_PLAN_READER`, `BINGO_GAME_REPOSITORY`, `IMAGE_REPOSITORY`).  
+**Entscheidung:** Feature-Slice-Architektur mit domain/application/infrastructure/presentation-Schichten. Storage-Interfaces werden als Ports modelliert; im Code existieren sowohl legacy Domain-Ports (`QUARTERLY_PLAN_READER`, `BINGO_GAME_REPOSITORY`, `IMAGE_REPOSITORY`) als auch feature-spezifische OutPorts (`...OutPort`).  
 **Konsequenzen:** Domäne hat keine Angular-Importe. Adapter können in Tests durch Mocks ersetzt werden.
 
 ### ADR-003: IndexedDB für Bilder, LocalStorage für strukturierte Daten
@@ -783,7 +781,7 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 | Q2 | Benutzer ändert den Plan nach Spielstart | Spielstand wird verworfen, neues Spiel beginnt automatisch |
 | Q3 | Benutzer lädt ein Bild >1 MB hoch | App bleibt responsive; Bild wird in IndexedDB gespeichert |
 | Q4 | Alle 16 Challenges einer Zeile abgehakt | Bingo wird sofort (synchron) erkannt und markiert |
-| Q5 | Domänenlogik-Test | `pnpm test --run` läuft in unter 1 Sekunde; keine Angular-Umgebung nötig |
+| Q5 | Domänenlogik-Test | `pnpm test` läuft in unter 1 Sekunde; keine Angular-Umgebung nötig |
 
 ---
 
@@ -818,5 +816,5 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 | Port | Abstrakte Schnittstelle, über die die Application-Schicht Infrastruktur anspricht. |
 | Progress-Bild | Während der Spielphase aufgenommenes Foto (`progressImageId`). |
 | Planungsbild | In der Planungsphase hinterlegtes Referenzbild (`planningImageId`). |
-| Result<T, E> | Typsicheres Erfolgs-/Fehlerobjekt statt Exception-Flow in Services. |
+| Result<T, E> | Typsicheres Erfolgs-/Fehlerobjekt statt Exception-Flow in UseCases/Repositories. |
 | Value Object | Unveränderliches Objekt ohne eigene Identität, beschrieben über seine Werte. |
