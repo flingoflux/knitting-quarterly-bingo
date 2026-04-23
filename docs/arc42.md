@@ -693,14 +693,14 @@ classDiagram
   class QuarterlyPlanSnapshot {
     +string quarterId
     +Challenge[16] challenges
-    +key: kq-bingo-board-definition-v3:{quarterId}
+    +key: kq-bingo-board-definition-v3:[quarterId]
   }
 
   class ActiveGame {
     +string quarterId
     +string planSignature
     +ChallengeProgress[16] challenges
-    +key: kq-bingo-active-game-v4:{quarterId}
+    +key: kq-bingo-active-game-v4:[quarterId]
   }
 
   class ArchiveSnapshot {
