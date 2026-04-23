@@ -99,43 +99,167 @@ Die kanonische Fachsprache in der Domäne lautet:
 
 ## 5. Bausteinsicht
 
-### 5.1 Ebene 1 – Gesamtsystem
+### 5.1 Drilldown-Navigation
+
+Die Bausteinsicht ist bewusst mehrstufig aufgebaut, damit ein schrittweises "Reindrillen" moeglich ist:
+
+1. **Ebene 1 (Gesamtsystem):** Ein Hexagon auf Systemebene mit Layern, InPorts, UseCases, OutPorts und Adaptern.
+2. **Ebene 2 (Feature-Slices):** Verantwortlichkeiten je Slice.
+3. **Ebene 3 (Pro Feature):** Eigene hexagonale Sicht mit konkreten InPorts, UseCases, OutPorts, Adaptern und Domain-Objekten.
+4. **Domain-Modell:** Ein globales Modell fuer das gemeinsame Verstaendnis plus fokussierte Sichten pro Feature.
+
+### 5.2 Ebene 1 – Gesamtsystem (Hexagon)
+
+```mermaid
+flowchart TB
+  subgraph PRIMARY[Primary Adapter]
+    UI[Presentation<br/>Components, Pages, Dialogs]
+  end
+
+  subgraph APP[Application Layer]
+    INP[[InPorts]]
+    UC[UseCases]
+    OUTP[[OutPorts]]
+  end
+
+  subgraph DOM[Domain Layer]
+    DM[Aggregate + Value Objects + Domain Rules]
+  end
+
+  subgraph SECONDARY[Secondary Adapter]
+    LSA[LocalStorage Adapter]
+    IDBA[IndexedDB Adapter]
+  end
+
+  INFRA[(Browser APIs<br/>LocalStorage / IndexedDB)]
+
+  UI --> INP
+  INP --> UC
+  UC --> DM
+  UC --> OUTP
+  LSA -. implements .-> OUTP
+  IDBA -. implements .-> OUTP
+  LSA --> INFRA
+  IDBA --> INFRA
+```
+
+Abhaengigkeitsregel: innen kennt nichts von aussen. Primary und Secondary Adapter haengen von Ports ab, nicht die Domain von Adaptern.
+
+Namensregel (ADR-005):
+- Inbound Ports enden auf `InPort`.
+- Outbound Ports enden auf `OutPort`.
+- Application-Implementierungen enden auf `UseCase`.
+- In Ports und UseCases wird fuer Schreibvorgaenge `persist...` verwendet.
+- Repositories behalten fuer Schreibvorgaenge `save...`.
+
+### 5.3 Ebene 2 – Feature-Slices (Verantwortlichkeiten)
+
+| Slice | InPort | UseCase | OutPorts | Adapter | Domain-Fokus |
+|---|---|---|---|---|---|
+| quarterly-plan | `PlanQuarterlyInPort` | `PlanQuarterlyUseCase` | `LoadQuarterlyPlanOutPort`, `PersistQuarterlyPlanOutPort` | `LocalStorageQuarterlyPlanRepository` | `QuarterlyPlan`, `Challenge` |
+| bingo-game | `PlayBingoInPort` | `PlayBingoUseCase` | `LoadBingoProgressOutPort`, `PersistBingoProgressOutPort`, Nutzung von `LoadQuarterlyPlanOutPort` | `LocalStorageBingoGameRepository` | `BingoGame`, `ChallengeProgress` |
+| archive | `ShowArchiveOverviewInPort` | `ShowArchiveOverviewUseCase` | `LoadArchiveEntriesOutPort` | `LocalStorageArchiveRepository` | `ArchiveEntry` |
+| core / quarter-lifecycle | `EnsureQuarterRolloverInPort` | `EnsureQuarterRolloverUseCase` | nutzt OutPorts aus quarterly-plan und bingo-game | kein eigener Storage-Adapter | `QuarterClock`, `QuarterId` |
+| shared image storage | n/a (derzeit) | n/a (derzeit) | `ImageRepository` | `IndexedDbImageRepository` | Bild-UUID-Referenzen |
+
+### 5.4 Ebene 3 – Feature-spezifische Hexagon-Sichten
+
+#### 5.4.1 quarterly-plan
+
+```mermaid
+flowchart LR
+  UI[QuarterlyPlanComponent] --> IN[[PlanQuarterlyInPort]]
+  IN --> UC[PlanQuarterlyUseCase]
+  UC --> DOM[QuarterlyPlan + Challenge]
+  UC --> OUT1[[LoadQuarterlyPlanOutPort]]
+  UC --> OUT2[[PersistQuarterlyPlanOutPort]]
+  AD[LocalStorageQuarterlyPlanRepository] -. implements .-> OUT1
+  AD -. implements .-> OUT2
+```
+
+#### 5.4.2 bingo-game
+
+```mermaid
+flowchart LR
+  UI[BingoGameComponent] --> IN[[PlayBingoInPort]]
+  IN --> UC[PlayBingoUseCase]
+  UC --> DOM[BingoGame + ChallengeProgress]
+  UC --> OUT1[[LoadBingoProgressOutPort]]
+  UC --> OUT2[[PersistBingoProgressOutPort]]
+  UC --> OUT3[[LoadQuarterlyPlanOutPort]]
+  AD[LocalStorageBingoGameRepository] -. implements .-> OUT1
+  AD -. implements .-> OUT2
+```
+
+#### 5.4.3 archive
+
+```mermaid
+flowchart LR
+  UI[ArchiveComponent] --> IN[[ShowArchiveOverviewInPort]]
+  IN --> UC[ShowArchiveOverviewUseCase]
+  UC --> DOM[ArchiveEntry]
+  UC --> OUT[[LoadArchiveEntriesOutPort]]
+  AD[LocalStorageArchiveRepository] -. implements .-> OUT
+```
+
+#### 5.4.4 core / quarter-lifecycle
+
+```mermaid
+flowchart LR
+  UI[StartPageComponent] --> IN[[EnsureQuarterRolloverInPort]]
+  IN --> UC[EnsureQuarterRolloverUseCase]
+  UC --> DOM[QuarterClock + QuarterId]
+  UC --> QP1[[LoadQuarterlyPlanOutPort]]
+  UC --> QP2[[PersistQuarterlyPlanOutPort]]
+  UC --> BG1[[LoadBingoProgressOutPort]]
+  UC --> BG2[[PersistBingoProgressOutPort]]
+```
+
+### 5.5 Domain-Modell
+
+#### 5.5.1 Globales Domain-Modell (systemweit)
 
 ```mermaid
 classDiagram
   class QuarterId {
     <<Value Type>>
     +parse(value: string) QuarterId
-    +fromDate(date: Date) QuarterId
+    +from(value: string|QuarterId) QuarterId
     +next() QuarterId
     +previous() QuarterId
-    +compareTo(other: QuarterId) int
+  }
+
+  class KnittingQuarterly {
+    <<Value Type>>
+    +QuarterId quarterId
+    +phaseAt(currentQuarterId: QuarterId) QuarterlyPhase
   }
 
   class QuarterlyPlan {
     <<Aggregate Root>>
     +QuarterId quarterId
     +Challenge[16] challenges
-    +QuarterlyPlan update(index, challenge)
-    +QuarterlyPlan reorder(from, to)
-    +PersistedQuarterlyPlan toPersistable()
+  }
+
+  class BingoGame {
+    <<Aggregate Root>>
+    +QuarterId quarterId
+    +ChallengeProgress[16] challenges
+    +Set~int~ bingoCells
+  }
+
+  class ArchiveEntry {
+    <<Aggregate Root>>
+    +QuarterId quarterId
+    +string archivedAt
+    +int completedCount
+    +boolean hasBingo
   }
 
   class Challenge {
     <<Value Type>>
     +string name
     +UUID imageId?
-  }
-
-  class BingoGame {
-    <<Aggregate Root>>
-    +QuarterId? quarterId
-    +ChallengeProgress[16] challenges
-    +BingoGame toggle(index)
-    +BingoGame updateProgressImage(index, imageId)
-    +BingoGame resetProgress()
-    +Set~int~ bingoCells()
-    +BingoGameProgress toProgress()
   }
 
   class ChallengeProgress {
@@ -146,167 +270,20 @@ classDiagram
     +boolean completed
   }
 
-  class ArchiveEntry {
-    <<Aggregate Root>>
-    +QuarterId quarterId
-    +string startedAt
-    +string archivedAt
-    +int completedCount
-    +int totalCount
-    +boolean hasBingo
-  }
-
-  class KnittingQuarterly {
-    <<Value Type>>
-    +QuarterId quarterId
-    +QuarterlyPhase phaseAt(currentQuarterId: QuarterId)
-    +boolean isFuturePreview(currentQuarterId: QuarterId)
-  }
-
-  class BingoGameProgress {
-    <<Persisted DTO>>
-    +string quarterId
-    +string planSignature
-    +ChallengeProgress[] challenges
-    +string startedAt
-  }
-
-  class PersistedQuarterlyPlan {
-    <<Persisted DTO>>
-    +string quarterId
-    +Challenge[] challenges
-  }
-
-  class QuarterlyPhase {
-    <<Value Type>>
-    past
-    current
-    future
-  }
-
-  QuarterlyPlan *-- "16" Challenge
-  BingoGame *-- "16" ChallengeProgress
+  QuarterlyPlan *-- Challenge
+  BingoGame *-- ChallengeProgress
+  KnittingQuarterly ..> QuarterId
   QuarterlyPlan ..> QuarterId
   BingoGame ..> QuarterId
   ArchiveEntry ..> QuarterId
-  KnittingQuarterly ..> QuarterId
-  BingoGame ..> BingoGameProgress
-  QuarterlyPlan ..> PersistedQuarterlyPlan
-
-  note for BingoGame "Immutable Aggregat:\nalle Mutationen liefern\nneue Instanzen."
 ```
 
-### 5.2 Ebene 1b – Port-Signaturen (Application -> Domain)
+#### 5.5.2 Domain-Sichten pro Feature
 
-```mermaid
-classDiagram
-  class QuarterId {
-    <<Value Type>>
-  }
-
-  class QuarterlyPlanReader {
-    <<Port>>
-    +load(quarterId: QuarterId) Result
-    +findById(id: QuarterId) Result
-  }
-
-  class QuarterlyPlanWriter {
-    <<Port>>
-    +save(quarterId: QuarterId, plan: QuarterlyPlanData)
-  }
-
-  class BingoGameRepository {
-    <<Port>>
-    +load(quarterId: QuarterId) BingoGameProgress?
-    +save(quarterId: QuarterId, progress: BingoGameProgress)
-    +clear(quarterId: QuarterId)
-  }
-
-  class LocalStorageQuarterlyPlanRepository {
-    <<Adapter>>
-  }
-
-  class LocalStorageBingoGameRepository {
-    <<Adapter>>
-  }
-
-  class QuarterlyPlanData {
-    <<DTO>>
-    +string quarterId
-    +Challenge[] challenges
-  }
-
-  class BingoGameProgress {
-    <<DTO>>
-    +string quarterId
-    +string planSignature
-  }
-
-  QuarterlyPlanReader ..> QuarterId
-  QuarterlyPlanWriter ..> QuarterId
-  BingoGameRepository ..> QuarterId
-
-  LocalStorageQuarterlyPlanRepository ..|> QuarterlyPlanReader
-  LocalStorageQuarterlyPlanRepository ..|> QuarterlyPlanWriter
-  LocalStorageBingoGameRepository ..|> BingoGameRepository
-```
-
-### 5.3 Architekturbild – Ports and Adapters
-
-```mermaid
-flowchart TB
-  PRESENTATION[Presentation<br/>Angular Components, Guards, Dialoge]
-  APPLICATION[Application<br/>Services / Use Cases]
-  DOMAIN[Domain<br/>Aggregate + Value Objects]
-
-  QPR[[QuarterlyPlanReader]]
-  QPW[[QuarterlyPlanWriter]]
-  BGR[[BingoGameRepository]]
-  AR[[ArchiveRepository]]
-  IR[[ImageRepository]]
-
-  LSBR[LocalStorageQuarterlyPlanRepository]
-  LSBGR[LocalStorageBingoGameRepository]
-  LSAR[LocalStorageArchiveRepository]
-  IDBR[IndexedDbImageRepositoryService]
-  LS[(LocalStorage)]
-  IDB[(IndexedDB)]
-
-  PRESENTATION --> APPLICATION
-  APPLICATION --> DOMAIN
-
-  APPLICATION --> QPR
-  APPLICATION --> QPW
-  APPLICATION --> BGR
-  APPLICATION --> AR
-  APPLICATION --> IR
-
-  LSBR -. implements .-> QPR
-  LSBR -. implements .-> QPW
-  LSBGR -. implements .-> BGR
-  LSAR -. implements .-> AR
-  IDBR -. implements .-> IR
-
-  LSBR --> LS
-  LSBGR --> LS
-  LSAR --> LS
-  IDBR --> IDB
-```
-
-Abhaengigkeitsregel: innen kennt nichts von aussen. Adapter haengen von Ports ab, nicht die Domain von Adaptern.
-
-**Kernelemente und Verantwortlichkeiten:**
-
-- **Aggregates:** `QuarterlyPlan`, `BingoGame`, `ArchiveEntry`.
-- **Entities:** Im aktuellen Domänenmodell gibt es keine eigenstaendigen Entities mit eigener fachlicher Identitaet unterhalb der Aggregate.
-- **Value Types:** `KnittingQuarterly`, `QuarterId`, `QuarterlyPhase`, `Challenge`, `ChallengeProgress`.
-- `KnittingQuarterly`: Fachobjekt fuer die zeitliche Einordnung eines Quartals. Die abgeleitete Phase steuert die erlaubte Sicht: `past` -> Archiv, `current` -> Spielen, `future` -> Planbearbeitung.
-- `QuarterlyPlan`: Unveraenderliches Planungs-Aggregat eines Quartals mit 16 Challenges (Bearbeiten, Umordnen).
-- `BingoGame`: Unveraenderliches Spiel-Aggregat eines Quartals fuer Fortschritt und Bingo-Erkennung.
-- `ArchiveEntry`: Historischer Snapshot eines abgeschlossenen Quartals.
-- Ports (`QuarterlyPlanReader/Writer`, `BingoGameRepository`, `ArchiveRepository`, `ImageRepository`): Definieren die von der Applikation benoetigte Persistenz.
-- Adapter (`LocalStorage...`, `IndexedDb...`): Implementieren Ports und kapseln Browser-APIs inklusive Migrationen.
-- Presentation + Application: UI loest Use Cases aus; Services orchestrieren Domain + Ports.
+- **quarterly-plan:** `QuarterlyPlan`, `Challenge`
+- **bingo-game:** `BingoGame`, `ChallengeProgress` (inkl. Bingo-Erkennung)
+- **archive:** `ArchiveEntry` als historischer Snapshot
+- **core / quarter-lifecycle:** `QuarterClock`, `QuarterId`, `KnittingQuarterly` fuer Zeit-/Phasenlogik
 
 ---
 
@@ -319,61 +296,56 @@ sequenceDiagram
   actor Benutzer
   participant Browser
   participant SPC as StartPageComponent
-  participant BGG as BingoGameGuard
-  participant BGS as BingoGameService
-  participant BCC as QuarterlyPlanComponent
-  participant BCS as QuarterlyPlanService
+  participant QPC as QuarterlyPlanComponent
+  participant PQ as PlanQuarterlyUseCase
   participant LocalStorage
 
   Benutzer->>Browser: Oeffnet /
   Browser->>SPC: Laden
-  Benutzer->>SPC: Klick auf "Spielen"
-  SPC->>BGG: canActivate()
-  BGG->>BGS: hasPlayableBoard()
-  BGS-->>BGG: false
-  BGG-->>Browser: Redirect /edit
+  Benutzer->>SPC: Klick auf "Planen"
+  SPC-->>Browser: Navigation /quarterly?quarter={nextQuarter}
 
-  Browser->>BCC: Laden
-  BCC->>BCS: initialize()
-  BCS->>LocalStorage: read(board-definition)
-  LocalStorage-->>BCS: kein Plan
-  BCS->>BCS: QuarterlyPlan.createDefault()
-  BCS->>LocalStorage: save(default plan)
+  Browser->>QPC: Laden
+  QPC->>PQ: setPreviewMode(false, quarter)
+  PQ->>LocalStorage: load(board-definition)
+  LocalStorage-->>PQ: kein Plan
+  PQ->>PQ: persistDefaultQuarterlyPlan()
+  PQ->>LocalStorage: persist(default plan)
 ```
 
 ### Szenario 1b: Quartalswechsel (Rollover)
 
-Der `QuarterRolloverOrchestratorService` wird beim App-Start aufgerufen und prueft, ob fuer das aktuelle Quartal bereits ein Board existiert. Die **Existenz des Boards als Domänen-Invariante** ersetzt einen separaten technischen Cursor.
+Der `EnsureQuarterRolloverUseCase` wird beim App-Start aufgerufen und prueft, ob fuer das aktuelle Quartal bereits ein Board existiert. Die **Existenz des Boards als Domaenen-Invariante** ersetzt einen separaten technischen Cursor.
 
 ```mermaid
 sequenceDiagram
-  participant APP as AppComponent
-  participant ORC as QuarterRolloverOrchestratorService
-  participant QPR as QuarterlyPlanReader
-  participant BGAR as BingoGameRepository
-  participant AR as ArchiveRepository
-  participant QPW as QuarterlyPlanWriter
+  participant SPC as StartPageComponent
+  participant RUC as EnsureQuarterRolloverUseCase
+  participant QPL as LoadQuarterlyPlanOutPort
+  participant BGL as LoadBingoProgressOutPort
+  participant BGP as PersistBingoProgressOutPort
+  participant QPP as PersistQuarterlyPlanOutPort
   participant LocalStorage
 
-  APP->>ORC: ensureCurrentQuarter(now)
-  ORC->>ORC: currentQuarterId = QuarterClock.getQuarterId(now)
-  ORC->>QPR: load(currentQuarterId)
-  QPR->>LocalStorage: read(board-definition:{currentQuarterId})
+  SPC->>RUC: persistQuarterRollover(now)
+  RUC->>RUC: currentQuarterId = QuarterClock.getQuarterId(now)
+  RUC->>QPL: load(currentQuarterId)
+  QPL->>LocalStorage: read(board-definition:{currentQuarterId})
   alt Board existiert bereits
-    LocalStorage-->>QPR: QuarterlyPlanData
-    QPR-->>ORC: Result.ok(plan)
-    ORC-->>APP: nichts zu tun
+    LocalStorage-->>QPL: QuarterlyPlanData
+    QPL-->>RUC: Result.ok(plan)
+    RUC-->>SPC: nichts zu tun
   else Kein Board fuer aktuelles Quartal
-    LocalStorage-->>QPR: kein Eintrag
-    QPR-->>ORC: Result.err
-    ORC->>ORC: previousQuarterId = QuarterId.parse(currentQuarterId).previous()
-    ORC->>BGAR: load(previousQuarterId)
+    LocalStorage-->>QPL: kein Eintrag
+    QPL-->>RUC: Result.err
+    RUC->>RUC: previousQuarterId = QuarterId.parse(currentQuarterId).previous()
+    RUC->>BGL: load(previousQuarterId)
     alt Altes Spiel vorhanden
-      BGAR-->>ORC: BingoGameProgress
-      ORC->>AR: append(ArchiveEntry)
+      BGL-->>RUC: BingoGameProgress
+      RUC->>RUC: createArchiveEntry(...)
     end
-    ORC->>BGAR: clear(previousQuarterId)
-    ORC->>QPW: save(currentQuarterId, defaultPlan)
+    RUC->>BGP: clear(previousQuarterId)
+    RUC->>QPP: persist(currentQuarterId, defaultPlan)
   end
 ```
 
@@ -384,30 +356,30 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   actor Benutzer
-  participant BCC as QuarterlyPlanComponent
-  participant BCS as QuarterlyPlanService
+  participant QPC as QuarterlyPlanComponent
+  participant PQ as PlanQuarterlyUseCase
   participant QP as QuarterlyPlan
   participant IDB as IndexedDbImageRepository
   participant LocalStorage
 
-  Benutzer->>BCC: Drag & Drop Challenge
-  BCC->>BCS: swapChallenges(i, j)
-  BCS->>QP: reorder(i, j)
-  QP-->>BCS: neue Instanz
-  BCS->>LocalStorage: persist(plan)
+  Benutzer->>QPC: Drag & Drop Challenge
+  QPC->>PQ: persistSwappedChallenges(i, j)
+  PQ->>QP: reorder(i, j)
+  QP-->>PQ: neue Instanz
+  PQ->>LocalStorage: persist(plan)
 
-  Benutzer->>BCC: Klick auf Challenge-Karte
-  BCC->>BCC: CardDetailDialog oeffnen
-  Benutzer->>BCC: Bild aufnehmen/hochladen
-  BCC->>IDB: saveImage(uuid, dataUrl)
-  IDB-->>BCC: uuid gespeichert
-  BCC->>BCS: updateChallenge(i, { name, imageId })
-  BCS->>QP: update(i, challenge)
-  QP-->>BCS: neue Instanz
-  BCS->>LocalStorage: persist(plan)
+  Benutzer->>QPC: Klick auf Challenge-Karte
+  QPC->>QPC: CardDetailDialog oeffnen
+  Benutzer->>QPC: Bild aufnehmen/hochladen
+  QPC->>IDB: saveImage(uuid, dataUrl)
+  IDB-->>QPC: uuid gespeichert
+  QPC->>PQ: persistUpdatedChallenge(i, { name, imageId })
+  PQ->>QP: update(i, challenge)
+  QP-->>PQ: neue Instanz
+  PQ->>LocalStorage: persist(plan)
 
-  Benutzer->>BCC: Klick auf "Spielen"
-  BCC-->>Benutzer: Navigation nach /play
+  Benutzer->>QPC: Klick auf "Spielen"
+  QPC-->>Benutzer: Navigation nach /quarterly
 ```
 
 ### Szenario 3: Spiel spielen
@@ -416,31 +388,31 @@ sequenceDiagram
 sequenceDiagram
   actor Benutzer
   participant BGC as BingoGameComponent
-  participant BGS as BingoGameService
+  participant PB as PlayBingoUseCase
   participant BG as BingoGame
   participant PBC as PlayableBoardComponent
   participant PCDC as ProjectComparisonDialogComponent
   participant IDB as IndexedDbImageRepository
   participant LocalStorage
 
-  Benutzer->>BGC: Navigation nach /play
-  BGC->>BGS: refreshFromDefinition()
-  BGS->>LocalStorage: load(plan)
-  BGS->>LocalStorage: load(saved game)
+  Benutzer->>BGC: Navigation nach /quarterly
+  BGC->>PB: setPreviewMode(false, quarter)
+  PB->>LocalStorage: load(plan)
+  PB->>LocalStorage: load(saved game)
   alt Signatur stimmt
-    BGS->>BG: restore(challenges, savedProgress)
+    PB->>BG: restore(challenges, savedProgress)
   else Signatur geaendert
-    BGS->>BG: fromDefinition(challenges)
+    PB->>BG: fromDefinition(challenges)
   end
-  BGS-->>BGC: game state
+  PB-->>BGC: game state
   BGC->>PBC: render(board)
 
   Benutzer->>PBC: Challenge abhaken
-  PBC->>BGS: toggle(index)
-  BGS->>BG: toggle(index)
-  BG-->>BGS: neue Instanz + bingoCells
-  BGS->>LocalStorage: persist(game)
-  BGS-->>PBC: aktualisierter state
+  PBC->>PB: persistToggledChallenge(index)
+  PB->>BG: toggle(index)
+  BG-->>PB: neue Instanz + bingoCells
+  PB->>LocalStorage: persist(game)
+  PB-->>PBC: aktualisierter state
 
   Benutzer->>PBC: Klick auf Karte
   PBC->>PCDC: oeffnen
@@ -448,10 +420,10 @@ sequenceDiagram
 
   Benutzer->>PCDC: Fortschrittsfoto hochladen
   PCDC->>IDB: saveImage(uuid, dataUrl)
-  PCDC->>BGS: updateProgressImage(index, uuid)
-  BGS->>BG: updateProgressImage(index, uuid)
-  BG-->>BGS: neue Instanz
-  BGS->>LocalStorage: persist(game)
+  PCDC->>PB: persistProgressImage(index, uuid)
+  PB->>BG: updateProgressImage(index, uuid)
+  BG-->>PB: neue Instanz
+  PB->>LocalStorage: persist(game)
 ```
 
 ### 6.4 Zustandsmodell – Spiellebenszyklus
@@ -461,12 +433,12 @@ stateDiagram-v2
   [*] --> KeinPlan
 
   KeinPlan: Kein gueltiger QuarterlyPlan
-  KeinPlan --> Planung: Nutzer oeffnet /edit
+  KeinPlan --> Planung: Nutzer oeffnet /quarterly mit future-Quarter
 
   Planung: Plan bearbeiten\n(Challenge-Namen/Reihenfolge/Bilder)
   Planung --> Spielfaehig: Plan mit 16 Challenges gespeichert
 
-  Spielfaehig: Guard erlaubt /play
+  Spielfaehig: Routing waehlt Spielsicht fuer current-Quarter
   Spielfaehig --> Spielen: Nutzer startet Spiel
 
   Spielen: Toggle/Foto-Upload\nProgress wird persistiert
@@ -606,9 +578,9 @@ flowchart TD
 
 | Fehlerfall | Betroffene Komponente | Reaktion/Fallback | Ergebnis |
 |---|---|---|---|
-| Plan kann nicht aus LocalStorage geladen werden | `QuarterlyPlanService` + `LocalStorageQuarterlyPlanRepository` | `QuarterlyPlan.createDefault()` und Persistenz mit Default-Werten | Edit-Flow bleibt nutzbar |
-| Spielstand kann nicht geladen werden | `BingoGameService` + `LocalStorageBingoGameRepository` | `BingoGame.fromDefinition()` statt Restore | Spiel startet konsistent neu |
-| Signatur passt nicht (Plan geaendert) | `BingoGameService` | Gespeicherten Fortschritt verwerfen, neues Spiel aus aktueller Definition | Kein inkonsistenter Mischzustand |
+| Plan kann nicht aus LocalStorage geladen werden | `PlanQuarterlyUseCase` + `LocalStorageQuarterlyPlanRepository` | `persistDefaultQuarterlyPlan()` mit Default-Werten | Edit-Flow bleibt nutzbar |
+| Spielstand kann nicht geladen werden | `PlayBingoUseCase` + `LocalStorageBingoGameRepository` | `BingoGame.fromDefinition()` statt Restore | Spiel startet konsistent neu |
+| Signatur passt nicht (Plan geaendert) | `PlayBingoUseCase` | Gespeicherten Fortschritt verwerfen, neues Spiel aus aktueller Definition | Kein inkonsistenter Mischzustand |
 | Bild kann nicht aus IndexedDB geladen werden | `IndexedDbImageRepositoryService` + UI-Komponenten (`ChallengeCard`, `ProjectComparisonDialog`) | Platzhalter statt Bild anzeigen | Kerninteraktion bleibt erhalten |
 | Bildspeicherung schlaegt fehl | `IndexedDbImageRepositoryService` + aufrufender Service | Aktion ohne Bild abschliessen, bestehenden Zustand beibehalten | Keine Blockade des Spielflusses |
 | Schreiben nach LocalStorage schlaegt fehl | `StorageService` + aufrufender Service | Fehler als `Result` propagieren, keine Exception bis in die UI | UI bleibt stabil (degraded mode) |
@@ -699,13 +671,13 @@ Größere, oft zusammengesetzte Komponenten mit komplexerer Logik:
 
 Standalone Angular Components, die Organisms und kleinere Feature-spezifische Komponenten kombinieren:
 
-**`quarterly-plan.component.ts` (/edit)**
+**`quarterly-plan.component.ts` (/quarterly mit future-Quarter)**
 - Nutzt: `BoardGridComponent`, `EditableBoardComponent` (nicht in Atoms/Molecules), `CardDetailDialogComponent`
-- State: `QuarterlyPlanService`
+- State: `PlanQuarterlyInPort` (`PlanQuarterlyUseCase`)
 
-**`bingo-game.component.ts` (/play)**
+**`bingo-game.component.ts` (/quarterly mit current-Quarter)**
 - Nutzt: `BoardGridComponent`, `PlayableBoardComponent`, `ProjectComparisonDialogComponent`
-- State: `BingoGameService`
+- State: `PlayBingoInPort` (`PlayBingoUseCase`)
 
 **`start-page.component.ts` (/)**
 - Einfache Buttons: Primary/Secondary via `KqButtonComponent`
