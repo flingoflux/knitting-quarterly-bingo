@@ -25,7 +25,7 @@ Ein Angular-Projekt für ein Bingo-Spiel rund ums Stricken.
    npm start
    ```
 
-   Die App ist dann unter http://localhost:4200 erreichbar.
+   Die App ist dann unter <http://localhost:4200> erreichbar.
 
 ## Build für Produktion
 

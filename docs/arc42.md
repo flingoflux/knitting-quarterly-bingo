@@ -1,6 +1,6 @@
 # arc42 Architekturdokumentation – Knitting Quarterly Bingo
 
-> Basierend auf arc42 Template Version 8 (https://arc42.org)
+> Basierend auf arc42 Template Version 8 (<https://arc42.org>)
 
 ---
 
@@ -18,7 +18,7 @@ Die Anwendung unterstützt zwei Phasen:
 ### 1.2 Qualitätsziele
 
 | Priorität | Qualitätsmerkmal | Konkrete Ausprägung |
-|---|---|---|
+| --- | --- | --- |
 | 1 | Offline-Fähigkeit | Keine Serverabhängigkeit; alles im Browser persistiert |
 | 2 | Einfache Bedienbarkeit | Wenige Screens, direktes Interaktionsmodell |
 | 3 | Datenkonsistenz | Spielstand wird bei jedem Schritt gespeichert; kein Datenverlust bei Reload |
@@ -28,7 +28,7 @@ Die Anwendung unterstützt zwei Phasen:
 ### 1.3 Stakeholder
 
 | Rolle | Erwartung |
-|---|---|
+| --- | --- |
 | Strickerin / Stricker | Einfache, schnelle App zum Tracken des eigenen Quartals-Bingos |
 | Entwicklerin | Klare Architektur, gute Testbarkeit, keine externe Abhängigkeiten im Betrieb |
 
@@ -75,7 +75,7 @@ flowchart TB
 ## 4. Lösungsstrategie
 
 | Entscheidung | Begründung |
-|---|---|
+| --- | --- |
 | **Domain-Driven Design** | Komplexe Domänenlogik (Bingo-Erkennung, Spielstand-Validierung, Bild-Konzepte) lebt isoliert im Domain-Layer |
 | **Ports and Adapters** | Storage-Technologien (LocalStorage, IndexedDB) sind austauschbar; Domäne kennt nur Interfaces (Ports) |
 | **Immutable Aggregate + Value Objects** | `QuarterlyPlan`, `BingoGame` und `KnittingQuarterly` kapseln fachliche Regeln ohne Seiteneffekte; jede Mutation liefert eine neue Instanz |
@@ -121,7 +121,7 @@ Namensregel: siehe ADR-005 (Kapitel 9) fuer die verbindliche Benennung von InPor
 ### 5.3 Ebene 2 – Feature-Slices (Verantwortlichkeiten)
 
 | Slice | InPort | UseCase | OutPorts | Adapter | Domain-Fokus |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | quarterly-plan | `PlanQuarterlyInPort` | `PlanQuarterlyUseCase` | `LoadQuarterlyPlanOutPort`, `PersistQuarterlyPlanOutPort` | `LocalStorageQuarterlyPlanRepository` | `QuarterlyPlan`, `Challenge` |
 | bingo-game | `PlayBingoInPort` | `PlayBingoUseCase` | `LoadBingoProgressOutPort`, `PersistBingoProgressOutPort`, Nutzung von `LoadQuarterlyPlanOutPort` | `LocalStorageBingoGameRepository` | `BingoGame`, `ChallengeProgress` |
 | archive | `ShowArchiveOverviewInPort` | `ShowArchiveOverviewUseCase` | `LoadArchiveEntriesOutPort` | `LocalStorageArchiveRepository` | `ArchiveEntry` |
@@ -387,7 +387,7 @@ stateDiagram-v2
 ```
 
 | Zustand | Bedeutung |
-|---|---|
+| --- | --- |
 | `KeinPlan` | Fuer das gewaehlte Quartal existiert noch kein gueltiger `QuarterlyPlan`. |
 | `Planung` | Das Board wird bearbeitet (Challenges, Reihenfolge, Bilder). |
 | `Spielen` | Das aktive Spiel laeuft; Fortschritt wird per Toggle/Foto aktualisiert und persistiert. |
@@ -435,7 +435,7 @@ flowchart TB
 Zwei Storage-Technologien, klar nach Datentyp getrennt:
 
 | Daten | Technologie | Schlüssel |
-|---|---|---|
+| --- | --- | --- |
 | Quartalsplan | LocalStorage | `kq-bingo-board-definition-v3:{quarterId}` (Legacy: `...-v2`) |
 | Spielfortschritt | LocalStorage | `kq-bingo-active-game-v4:{quarterId}` (Legacy: `...-v3`) |
 | Challenge-Bilder (Planung + Fortschritt) | IndexedDB | UUIDs als Objekt-Store-Keys |
@@ -519,7 +519,7 @@ flowchart TD
 **Mapping Fehlerfall -> Reaktion:**
 
 | Fehlerfall | Betroffene Komponente | Reaktion/Fallback | Ergebnis |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Plan kann nicht aus LocalStorage geladen werden | `PlanQuarterlyUseCase` + `LocalStorageQuarterlyPlanRepository` | `persistDefaultQuarterlyPlan()` mit Default-Werten | Edit-Flow bleibt nutzbar |
 | Spielstand kann nicht geladen werden | `PlayBingoUseCase` + `LocalStorageBingoGameRepository` | `BingoGame.fromDefinition()` statt Restore | Spiel startet konsistent neu |
 | Signatur passt nicht (Plan geaendert) | `PlayBingoUseCase` | Gespeicherten Fortschritt verwerfen, neues Spiel aus aktueller Definition | Kein inkonsistenter Mischzustand |
@@ -536,6 +536,7 @@ Die Presentation-Schicht folgt dem **Atomic Design**-Modell (nach Brad Frost). K
 Zentrale SCSS-Variablen definieren Farben, Abstände und Typografie. Sie sind über CSS Custom Properties (`--kq-*`) verfügbar:
 
 **Dateistruktur:** `shared/ui/tokens/`
+
 - `_colors.scss`: Farbpalette (Hintergründe, Text, Primärfarben, Schatten)
   - `--kq-bg`: #f9f1e7 (Creme-Hintergrund)
   - `--kq-primary`: #8f3b22 (Terrakotta-Braun)
@@ -554,16 +555,19 @@ Zentrale SCSS-Variablen definieren Farben, Abstände und Typografie. Sie sind ü
 Kleine, eigenständige Komponenten ohne Business-Logik:
 
 **`icon/icon.component.ts`** (24px × 24px SVG-Icons)
+
 - Input: `name` (home, shuffle, play, camera, upload, delete, check, star, close, polaroid, horizontal)
 - Input: `size` (px), `strokeWidth`, `filled` (für solide Icons wie Stern)
 - Verwendet: Token-basierte Farben
 
 **`button/button.component.ts`** (wiederverwendbarer Button)
+
 - Varianten: `primary`, `secondary`, `icon` (rund 42×42px), `ghost` (transparent mit Rahmen)
 - Input: `type` (button|submit), `title`, `ariaLabel`, `disabled`
 - Inhalt: Slot-basiert (kann Icon + Text enthalten)
 
 **`badge/badge.component.ts`** (Overlay-Abzeichen)
+
 - Varianten: `done` (grüner Haken), `bingo` (goldener Stern, gefüllt)
 - Position: oben links (done) oder oben rechts (bingo) auf Karten
 - Abhängig von: `IconComponent`
@@ -573,6 +577,7 @@ Kleine, eigenständige Komponenten ohne Business-Logik:
 Kombinationen von Atoms mit begrenzter UI-Logik:
 
 **`challenge-card/challenge-card.component.ts`** (Kern-Element)
+
 - **Inputs:**
   - `name: string` (Challenge-Name)
   - `imageUrl: string | null` (Foto-URL oder null = Platzhalter)
@@ -593,6 +598,7 @@ Kombinationen von Atoms mit begrenzter UI-Logik:
 - **Verwendung:** Im `playable-board` (Spiel) und im `editable-board` (Planung)
 
 **`page-toolbar/page-toolbar.component.ts`** (Seiten-Header)
+
 - Navigation: Home, Shuffle, ViewMode-Toggle, Play/Back
 - Responsive: wird auf Mobile zu Burger-Menu
 
@@ -601,6 +607,7 @@ Kombinationen von Atoms mit begrenzter UI-Logik:
 Größere, oft zusammengesetzte Komponenten mit komplexerer Logik:
 
 **`board-grid/board-grid.component.ts`** (4×4-Layout-Container)
+
 - Responsive CSS Grid mit Gap
 - Polaroid-Modus: max-width 52rem
 - Horizontal-Modus: max-width 58rem
@@ -614,14 +621,17 @@ Größere, oft zusammengesetzte Komponenten mit komplexerer Logik:
 Standalone Angular Components, die Organisms und kleinere Feature-spezifische Komponenten kombinieren:
 
 **`quarterly-plan.component.ts` (/quarterly mit future-Quarter)**
+
 - Nutzt: `BoardGridComponent`, `EditableBoardComponent` (nicht in Atoms/Molecules), `CardDetailDialogComponent`
 - State: `PlanQuarterlyInPort` (`PlanQuarterlyUseCase`)
 
 **`bingo-game.component.ts` (/quarterly mit current-Quarter)**
+
 - Nutzt: `BoardGridComponent`, `PlayableBoardComponent`, `ProjectComparisonDialogComponent`
 - State: `PlayBingoInPort` (`PlayBingoUseCase`)
 
 **`start-page.component.ts` (/)**
+
 - Einfache Buttons: Primary/Secondary via `KqButtonComponent`
 
 #### **Kompositions-Muster**
@@ -810,6 +820,7 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 **Kontext:** Die bisherige Benennung mischt technische und fachliche Begriffe (z. B. `...Service`, `...Repository`, uneinheitliche Verben). Fuer Ports-and-Adapters soll die Absicht klar erkennbar sein und die Richtung (inbound/outbound) in Namen und Struktur sichtbar werden.
 
 **Entscheidung:**
+
 - Inbound-Ports verwenden das Suffix `InPort` und beschreiben eine fachliche Intention, z. B. `PlanQuarterlyInPort`, `PlayBingoInPort`.
 - Application-Implementierungen verwenden das Suffix `UseCase` und implementieren den passenden Inbound-Port, z. B. `PlanQuarterlyUseCase`, `PlayBingoUseCase`.
 - Outbound-Ports verwenden das Suffix `OutPort`.
@@ -818,6 +829,7 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 - Namen folgen einer intentionale Benennung im Muster `Verb + Fachobjekt + Suffix` statt technischer Sammelbegriffe.
 
 **Konsequenzen:**
+
 - Lesbarkeit steigt, weil Richtung und Verantwortung aus dem Namen direkt ersichtlich sind.
 - Primäre Adapter (Presentation/Guards) koppeln an `InPort` statt an konkrete Klassen.
 - UseCases bleiben austauschbar und testbar; Outbound-Abhaengigkeiten bleiben ueber `OutPort` entkoppelt.
@@ -828,7 +840,7 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 ## 10. Qualitätsszenarien
 
 | ID | Szenario | Messung |
-|---|---|---|
+| --- | --- | --- |
 | Q1 | Seite wird neu geladen während ein Spiel läuft | Spielstand ist vollständig wiederhergestellt (alle Häkchen, alle Bilder) |
 | Q2 | Benutzer ändert den Plan nach Spielstart | Spielstand wird verworfen, neues Spiel beginnt automatisch |
 | Q3 | Benutzer lädt ein Bild >1 MB hoch | App bleibt responsive; Bild wird in IndexedDB gespeichert |
@@ -841,7 +853,7 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 ## 11. Risiken und technische Schulden
 
 | Risiko / Tech Debt | Beschreibung | Schwere |
-|---|---|---|
+| --- | --- | --- |
 | Kein Bild-Garbage-Collection | Gelöschte Challenges hinterlassen Bilder-UUIDs in IndexedDB ohne Referenz | Niedrig |
 | Kein Multi-Device-Sync | Daten sind lokal im Browser; kein Export/Import | Mittel |
 | LocalStorage-Limit | Bei sehr vielen Challenges mit langen Namen könnte das 5 MB-Limit erreicht werden | Niedrig |
@@ -852,7 +864,7 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 ## 12. Glossar
 
 | Begriff | Definition |
-|---|---|
+| --- | --- |
 | Adapter | Technische Implementierung eines Ports, z. B. LocalStorage- oder IndexedDB-Zugriff. |
 | Aggregate | Konsistenzgrenze im Domänenmodell; hier v. a. `KnittingQuarterly`, `QuarterlyPlan` und `BingoGame`. |
 | Atomic Design | UI-Strukturierung in Tokens, Atoms, Molecules, Organisms und Templates. |
@@ -862,7 +874,7 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 | ChallengeProgress | Persistenznahes Value Object mit `name`, `planningImageId`, `progressImageId` und `completed` innerhalb von `BingoGame`. |
 | Domain-Layer | Schicht mit fachlichen Regeln und domänennahen Objekten ohne Angular- oder Storage-Abhängigkeiten. |
 | Fallback | Definierter Ersatzpfad bei Fehlern, z. B. Default-Plan oder Platzhalterbild. |
-| KnittingQuarterly | Fachobjekt fuer die zeitliche Quartalseinordnung; aus der Phase (`past` | `current` | `future`) ergeben sich die erlaubten Sichten/Aktionen. |
+| KnittingQuarterly | Fachobjekt fuer die zeitliche Quartalseinordnung; aus der Phase (`past` &#124; `current` &#124; `future`) ergeben sich die erlaubten Sichten/Aktionen. |
 | IndexedDB | Browser-Datenbank für größere Binärdaten, hier für Bilder. |
 | LocalStorage | Browser-Speicher für kompakte strukturierte Daten wie Plan und Spielstand. |
 | QuarterlyPlan | Fachbegriff fuer den Plan eines Quartals; identifiziert ueber `quarterId`. |
