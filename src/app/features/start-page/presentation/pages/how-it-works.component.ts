@@ -3,13 +3,14 @@ import { Router } from '@angular/router';
 import { PageToolbarComponent } from '../../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 import { PageContainerComponent } from '../../../../shared/ui/templates/page-container/page-container.component';
 import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
+import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 import { StorageService } from '../../../../core/infrastructure/storage.service';
 import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexed-db-image-repository.service';
 
 @Component({
   selector: 'app-how-to',
   standalone: true,
-  imports: [PageToolbarComponent, PageContainerComponent, ButtonComponent],
+  imports: [PageToolbarComponent, PageContainerComponent, ButtonComponent, IconComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -26,7 +27,7 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
 
         <div class="content">
         <section class="section">
-          <h2>🎯 Das Konzept</h2>
+          <h2 class="section-title"><kq-icon name="target" [size]="18"/>Das Konzept</h2>
           <p>
             Knitting Quarterly Bingo ist Gamification fürs Stricken. Alle 3 Monate startet ein neues
             Quartal mit einem Board aus 16 Challenges — Strickprojekten, die dich inspirieren und motivieren sollen.
@@ -39,7 +40,7 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
         </section>
 
         <section class="section">
-          <h2>📋 Die Phasen des Spiels</h2>
+          <h2 class="section-title"><kq-icon name="layers" [size]="18"/>Die Phasen des Spiels</h2>
           <div class="phase-list">
             <div class="phase">
               <div class="phase-name">1. Planen</div>
@@ -68,7 +69,7 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
         </section>
 
         <section class="section">
-          <h2>🎲 Bingo gewinnen</h2>
+          <h2 class="section-title"><kq-icon name="award" [size]="18"/>Bingo gewinnen</h2>
           <p>
             Ein <strong>Bingo</strong> entsteht, wenn du alle 4 Projekte einer vollständigen
             Reihe, Spalte oder Diagonale abschließt. Es gibt insgesamt <strong>10 mögliche Bingo-Linien</strong>:
@@ -77,7 +78,7 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
         </section>
 
         <section class="section">
-          <h2>💡 Tipps</h2>
+          <h2 class="section-title"><kq-icon name="lightbulb" [size]="18"/>Tipps</h2>
           <ul>
             <li>Dein Fortschritt wird <strong>automatisch gespeichert</strong> — kein manuelles Speichern nötig.</li>
             <li>Fotos sollten <strong>quadratisch</strong> sein — beim Hochladen kannst du den Ausschnitt direkt zuschneiden.</li>
@@ -86,7 +87,7 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
         </section>
 
         <section class="section danger-zone">
-          <h2>⚠️ Daten zurücksetzen</h2>
+          <h2 class="section-title"><kq-icon name="alert-triangle" [size]="18"/>Daten zurücksetzen</h2>
           <p>Löscht alle lokal gespeicherten Daten: Spielstände, Pläne, Archiv und Fotos. Diese Aktion kann nicht rückgängig gemacht werden.</p>
           <kq-button variant="ghost" (click)="clearAllData()">Spielstand löschen</kq-button>
         </section>
@@ -146,6 +147,21 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
       color: #7b371f;
       margin: 0 0 1rem 0;
       font-weight: 600;
+    }
+
+    .section-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-title kq-icon {
+      color: #9a5b34;
+      flex-shrink: 0;
+    }
+
+    .danger-zone .section-title kq-icon {
+      color: #8b2e0f;
     }
 
     p {

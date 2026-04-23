@@ -17,7 +17,12 @@ export type KqIconName =
   | 'check'
   | 'star'
   | 'close'
-  | 'question';
+  | 'question'
+  | 'target'
+  | 'layers'
+  | 'award'
+  | 'lightbulb'
+  | 'alert-triangle';
 
 const ICONS: Record<KqIconName, string> = {
   home: `<path d="M3 9l9-7 9 7"/><path d="M9 22V12h6v10"/><path d="M21 22H3"/>`,
@@ -36,6 +41,11 @@ const ICONS: Record<KqIconName, string> = {
   star: `<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>`,
   close: `<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`,
   question: `<path d="M9 9a3 3 0 0 1 6 0c0 2-3 3-3 3"/><circle cx="12" cy="16.5" r="0.7" fill="currentColor"/>`,
+  target: `<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/>`,
+  layers: `<polygon points="12 2 22 7 12 12 2 7 12 2"/><polyline points="2 12 12 17 22 12"/><polyline points="2 17 12 22 22 17"/>`,
+  award: `<circle cx="12" cy="8" r="6"/><polyline points="8.5 13.5 7 22 12 19 17 22 15.5 13.5"/>`,
+  lightbulb: `<path d="M9 18h6"/><path d="M10 22h4"/><path d="M8 10a4 4 0 1 1 8 0c0 1.7-.8 2.8-1.7 3.8-.7.8-1.3 1.4-1.3 2.2h-2c0-.8-.6-1.4-1.3-2.2C8.8 12.8 8 11.7 8 10Z"/>`,
+  'alert-triangle': `<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.7" fill="currentColor"/>`,
 };
 
 @Component({
