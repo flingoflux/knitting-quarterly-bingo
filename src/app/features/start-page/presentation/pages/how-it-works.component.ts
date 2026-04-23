@@ -291,6 +291,6 @@ export class HowItWorksComponent {
 
     this.storage.clearAppData();
     await this.imageRepo.clearAllImages();
-    window.location.href = '/';
+    await this.router.navigate(['/']);
   }
 }
