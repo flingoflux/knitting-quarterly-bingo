@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
 import { BINGO_GAME_REPOSITORY } from '../../../../features/bingo-game/domain/bingo-game.repository';
 import { QuarterRolloverOrchestratorService } from '../../../../core/application/quarter-rollover-orchestrator.service';
-import { QuarterClock } from '../../../../core/domain';
+import { QuarterClock, QuarterId } from '../../../../core/domain';
 
 @Component({
   selector: 'app-start-page',
@@ -221,7 +221,7 @@ export class StartPageComponent {
   }
 
   private hasAnyBingoFromStoredProgress(): boolean {
-    const currentQuarterId = this.quarterClock.getQuarterId(new Date());
+    const currentQuarterId = QuarterId.parse(this.quarterClock.getQuarterId(new Date()));
     const progress = this.bingoGameRepository.load(currentQuarterId);
     if (progress === null) {
       return false;

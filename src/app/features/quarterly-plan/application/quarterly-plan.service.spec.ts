@@ -6,12 +6,13 @@ import { QuarterlyPlanService } from './quarterly-plan.service';
 import { PersistedQuarterlyPlan } from '../infrastructure/local-storage-quarterly-plan.repository';
 import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from '../domain/quarterly-plan.repository';
 import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
+import { QuarterId } from '../../../core/domain';
 
 class MockQuarterlyPlanRepository {
   loadedPlan: PersistedQuarterlyPlan | null = null;
   lastSavedPlan: PersistedQuarterlyPlan | null = null;
 
-  load(_quarterId: string): Result<PersistedQuarterlyPlan, string> {
+  load(_quarterId: QuarterId): Result<PersistedQuarterlyPlan, string> {
     if (this.loadedPlan === null) {
       return Result.err('not-found');
     }
@@ -25,7 +26,7 @@ class MockQuarterlyPlanRepository {
     return Result.ok(this.loadedPlan);
   }
 
-  save(_quarterId: string, definition: PersistedQuarterlyPlan): void {
+  save(_quarterId: QuarterId, definition: PersistedQuarterlyPlan): void {
     this.lastSavedPlan = {
       quarterId: definition.quarterId,
       challenges: [...definition.challenges],

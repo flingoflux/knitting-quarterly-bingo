@@ -103,12 +103,22 @@ Die kanonische Fachsprache in der Domäne lautet:
 
 ```mermaid
 classDiagram
+  class QuarterId {
+    <<Value Type>>
+    +parse(value: string) QuarterId
+    +fromDate(date: Date) QuarterId
+    +next() QuarterId
+    +previous() QuarterId
+    +compareTo(other: QuarterId) int
+  }
+
   class QuarterlyPlan {
     <<Aggregate Root>>
-    +string quarterId
+    +QuarterId quarterId
     +Challenge[16] challenges
     +QuarterlyPlan update(index, challenge)
     +QuarterlyPlan reorder(from, to)
+    +PersistedQuarterlyPlan toPersistable()
   }
 
   class Challenge {
@@ -119,13 +129,13 @@ classDiagram
 
   class BingoGame {
     <<Aggregate Root>>
-    +string quarterId
-    +string planSignature
+    +QuarterId? quarterId
     +ChallengeProgress[16] challenges
     +BingoGame toggle(index)
     +BingoGame updateProgressImage(index, imageId)
     +BingoGame resetProgress()
     +Set~int~ bingoCells()
+    +BingoGameProgress toProgress()
   }
 
   class ChallengeProgress {
@@ -138,7 +148,7 @@ classDiagram
 
   class ArchiveEntry {
     <<Aggregate Root>>
-    +string quarterId
+    +QuarterId quarterId
     +string startedAt
     +string archivedAt
     +int completedCount
@@ -148,18 +158,23 @@ classDiagram
 
   class KnittingQuarterly {
     <<Value Type>>
-    +string quarterId
-    +QuarterlyPhase phaseAt(currentQuarterId)
-    +boolean isFuturePreview(currentQuarterId)
+    +QuarterId quarterId
+    +QuarterlyPhase phaseAt(currentQuarterId: QuarterId)
+    +boolean isFuturePreview(currentQuarterId: QuarterId)
   }
 
-  class QuarterId {
-    <<Value Type>>
-    +parse(value)
-    +fromDate(date)
-    +next()
-    +previous()
-    +compareTo(other)
+  class BingoGameProgress {
+    <<Persisted DTO>>
+    +string quarterId
+    +string planSignature
+    +ChallengeProgress[] challenges
+    +string startedAt
+  }
+
+  class PersistedQuarterlyPlan {
+    <<Persisted DTO>>
+    +string quarterId
+    +Challenge[] challenges
   }
 
   class QuarterlyPhase {
@@ -171,11 +186,72 @@ classDiagram
 
   QuarterlyPlan *-- "16" Challenge
   BingoGame *-- "16" ChallengeProgress
+  QuarterlyPlan ..> QuarterId
+  BingoGame ..> QuarterId
+  ArchiveEntry ..> QuarterId
+  KnittingQuarterly ..> QuarterId
+  BingoGame ..> BingoGameProgress
+  QuarterlyPlan ..> PersistedQuarterlyPlan
 
   note for BingoGame "Immutable Aggregat:\nalle Mutationen liefern\nneue Instanzen."
 ```
 
-### 5.2 Architekturbild – Ports and Adapters
+### 5.2 Ebene 1b – Port-Signaturen (Application -> Domain)
+
+```mermaid
+classDiagram
+  class QuarterId {
+    <<Value Type>>
+  }
+
+  class QuarterlyPlanReader {
+    <<Port>>
+    +load(quarterId: QuarterId) Result
+    +findById(id: QuarterId) Result
+  }
+
+  class QuarterlyPlanWriter {
+    <<Port>>
+    +save(quarterId: QuarterId, plan: QuarterlyPlanData)
+  }
+
+  class BingoGameRepository {
+    <<Port>>
+    +load(quarterId: QuarterId) BingoGameProgress?
+    +save(quarterId: QuarterId, progress: BingoGameProgress)
+    +clear(quarterId: QuarterId)
+  }
+
+  class LocalStorageQuarterlyPlanRepository {
+    <<Adapter>>
+  }
+
+  class LocalStorageBingoGameRepository {
+    <<Adapter>>
+  }
+
+  class QuarterlyPlanData {
+    <<DTO>>
+    +string quarterId
+    +Challenge[] challenges
+  }
+
+  class BingoGameProgress {
+    <<DTO>>
+    +string quarterId
+    +string planSignature
+  }
+
+  QuarterlyPlanReader ..> QuarterId
+  QuarterlyPlanWriter ..> QuarterId
+  BingoGameRepository ..> QuarterId
+
+  LocalStorageQuarterlyPlanRepository ..|> QuarterlyPlanReader
+  LocalStorageQuarterlyPlanRepository ..|> QuarterlyPlanWriter
+  LocalStorageBingoGameRepository ..|> BingoGameRepository
+```
+
+### 5.3 Architekturbild – Ports and Adapters
 
 ```mermaid
 flowchart TB

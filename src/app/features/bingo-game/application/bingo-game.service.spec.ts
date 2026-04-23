@@ -7,13 +7,14 @@ import { QUARTERLY_PLAN_READER } from '../../quarterly-plan/domain/quarterly-pla
 import { BingoGameService } from './bingo-game.service';
 import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
 import { BingoGameProgress, ChallengeProgress, createPlanSignature } from '../domain/bingo-game';
+import { QuarterId } from '../../../core/domain';
 
 const TEST_BOARD_ID = 'test-board-id';
 
 class MockBoardDefinitionRepository {
   loadedDefinition: PersistedQuarterlyPlan | null = null;
 
-  load(_quarterId: string): Result<PersistedQuarterlyPlan, string> {
+  load(_quarterId: QuarterId): Result<PersistedQuarterlyPlan, string> {
     if (this.loadedDefinition === null) {
       return Result.err('not-found');
     }
@@ -32,11 +33,11 @@ class MockBingoGameRepository {
   loadedProgress: BingoGameProgress | null = null;
   lastSavedProgress: BingoGameProgress | null = null;
 
-  load(_quarterId: string): BingoGameProgress | null {
+  load(_quarterId: QuarterId): BingoGameProgress | null {
     return this.loadedProgress;
   }
 
-  save(_quarterId: string, progress: BingoGameProgress): void {
+  save(_quarterId: QuarterId, progress: BingoGameProgress): void {
     this.lastSavedProgress = {
       quarterId: progress.quarterId,
       planSignature: progress.planSignature,
@@ -46,7 +47,7 @@ class MockBingoGameRepository {
     this.loadedProgress = this.lastSavedProgress;
   }
 
-  clear(_quarterId: string): void {
+  clear(_quarterId: QuarterId): void {
     this.loadedProgress = null;
   }
 }

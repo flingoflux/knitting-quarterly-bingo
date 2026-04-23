@@ -15,14 +15,14 @@ export class QuarterRolloverOrchestratorService {
   private readonly bingoGameRepository = inject(BINGO_GAME_REPOSITORY);
 
   ensureCurrentQuarter(now: Date = new Date()): void {
-    const currentQuarterId = this.quarterClock.getQuarterId(now);
+    const currentQuarterId = QuarterId.parse(this.quarterClock.getQuarterId(now));
     const nowIso = now.toISOString();
 
     if (this.boardReader.load(currentQuarterId).ok) {
       return;
     }
 
-    const previousQuarterId = QuarterId.parse(currentQuarterId).previous().toString();
+    const previousQuarterId = currentQuarterId.previous();
     const activeGame = this.bingoGameRepository.load(previousQuarterId);
 
     if (activeGame !== null && activeGame.challenges.length > 0) {
@@ -43,7 +43,7 @@ export class QuarterRolloverOrchestratorService {
 
     this.bingoGameRepository.clear(previousQuarterId);
     this.boardWriter.save(currentQuarterId, {
-      quarterId: currentQuarterId,
+      quarterId: currentQuarterId.toString(),
       challenges: DEFAULT_CHALLENGES.map(challenge => ({ ...challenge })),
     });
   }

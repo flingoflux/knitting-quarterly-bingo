@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { StorageService } from '../../../core/infrastructure/storage.service';
 import { BingoGameProgress, ChallengeProgress } from '../domain/bingo-game';
 import { BingoGameRepository } from '../domain/bingo-game.repository';
-import { QuarterClock } from '../../../core/domain';
+import { QuarterClock, QuarterId } from '../../../core/domain';
 
 interface LegacyV2Progress {
   boardDefinitionId: string;
@@ -21,13 +21,14 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
 
   constructor(private readonly storage: StorageService) {}
 
-  load(quarterId: string): BingoGameProgress | null {
+  load(quarterId: QuarterId): BingoGameProgress | null {
+    const quarterIdString = quarterId.toString();
     const v4 = this.storage.getItem<BingoGameProgress>(this.getStorageKeyV4(quarterId));
     if (v4 !== null) {
       const rawV4 = v4 as BingoGameProgress & { boardSignature?: string };
       const resolved: BingoGameProgress = {
         ...v4,
-        quarterId: v4.quarterId ?? quarterId,
+        quarterId: v4.quarterId ?? quarterIdString,
         planSignature: v4.planSignature ?? rawV4.boardSignature ?? '',
       };
       if (v4.quarterId !== resolved.quarterId) {
@@ -37,13 +38,13 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
     }
 
     // Migrate legacy single-game storage only for the current quarter.
-    if (quarterId !== new QuarterClock().getQuarterId(new Date())) {
+    if (quarterIdString !== new QuarterClock().getQuarterId(new Date())) {
       return null;
     }
 
     const v3 = this.storage.getItem<BingoGameProgress>(this.storageKeyV3);
     if (v3 !== null) {
-      const migrated = { ...v3, quarterId };
+      const migrated = { ...v3, quarterId: quarterIdString };
       this.storage.setItem(this.getStorageKeyV4(quarterId), migrated);
       return migrated;
     }
@@ -56,7 +57,7 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
       Array.isArray(v2.completed)
     ) {
       const migrated: BingoGameProgress = {
-        quarterId,
+        quarterId: quarterIdString,
         planSignature: v2.planSignature,
         challenges: v2.challenges.map((c, i): ChallengeProgress => ({
           name: c.name ?? '',
@@ -73,26 +74,27 @@ export class LocalStorageBingoGameRepository implements BingoGameRepository {
     return null;
   }
 
-  save(quarterId: string, progress: BingoGameProgress): void {
+  save(quarterId: QuarterId, progress: BingoGameProgress): void {
     this.storage.setItem(this.getStorageKeyV4(quarterId), {
-      quarterId,
+      quarterId: quarterId.toString(),
       planSignature: progress.planSignature,
       challenges: [...progress.challenges],
       startedAt: progress.startedAt,
     });
   }
 
-  clear(quarterId: string): void {
+  clear(quarterId: QuarterId): void {
+    const quarterIdString = quarterId.toString();
     this.storage.removeItem(this.getStorageKeyV4(quarterId));
 
     // Backward compatibility cleanup for current quarter.
-    if (quarterId === new QuarterClock().getQuarterId(new Date())) {
+    if (quarterIdString === new QuarterClock().getQuarterId(new Date())) {
       this.storage.removeItem(this.storageKeyV3);
       this.storage.removeItem(this.storageKeyV2);
     }
   }
 
-  private getStorageKeyV4(quarterId: string): string {
-    return `${this.storageKeyPrefixV4}${quarterId}`;
+  private getStorageKeyV4(quarterId: QuarterId): string {
+    return `${this.storageKeyPrefixV4}${quarterId.toString()}`;
   }
 }

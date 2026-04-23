@@ -8,21 +8,22 @@ import { BINGO_GAME_REPOSITORY } from '../../features/bingo-game/domain/bingo-ga
 import { BingoGameProgress } from '../../features/bingo-game/domain/bingo-game';
 import { Result } from '../../shared/domain/result';
 import { QuarterRolloverOrchestratorService } from './quarter-rollover-orchestrator.service';
+import { QuarterId } from '../domain';
 
 class MockBoardReader {
   private plans: Map<string, QuarterlyPlanData> = new Map();
 
-  set(quarterId: string, plan: QuarterlyPlanData): void {
-    this.plans.set(quarterId, plan);
+  set(quarterId: QuarterId | string, plan: QuarterlyPlanData): void {
+    this.plans.set(QuarterId.from(quarterId).toString(), plan);
   }
 
-  load(quarterId: string): Result<QuarterlyPlanData, string> {
-    const plan = this.plans.get(quarterId);
+  load(quarterId: QuarterId): Result<QuarterlyPlanData, string> {
+    const plan = this.plans.get(quarterId.toString());
     return plan ? Result.ok(plan) : Result.err('not-found');
   }
 
-  findById(id: string): Result<QuarterlyPlanData, string> {
-    const plan = this.plans.get(id);
+  findById(id: QuarterId): Result<QuarterlyPlanData, string> {
+    const plan = this.plans.get(id.toString());
     return plan ? Result.ok(plan) : Result.err('not-found');
   }
 }
@@ -46,7 +47,7 @@ class MockArchiveRepository {
 class MockBoardWriter {
   savedPlans: QuarterlyPlanData[] = [];
 
-  save(_quarterId: string, plan: QuarterlyPlanData): void {
+  save(_quarterId: QuarterId, plan: QuarterlyPlanData): void {
     this.savedPlans.push({ quarterId: plan.quarterId, challenges: [...plan.challenges] });
   }
 }
@@ -55,15 +56,15 @@ class MockBingoGameRepository {
   progress: BingoGameProgress | null = null;
   clearCalls = 0;
 
-  load(_quarterId: string): BingoGameProgress | null {
+  load(_quarterId: QuarterId): BingoGameProgress | null {
     return this.progress;
   }
 
-  save(_quarterId: string, progress: BingoGameProgress): void {
+  save(_quarterId: QuarterId, progress: BingoGameProgress): void {
     this.progress = progress;
   }
 
-  clear(_quarterId: string): void {
+  clear(_quarterId: QuarterId): void {
     this.clearCalls += 1;
     this.progress = null;
   }

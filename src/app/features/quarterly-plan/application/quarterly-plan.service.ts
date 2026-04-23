@@ -3,12 +3,12 @@ import { Challenge } from '../../../shared/domain/challenge';
 import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
 import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from '../domain/quarterly-plan.repository';
 import { QuarterlyPlan } from '../domain/quarterly-plan';
-import { QuarterClock } from '../../../core/domain';
+import { QuarterClock, QuarterId } from '../../../core/domain';
 
 @Injectable()
 export class QuarterlyPlanService {
   private readonly quarterClock = new QuarterClock();
-  private readonly activeQuarterId = signal(this.quarterClock.getQuarterId(new Date()));
+  private readonly activeQuarterId = signal(QuarterId.parse(this.quarterClock.getQuarterId(new Date())));
   private readonly planState = signal<QuarterlyPlan>(QuarterlyPlan.createDefault(this.activeQuarterId()));
   private readonly previewMode = signal(false);
   readonly challenges: Signal<Challenge[]> = computed(() => this.planState().challenges as Challenge[]);
@@ -27,9 +27,10 @@ export class QuarterlyPlanService {
     this.resetPlan();
   }
 
-  setPreviewMode(enabled: boolean, quarterId?: string): void {
+  setPreviewMode(enabled: boolean, quarterId?: QuarterId | string): void {
+    const resolvedQuarterId = quarterId ? QuarterId.from(quarterId) : QuarterId.parse(this.quarterClock.getQuarterId(new Date()));
     this.previewMode.set(enabled);
-    this.activeQuarterId.set(quarterId ?? this.quarterClock.getQuarterId(new Date()));
+    this.activeQuarterId.set(resolvedQuarterId);
 
     const result = this.reader.load(this.activeQuarterId());
     if (result.ok && result.value.challenges.length > 0) {
@@ -38,8 +39,7 @@ export class QuarterlyPlanService {
     }
 
     if (enabled) {
-      const previewQuarterId = quarterId || 'preview-quarter';
-      this.planState.set(QuarterlyPlan.createDefault(previewQuarterId));
+      this.planState.set(QuarterlyPlan.createDefault(resolvedQuarterId));
       return;
     }
 

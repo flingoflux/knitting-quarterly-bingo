@@ -4,14 +4,14 @@ import { QUARTERLY_PLAN_READER } from '../../quarterly-plan/domain/quarterly-pla
 import { BINGO_GAME_REPOSITORY } from '../domain/bingo-game.repository';
 import { BingoGame, createPlanSignature } from '../domain/bingo-game';
 import { DEFAULT_CHALLENGES } from '../../../shared/domain/default-challenges';
-import { QuarterClock } from '../../../core/domain';
+import { QuarterClock, QuarterId } from '../../../core/domain';
 
 @Injectable()
 export class BingoGameService {
   private readonly gameState = signal<BingoGame>(BingoGame.empty());
   private readonly previewMode = signal(false);
   private readonly quarterClock = new QuarterClock();
-  private readonly activeQuarterId = signal(this.quarterClock.getQuarterId(new Date()));
+  private readonly activeQuarterId = signal(QuarterId.parse(this.quarterClock.getQuarterId(new Date())));
 
   readonly challenges: Signal<ChallengeProgress[]> = computed(() => this.gameState().challenges as ChallengeProgress[]);
   readonly completed: Signal<boolean[]> = computed(() => this.gameState().completed as boolean[]);
@@ -25,24 +25,25 @@ export class BingoGameService {
     this.refreshFromDefinition(this.activeQuarterId());
   }
 
-  setPreviewMode(enabled: boolean, quarterId?: string): void {
+  setPreviewMode(enabled: boolean, quarterId?: QuarterId | string): void {
+    const resolvedQuarterId = quarterId ? QuarterId.from(quarterId) : QuarterId.parse(this.quarterClock.getQuarterId(new Date()));
     this.previewMode.set(enabled);
-    this.activeQuarterId.set(quarterId ?? this.quarterClock.getQuarterId(new Date()));
+    this.activeQuarterId.set(resolvedQuarterId);
     this.refreshFromDefinition(this.activeQuarterId());
 
     if (enabled) {
-      const id = quarterId || 'preview-quarter';
-      const game = BingoGame.fromDefinition(id, DEFAULT_CHALLENGES);
+      const game = BingoGame.fromDefinition(resolvedQuarterId, DEFAULT_CHALLENGES);
       this.gameState.set(game);
     }
   }
 
-  isQuarterPlayable(quarterId: string, restartRequested: boolean): boolean {
-    this.activeQuarterId.set(quarterId);
+  isQuarterPlayable(quarterId: QuarterId | string, restartRequested: boolean): boolean {
+    const resolvedQuarterId = QuarterId.from(quarterId);
+    this.activeQuarterId.set(resolvedQuarterId);
     if (restartRequested) {
-      this.bingoGameRepository.clear(quarterId);
+      this.bingoGameRepository.clear(resolvedQuarterId);
     }
-    this.refreshFromDefinition(quarterId);
+    this.refreshFromDefinition(resolvedQuarterId);
     return !this.gameState().isEmpty;
   }
 
@@ -76,7 +77,7 @@ export class BingoGameService {
     this.gameState.set(toggled);
   }
 
-  private refreshFromDefinition(quarterId: string): void {
+  private refreshFromDefinition(quarterId: QuarterId): void {
     const result = this.quarterlyPlanRepository.load(quarterId);
     if (!result.ok || result.value.challenges.length === 0) {
       this.gameState.set(BingoGame.empty());
@@ -88,7 +89,7 @@ export class BingoGameService {
 
     if (
       persistedProgress !== null &&
-      persistedProgress.quarterId === quarterId &&
+      persistedProgress.quarterId === quarterId.toString() &&
       persistedProgress.planSignature === createPlanSignature(challenges)
     ) {
       this.gameState.set(BingoGame.restore(challenges, persistedProgress));
