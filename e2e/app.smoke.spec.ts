@@ -41,28 +41,29 @@ function previousQuarterId(quarterId: string): string {
 test('Startseite zeigt Kernaktionen', async ({ page }) => {
   await page.goto('/');
 
-  await expect(page.getByRole('img', { name: 'Logo von Knitting Quarterly Bingo' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Spielen' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Planen' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Archiv anzeigen' })).toBeVisible();
+  await expect(page.getByTestId('page-start-root')).toBeVisible();
+  await expect(page.getByTestId('page-start-logo')).toBeVisible();
+  await expect(page.getByTestId('action-start-play')).toBeVisible();
+  await expect(page.getByTestId('action-start-plan')).toBeVisible();
+  await expect(page.getByTestId('action-start-open-archive')).toBeVisible();
 });
 
 test('Spielen fuehrt in die aktuelle Quartalsansicht', async ({ page }) => {
   await page.goto('/');
 
-  await page.getByRole('button', { name: 'Spielen' }).click();
+  await page.getByTestId('action-start-play').click();
 
   await expect(page).toHaveURL(/\/quarterly\?quarter=\d{4}-Q[1-4]/);
-  await expect(page.getByRole('heading', { name: 'Happy crafting' })).toBeVisible();
+  await expect(page.getByTestId('page-bingo-title')).toBeVisible();
 });
 
 test('Planen fuehrt in die Edit-Ansicht', async ({ page }) => {
   await page.goto('/');
 
-  await page.getByRole('button', { name: 'Planen' }).click();
+  await page.getByTestId('action-start-plan').click();
 
   await expect(page).toHaveURL(/\/quarterly\?quarter=\d{4}-Q[1-4]/);
-  await expect(page.getByRole('heading', { name: 'Challenges und Projekte planen' })).toBeVisible();
+  await expect(page.getByTestId('page-quarterly-plan-title')).toBeVisible();
 });
 
 test('Vergangenes Quartal leitet ins Archiv um', async ({ page }) => {
@@ -72,5 +73,31 @@ test('Vergangenes Quartal leitet ins Archiv um', async ({ page }) => {
   await page.goto(`/quarterly?quarter=${pastQuarter}`);
 
   await expect(page).toHaveURL(/\/archive/);
-  await expect(page.getByRole('heading', { name: 'Bisher erledigte Runden' })).toBeVisible();
+  await expect(page.getByTestId('page-archive-title')).toBeVisible();
+});
+
+test('Quarter-Navigation wechselt zwischen Play und Plan', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByTestId('action-start-play').click();
+  await expect(page.getByTestId('page-bingo-title')).toBeVisible();
+
+  await page.getByTestId('action-toolbar-quarter-next').click();
+  await expect(page).toHaveURL(/\/quarterly\?quarter=\d{4}-Q[1-4]/);
+  await expect(page.getByTestId('page-quarterly-plan-title')).toBeVisible();
+
+  await page.getByTestId('action-toolbar-quarter-prev').click();
+  await expect(page.getByTestId('page-bingo-title')).toBeVisible();
+});
+
+test('Help und Home funktionieren ueber die Toolbar', async ({ page }) => {
+  await page.goto('/');
+
+  await page.getByTestId('action-start-play').click();
+  await page.getByTestId('action-toolbar-help').click();
+  await expect(page.getByTestId('page-howto-title')).toBeVisible();
+
+  await page.getByTestId('action-toolbar-home').click();
+  await expect(page).toHaveURL('/');
+  await expect(page.getByTestId('page-start-root')).toBeVisible();
 });

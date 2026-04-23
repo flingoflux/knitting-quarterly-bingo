@@ -10,11 +10,12 @@ import { QuarterClock, QuarterId } from '../../../../core/domain';
   standalone: true,
   imports: [ButtonComponent],
   template: `
-    <div class="start-page">
+    <div class="start-page" data-testid="page-start-root">
       <img
         class="logo"
         src="assets/logo.svg"
         alt="Logo von Knitting Quarterly Bingo"
+        data-testid="page-start-logo"
         width="420"
         height="420"
       />
@@ -24,6 +25,7 @@ import { QuarterClock, QuarterId } from '../../../../core/domain';
           <button
             type="button"
             class="mode-option mode-option--left"
+            data-testid="action-start-play"
             (click)="goToPlay()"
           >
             Spielen
@@ -31,6 +33,7 @@ import { QuarterClock, QuarterId } from '../../../../core/domain';
           <button
             type="button"
             class="mode-option mode-option--right"
+            data-testid="action-start-plan"
             (click)="goToEdit()"
           >
             Planen
@@ -42,10 +45,10 @@ import { QuarterClock, QuarterId } from '../../../../core/domain';
         </p>
 
         <div class="archive-action">
-          <kq-button variant="ghost" title="Archiv anzeigen" (click)="goToArchive()">
+          <kq-button data-testid="action-start-open-archive" variant="ghost" title="Archiv anzeigen" (click)="goToArchive()">
             Archiv
           </kq-button>
-          <kq-button variant="ghost" title="Wie funktioniert Knitting Quarterly Bingo?" (click)="goToHowTo()">
+          <kq-button data-testid="action-start-open-howto" variant="ghost" title="Wie funktioniert Knitting Quarterly Bingo?" (click)="goToHowTo()">
             How-to
           </kq-button>
         </div>

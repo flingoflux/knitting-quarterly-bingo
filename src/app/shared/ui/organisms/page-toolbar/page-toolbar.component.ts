@@ -9,7 +9,7 @@ import { QuarterNavComponent } from '../../molecules/quarter-nav/quarter-nav.com
   imports: [IconComponent, ButtonComponent, QuarterNavComponent],
   template: `
     <div class="toolbar-left">
-      <kq-button variant="icon" (click)="homeClicked.emit()" title="Zur Startseite" ariaLabel="Zur Startseite">
+      <kq-button testId="action-toolbar-home" variant="icon" (click)="homeClicked.emit()" title="Zur Startseite" ariaLabel="Zur Startseite">
         <kq-icon name="home" [size]="20"/>
       </kq-button>
     </div>

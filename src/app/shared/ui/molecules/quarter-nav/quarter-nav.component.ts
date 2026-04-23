@@ -9,6 +9,7 @@ import { ButtonComponent } from '../../atoms/button/button.component';
   template: `
     @if (showPreviousButton) {
       <kq-button
+        testId="action-toolbar-quarter-prev"
         variant="icon"
         size="sm"
         [disabled]="!canGoToPrevious"
@@ -22,10 +23,11 @@ import { ButtonComponent } from '../../atoms/button/button.component';
       <span class="nav-placeholder" aria-hidden="true"></span>
     }
 
-    <span class="quarter-label">{{ label }}</span>
+    <span class="quarter-label" data-testid="state-toolbar-quarter-label">{{ label }}</span>
 
     @if (showNextButton) {
       <kq-button
+        testId="action-toolbar-quarter-next"
         variant="icon"
         size="sm"
         (click)="nextClicked.emit()"

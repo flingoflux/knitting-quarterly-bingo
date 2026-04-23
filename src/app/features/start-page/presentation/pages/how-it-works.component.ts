@@ -22,7 +22,7 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
       <div class="feature-shell">
         <div class="how-it-works-header">
           <p class="eyebrow">How-to</p>
-          <h1>Wie funktioniert Knitting Quarterly Bingo?</h1>
+          <h1 data-testid="page-howto-title">Wie funktioniert Knitting Quarterly Bingo?</h1>
         </div>
 
         <div class="content">

@@ -725,6 +725,35 @@ classDiagram
 
 Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden ueber UUIDs referenziert.
 
+### 8.11 Teststrategie (Unit + E2E)
+
+Die Testpyramide wird in diesem Projekt wie folgt umgesetzt:
+
+- Unit-Tests mit Vitest (`pnpm test`) fuer Domain- und UseCase-Logik
+- E2E-Tests mit Playwright (`pnpm test:e2e`) fuer zentrale Nutzerfluesse, Routing und Persistenzintegration
+- CI-Ausfuehrung von E2E in GitHub Actions inklusive Playwright-Report als Artefakt
+
+#### E2E-Selektor-Strategie
+
+Fuer robuste E2E-Tests werden Selektoren auf `data-testid` standardisiert. Sichtbarer Text wird nur dann verwendet, wenn kein stabiler technischer Anker vorhanden ist.
+
+Namenskonvention:
+
+- `page-*` fuer Seitenanker und Titel
+- `action-*` fuer interaktive Controls
+- `state-*` fuer Zustandsanzeigen
+
+Beispiele aus der aktuellen Implementierung:
+
+- `page-start-root`
+- `action-start-play`
+- `action-toolbar-home`
+- `action-toolbar-quarter-prev`
+- `action-toolbar-quarter-next`
+- `state-toolbar-quarter-label`
+
+Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der Implementierung unmittelbar eine passende `data-testid` gemaess dieser Konvention.
+
 ---
 
 ## 9. Architekturentscheidungen
@@ -782,6 +811,7 @@ Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden u
 | Q3 | Benutzer lädt ein Bild >1 MB hoch | App bleibt responsive; Bild wird in IndexedDB gespeichert |
 | Q4 | Alle 16 Challenges einer Zeile abgehakt | Bingo wird sofort (synchron) erkannt und markiert |
 | Q5 | Domänenlogik-Test | `pnpm test` läuft in unter 1 Sekunde; keine Angular-Umgebung nötig |
+| Q6 | Navigation und Quartalswechsel im Browser | `pnpm test:e2e` läuft in CI erfolgreich; Toolbar-Flows (Home/Help/Prev/Next) sind stabil testbar |
 
 ---
 

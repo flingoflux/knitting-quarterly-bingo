@@ -61,6 +61,15 @@ Interaktive E2E-Ausführung:
 pnpm test:e2e:ui
 ```
 
+### E2E-Konventionen (Playwright)
+
+- Selektoren in E2E-Tests sollen bevorzugt `data-testid` nutzen statt sichtbarem Text.
+- Namenskonvention für `data-testid`: `page-*` für Seitenanker/Titel, `action-*` für klickbare Aktionen, `state-*` für Zustandsanzeigen.
+- Beispiel-IDs: `page-start-root`, `page-bingo-title`, `action-start-play`, `action-toolbar-home`, `state-toolbar-quarter-label`.
+- Kritische Toolbar-Navigation ist standardisiert über `action-toolbar-home`, `action-toolbar-help`, `action-toolbar-quarter-prev`, `action-toolbar-quarter-next`.
+
+Hinweis: Neue interaktive UI-Elemente sollten bei Implementierung direkt eine passende `data-testid` nach diesem Schema erhalten.
+
 Ein Beispieltest für den BingoService ist enthalten. Weitere Tests können in `src/**/*.spec.ts` ergänzt werden.
 
 ## Codequalität

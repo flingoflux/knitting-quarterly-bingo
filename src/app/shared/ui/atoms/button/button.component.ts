@@ -17,6 +17,7 @@ export type KqButtonSize = 'regular' | 'sm';
       [type]="type"
       [title]="title ?? ''"
       [attr.aria-label]="ariaLabel ?? title ?? null"
+      [attr.data-testid]="testId ?? null"
       [disabled]="disabled"
       [class]="buttonClasses"
     >
@@ -136,6 +137,7 @@ export class ButtonComponent {
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() title?: string;
   @Input() ariaLabel?: string;
+  @Input() testId?: string;
   @Input() disabled = false;
 
   get buttonClasses(): string {

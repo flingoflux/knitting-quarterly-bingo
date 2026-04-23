@@ -32,7 +32,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         (previousQuarterClicked)="goToPreviousQuarter()"
         (nextQuarterClicked)="goToNextQuarter()"
       >
-        <kq-button toolbar-actions variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
+        <kq-button toolbar-actions testId="action-toolbar-help" variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
           <kq-icon name="question" [size]="24"/>
         </kq-button>
       </kq-page-toolbar>
@@ -43,7 +43,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 
       <div class="play-bingo-header" [class.compact-header]="viewMode === 'horizontal'">
         <p class="eyebrow">Knitting Quarterly - Bingo</p>
-        <h2>Happy crafting</h2>
+        <h2 data-testid="page-bingo-title">Happy crafting</h2>
         <p class="subtitle" *ngIf="viewMode === 'polaroid'">Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen.</p>
       </div>
 

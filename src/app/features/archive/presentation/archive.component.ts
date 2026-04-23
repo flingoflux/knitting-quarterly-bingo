@@ -21,7 +21,7 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
         (homeClicked)="goHome()"
         (nextQuarterClicked)="goToCurrentQuarter()"
       >
-        <kq-button toolbar-actions variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
+        <kq-button toolbar-actions testId="action-toolbar-help" variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
           <kq-icon name="question" [size]="24"/>
         </kq-button>
       </kq-page-toolbar>
@@ -29,7 +29,7 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
       <div class="feature-shell">
       <section class="archive-header">
         <p class="eyebrow">Knitting Quarterly - Archiv</p>
-        <h2>Bisher erledigte Runden</h2>
+        <h2 data-testid="page-archive-title">Bisher erledigte Runden</h2>
         <p class="subtitle">Miniuebersicht abgeschlossener Bingo-Boards.</p>
         <p class="prototype-note" *ngIf="isShowingPrototype()">
           Vorschau mit Beispiel-Boards, bis echte Quartale archiviert wurden.
