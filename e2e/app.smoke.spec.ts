@@ -48,21 +48,19 @@ test('should show core actions on the start page', async ({ page }) => {
   await expect(page.getByTestId('page-start-logo')).toBeVisible();
   await expect(page.getByTestId('action-start-play')).toBeVisible();
   await expect(page.getByTestId('action-start-plan')).toBeVisible();
-  await expect(page.getByTestId('action-start-open-archive')).toBeVisible();
-  await expect(page.getByTestId('action-start-open-settings')).toBeVisible();
+  await expect(page.getByTestId('action-start-open-howto')).toBeVisible();
 });
 
-test('should navigate to settings from start page', async ({ page }) => {
+test('should navigate to how-to from start page', async ({ page }) => {
   // given
   // when
   await page.goto('/');
 
-  await page.getByTestId('action-start-open-settings').click();
+  await page.getByTestId('action-start-open-howto').click();
 
   // then
-  await expect(page).toHaveURL('/settings');
-  await expect(page.getByTestId('page-settings-title')).toBeVisible();
-  await expect(page.getByTestId('action-settings-clear-data')).toBeVisible();
+  await expect(page).toHaveURL('/how-it-works');
+  await expect(page.getByTestId('page-howto-title')).toBeVisible();
 });
 
 test('should navigate to the current quarter view when starting play', async ({ page }) => {
