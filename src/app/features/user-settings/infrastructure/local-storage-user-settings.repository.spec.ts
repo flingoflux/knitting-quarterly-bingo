@@ -26,9 +26,9 @@ describe('LocalStorageUserSettingsRepository', () => {
   });
 
   it('should persist selected board view mode', () => {
-    repository.persistBoardViewMode('horizontal');
+    repository.persistBoardViewMode('kompakt');
 
-    expect(repository.loadBoardViewMode()).toBe('horizontal');
+    expect(repository.loadBoardViewMode()).toBe('kompakt');
   });
 
   it('should reset invalid persisted setting to default mode', () => {

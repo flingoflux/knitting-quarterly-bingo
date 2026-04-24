@@ -34,12 +34,12 @@ function createUseCase(loader: MockBoardViewModeLoader, persister: MockBoardView
 describe('ManageUserSettingsUseCase', () => {
   it('should load board view mode from out port', () => {
     const loader = new MockBoardViewModeLoader();
-    loader.mode = 'horizontal';
+    loader.mode = 'kompakt';
     const persister = new MockBoardViewModePersister();
 
     const useCase = createUseCase(loader, persister);
 
-    expect(useCase.loadBoardViewMode()).toBe('horizontal');
+    expect(useCase.loadBoardViewMode()).toBe('kompakt');
   });
 
   it('should persist board view mode through out port', () => {
@@ -47,8 +47,8 @@ describe('ManageUserSettingsUseCase', () => {
     const persister = new MockBoardViewModePersister();
 
     const useCase = createUseCase(loader, persister);
-    useCase.persistBoardViewMode('horizontal');
+    useCase.persistBoardViewMode('kompakt');
 
-    expect(persister.persistedMode).toBe('horizontal');
+    expect(persister.persistedMode).toBe('kompakt');
   });
 });

@@ -44,7 +44,7 @@ export class PlayableBoardComponent {
 
   @Input() completed: boolean[] = [];
   @Input() bingoCells: Set<number> = new Set<number>();
-  @Input() mode: 'polaroid' | 'horizontal' = 'polaroid';
+  @Input() mode: 'polaroid' | 'kompakt' = 'polaroid';
   @Output() toggled = new EventEmitter<number>();
   @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
 

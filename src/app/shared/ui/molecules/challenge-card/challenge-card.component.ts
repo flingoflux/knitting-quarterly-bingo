@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { BadgeComponent } from '../../atoms/badge/badge.component';
 
-export type KqCardMode = 'polaroid' | 'horizontal';
+export type KqCardMode = 'polaroid' | 'kompakt';
 
 /**
  * Wiederverwendbare Bingo-Karte (Molecule).
@@ -28,10 +28,11 @@ export type KqCardMode = 'polaroid' | 'horizontal';
     <div
       class="card"
       [class.card--polaroid]="mode === 'polaroid'"
-      [class.card--horizontal]="mode === 'horizontal'"
+      [class.card--kompakt]="mode === 'kompakt'"
       [class.card--done]="done"
       [class.card--bingo]="inBingo"
       [class.card--hoverable]="hoverable"
+      [style.--placeholder-logo-size.px]="mode === 'kompakt' ? 24 : 58"
     >
       <div class="card__photo" [class.card__photo--editing]="editing">
         <img
@@ -42,11 +43,11 @@ export type KqCardMode = 'polaroid' | 'horizontal';
           draggable="false"
         />
         <div *ngIf="!imageUrl" class="card__placeholder">
-          <img src="assets/logo_plain.svg" class="card__logo-placeholder" alt="" draggable="false" />
+          <img [src]="placeholderLogoSrc" class="card__logo-placeholder" alt="" draggable="false" />
         </div>
 
-        <kq-badge *ngIf="done" variant="done" [compact]="mode === 'horizontal'"/>
-        <kq-badge *ngIf="inBingo" variant="bingo" [compact]="mode === 'horizontal'"/>
+        <kq-badge *ngIf="done" variant="done" [compact]="mode === 'kompakt'"/>
+        <kq-badge *ngIf="inBingo" variant="bingo" [compact]="mode === 'kompakt'"/>
 
         <button
           *ngIf="showCameraButton"
@@ -120,13 +121,11 @@ export type KqCardMode = 'polaroid' | 'horizontal';
       color: #c9a878;
     }
     .card__logo-placeholder {
-      width: 58px;
-      height: 58px;
+      width: var(--placeholder-logo-size, 30px);
+      height: var(--placeholder-logo-size, 30px);
       object-fit: contain;
       -webkit-user-drag: none;
       user-select: none;
-      filter: brightness(0) saturate(100%) invert(73%) sepia(28%) saturate(500%)
-              hue-rotate(355deg) brightness(94%) contrast(88%) opacity(0.45);
     }
 
     .card__photo--editing {
@@ -198,28 +197,28 @@ export type KqCardMode = 'polaroid' | 'horizontal';
       text-align: center;
     }
 
-    /* ── Horizontal-Modus ── */
-    .card--horizontal {
+    /* ── Kompakt-Modus ── */
+    .card--kompakt {
       flex-direction: row;
       align-items: stretch;
       height: 4.8rem;
     }
-    .card--horizontal.card--hoverable:hover {
+    .card--kompakt.card--hoverable:hover {
       transform: translateY(-2px) rotate(0deg);
     }
-    .card--horizontal .card__photo {
+    .card--kompakt .card__photo {
       width: 4.8rem;
       height: 4.8rem;
       aspect-ratio: unset;
       flex-shrink: 0;
     }
-    .card--horizontal .card__camera-btn {
+    .card--kompakt .card__camera-btn {
       width: 22px;
       height: 22px;
       bottom: 4px;
       right: 4px;
     }
-    .card--horizontal .card__caption {
+    .card--kompakt .card__caption {
       flex: 1;
       align-items: flex-start;
       justify-content: center;
@@ -227,7 +226,7 @@ export type KqCardMode = 'polaroid' | 'horizontal';
       min-height: unset;
       overflow: hidden;
     }
-    .card--horizontal .card__title {
+    .card--kompakt .card__title {
       font-size: 0.7rem;
       text-align: left;
       display: -webkit-box;
@@ -246,6 +245,7 @@ export class ChallengeCardComponent {
   @Input() showCameraButton = true;
   @Input() editing = false;
   @Input() hoverable = true;
+  @Input() placeholderLogoSrc = 'assets/crown.svg';
 
   @Output() cameraClicked = new EventEmitter<MouseEvent>();
 

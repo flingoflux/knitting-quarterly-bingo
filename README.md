@@ -5,7 +5,12 @@
 
 ## Projektüberblick
 
-Ein Angular-Projekt für ein Bingo-Spiel rund ums Stricken.
+Knitting Quarterly Bingo ist eine Angular-Webanwendung fuer ein persoenliches 4x4-Quartalsboard rund ums Stricken. Planung, aktives Spielen, Archiv und Druckansicht laufen komplett im Browser ohne Backend.
+
+## Dokumentation
+
+- Architektur (arc42): `docs/arc42.md`
+- Architekturdiagramme: `docs/diagrams/`
 
 ## Setup
 
@@ -81,7 +86,7 @@ it('should load persisted progress when plan signature matches', () => {
 - Namen beginnen immer mit `should` und beschreiben das erwartete Verhalten.
 - Der Kontext steht nach `when`, `for`, `on`, `with` oder `without`.
 - Testnamen sind auf Englisch.
-- Testköörper sind mit `// given`, `// when`, `// then` gegliedert.
+- Testkoerper sind mit `// given`, `// when`, `// then` gegliedert.
 - Wenn es keinen eigenen Aktionsschritt gibt, werden `// when` und `// then` zu `// when + then` zusammengefasst.
 
 ### E2E-Konventionen (Playwright)
@@ -93,7 +98,7 @@ it('should load persisted progress when plan signature matches', () => {
 
 Hinweis: Neue interaktive UI-Elemente sollten bei Implementierung direkt eine passende `data-testid` nach diesem Schema erhalten.
 
-Ein Beispieltest für den BingoService ist enthalten. Weitere Tests können in `src/**/*.spec.ts` ergänzt werden.
+Die Smoke-Suite deckt die Kernfluesse Start, Navigation, Quartalswechsel, Help/Home, Kompakt-Umschaltung und Print-Popup ab.
 
 ## Codequalität
 
@@ -108,6 +113,7 @@ Ein Beispieltest für den BingoService ist enthalten. Weitere Tests können in `
 - **Jetzt spielen** – Plan eines zukünftigen Quartals direkt als Bingo starten (Play-Button im Planungsboard, mit Sicherheitsabfrage)
 - **Archiv** – abgeschlossene Quartale werden automatisch archiviert
 - **Einstellungen** – Board-Ansicht (Polaroid / Kompakt) umschalten
+- **Druckansicht** – Bingo-Board als eigene Print-Ansicht (`/quarterly-print`) mit mode-abhaengiger Seitenausrichtung drucken
 
 ## Projektstruktur
 

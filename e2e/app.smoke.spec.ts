@@ -131,3 +131,32 @@ test('should open help and return home when using toolbar actions', async ({ pag
   await expect(page).toHaveURL('/');
   await expect(page.getByTestId('page-start-root')).toBeVisible();
 });
+
+test('should allow switching to kompakt mode in play view', async ({ page }) => {
+  // given
+  await page.goto('/');
+  await page.getByTestId('action-start-play').click();
+
+  // when
+  const compactButton = page.getByRole('button', { name: 'Kompaktansicht' });
+  await compactButton.click();
+
+  // then
+  await expect(compactButton).toHaveClass(/active/);
+});
+
+test('should open print view popup with quarter and mode query params', async ({ page }) => {
+  // given
+  await page.goto('/');
+  await page.getByTestId('action-start-play').click();
+
+  // when
+  const popupPromise = page.waitForEvent('popup');
+  await page.getByRole('button', { name: 'Board drucken' }).click();
+  const popup = await popupPromise;
+
+  // then
+  await popup.waitForURL(/\/quarterly-print\?quarter=\d{4}-Q[1-4]&mode=polaroid/);
+  await expect(popup).toHaveURL(/\/quarterly-print\?quarter=\d{4}-Q[1-4]&mode=polaroid/);
+  await popup.close();
+});
