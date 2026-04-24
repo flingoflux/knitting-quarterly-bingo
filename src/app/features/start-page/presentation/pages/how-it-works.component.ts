@@ -4,6 +4,10 @@ import { PageToolbarComponent } from '../../../../shared/ui/organisms/page-toolb
 import { PageContainerComponent } from '../../../../shared/ui/templates/page-container/page-container.component';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
+import { BoardViewMode } from '../../../user-settings/domain/board-view-mode';
+import { MANAGE_USER_SETTINGS_IN_PORT } from '../../../user-settings/application/ports/in/manage-user-settings.in-port';
+import { StorageService } from '../../../../core/infrastructure/storage.service';
+import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexed-db-image-repository.service';
 
 @Component({
   selector: 'app-how-to',
@@ -16,9 +20,6 @@ import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.compo
         [showQuarterNav]="false"
         (homeClicked)="goHome()"
       >
-        <kq-button toolbar-actions testId="action-toolbar-settings" variant="icon" (click)="goToSettings()" title="Einstellungen" ariaLabel="Einstellungen">
-          <kq-icon name="settings-feather" [size]="24"/>
-        </kq-button>
         <kq-button toolbar-actions testId="action-toolbar-help" variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
           <kq-icon name="question" [size]="24"/>
         </kq-button>
@@ -90,6 +91,53 @@ import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.compo
             <li>Du kannst vergangene und zukünftige Quartale über die Navigationspfeile in der Toolbar aufrufen.</li>
           </ul>
         </section>
+
+        <section id="settings" class="section settings-section" aria-labelledby="howto-settings-title">
+          <h2 id="howto-settings-title" class="section-title"><kq-icon name="settings-feather" [size]="18"/>Einstellungen</h2>
+          <p class="settings-intro">
+            Passe die Board-Ansicht an oder setze lokale Daten zurueck.
+          </p>
+
+          <div class="settings-subsection">
+            <h3>Board-Ansicht</h3>
+            <p class="view-mode-note">
+              Waehle einen Modus. Er gilt sofort fuer Spielen und Planen.
+            </p>
+            <div class="mode-options" role="group" aria-label="Board-Ansicht waehlen">
+              <button
+                type="button"
+                class="mode-option"
+                [class.active]="viewMode === 'polaroid'"
+                [attr.aria-pressed]="viewMode === 'polaroid'"
+                (click)="onModeChange('polaroid')"
+              >
+                <span class="mode-option-title"><kq-icon name="polaroid" [size]="16"/>Polaroid</span>
+                <span class="mode-option-copy">Zeigt Karten im Polaroid-Look, wie auf einem Moodboard angeordnet.</span>
+              </button>
+
+              <button
+                type="button"
+                class="mode-option"
+                [class.active]="viewMode === 'horizontal'"
+                [attr.aria-pressed]="viewMode === 'horizontal'"
+                (click)="onModeChange('horizontal')"
+              >
+                <span class="mode-option-title"><kq-icon name="horizontal" [size]="16"/>Kompakt</span>
+                <span class="mode-option-copy">Zeigt mehr Felder gleichzeitig fuer schnellen Ueberblick.</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="settings-subsection settings-subsection-danger">
+            <h3 class="settings-danger-title">
+              <kq-icon name="alert-triangle" [size]="18"/> Daten zuruecksetzen
+            </h3>
+            <p class="danger-copy">
+              Loescht alle lokalen Daten (Spielstaende, Plaene, Archiv, Fotos). Kann nicht rueckgaengig gemacht werden.
+            </p>
+            <kq-button data-testid="action-howto-clear-data" variant="ghost" (click)="clearAllData()">Spielstand loeschen</kq-button>
+          </div>
+        </section>
       </div>
     </div>
     </kq-page-container>
@@ -138,6 +186,12 @@ import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.compo
 
     .section:last-of-type {
       margin-bottom: 1.5rem;
+    }
+
+    .settings-section {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid #ead8cb;
     }
 
     h2 {
@@ -227,6 +281,103 @@ import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.compo
       margin-bottom: 0;
     }
 
+    .settings-intro {
+      margin-bottom: 1rem;
+    }
+
+    .settings-subsection {
+      margin-top: 1rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid #ead8cb;
+    }
+
+    .settings-subsection h3 {
+      margin: 0 0 0.55rem;
+      color: #7b371f;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .view-mode-note {
+      margin: 0 0 0.9rem;
+      color: #5a3c2f;
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .mode-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    .mode-option {
+      border: 1px solid #ddc7b8;
+      border-radius: 12px;
+      background: #faf8f6;
+      color: #5a2d1a;
+      text-align: left;
+      padding: 0.8rem 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .mode-option:hover {
+      border-color: #c7936a;
+      box-shadow: 0 3px 10px rgba(123, 55, 31, 0.12);
+    }
+
+    .mode-option.active {
+      border-color: #9f4b27;
+      background: #fff2e6;
+      box-shadow: 0 0 0 2px rgba(159, 75, 39, 0.18);
+    }
+
+    .mode-option:focus-visible {
+      outline: 3px solid rgba(196, 110, 53, 0.35);
+      outline-offset: 1px;
+    }
+
+    .mode-option-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .mode-option-title kq-icon {
+      color: #8f4a2b;
+      flex-shrink: 0;
+    }
+
+    .mode-option-copy {
+      font-size: 0.9rem;
+      color: #6f4e3f;
+      line-height: 1.4;
+    }
+
+    .settings-subsection-danger {
+      margin-top: 1.2rem;
+    }
+
+    .settings-danger-title {
+      color: #8b2e0f;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .danger-copy {
+      margin: 0 0 1rem;
+      color: #6b4035;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
     .cta {
       display: none;
     }
@@ -238,6 +389,10 @@ import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.compo
 
       .content {
         padding: 1.5rem;
+      }
+
+      .mode-options {
+        grid-template-columns: 1fr;
       }
 
       h1 {
@@ -252,8 +407,12 @@ import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.compo
 })
 export class HowItWorksComponent {
   private readonly router = inject(Router);
+  private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
+  private readonly storage = inject(StorageService);
+  private readonly imageRepo = inject(IndexedDbImageRepository);
 
   readonly pageToolbarWidth = '52rem';
+  viewMode: BoardViewMode = this.userSettings.loadBoardViewMode();
 
   goHome(): void {
     this.router.navigate(['/']);
@@ -264,6 +423,22 @@ export class HowItWorksComponent {
   }
 
   goToSettings(): void {
-    void this.router.navigate(['/settings']);
+    void this.router.navigate([], { fragment: 'settings' });
+  }
+
+  onModeChange(mode: BoardViewMode): void {
+    this.viewMode = mode;
+    this.userSettings.persistBoardViewMode(mode);
+  }
+
+  async clearAllData(): Promise<void> {
+    const confirmed = window.confirm(
+      'Alle Spielstaende, Plaene, Archiv-Eintraege und Fotos werden unwiderruflich geloescht. Fortfahren?'
+    );
+    if (!confirmed) return;
+
+    this.storage.clearAppData();
+    await this.imageRepo.clearAllImages();
+    await this.router.navigate(['/']);
   }
 }

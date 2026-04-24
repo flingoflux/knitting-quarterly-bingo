@@ -21,9 +21,6 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
         (homeClicked)="goHome()"
         (nextQuarterClicked)="goToCurrentQuarter()"
       >
-        <kq-button toolbar-actions testId="action-toolbar-settings" variant="icon" (click)="goToSettings()" title="Einstellungen" ariaLabel="Einstellungen">
-          <kq-icon name="settings-feather" [size]="24"/>
-        </kq-button>
         <kq-button toolbar-actions testId="action-toolbar-help" variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
           <kq-icon name="question" [size]="24"/>
         </kq-button>
@@ -202,7 +199,7 @@ export class ArchiveComponent {
     this.router.navigate(['/how-it-works']);
   }
   goToSettings(): void {
-    void this.router.navigate(['/settings']);
+    void this.router.navigate(['/how-it-works'], { fragment: 'settings' });
   }
   goHome(): void {
     void this.router.navigate(['/']);

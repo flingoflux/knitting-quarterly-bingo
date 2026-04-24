@@ -45,12 +45,6 @@ import { QuarterClock, QuarterId } from '../../../../core/domain';
         </p>
 
         <div class="archive-action">
-          <kq-button data-testid="action-start-open-archive" variant="ghost" title="Archiv anzeigen" (click)="goToArchive()">
-            Archiv
-          </kq-button>
-          <kq-button data-testid="action-start-open-settings" variant="ghost" title="Einstellungen" (click)="goToSettings()">
-            Einstellungen
-          </kq-button>
           <kq-button data-testid="action-start-open-howto" variant="ghost" title="Wie funktioniert Knitting Quarterly Bingo?" (click)="goToHowTo()">
             How-to
           </kq-button>
@@ -86,6 +80,7 @@ import { QuarterClock, QuarterId } from '../../../../core/domain';
 
     .motivation {
       margin: 0;
+      width: 100%;
       max-width: 36ch;
       text-align: center;
       line-height: 1.45;
@@ -143,6 +138,7 @@ import { QuarterClock, QuarterId } from '../../../../core/domain';
       margin-top: 0.75rem;
       display: flex;
       justify-content: center;
+      width: 100%;
       gap: 0.5rem;
     }
 
@@ -150,6 +146,7 @@ import { QuarterClock, QuarterId } from '../../../../core/domain';
       display: flex;
       flex-direction: column;
       width: min(24rem, 100%);
+      align-items: center;
       gap: 0.9rem;
     }
 
@@ -192,16 +189,8 @@ export class StartPageComponent {
     this.router.navigate(['/quarterly'], { queryParams: { quarter: currentQuarterId } });
   }
 
-  goToArchive() {
-    this.router.navigate(['/archive']);
-  }
-
   goToHowTo() {
     this.router.navigate(['/how-it-works']);
-  }
-
-  goToSettings() {
-    this.router.navigate(['/settings']);
   }
 
   private getDaysUntilNextQuarterly(today: Date): number {

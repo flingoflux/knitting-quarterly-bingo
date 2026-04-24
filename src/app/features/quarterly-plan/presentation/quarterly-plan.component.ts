@@ -34,9 +34,6 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         (previousQuarterClicked)="goToPreviousQuarter()"
         (nextQuarterClicked)="goToNextQuarter()"
       >
-        <kq-button toolbar-actions testId="action-toolbar-settings" variant="icon" (click)="goToSettings()" title="Einstellungen" ariaLabel="Einstellungen">
-          <kq-icon name="settings-feather" [size]="24"/>
-        </kq-button>
         <kq-button toolbar-actions testId="action-toolbar-help" variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
           <kq-icon name="question" [size]="24"/>
         </kq-button>
@@ -176,7 +173,7 @@ export class QuarterlyPlanComponent implements OnInit {
   }
 
   goToSettings() {
-    void this.router.navigate(['/settings']);
+    void this.router.navigate(['/how-it-works'], { fragment: 'settings' });
   }
 
   goToNextQuarter() {
