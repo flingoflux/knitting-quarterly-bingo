@@ -56,6 +56,11 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
                 Drag &amp; Drop an oder würfle sie zufällig. Zu jeder Challenge kannst du
                 optional ein Inspirationsfoto hinterlegen.
               </p>
+              <p>
+                Dein Board startet automatisch mit dem nächsten Quartal. Wenn du aber nicht warten möchtest:
+                Mit dem <strong>Play-Button</strong> ▶ kannst du das Board direkt als Bingo starten —
+                das überschreibt dann das aktuelle Spiel und seinen Fortschritt.
+              </p>
             </div>
             <div class="phase">
               <div class="phase-name">2. Spielen</div>

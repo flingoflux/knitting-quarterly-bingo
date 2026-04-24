@@ -101,19 +101,14 @@ Ein Beispieltest für den BingoService ist enthalten. Weitere Tests können in `
 - Formatierung: `pnpm format` (Prettier)
 - Pre-commit-Hook prüft Linting & Formatierung automatisch
 
-## Technische Verbesserungen (Stand 2026)
 
-- Moderne Testumgebung: **Vitest** (statt Karma/Jasmine)
-- Linting & Formatierung mit ESLint und Prettier
-- Husky pre-commit-Hook für Codequalität
-- Build & Tests laufen ohne Warnungen
-- Projektstruktur nach Best Practices (core/features/shared)
+## Features
 
-Weitere Empfehlungen:
-
-- Unit- und E2E-Tests ergänzen
-- ggf. Barrierefreiheit (a11y) und Internationalisierung (i18n) prüfen
-- README aktuell halten
+- **Board planen** – Challenges per Drag & Drop anordnen, würfeln und mit Inspirationsfotos versehen
+- **Bingo spielen** – Challenges abhaken, Fortschrittsfotos hochladen, Bingo-Linien erkennen
+- **Jetzt spielen** – Plan eines zukünftigen Quartals direkt als Bingo starten (Play-Button im Planungsboard, mit Sicherheitsabfrage)
+- **Archiv** – abgeschlossene Quartale werden automatisch archiviert
+- **Einstellungen** – Board-Ansicht (Polaroid / Kompakt) umschalten
 
 ## Projektstruktur
 
@@ -121,12 +116,5 @@ Weitere Empfehlungen:
 - `src/app/features/` – Feature-Module und Komponenten
 - `src/app/shared/` – geteilte Komponenten, Pipes, etc.
 
-## Entwicklungstipps
 
-- Halte dich an Angular- und TypeScript-Best Practices
-- Nutze Linting und Formatierung (z.B. ESLint, Prettier)
-- Schreibe Unit- und E2E-Tests
 
-## Verbesserungsvorschläge
-
-Siehe Chatverlauf für technische Empfehlungen!
