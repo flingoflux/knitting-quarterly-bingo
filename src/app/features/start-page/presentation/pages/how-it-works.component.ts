@@ -100,15 +100,15 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
         <section id="settings" class="section settings-section" aria-labelledby="howto-settings-title">
           <h2 id="howto-settings-title" class="section-title"><kq-icon name="settings-feather" [size]="18"/>Einstellungen</h2>
           <p class="settings-intro">
-            Passe die Board-Ansicht an oder setze lokale Daten zurueck.
+            Passe die Board-Ansicht an oder setze lokale Daten zurück.
           </p>
 
           <div class="settings-subsection">
             <h3>Board-Ansicht</h3>
             <p class="view-mode-note">
-              Waehle einen Modus. Er gilt sofort fuer Spielen und Planen.
+              Wähle einen Modus. Er gilt sofort für Spielen und Planen.
             </p>
-            <div class="mode-options" role="group" aria-label="Board-Ansicht waehlen">
+            <div class="mode-options" role="group" aria-label="Board-Ansicht wählen">
               <button
                 type="button"
                 class="mode-option"
@@ -128,19 +128,19 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
                 (click)="onModeChange('kompakt')"
               >
                 <span class="mode-option-title"><kq-icon name="horizontal" [size]="16"/>Kompakt</span>
-                <span class="mode-option-copy">Zeigt mehr Felder gleichzeitig fuer schnellen Ueberblick.</span>
+                <span class="mode-option-copy">Zeigt mehr Felder gleichzeitig für schnellen Überblick.</span>
               </button>
             </div>
           </div>
 
           <div class="settings-subsection settings-subsection-danger">
             <h3 class="settings-danger-title">
-              <kq-icon name="alert-triangle" [size]="18"/> Daten zuruecksetzen
+              <kq-icon name="alert-triangle" [size]="18"/> Daten zurücksetzen
             </h3>
             <p class="danger-copy">
-              Loescht alle lokalen Daten (Spielstaende, Plaene, Archiv, Fotos). Kann nicht rueckgaengig gemacht werden.
+              Löscht alle lokalen Daten (Spielstände, Pläne, Archiv, Fotos). Kann nicht rückgängig gemacht werden.
             </p>
-            <kq-button data-testid="action-howto-clear-data" variant="ghost" (click)="clearAllData()">Spielstand loeschen</kq-button>
+            <kq-button data-testid="action-howto-clear-data" variant="ghost" (click)="clearAllData()">Spielstand löschen</kq-button>
           </div>
         </section>
       </div>
@@ -438,7 +438,7 @@ export class HowItWorksComponent {
 
   async clearAllData(): Promise<void> {
     const confirmed = window.confirm(
-      'Alle Spielstaende, Plaene, Archiv-Eintraege und Fotos werden unwiderruflich geloescht. Fortfahren?'
+      'Alle Spielstände, Pläne, Archiv-Einträge und Fotos werden unwiderruflich gelöscht. Fortfahren?'
     );
     if (!confirmed) return;
 

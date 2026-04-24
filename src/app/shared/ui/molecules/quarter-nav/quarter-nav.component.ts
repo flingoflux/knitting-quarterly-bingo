@@ -31,8 +31,8 @@ import { ButtonComponent } from '../../atoms/button/button.component';
         variant="icon"
         size="sm"
         (click)="nextClicked.emit()"
-        title="Naechstes Quartal"
-        ariaLabel="Naechstes Quartal"
+        title="Nächstes Quartal"
+        ariaLabel="Nächstes Quartal"
       >
         <kq-icon name="chevron-right" [size]="12"/>
       </kq-button>

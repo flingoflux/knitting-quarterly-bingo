@@ -30,7 +30,7 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
       <section class="archive-header">
         <p class="eyebrow">Knitting Quarterly - Archiv</p>
         <h2 data-testid="page-archive-title">Bisher erledigte Runden</h2>
-        <p class="subtitle">Miniuebersicht abgeschlossener Bingo-Boards.</p>
+        <p class="subtitle">Miniübersicht abgeschlossener Bingo-Boards.</p>
         <p class="prototype-note" *ngIf="isShowingPrototype()">
           Vorschau mit Beispiel-Boards, bis echte Quartale archiviert wurden.
         </p>

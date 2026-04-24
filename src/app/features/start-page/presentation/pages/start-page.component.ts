@@ -209,11 +209,11 @@ export class StartPageComponent {
 
   private getMotivationText(daysUntilNextQuarterly: number, hasBingo: boolean): string {
     if (hasBingo) {
-      return 'Glueckwunsch, du hast schon ein Bingo geschafft!';
+      return 'Glückwunsch, du hast schon ein Bingo geschafft!';
     }
 
     if (daysUntilNextQuarterly <= 14) {
-      return `Noch ${daysUntilNextQuarterly} Tage bis zum naechsten Quarterly. Plane jetzt dein Board!`;
+      return `Noch ${daysUntilNextQuarterly} Tage bis zum nächsten Quarterly. Plane jetzt dein Board!`;
     }
 
     return `Noch ${daysUntilNextQuarterly} Tage Zeit: dranbleiben und Projekte eintragen. Du kannst noch ein Bingo schaffen.`;
