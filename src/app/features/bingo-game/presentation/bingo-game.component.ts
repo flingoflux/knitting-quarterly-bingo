@@ -249,7 +249,7 @@ export class BingoGameComponent implements OnInit {
     });
 
     const printUrl = this.router.serializeUrl(urlTree);
-    const absoluteUrl = new URL(printUrl, window.location.href).toString();
+    const absoluteUrl = new URL(printUrl.replace(/^\//, ''), document.baseURI).toString();
     const printWindow = window.open(absoluteUrl, '_blank');
     if (printWindow) {
       printWindow.opener = null;

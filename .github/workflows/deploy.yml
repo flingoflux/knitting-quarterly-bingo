@@ -41,28 +41,7 @@ jobs:
       - name: Prepare SPA fallback
         run: |
           touch dist/.nojekyll
-          cat > dist/404.html << 'EOF'
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="utf-8">
-              <title>Knitting Quarterly Bingo</title>
-              <script>
-                var l = window.location;
-                var segments = l.pathname.split('/').filter(Boolean);
-                var repoBase = segments.length > 0 ? '/' + segments[0] : '';
-                var appPath = '/' + segments.slice(1).join('/');
-                if (appPath === '/') {
-                  appPath = '/';
-                }
-                l.replace(
-                  l.protocol + '//' + l.host + repoBase + '/#' + appPath + l.search + l.hash
-                );
-              </script>
-            </head>
-            <body></body>
-          </html>
-          EOF
+          cp dist/index.html dist/404.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
