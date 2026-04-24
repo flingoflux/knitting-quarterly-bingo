@@ -1,5 +1,5 @@
 import { ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withHashLocation } from '@angular/router';
 import { routes } from './app.routes';
 import { EnsureQuarterRolloverUseCase } from './core/application/ensure-quarter-rollover.use-case';
 import { ENSURE_QUARTER_ROLLOVER_IN_PORT } from './core/application/ports/in/ensure-quarter-rollover.in-port';
@@ -25,7 +25,7 @@ import { ManageUserSettingsUseCase } from './features/user-settings/application/
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
+    provideRouter(routes, withHashLocation()),
     { provide: ENSURE_QUARTER_ROLLOVER_IN_PORT, useExisting: EnsureQuarterRolloverUseCase },
     { provide: QUARTERLY_PLAN_READER, useExisting: LocalStorageQuarterlyPlanRepository },
     { provide: QUARTERLY_PLAN_WRITER, useExisting: LocalStorageQuarterlyPlanRepository },
