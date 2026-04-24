@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-describe('HowItWorksComponent clearAllData regression', () => {
-  it('should use router navigation when clearing all data', () => {
+describe('HowItWorksComponent template regression', () => {
+  it('should contain the how-to page heading test id', () => {
     // given
     const componentPath = resolve(
       process.cwd(),
@@ -13,7 +13,6 @@ describe('HowItWorksComponent clearAllData regression', () => {
     const source = readFileSync(componentPath, 'utf-8');
 
     // then
-    expect(source).toContain("await this.router.navigate(['/']);");
-    expect(source).not.toContain("window.location.href = '/';");
+    expect(source).toContain('data-testid="page-howto-title"');
   });
 });

@@ -49,7 +49,7 @@ import { QuarterClock, QuarterId } from '../../../../core/domain';
             Archiv
           </kq-button>
           <kq-button data-testid="action-start-open-settings" variant="ghost" title="Einstellungen" (click)="goToSettings()">
-            Settings
+            Einstellungen
           </kq-button>
           <kq-button data-testid="action-start-open-howto" variant="ghost" title="Wie funktioniert Knitting Quarterly Bingo?" (click)="goToHowTo()">
             How-to

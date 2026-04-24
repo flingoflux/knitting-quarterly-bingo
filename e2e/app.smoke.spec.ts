@@ -62,6 +62,7 @@ test('should navigate to settings from start page', async ({ page }) => {
   // then
   await expect(page).toHaveURL('/settings');
   await expect(page.getByTestId('page-settings-title')).toBeVisible();
+  await expect(page.getByTestId('action-settings-clear-data')).toBeVisible();
 });
 
 test('should navigate to the current quarter view when starting play', async ({ page }) => {
