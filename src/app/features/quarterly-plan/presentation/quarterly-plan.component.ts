@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PLAN_QUARTERLY_IN_PORT } from '../application/ports/in/plan-quarterly.in-port';
+import { START_BINGO_FROM_PLAN_IN_PORT } from '../../bingo-game/application/ports/in/start-bingo-from-plan.in-port';
 import { EditableBoardComponent } from './components/editable-board.component';
 import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-detail-dialog.component';
 import { shuffleArray } from '../../../shared/utils/array-utils';
@@ -49,16 +50,11 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         [mode]="viewMode"
         (modeChange)="onModeChange($event)"
       >
-        <kq-button
-          variant="icon"
-          (click)="resetToDefaultBoard()"
-          title="Board auf Standard-Challenges zurücksetzen und Bilder entfernen"
-          ariaLabel="Board auf Standard-Challenges zurücksetzen"
-        >
-          <kq-icon name="plus-feather" [size]="18"/>
-        </kq-button>
         <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
           <kq-icon name="shuffle" [size]="22"/>
+        </kq-button>
+        <kq-button variant="icon" (click)="startBingo()" title="Neues Bingo mit diesem Plan starten" ariaLabel="Neues Bingo mit diesem Plan starten">
+          <kq-icon name="play" [size]="20"/>
         </kq-button>
       </kq-board-toolbar>
 
@@ -128,6 +124,7 @@ export class QuarterlyPlanComponent implements OnInit {
   @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
   @ViewChild('editableBoard') private readonly editableBoardRef!: EditableBoardComponent;
   state = inject(PLAN_QUARTERLY_IN_PORT);
+  private readonly startBingoFromPlanService = inject(START_BINGO_FROM_PLAN_IN_PORT);
   router = inject(Router);
   route = inject(ActivatedRoute);
   private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
@@ -194,6 +191,19 @@ export class QuarterlyPlanComponent implements OnInit {
 
   resetToDefaultBoard() {
     this.state.persistDefaultChallengesWithoutImages();
+  }
+
+  startBingo() {
+    const confirmed = window.confirm(
+      `Dein Board startet automatisch mit dem ${this.displayedQuarterId()} 🧶\n\n` +
+      `Möchtest du schon jetzt damit spielen? Das überschreibt das aktuelle Bingo – ` +
+      `inklusive deinem Fortschritt und allen Fotos.`,
+    );
+    if (!confirmed) return;
+    const started = this.startBingoFromPlanService.startBingoFromPlan(this.displayedQuarterId());
+    if (started) {
+      void this.router.navigate(['/quarterly'], { queryParams: { quarter: this.actualCurrentQuarterId } });
+    }
   }
 
   onDragStart(i: number) {
