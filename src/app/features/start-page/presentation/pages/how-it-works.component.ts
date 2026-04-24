@@ -123,9 +123,9 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
               <button
                 type="button"
                 class="mode-option"
-                [class.active]="viewMode === 'horizontal'"
-                [attr.aria-pressed]="viewMode === 'horizontal'"
-                (click)="onModeChange('horizontal')"
+                [class.active]="viewMode === 'kompakt'"
+                [attr.aria-pressed]="viewMode === 'kompakt'"
+                (click)="onModeChange('kompakt')"
               >
                 <span class="mode-option-title"><kq-icon name="horizontal" [size]="16"/>Kompakt</span>
                 <span class="mode-option-copy">Zeigt mehr Felder gleichzeitig fuer schnellen Ueberblick.</span>

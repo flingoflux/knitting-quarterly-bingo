@@ -26,7 +26,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
   template: `
     <kq-page-container>
       <kq-page-toolbar
-        [maxWidth]="viewMode === 'horizontal' ? PAGE_TOOLBAR_WIDTH_HORIZONTAL : PAGE_TOOLBAR_WIDTH_MOBILE"
+        [maxWidth]="viewMode === 'kompakt' ? PAGE_TOOLBAR_WIDTH_HORIZONTAL : PAGE_TOOLBAR_WIDTH_MOBILE"
         [quarterLabel]="displayedQuarterId()"
         [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
         [showNextButton]="canGoToNextQuarter()"
@@ -43,15 +43,17 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         💡 Du schaust dir das <strong>{{ displayedQuarterId() }}</strong> an. Fortschritt wird hier nicht gespeichert.
       </div>
 
-      <div class="play-bingo-header" [class.compact-header]="viewMode === 'horizontal'">
+      <div class="play-bingo-header" [class.compact-header]="viewMode === 'kompakt'">
         <p class="eyebrow">Knitting Quarterly - Bingo</p>
         <h2 data-testid="page-bingo-title">Happy crafting</h2>
-        <p class="subtitle" *ngIf="viewMode === 'polaroid'">Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen.</p>
+        <p class="subtitle">Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen.</p>
       </div>
 
       <kq-board-toolbar
         [mode]="viewMode"
+        [showPrintButton]="true"
         (modeChange)="onModeChange($event)"
+        (printClicked)="onPrintClick()"
       >
         <div class="status-grid" aria-label="Fortschritt">
           <div
@@ -236,6 +238,22 @@ export class BingoGameComponent implements OnInit {
   goToPreviousQuarter() {
     const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
     void this.router.navigate(['/quarterly'], { queryParams: { quarter: previousQuarter } });
+  }
+
+  onPrintClick(): void {
+    const urlTree = this.router.createUrlTree(['/quarterly-print'], {
+      queryParams: {
+        quarter: this.displayedQuarterId(),
+        mode: this.viewMode,
+      },
+    });
+
+    const printUrl = this.router.serializeUrl(urlTree);
+    const absoluteUrl = new URL(printUrl, window.location.origin).toString();
+    const printWindow = window.open(absoluteUrl, '_blank');
+    if (printWindow) {
+      printWindow.opener = null;
+    }
   }
 
   onToggle(i: number) {

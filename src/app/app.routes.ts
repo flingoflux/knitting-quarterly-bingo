@@ -27,6 +27,19 @@ export const routes: Routes = [
     loadComponent: () => import('./features/quarter-lifecycle/presentation/pages/quarterly-view-page.component').then(m => m.QuarterlyViewPageComponent),
   },
   {
+    path: 'quarterly-print',
+    providers: [
+      PlayBingoUseCase,
+      { provide: PLAY_BINGO_IN_PORT, useExisting: PlayBingoUseCase },
+    ],
+    loadComponent: () => import('./features/bingo-game/presentation/print-bingo-board.component').then(m => m.PrintBingoBoardComponent),
+  },
+  {
+    path: 'quarterly/print',
+    redirectTo: 'quarterly-print',
+    pathMatch: 'full',
+  },
+  {
     path: 'play',
     redirectTo: 'quarterly',
     pathMatch: 'full',

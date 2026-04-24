@@ -10,6 +10,7 @@ export type KqIconName =
   | 'chevron-right'
   | 'polaroid'
   | 'horizontal'
+  | 'print'
   | 'camera'
   | 'upload'
   | 'delete'
@@ -34,6 +35,7 @@ const ICONS: Record<KqIconName, string> = {
   'chevron-right': `<polyline points="9 18 15 12 9 6"/>`,
   polaroid: `<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="16" x2="21" y2="16"/>`,
   horizontal: `<rect x="2" y="3" width="7" height="7" rx="1"/><line x1="12" y1="6.5" x2="22" y2="6.5"/><rect x="2" y="14" width="7" height="7" rx="1"/><line x1="12" y1="17.5" x2="22" y2="17.5"/>`,
+  print: `<polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect>`,
   camera: `<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>`,
   upload: `<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>`,
   delete: `<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>`,

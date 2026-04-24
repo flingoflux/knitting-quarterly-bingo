@@ -41,9 +41,9 @@ Die Anwendung unterstützt zwei Phasen:
 - **Laufzeitumgebung**: Moderner Webbrowser (Chrome, Firefox, Safari)
 - **Kein Backend**: Vollständige Client-Side-Applikation, keine Server-Komponente
 - **Persistence**: Browser-APIs (LocalStorage für strukturierte Daten, IndexedDB für Bilder)
-- **Framework**: Angular 17+ (Standalone Components, Signals)
+- **Framework**: Angular 21+ (Standalone Components, Signals)
 - **Sprache**: TypeScript
-- **Tests**: Vitest
+- **Tests**: Vitest (Unit) und Playwright (E2E)
 
 ### Organisatorische Randbedingungen
 
@@ -123,7 +123,7 @@ Namensregel: siehe ADR-005 (Kapitel 9) fuer die verbindliche Benennung von InPor
 | Slice | InPort | UseCase | OutPorts | Adapter | Domain-Fokus |
 | --- | --- | --- | --- | --- | --- |
 | quarterly-plan | `PlanQuarterlyInPort` | `PlanQuarterlyUseCase` | `LoadQuarterlyPlanOutPort`, `PersistQuarterlyPlanOutPort` | `LocalStorageQuarterlyPlanRepository` | `QuarterlyPlan`, `Challenge` |
-| bingo-game | `PlayBingoInPort` | `PlayBingoUseCase` | `LoadBingoProgressOutPort`, `PersistBingoProgressOutPort`, Nutzung von `LoadQuarterlyPlanOutPort` | `LocalStorageBingoGameRepository` | `BingoGame`, `ChallengeProgress` |
+| bingo-game | `PlayBingoInPort` | `PlayBingoUseCase` | `LoadBingoProgressOutPort`, `PersistBingoProgressOutPort`, Nutzung von `LoadQuarterlyPlanOutPort` | `LocalStorageBingoGameRepository`; Presentation inkl. `PrintBingoBoardComponent` | `BingoGame`, `ChallengeProgress` |
 | bingo-game (Start) | `StartBingoFromPlanInPort` | `StartBingoFromPlanUseCase` | `LoadQuarterlyPlanOutPort`, `PersistQuarterlyPlanOutPort`, `PersistBingoProgressOutPort` | – (nutzt bestehende Adapter) | QuarterId-Mapping, Cross-Quarter-Persistenz |
 | archive | `ShowArchiveOverviewInPort` | `ShowArchiveOverviewUseCase` | `LoadArchiveEntriesOutPort` | `LocalStorageArchiveRepository` | `ArchiveEntry` |
 | core / quarter-lifecycle | `EnsureQuarterRolloverInPort` | `EnsureQuarterRolloverUseCase` | nutzt aktuell `QUARTERLY_PLAN_READER`/`QUARTERLY_PLAN_WRITER` und `BINGO_GAME_REPOSITORY` (Migration auf OutPorts folgt) | kein eigener Storage-Adapter | `QuarterClock`, `QuarterId` |
@@ -406,6 +406,28 @@ sequenceDiagram
   PB->>LocalStorage: persist(game)
 ```
 
+### Szenario 3b: Board drucken
+
+```mermaid
+sequenceDiagram
+  actor Benutzer
+  participant BGC as BingoGameComponent
+  participant Router
+  participant PBC as PrintBingoBoardComponent
+  participant PB as PlayBingoUseCase
+
+  Benutzer->>BGC: Klick auf Druck-Button
+  BGC->>Router: open /quarterly-print?quarter={quarterId}&mode={viewMode}
+  Router-->>PBC: Print-Ansicht laden
+  PBC->>PB: setPreviewMode(isPreview, quarter)
+  PBC->>PBC: applyOrientationStyle(mode)
+  PBC->>Browser: window.print()
+  Browser-->>PBC: afterprint
+  PBC->>PBC: removeOrientationStyle()
+```
+
+Die Druckausrichtung wird mode-abhaengig gesetzt: `polaroid -> portrait`, `kompakt -> landscape`.
+
 ### 6.4 Zustandsmodell – Spiellebenszyklus
 
 ```mermaid
@@ -600,7 +622,7 @@ Kleine, eigenständige Komponenten ohne Business-Logik:
 
 **`icon/icon.component.ts`** (24px × 24px SVG-Icons)
 
-- Input: `name` (home, shuffle, play, camera, upload, delete, check, star, close, polaroid, horizontal)
+- Input: `name` (home, shuffle, play, print, camera, upload, delete, check, star, close, polaroid, horizontal)
 - Input: `size` (px), `strokeWidth`, `filled` (für solide Icons wie Stern)
 - Verwendet: Token-basierte Farben
 
@@ -625,7 +647,7 @@ Kombinationen von Atoms mit begrenzter UI-Logik:
 - **Inputs:**
   - `name: string` (Challenge-Name)
   - `imageUrl: string | null` (Foto-URL oder null = Platzhalter)
-  - `mode: 'polaroid' | 'horizontal'` (Layout-Modus)
+  - `mode: 'polaroid' | 'kompakt'` (Layout-Modus)
   - `done: boolean` (abgehakt?)
   - `inBingo: boolean` (Teil einer Bingo-Reihe?)
   - `showCameraButton?: boolean` (Kamera-Icon anzeigen?)
@@ -636,7 +658,7 @@ Kombinationen von Atoms mit begrenzter UI-Logik:
 
 - **Styles:**
   - Polaroid-Modus: klassische Instant-Film-Optik mit Label unten
-  - Horizontal-Modus: Bild links, Name rechts
+  - Kompakt-Modus: Bild links, Name rechts
   - Beim Hover: Haken und Bingo-Stern werden angezeigt
 
 - **Verwendung:** Im `playable-board` (Spiel) und im `editable-board` (Planung)
@@ -654,7 +676,7 @@ Größere, oft zusammengesetzte Komponenten mit komplexerer Logik:
 
 - Responsive CSS Grid mit Gap
 - Polaroid-Modus: max-width 52rem
-- Horizontal-Modus: max-width 58rem
+- Kompakt-Modus: max-width 58rem
 - Breakpoints: 900px (2 Spalten), 520px (1 Spalte)
 - Inhalt: beliebige Kinder (typen Challenge-Cards)
 
@@ -673,6 +695,11 @@ Standalone Angular Components, die Organisms und kleinere Feature-spezifische Ko
 
 - Nutzt: `BoardGridComponent`, `PlayableBoardComponent`, `ProjectComparisonDialogComponent`
 - State: `PlayBingoInPort` (`PlayBingoUseCase`)
+
+**`print-bingo-board.component.ts` (/quarterly-print)**
+
+- Nutzt: `BoardGridComponent`, `PrintChallengeCardComponent`
+- Zweck: druckoptimierte Darstellung mit mode-abhaengiger Seitenausrichtung und automatischem `window.print()`
 
 **`start-page.component.ts` (/)**
 
@@ -786,6 +813,7 @@ Die Testpyramide wird in diesem Projekt wie folgt umgesetzt:
 - Unit-Tests mit Vitest (`pnpm test`) fuer Domain- und UseCase-Logik
 - E2E-Tests mit Playwright (`pnpm test:e2e`) fuer zentrale Nutzerfluesse, Routing und Persistenzintegration
 - CI-Ausfuehrung von E2E in GitHub Actions inklusive Playwright-Report als Artefakt
+- Smoke-E2E decken zusaetzlich Kompakt-Umschaltung und das Oeffnen des Print-Popups (`/quarterly-print?quarter=...&mode=...`) ab
 
 #### Unit-Test-Konventionen
 
@@ -892,6 +920,7 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 | Q5 | Domänenlogik-Test | `pnpm test` läuft in unter 1 Sekunde; keine Angular-Umgebung nötig |
 | Q6 | Navigation und Quartalswechsel im Browser | `pnpm test:e2e` läuft in CI erfolgreich; Toolbar-Flows (Home/Help/Prev/Next) sind stabil testbar |
 | Q7 | Play-Button: Plan aus Quartal A startet Bingo in aktuellem Quartal B | Challenges aus A sind nach Klick unter B's `quarterId` persistiert; bisheriger Fortschritt in B ist gelöscht; `QuarterlyViewPage` zeigt Spielansicht |
+| Q8 | Druckansicht aus dem Spiel öffnen | Print-Popup oeffnet mit korrekten Query-Parametern (`quarter`, `mode`) und ist E2E-abgesichert |
 
 ---
 

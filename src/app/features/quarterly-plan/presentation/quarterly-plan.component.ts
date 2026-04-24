@@ -27,7 +27,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
   template: `
     <kq-page-container>
       <kq-page-toolbar
-        [maxWidth]="viewMode === 'horizontal' ? PAGE_TOOLBAR_WIDTH_HORIZONTAL : PAGE_TOOLBAR_WIDTH_MOBILE"
+        [maxWidth]="viewMode === 'kompakt' ? PAGE_TOOLBAR_WIDTH_HORIZONTAL : PAGE_TOOLBAR_WIDTH_MOBILE"
         [quarterLabel]="displayedQuarterId()"
         [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
         [showNextButton]="canGoToNextQuarter()"
@@ -40,7 +40,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         </kq-button>
       </kq-page-toolbar>
 
-      <div class="edit-board-header" [class.compact-header]="viewMode === 'horizontal'">
+      <div class="edit-board-header" [class.compact-header]="viewMode === 'kompakt'">
         <p class="eyebrow">Knitting Quarterly - Board Studio</p>
         <h2 data-testid="page-quarterly-plan-title">Challenges und Projekte planen</h2>
         <p class="subtitle" *ngIf="viewMode === 'polaroid'">Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden.</p>

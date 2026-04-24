@@ -15,4 +15,19 @@ describe('HowItWorksComponent template regression', () => {
     // then
     expect(source).toContain('data-testid="page-howto-title"');
   });
+
+  it('should use kompakt mode toggle and not horizontal', () => {
+    // given
+    const componentPath = resolve(
+      process.cwd(),
+      'src/app/features/start-page/presentation/pages/how-it-works.component.ts'
+    );
+
+    // when
+    const source = readFileSync(componentPath, 'utf-8');
+
+    // then
+    expect(source).toContain("(click)=\"onModeChange('kompakt')\"");
+    expect(source).not.toContain("(click)=\"onModeChange('horizontal')\"");
+  });
 });

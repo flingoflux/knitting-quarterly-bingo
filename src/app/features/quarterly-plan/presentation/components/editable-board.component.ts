@@ -146,13 +146,13 @@ interface CardDetailOpenedEvent {
       margin-top: 0.25rem;
     }
 
-    /* ── Horizontal-Grid ── */
-    .grid.editable.mode-horizontal {
+    /* ── Kompakt-Grid ── */
+    .grid.editable.mode-kompakt {
       grid-template-columns: repeat(4, minmax(0, 1fr));
       max-width: 58rem;
       gap: 0.4rem;
     }
-    .mode-horizontal .title {
+    .mode-kompakt .title {
       font-size: 0.7rem;
       text-align: left;
       display: -webkit-box;
@@ -160,7 +160,7 @@ interface CardDetailOpenedEvent {
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .mode-horizontal .title-input {
+    .mode-kompakt .title-input {
       width: calc(100% - 0.5rem);
       font-size: 0.72rem;
       padding: 0.2rem 0.4rem;
@@ -180,7 +180,7 @@ export class EditableBoardComponent {
   }
   get challenges(): Challenge[] { return this._challenges; }
 
-  @Input() mode: 'polaroid' | 'horizontal' = 'polaroid';
+  @Input() mode: 'polaroid' | 'kompakt' = 'polaroid';
   @Input() dragTargetIndex!: number | null;
   @Output() dragStarted = new EventEmitter<number>();
   @Output() dragOverCell = new EventEmitter<number>();
