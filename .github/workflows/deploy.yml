@@ -49,11 +49,14 @@ jobs:
               <title>Knitting Quarterly Bingo</title>
               <script>
                 var l = window.location;
+                var segments = l.pathname.split('/').filter(Boolean);
+                var repoBase = segments.length > 0 ? '/' + segments[0] : '';
+                var appPath = '/' + segments.slice(1).join('/');
+                if (appPath === '/') {
+                  appPath = '/';
+                }
                 l.replace(
-                  l.protocol + '//' + l.host + l.pathname.split('/').slice(0, 2).join('/') +
-                  '/?p=/' + l.pathname.slice(1).replace(/&/g, '~and~') +
-                  (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-                  l.hash
+                  l.protocol + '//' + l.host + repoBase + '/#' + appPath + l.search + l.hash
                 );
               </script>
             </head>
