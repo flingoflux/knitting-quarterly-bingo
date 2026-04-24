@@ -32,6 +32,7 @@ export type KqCardMode = 'polaroid' | 'kompakt';
       [class.card--done]="done"
       [class.card--bingo]="inBingo"
       [class.card--hoverable]="hoverable"
+      [style.--placeholder-logo-size.px]="mode === 'kompakt' ? 24 : 58"
     >
       <div class="card__photo" [class.card__photo--editing]="editing">
         <img
@@ -120,13 +121,11 @@ export type KqCardMode = 'polaroid' | 'kompakt';
       color: #c9a878;
     }
     .card__logo-placeholder {
-      width: 58px;
-      height: 58px;
+      width: var(--placeholder-logo-size, 30px);
+      height: var(--placeholder-logo-size, 30px);
       object-fit: contain;
       -webkit-user-drag: none;
       user-select: none;
-      filter: brightness(0) saturate(100%) invert(73%) sepia(28%) saturate(500%)
-              hue-rotate(355deg) brightness(94%) contrast(88%) opacity(0.45);
     }
 
     .card__photo--editing {
@@ -246,7 +245,7 @@ export class ChallengeCardComponent {
   @Input() showCameraButton = true;
   @Input() editing = false;
   @Input() hoverable = true;
-  @Input() placeholderLogoSrc = 'assets/logo_print.svg';
+  @Input() placeholderLogoSrc = 'assets/crown.svg';
 
   @Output() cameraClicked = new EventEmitter<MouseEvent>();
 

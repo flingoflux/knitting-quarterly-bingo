@@ -28,7 +28,7 @@ import { KqCardMode } from '../../../shared/ui/molecules/challenge-card/challeng
           draggable="false"
         />
         <div *ngIf="!imageUrl" class="card__placeholder">
-          <img src="assets/logo_print.svg" class="card__logo-placeholder" alt="" draggable="false" />
+          <img src="assets/crown.svg" class="card__logo-placeholder" alt="" draggable="false" />
         </div>
 
         <div *ngIf="done" class="card__badge card__badge--done">✓</div>
