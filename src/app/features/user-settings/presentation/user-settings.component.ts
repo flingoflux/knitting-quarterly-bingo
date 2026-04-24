@@ -21,6 +21,9 @@ import { IndexedDbImageRepository } from '../../../core/infrastructure/indexed-d
         [showNextButton]="false"
         (homeClicked)="goHome()"
       >
+        <kq-button toolbar-actions testId="action-toolbar-settings" variant="icon" (click)="goToSettings()" title="Einstellungen" ariaLabel="Einstellungen">
+          <kq-icon name="settings-feather" [size]="24"/>
+        </kq-button>
         <kq-button toolbar-actions testId="action-toolbar-help" variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
           <kq-icon name="question" [size]="24"/>
         </kq-button>
@@ -224,6 +227,10 @@ export class UserSettingsComponent {
 
   goToHelp(): void {
     void this.router.navigate(['/how-it-works']);
+  }
+
+  goToSettings(): void {
+    // Already on settings page
   }
 
   onModeChange(mode: BoardViewMode): void {

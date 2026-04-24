@@ -3,18 +3,26 @@ import { Router } from '@angular/router';
 import { PageToolbarComponent } from '../../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 import { PageContainerComponent } from '../../../../shared/ui/templates/page-container/page-container.component';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
+import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
 
 @Component({
   selector: 'app-how-to',
   standalone: true,
-  imports: [PageToolbarComponent, PageContainerComponent, IconComponent],
+  imports: [PageToolbarComponent, PageContainerComponent, IconComponent, ButtonComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
         [maxWidth]="pageToolbarWidth"
         [showQuarterNav]="false"
         (homeClicked)="goHome()"
-      ></kq-page-toolbar>
+      >
+        <kq-button toolbar-actions testId="action-toolbar-settings" variant="icon" (click)="goToSettings()" title="Einstellungen" ariaLabel="Einstellungen">
+          <kq-icon name="settings-feather" [size]="24"/>
+        </kq-button>
+        <kq-button toolbar-actions testId="action-toolbar-help" variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
+          <kq-icon name="question" [size]="24"/>
+        </kq-button>
+      </kq-page-toolbar>
 
       <div class="feature-shell">
         <div class="how-it-works-header">
@@ -249,5 +257,13 @@ export class HowItWorksComponent {
 
   goHome(): void {
     this.router.navigate(['/']);
+  }
+
+  goToHelp(): void {
+    // Already on help page
+  }
+
+  goToSettings(): void {
+    void this.router.navigate(['/settings']);
   }
 }
