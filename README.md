@@ -101,7 +101,6 @@ Ein Beispieltest für den BingoService ist enthalten. Weitere Tests können in `
 - Formatierung: `pnpm format` (Prettier)
 - Pre-commit-Hook prüft Linting & Formatierung automatisch
 
-
 ## Features
 
 - **Board planen** – Challenges per Drag & Drop anordnen, würfeln und mit Inspirationsfotos versehen
@@ -115,6 +114,3 @@ Ein Beispieltest für den BingoService ist enthalten. Weitere Tests können in `
 - `src/app/core/` – zentrale Services, z.B. für Datenhaltung
 - `src/app/features/` – Feature-Module und Komponenten
 - `src/app/shared/` – geteilte Komponenten, Pipes, etc.
-
-
-

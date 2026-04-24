@@ -358,6 +358,7 @@ sequenceDiagram
 ```
 
 **Kernentscheidungen in diesem Szenario:**
+
 - `sourcePlanQuarterId` (angezeigtes Planquartal) ≠ `currentQuarterId` (Ziel-Quartal des neuen Spiels): Das Mapping ist explizit im `StartBingoFromPlanUseCase` gekapselt.
 - Bestehender Bingo-Fortschritt im aktuellen Quartal wird hart gelöscht; die `QuarterlyViewPage` initialisiert beim Navigieren automatisch ein neues Spiel aus dem persistierten Plan.
 
