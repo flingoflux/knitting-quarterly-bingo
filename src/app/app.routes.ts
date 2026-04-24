@@ -44,4 +44,8 @@ export const routes: Routes = [
     path: 'how-it-works',
     loadComponent: () => import('./features/start-page/presentation/pages/how-it-works.component').then(m => m.HowItWorksComponent),
   },
+  {
+    path: 'settings',
+    loadComponent: () => import('./features/user-settings/presentation/user-settings.component').then(m => m.UserSettingsComponent),
+  },
 ];

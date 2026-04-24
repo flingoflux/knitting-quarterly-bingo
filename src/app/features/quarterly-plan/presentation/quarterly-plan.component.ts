@@ -13,6 +13,8 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
 import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
 import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
 import { QuarterClock } from '../../../core/domain';
+import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
+import { MANAGE_USER_SETTINGS_IN_PORT } from '../../user-settings/application/ports/in/manage-user-settings.in-port';
 
 const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
 const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
@@ -45,7 +47,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 
       <kq-board-toolbar
         [mode]="viewMode"
-        (modeChange)="viewMode = $event"
+        (modeChange)="onModeChange($event)"
       >
         <kq-button
           variant="icon"
@@ -128,12 +130,13 @@ export class QuarterlyPlanComponent implements OnInit {
   state = inject(PLAN_QUARTERLY_IN_PORT);
   router = inject(Router);
   route = inject(ActivatedRoute);
+  private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly PAGE_TOOLBAR_WIDTH_MOBILE = PAGE_TOOLBAR_WIDTH_MOBILE;
   readonly PAGE_TOOLBAR_WIDTH_HORIZONTAL = PAGE_TOOLBAR_WIDTH_HORIZONTAL;
 
-  viewMode: 'polaroid' | 'horizontal' = 'polaroid';
+  viewMode: BoardViewMode = this.userSettings.loadBoardViewMode();
   private readonly quarterClock = new QuarterClock();
   readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
   readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
@@ -192,6 +195,11 @@ export class QuarterlyPlanComponent implements OnInit {
   onDragStart(i: number) {
     this.dragStartIndex = i;
     this.dragTargetIndex = i;
+  }
+
+  onModeChange(mode: BoardViewMode): void {
+    this.viewMode = mode;
+    this.userSettings.persistBoardViewMode(mode);
   }
 
   onDragOver(i: number) {

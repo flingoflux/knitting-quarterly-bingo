@@ -48,6 +48,9 @@ import { QuarterClock, QuarterId } from '../../../../core/domain';
           <kq-button data-testid="action-start-open-archive" variant="ghost" title="Archiv anzeigen" (click)="goToArchive()">
             Archiv
           </kq-button>
+          <kq-button data-testid="action-start-open-settings" variant="ghost" title="Einstellungen" (click)="goToSettings()">
+            Settings
+          </kq-button>
           <kq-button data-testid="action-start-open-howto" variant="ghost" title="Wie funktioniert Knitting Quarterly Bingo?" (click)="goToHowTo()">
             How-to
           </kq-button>
@@ -195,6 +198,10 @@ export class StartPageComponent {
 
   goToHowTo() {
     this.router.navigate(['/how-it-works']);
+  }
+
+  goToSettings() {
+    this.router.navigate(['/settings']);
   }
 
   private getDaysUntilNextQuarterly(today: Date): number {
