@@ -4,6 +4,8 @@ import { PLAY_BINGO_IN_PORT } from './features/bingo-game/application/ports/in/p
 import { PlayBingoUseCase } from './features/bingo-game/application/play-bingo.use-case';
 import { PLAN_QUARTERLY_IN_PORT } from './features/quarterly-plan/application/ports/in/plan-quarterly.in-port';
 import { PlanQuarterlyUseCase } from './features/quarterly-plan/application/plan-quarterly.use-case';
+import { START_BINGO_FROM_PLAN_IN_PORT } from './features/bingo-game/application/ports/in/start-bingo-from-plan.in-port';
+import { StartBingoFromPlanUseCase } from './features/bingo-game/application/start-bingo-from-plan.use-case';
 import { SHOW_ARCHIVE_OVERVIEW_IN_PORT } from './features/archive/application/ports/in/show-archive-overview.in-port';
 import { ShowArchiveOverviewUseCase } from './features/archive/application/show-archive-overview.use-case';
 
@@ -19,6 +21,8 @@ export const routes: Routes = [
       { provide: PLAY_BINGO_IN_PORT, useExisting: PlayBingoUseCase },
       PlanQuarterlyUseCase,
       { provide: PLAN_QUARTERLY_IN_PORT, useExisting: PlanQuarterlyUseCase },
+      StartBingoFromPlanUseCase,
+      { provide: START_BINGO_FROM_PLAN_IN_PORT, useExisting: StartBingoFromPlanUseCase },
     ],
     loadComponent: () => import('./features/quarter-lifecycle/presentation/pages/quarterly-view-page.component').then(m => m.QuarterlyViewPageComponent),
   },

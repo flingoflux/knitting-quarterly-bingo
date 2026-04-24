@@ -124,6 +124,7 @@ Namensregel: siehe ADR-005 (Kapitel 9) fuer die verbindliche Benennung von InPor
 | --- | --- | --- | --- | --- | --- |
 | quarterly-plan | `PlanQuarterlyInPort` | `PlanQuarterlyUseCase` | `LoadQuarterlyPlanOutPort`, `PersistQuarterlyPlanOutPort` | `LocalStorageQuarterlyPlanRepository` | `QuarterlyPlan`, `Challenge` |
 | bingo-game | `PlayBingoInPort` | `PlayBingoUseCase` | `LoadBingoProgressOutPort`, `PersistBingoProgressOutPort`, Nutzung von `LoadQuarterlyPlanOutPort` | `LocalStorageBingoGameRepository` | `BingoGame`, `ChallengeProgress` |
+| bingo-game (Start) | `StartBingoFromPlanInPort` | `StartBingoFromPlanUseCase` | `LoadQuarterlyPlanOutPort`, `PersistQuarterlyPlanOutPort`, `PersistBingoProgressOutPort` | – (nutzt bestehende Adapter) | QuarterId-Mapping, Cross-Quarter-Persistenz |
 | archive | `ShowArchiveOverviewInPort` | `ShowArchiveOverviewUseCase` | `LoadArchiveEntriesOutPort` | `LocalStorageArchiveRepository` | `ArchiveEntry` |
 | core / quarter-lifecycle | `EnsureQuarterRolloverInPort` | `EnsureQuarterRolloverUseCase` | nutzt aktuell `QUARTERLY_PLAN_READER`/`QUARTERLY_PLAN_WRITER` und `BINGO_GAME_REPOSITORY` (Migration auf OutPorts folgt) | kein eigener Storage-Adapter | `QuarterClock`, `QuarterId` |
 | shared image storage | n/a (derzeit) | n/a (derzeit) | `ImageRepository` | `IndexedDbImageRepository` | Bild-UUID-Referenzen |
@@ -322,6 +323,44 @@ sequenceDiagram
   QPC-->>Benutzer: Navigation nach /quarterly
 ```
 
+### Szenario 2b: Jetzt spielen – Plan eines anderen Quartals als neues Bingo starten
+
+Über den **Play-Button im Planungsboard** kann der Benutzer einen Plan (auch eines zukünftigen Quartals) sofort als Bingo starten. Die Challenges werden unter der aktuellen `quarterId` gespeichert und der bisherige Fortschritt wird hart zurückgesetzt.
+
+```mermaid
+sequenceDiagram
+  actor Benutzer
+  participant QPC as QuarterlyPlanComponent
+  participant SBFP as StartBingoFromPlanUseCase
+  participant PLR as LoadQuarterlyPlanOutPort
+  participant PLW as PersistQuarterlyPlanOutPort
+  participant BPW as PersistBingoProgressOutPort
+  participant LocalStorage
+
+  Benutzer->>QPC: Klick auf Play-Button (sourcePlanQuarterId)
+  QPC-->>Benutzer: window.confirm (Sicherheitsabfrage)
+  alt Abbruch
+    Benutzer-->>QPC: Abbrechen
+  else Bestätigt
+    QPC->>SBFP: startBingoFromPlan(sourcePlanQuarterId)
+    SBFP->>PLR: load(sourcePlanQuarterId)
+    PLR->>LocalStorage: read(board-definition:{sourcePlanQuarterId})
+    LocalStorage-->>PLR: QuarterlyPlanData
+    PLR-->>SBFP: Result.ok(plan)
+    SBFP->>SBFP: currentQuarterId = QuarterClock.getQuarterId(now)
+    SBFP->>PLW: persist(currentQuarterId, { quarterId: currentQuarterId, challenges })
+    PLW->>LocalStorage: write(board-definition:{currentQuarterId})
+    SBFP->>BPW: clear(currentQuarterId)
+    BPW->>LocalStorage: delete(active-game:{currentQuarterId})
+    SBFP-->>QPC: true
+    QPC-->>Benutzer: Navigation /quarterly?quarter={currentQuarterId}
+  end
+```
+
+**Kernentscheidungen in diesem Szenario:**
+- `sourcePlanQuarterId` (angezeigtes Planquartal) ≠ `currentQuarterId` (Ziel-Quartal des neuen Spiels): Das Mapping ist explizit im `StartBingoFromPlanUseCase` gekapselt.
+- Bestehender Bingo-Fortschritt im aktuellen Quartal wird hart gelöscht; die `QuarterlyViewPage` initialisiert beim Navigieren automatisch ein neues Spiel aus dem persistierten Plan.
+
 ### Szenario 3: Spiel spielen
 
 ```mermaid
@@ -384,7 +423,11 @@ stateDiagram-v2
 
   Spielen --> Spielen: resetProgress()
   Bingo --> Spielen: resetProgress()
+
+  Planung --> Spielen: Play-Button (startBingoFromPlan)
 ```
+
+> **Play-Button-Übergang:** `Planung → Spielen` (via `StartBingoFromPlanUseCase`) ist ein expliziter Hard-Reset-Pfad. Der Plan des angezeigten Quartals wird unter der aktuellen `quarterId` persistiert, der bestehende Fortschritt gelöscht und anschließend zur Spielansicht des aktuellen Quartals navigiert.
 
 | Zustand | Bedeutung |
 | --- | --- |
@@ -847,6 +890,7 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 | Q4 | Alle 16 Challenges einer Zeile abgehakt | Bingo wird sofort (synchron) erkannt und markiert |
 | Q5 | Domänenlogik-Test | `pnpm test` läuft in unter 1 Sekunde; keine Angular-Umgebung nötig |
 | Q6 | Navigation und Quartalswechsel im Browser | `pnpm test:e2e` läuft in CI erfolgreich; Toolbar-Flows (Home/Help/Prev/Next) sind stabil testbar |
+| Q7 | Play-Button: Plan aus Quartal A startet Bingo in aktuellem Quartal B | Challenges aus A sind nach Klick unter B's `quarterId` persistiert; bisheriger Fortschritt in B ist gelöscht; `QuarterlyViewPage` zeigt Spielansicht |
 
 ---
 
