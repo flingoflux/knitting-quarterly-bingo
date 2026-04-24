@@ -246,7 +246,7 @@ export class ChallengeCardComponent {
   @Input() showCameraButton = true;
   @Input() editing = false;
   @Input() hoverable = true;
-  @Input() placeholderLogoSrc = 'assets/logo_plain.svg';
+  @Input() placeholderLogoSrc = 'assets/logo_print.svg';
 
   @Output() cameraClicked = new EventEmitter<MouseEvent>();
 

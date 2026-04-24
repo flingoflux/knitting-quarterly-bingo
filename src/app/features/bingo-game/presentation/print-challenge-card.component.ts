@@ -88,7 +88,6 @@ import { KqCardMode } from '../../../shared/ui/molecules/challenge-card/challeng
     .card__badge {
       position: absolute;
       top: 4px;
-      right: 4px;
       border-radius: 50%;
       width: 18px;
       height: 18px;
@@ -100,14 +99,17 @@ import { KqCardMode } from '../../../shared/ui/molecules/challenge-card/challeng
       line-height: 1;
     }
     .card__badge--done {
+      left: 4px;
       background: #3a7d44;
       color: #fff;
     }
     .card__badge--bingo {
+      right: 4px;
       background: #b8860b;
       color: #fff;
     }
     .card__badge--empty {
+      left: 4px;
       background: #fff;
       border: 0.3mm solid #c9b49a;
     }
