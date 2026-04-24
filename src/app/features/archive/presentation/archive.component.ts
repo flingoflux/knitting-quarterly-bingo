@@ -198,7 +198,9 @@ export class ArchiveComponent {
   goToHelp(): void {
     this.router.navigate(['/how-it-works']);
   }
-
+  goToSettings(): void {
+    void this.router.navigate(['/how-it-works'], { fragment: 'settings' });
+  }
   goHome(): void {
     void this.router.navigate(['/']);
   }

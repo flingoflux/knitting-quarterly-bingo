@@ -16,6 +16,12 @@ import { LocalStorageArchiveRepository } from './features/archive/infrastructure
 import { LOAD_ARCHIVE_ENTRIES_OUT_PORT } from './features/archive/application/ports/out/load-archive-entries.out-port';
 import { IndexedDbImageRepository } from './core/infrastructure/indexed-db-image-repository.service';
 import { IMAGE_REPOSITORY } from './shared/ports/image-repository';
+import { LocalStorageUserSettingsRepository } from './features/user-settings/infrastructure/local-storage-user-settings.repository';
+import { USER_SETTINGS_REPOSITORY } from './features/user-settings/domain/user-settings.repository';
+import { LOAD_BOARD_VIEW_MODE_OUT_PORT } from './features/user-settings/application/ports/out/load-board-view-mode.out-port';
+import { PERSIST_BOARD_VIEW_MODE_OUT_PORT } from './features/user-settings/application/ports/out/persist-board-view-mode.out-port';
+import { MANAGE_USER_SETTINGS_IN_PORT } from './features/user-settings/application/ports/in/manage-user-settings.in-port';
+import { ManageUserSettingsUseCase } from './features/user-settings/application/manage-user-settings.use-case';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -31,5 +37,9 @@ export const appConfig: ApplicationConfig = {
     { provide: ARCHIVE_REPOSITORY, useExisting: LocalStorageArchiveRepository },
     { provide: LOAD_ARCHIVE_ENTRIES_OUT_PORT, useExisting: LocalStorageArchiveRepository },
     { provide: IMAGE_REPOSITORY, useExisting: IndexedDbImageRepository },
+    { provide: USER_SETTINGS_REPOSITORY, useExisting: LocalStorageUserSettingsRepository },
+    { provide: LOAD_BOARD_VIEW_MODE_OUT_PORT, useExisting: LocalStorageUserSettingsRepository },
+    { provide: PERSIST_BOARD_VIEW_MODE_OUT_PORT, useExisting: LocalStorageUserSettingsRepository },
+    { provide: MANAGE_USER_SETTINGS_IN_PORT, useExisting: ManageUserSettingsUseCase },
   ],
 };

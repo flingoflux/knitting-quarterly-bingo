@@ -13,6 +13,8 @@ import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/
 import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
 import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
 import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
+import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
+import { MANAGE_USER_SETTINGS_IN_PORT } from '../../user-settings/application/ports/in/manage-user-settings.in-port';
 
 const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
 const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
@@ -49,7 +51,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 
       <kq-board-toolbar
         [mode]="viewMode"
-        (modeChange)="viewMode = $event"
+        (modeChange)="onModeChange($event)"
       >
         <div class="status-grid" aria-label="Fortschritt">
           <div
@@ -161,12 +163,13 @@ export class BingoGameComponent implements OnInit {
   state = inject(PLAY_BINGO_IN_PORT);
   router = inject(Router);
   route = inject(ActivatedRoute);
+  private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly PAGE_TOOLBAR_WIDTH_MOBILE = PAGE_TOOLBAR_WIDTH_MOBILE;
   readonly PAGE_TOOLBAR_WIDTH_HORIZONTAL = PAGE_TOOLBAR_WIDTH_HORIZONTAL;
 
-  viewMode: 'polaroid' | 'horizontal' = 'polaroid';
+  viewMode: BoardViewMode = this.userSettings.loadBoardViewMode();
   private readonly quarterClock = new QuarterClock();
   readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
   readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
@@ -221,6 +224,10 @@ export class BingoGameComponent implements OnInit {
     this.router.navigate(['/how-it-works']);
   }
 
+  goToSettings() {
+    void this.router.navigate(['/how-it-works'], { fragment: 'settings' });
+  }
+
   goToNextQuarter() {
     const nextQuarter = this.quarterClock.getNextQuarterIdFromQuarterId(this.displayedQuarterId());
     void this.router.navigate(['/quarterly'], { queryParams: { quarter: nextQuarter } });
@@ -233,6 +240,11 @@ export class BingoGameComponent implements OnInit {
 
   onToggle(i: number) {
     this.state.persistToggledChallenge(i);
+  }
+
+  onModeChange(mode: BoardViewMode): void {
+    this.viewMode = mode;
+    this.userSettings.persistBoardViewMode(mode);
   }
 
   onCardDetailOpen(event: { index: number; challenge: ChallengeProgress }) {
