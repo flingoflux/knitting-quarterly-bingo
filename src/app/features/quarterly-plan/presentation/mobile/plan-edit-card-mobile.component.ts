@@ -1,21 +1,20 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
+import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-photo.component';
 
 @Component({
   selector: 'app-plan-mobile-edit-card',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, CardPhotoComponent],
   template: `
     <div class="edit-card">
       <div class="edit-card__photo" (click)="cameraClicked.emit($event)">
-        <img *ngIf="imageUrl" [src]="imageUrl" [alt]="name" class="edit-card__img" draggable="false" />
-        <div *ngIf="!imageUrl" class="edit-card__placeholder">
-          <img src="assets/crown.svg" alt="" class="edit-card__logo" draggable="false" />
-        </div>
-        <div class="edit-card__camera-hint">
-          <kq-icon name="camera" [size]="16"/>
-        </div>
+        <kq-card-photo [imageUrl]="imageUrl" [alt]="name">
+          <div class="edit-card__camera-hint">
+            <kq-icon name="camera" [size]="16"/>
+          </div>
+        </kq-card-photo>
       </div>
 
       <div class="edit-card__body">
@@ -90,27 +89,8 @@ import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
       overflow: hidden;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-    }
-
-    .edit-card__img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .edit-card__placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .edit-card__logo {
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
+      --kq-card-photo-logo-size: 40px;
+      --kq-card-photo-logo-max-size: 40px;
     }
 
     .edit-card__camera-hint {

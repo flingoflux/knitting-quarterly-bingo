@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BadgeComponent } from '../../../../shared/ui/atoms/badge/badge.component';
+import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-photo.component';
 
 @Component({
   selector: 'app-mobile-mini-card',
   standalone: true,
-  imports: [CommonModule, BadgeComponent],
+  imports: [CommonModule, BadgeComponent, CardPhotoComponent],
   template: `
     <div
       class="mini-card"
@@ -13,12 +14,10 @@ import { BadgeComponent } from '../../../../shared/ui/atoms/badge/badge.componen
       [class.mini-card--bingo]="inBingo"
     >
       <div class="mini-card__photo">
-        <img *ngIf="imageUrl" [src]="imageUrl" [alt]="name" class="mini-card__img" draggable="false" />
-        <div *ngIf="!imageUrl" class="mini-card__placeholder">
-          <img src="assets/crown.svg" alt="" class="mini-card__logo" draggable="false" />
-        </div>
-        <kq-badge *ngIf="done" variant="done" [compact]="true"/>
-        <kq-badge *ngIf="inBingo && !done" variant="bingo" [compact]="true"/>
+        <kq-card-photo [imageUrl]="imageUrl" [alt]="name">
+          <kq-badge *ngIf="done" variant="done" [compact]="true"/>
+          <kq-badge *ngIf="inBingo && !done" variant="bingo" [compact]="true"/>
+        </kq-card-photo>
       </div>
       <div class="mini-card__label">{{ name }}</div>
     </div>
@@ -44,28 +43,6 @@ import { BadgeComponent } from '../../../../shared/ui/atoms/badge/badge.componen
       aspect-ratio: 1 / 1;
       border-radius: 2px;
       overflow: hidden;
-    }
-
-    .mini-card__img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .mini-card__placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .mini-card__logo {
-      width: 40%;
-      max-width: 28px;
-      height: auto;
-      object-fit: contain;
     }
 
     .mini-card__label {

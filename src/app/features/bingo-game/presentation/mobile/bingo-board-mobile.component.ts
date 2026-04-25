@@ -2,9 +2,9 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject, sign
 import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
-import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 import { MiniCardMobileComponent } from './mini-card-mobile.component';
 import { EditCardMobileComponent } from './edit-card-mobile.component';
+import { MobileFabComponent } from '../../../../shared/ui/mobile/atoms/fab/fab-mobile.component';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -14,7 +14,7 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-mobile-bingo-board',
   standalone: true,
-  imports: [CommonModule, IconComponent, MiniCardMobileComponent, EditCardMobileComponent],
+  imports: [CommonModule, MiniCardMobileComponent, EditCardMobileComponent, MobileFabComponent],
   template: `
     <!-- Read-only Grid (4×4 Miniatur-Polaroids) -->
     @if (!editMode()) {
@@ -47,16 +47,11 @@ interface CardDetailOpenedEvent {
     }
 
     <!-- FAB: Edit-Modus umschalten -->
-    <button
-      type="button"
-      class="fab"
-      [class.fab--active]="editMode()"
-      [title]="editMode() ? 'Bearbeitungsmodus beenden' : 'Felder abhaken'"
-      [attr.aria-label]="editMode() ? 'Bearbeitungsmodus beenden' : 'Felder abhaken'"
-      (click)="toggleEditMode()"
-    >
-      <kq-icon [name]="editMode() ? 'x' : 'edit'" [size]="22"/>
-    </button>
+    <kq-fab-mobile
+      [active]="editMode()"
+      inactiveLabel="Felder abhaken"
+      (clicked)="toggleEditMode()"
+    />
   `,
   styles: [`
     :host {
@@ -77,34 +72,6 @@ interface CardDetailOpenedEvent {
       gap: 0.6rem;
     }
 
-    /* ── FAB ── */
-    .fab {
-      position: fixed;
-      bottom: 1.5rem;
-      right: 1.25rem;
-      z-index: 100;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #8f3b22 0%, #c46e35 100%);
-      color: #fff7ec;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 14px rgba(96, 58, 30, 0.35);
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .fab:active {
-      transform: scale(0.94);
-    }
-
-    .fab--active {
-      background: #5a2d1a;
-    }
   `],
 })
 export class BingoBoardMobileComponent {

@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { KqCardMode } from '../../../../shared/ui/desktop/molecules/challenge-card/challenge-card-desktop.component';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
+import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-photo.component';
 
 /**
  * Druckoptimierte Bingo-Karte.
@@ -11,7 +12,7 @@ import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 @Component({
   selector: 'kq-print-challenge-card',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, CardPhotoComponent],
   template: `
     <div
       class="card"
@@ -21,22 +22,13 @@ import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
       [class.card--bingo]="inBingo"
     >
       <div class="card__photo">
-        <img
-          *ngIf="imageUrl"
-          [src]="imageUrl"
-          class="card__img"
-          [alt]="name"
-          draggable="false"
-        />
-        <div *ngIf="!imageUrl" class="card__placeholder">
-          <img src="assets/crown.svg" class="card__logo-placeholder" alt="" draggable="false" />
-        </div>
-
-        <div *ngIf="done" class="card__badge card__badge--done">
-          <kq-icon name="x-done" [size]="14" [strokeWidth]="2.2" />
-        </div>
-        <div *ngIf="inBingo && !done" class="card__badge card__badge--bingo">★</div>
-        <div *ngIf="!done && !inBingo" class="card__badge card__badge--empty"></div>
+        <kq-card-photo [imageUrl]="imageUrl" [alt]="name">
+          <div *ngIf="done" class="card__badge card__badge--done">
+            <kq-icon name="x-done" [size]="14" [strokeWidth]="2.2" />
+          </div>
+          <div *ngIf="inBingo && !done" class="card__badge card__badge--bingo">★</div>
+          <div *ngIf="!done && !inBingo" class="card__badge card__badge--empty"></div>
+        </kq-card-photo>
       </div>
 
       <div class="card__caption">
@@ -64,29 +56,8 @@ import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
       flex-shrink: 0;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
+      --kq-card-photo-logo-max-size: 48px;
     }
-    .card__img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .card__placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .card__logo-placeholder {
-      width: 40%;
-      max-width: 48px;
-      height: auto;
-      object-fit: contain;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-
     /* ── Badge ── */
     .card__badge {
       position: absolute;

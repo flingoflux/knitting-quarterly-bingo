@@ -6,14 +6,14 @@ import { ArchiveEntry } from '../domain/archive-entry';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
-import { EyebrowComponent } from '../../../shared/ui/atoms/eyebrow/eyebrow.component';
 import { StatusMiniGridComponent } from '../../../shared/ui/atoms/status-mini-grid/status-mini-grid.component';
 import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
+import { FeatureHeaderComponent } from '../../../shared/ui/molecules/feature-header/feature-header.component';
 
 @Component({
   selector: 'app-archive',
   standalone: true,
-  imports: [CommonModule, PageToolbarComponent, IconComponent, ButtonComponent, EyebrowComponent, StatusMiniGridComponent, PageContainerComponent],
+  imports: [CommonModule, PageToolbarComponent, IconComponent, ButtonComponent, StatusMiniGridComponent, PageContainerComponent, FeatureHeaderComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -29,14 +29,16 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
       </kq-page-toolbar>
 
       <div class="feature-shell">
-      <section class="archive-header">
-        <kq-eyebrow>Knitting Quarterly - Archiv</kq-eyebrow>
-        <h2 data-testid="page-archive-title">Bisher erledigte Runden</h2>
-        <p class="subtitle">Miniübersicht abgeschlossener Bingo-Boards.</p>
+      <kq-feature-header
+        eyebrow="Knitting Quarterly - Archiv"
+        title="Bisher erledigte Runden"
+        titleTestId="page-archive-title"
+        subtitle="Miniübersicht abgeschlossener Bingo-Boards."
+      >
         <p class="prototype-note" *ngIf="isShowingPrototype()">
           Vorschau mit Beispiel-Boards, bis echte Quartale archiviert wurden.
         </p>
-      </section>
+      </kq-feature-header>
 
       <section *ngIf="hasEntries(); else emptyState" class="archive-list" aria-label="Archivierte Quartale">
         <article class="archive-card" *ngFor="let entry of entries()">
@@ -67,28 +69,6 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
       margin: 0;
       padding: 1.4rem 1.1rem 2rem;
       color: var(--kq-text);
-    }
-
-
-
-    .archive-header {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
-
-
-    h2 {
-      margin: 0.4rem 0 0;
-      font-size: clamp(1.4rem, 2.5vw, 2rem);
-      color: var(--kq-text-heading);
-      text-wrap: balance;
-    }
-
-    .subtitle {
-      margin: 0.55rem auto 0;
-      color: var(--kq-muted);
-      font-size: 0.98rem;
-      max-width: 36rem;
     }
 
     .prototype-note {

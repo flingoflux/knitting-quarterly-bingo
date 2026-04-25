@@ -1,17 +1,15 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-photo.component';
 
 @Component({
   selector: 'app-plan-mobile-mini-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, CardPhotoComponent],
   template: `
     <div class="mini-card">
       <div class="mini-card__photo">
-        <img *ngIf="imageUrl" [src]="imageUrl" [alt]="name" class="mini-card__img" draggable="false" />
-        <div *ngIf="!imageUrl" class="mini-card__placeholder">
-          <img src="assets/crown.svg" alt="" class="mini-card__logo" draggable="false" />
-        </div>
+        <kq-card-photo [imageUrl]="imageUrl" [alt]="name" />
       </div>
       <div class="mini-card__label">{{ name }}</div>
     </div>
@@ -33,28 +31,6 @@ import { CommonModule } from '@angular/common';
       aspect-ratio: 1 / 1;
       border-radius: 2px;
       overflow: hidden;
-    }
-
-    .mini-card__img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .mini-card__placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .mini-card__logo {
-      width: 40%;
-      max-width: 28px;
-      height: auto;
-      object-fit: contain;
     }
 
     .mini-card__label {

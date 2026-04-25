@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IconComponent } from '../../../atoms/icon/icon.component';
 import { BadgeComponent } from '../../../atoms/badge/badge.component';
+import { CardPhotoComponent } from '../../../atoms/card-photo/card-photo.component';
 
 export type KqCardMode = 'polaroid' | 'kompakt';
 
@@ -23,7 +24,7 @@ export type KqCardMode = 'polaroid' | 'kompakt';
 @Component({
   selector: 'kq-challenge-card',
   standalone: true,
-  imports: [CommonModule, IconComponent, BadgeComponent],
+  imports: [CommonModule, IconComponent, BadgeComponent, CardPhotoComponent],
   template: `
     <div
       class="card"
@@ -32,35 +33,26 @@ export type KqCardMode = 'polaroid' | 'kompakt';
       [class.card--done]="done"
       [class.card--bingo]="inBingo"
       [class.card--hoverable]="hoverable"
-      [style.--placeholder-logo-size.px]="mode === 'kompakt' ? 24 : 58"
+      [style.--kq-card-photo-logo-max-size.px]="mode === 'kompakt' ? 24 : 58"
     >
       <div class="card__photo" [class.card__photo--editing]="editing">
-        <img
-          *ngIf="imageUrl"
-          [src]="imageUrl"
-          class="card__img"
-          [alt]="name"
-          draggable="false"
-        />
-        <div *ngIf="!imageUrl" class="card__placeholder">
-          <img [src]="placeholderLogoSrc" class="card__logo-placeholder" alt="" draggable="false" />
-        </div>
+        <kq-card-photo [imageUrl]="imageUrl" [alt]="name">
+          <kq-badge *ngIf="done" variant="done" [compact]="mode === 'kompakt'"/>
+          <kq-badge *ngIf="inBingo" variant="bingo" [compact]="mode === 'kompakt'"/>
 
-        <kq-badge *ngIf="done" variant="done" [compact]="mode === 'kompakt'"/>
-        <kq-badge *ngIf="inBingo" variant="bingo" [compact]="mode === 'kompakt'"/>
+          <button
+            *ngIf="showCameraButton"
+            type="button"
+            class="card__camera-btn"
+            title="Foto ansehen / hochladen"
+            aria-label="Foto ansehen oder hochladen"
+            (click)="onCameraClick($event)"
+          >
+            <kq-icon name="camera" [size]="13"/>
+          </button>
 
-        <button
-          *ngIf="showCameraButton"
-          type="button"
-          class="card__camera-btn"
-          title="Foto ansehen / hochladen"
-          aria-label="Foto ansehen oder hochladen"
-          (click)="onCameraClick($event)"
-        >
-          <kq-icon name="camera" [size]="13"/>
-        </button>
-
-        <ng-content select="[slot=photo-overlay]"/>
+          <ng-content select="[slot=photo-overlay]"/>
+        </kq-card-photo>
       </div>
 
       <div class="card__caption">
@@ -104,30 +96,6 @@ export type KqCardMode = 'polaroid' | 'kompakt';
       overflow: hidden;
       flex-shrink: 0;
     }
-    .card__img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      -webkit-user-drag: none;
-      user-select: none;
-    }
-    .card__placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #c9a878;
-    }
-    .card__logo-placeholder {
-      width: var(--placeholder-logo-size, 30px);
-      height: var(--placeholder-logo-size, 30px);
-      object-fit: contain;
-      -webkit-user-drag: none;
-      user-select: none;
-    }
-
     .card__photo--editing {
       opacity: 0.45;
     }

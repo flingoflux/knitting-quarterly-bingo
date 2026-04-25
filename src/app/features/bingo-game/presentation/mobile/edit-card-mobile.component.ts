@@ -2,11 +2,12 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BadgeComponent } from '../../../../shared/ui/atoms/badge/badge.component';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
+import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-photo.component';
 
 @Component({
   selector: 'app-mobile-edit-card',
   standalone: true,
-  imports: [CommonModule, BadgeComponent, IconComponent],
+  imports: [CommonModule, BadgeComponent, IconComponent, CardPhotoComponent],
   template: `
     <div
       class="edit-card"
@@ -15,21 +16,19 @@ import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
       (click)="toggled.emit()"
     >
       <div class="edit-card__photo">
-        <img *ngIf="imageUrl" [src]="imageUrl" [alt]="name" class="edit-card__img" draggable="false" />
-        <div *ngIf="!imageUrl" class="edit-card__placeholder">
-          <img src="assets/crown.svg" alt="" class="edit-card__logo" draggable="false" />
-        </div>
-        <kq-badge *ngIf="done" variant="done"/>
-        <kq-badge *ngIf="inBingo && !done" variant="bingo"/>
-        <button
-          type="button"
-          class="edit-card__camera-hint"
-          title="Foto ansehen / hochladen"
-          aria-label="Foto ansehen oder hochladen"
-          (click)="onCameraClick($event)"
-        >
-          <kq-icon name="camera" [size]="16"/>
-        </button>
+        <kq-card-photo [imageUrl]="imageUrl" [alt]="name">
+          <kq-badge *ngIf="done" variant="done"/>
+          <kq-badge *ngIf="inBingo && !done" variant="bingo"/>
+          <button
+            type="button"
+            class="edit-card__camera-hint"
+            title="Foto ansehen / hochladen"
+            aria-label="Foto ansehen oder hochladen"
+            (click)="onCameraClick($event)"
+          >
+            <kq-icon name="camera" [size]="16"/>
+          </button>
+        </kq-card-photo>
       </div>
       <div class="edit-card__body">
         <span class="edit-card__name">{{ name }}</span>
@@ -76,27 +75,8 @@ import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
       background: #f2e8d8;
       border-radius: 6px;
       overflow: hidden;
-    }
-
-    .edit-card__img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .edit-card__placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .edit-card__logo {
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
+      --kq-card-photo-logo-size: 40px;
+      --kq-card-photo-logo-max-size: 40px;
     }
 
     .edit-card__body {

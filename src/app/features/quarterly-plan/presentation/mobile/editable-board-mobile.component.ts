@@ -2,9 +2,9 @@ import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, I
 import { CommonModule } from '@angular/common';
 import { Challenge } from '../../../../shared/domain/challenge';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
-import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 import { PlanMiniCardMobileComponent } from './plan-mini-card-mobile.component';
 import { PlanEditCardMobileComponent } from './plan-edit-card-mobile.component';
+import { MobileFabComponent } from '../../../../shared/ui/mobile/atoms/fab/fab-mobile.component';
 
 interface ChallengeEditedEvent {
   index: number;
@@ -24,7 +24,7 @@ interface ReorderRequestedEvent {
 @Component({
   selector: 'app-mobile-editable-board',
   standalone: true,
-  imports: [CommonModule, IconComponent, PlanMiniCardMobileComponent, PlanEditCardMobileComponent],
+  imports: [CommonModule, PlanMiniCardMobileComponent, PlanEditCardMobileComponent, MobileFabComponent],
   template: `
     <!-- Read-only Mini-Grid (4×4 Polaroids) -->
     @if (!editMode()) {
@@ -61,16 +61,11 @@ interface ReorderRequestedEvent {
     }
 
     <!-- FAB: Edit-Modus umschalten -->
-    <button
-      type="button"
-      class="fab"
-      [class.fab--active]="editMode()"
-      [title]="editMode() ? 'Bearbeitungsmodus beenden' : 'Board bearbeiten'"
-      [attr.aria-label]="editMode() ? 'Bearbeitungsmodus beenden' : 'Board bearbeiten'"
-      (click)="toggleEditMode()"
-    >
-      <kq-icon [name]="editMode() ? 'x' : 'edit'" [size]="22"/>
-    </button>
+    <kq-fab-mobile
+      [active]="editMode()"
+      inactiveLabel="Board bearbeiten"
+      (clicked)="toggleEditMode()"
+    />
   `,
   styles: [`
     :host {
@@ -91,34 +86,6 @@ interface ReorderRequestedEvent {
       gap: 0.6rem;
     }
 
-    /* ── FAB ── */
-    .fab {
-      position: fixed;
-      bottom: 1.5rem;
-      right: 1.25rem;
-      z-index: 100;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #8f3b22 0%, #c46e35 100%);
-      color: #fff7ec;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 14px rgba(96, 58, 30, 0.35);
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .fab:active {
-      transform: scale(0.94);
-    }
-
-    .fab--active {
-      background: #5a2d1a;
-    }
   `],
 })
 export class EditableBoardMobileComponent {
