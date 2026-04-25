@@ -139,7 +139,7 @@ import { LayoutModeService } from '../../../../shared/utils/layout-mode.service'
                 (click)="onLayoutModeChange('auto')"
               >
                 <span class="mode-option-title"><kq-icon name="target" [size]="16"/>Auto</span>
-                <span class="mode-option-copy">Smartphone → Mobile, größere Bildschirme → Desktop.</span>
+                <span class="mode-option-copy">Smartphone/Tablet → Mobile, große Bildschirme → Desktop.</span>
               </button>
 
               <button

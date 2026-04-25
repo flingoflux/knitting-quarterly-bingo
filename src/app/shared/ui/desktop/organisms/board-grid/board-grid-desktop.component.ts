@@ -20,18 +20,7 @@ import { Component, HostBinding, Input } from '@angular/core';
       max-width: var(--kq-toolbar-max-width-horizontal);
       gap: 0.4rem;
     }
-    @media (max-width: 900px) {
-      :host(.mode-polaroid),
-      :host(.mode-kompakt) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-    @media (max-width: 520px) {
-      :host(.mode-polaroid),
-      :host(.mode-kompakt) {
-        grid-template-columns: 1fr;
-      }
-    }
+
   `]
 })
 export class BoardGridDesktopComponent {

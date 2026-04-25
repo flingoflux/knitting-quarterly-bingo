@@ -128,7 +128,7 @@ const LONG_PRESS_DURATION_MS = 450;
     }
 
     .mini-card__label {
-      font-size: 0.6rem;
+      font-size: clamp(0.55rem, 1.8vw, 0.78rem);
       font-weight: 700;
       color: var(--kq-text-warm);
       text-align: center;

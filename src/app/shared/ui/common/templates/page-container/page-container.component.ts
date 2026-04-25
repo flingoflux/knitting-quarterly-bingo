@@ -15,10 +15,10 @@ import { Component } from '@angular/core';
       padding-top: 1rem;
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 52rem) {
       :host {
-        padding-left: 0.75rem;
-        padding-right: 0.75rem;
+        padding-left: var(--kq-shell-padding-h);
+        padding-right: var(--kq-shell-padding-h);
       }
     }
     `,
