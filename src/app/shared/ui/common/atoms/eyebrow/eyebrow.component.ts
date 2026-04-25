@@ -20,6 +20,13 @@ import { Component } from '@angular/core';
       letter-spacing: 0.16em;
       font-weight: 700;
     }
+
+    @media (max-width: 768px) {
+      .eyebrow {
+        font-size: 0.66rem;
+        letter-spacing: 0.13em;
+      }
+    }
   `],
 })
 export class EyebrowComponent {}

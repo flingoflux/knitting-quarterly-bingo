@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Challenge } from '../../../../shared/domain/challenge';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { PlanEditCardMobileComponent } from './plan-edit-card-mobile.component';
-import { MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent } from '../../../../shared/ui';
+import { MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent } from '../../../../shared/ui';
 
 interface ChallengeEditedEvent {
   index: number;
@@ -23,7 +23,7 @@ interface ReorderRequestedEvent {
 @Component({
   selector: 'app-mobile-editable-board',
   standalone: true,
-  imports: [CommonModule, PlanEditCardMobileComponent, MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent],
+  imports: [CommonModule, PlanEditCardMobileComponent, MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent],
   template: `
     <!-- Read-only Mini-Grid (4×4 Polaroids) -->
     @if (!editMode()) {
@@ -39,7 +39,7 @@ interface ReorderRequestedEvent {
 
     <!-- Edit-Liste mit Umbenennungs-, Foto- und Sortierfunktion -->
     @if (editMode()) {
-      <div class="edit-list">
+      <kq-edit-list-mobile>
         @for (p of challenges; track p.name; let i = $index) {
           <app-plan-mobile-edit-card
             [name]="p.name"
@@ -56,7 +56,7 @@ interface ReorderRequestedEvent {
             (nameInput)="onDraftNameInput(i, $event)"
           />
         }
-      </div>
+      </kq-edit-list-mobile>
     }
 
     <!-- FAB: Edit-Modus umschalten -->
@@ -71,13 +71,6 @@ interface ReorderRequestedEvent {
       display: block;
       position: relative;
     }
-
-    .edit-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-
   `],
 })
 export class EditableBoardMobileComponent {
@@ -95,6 +88,7 @@ export class EditableBoardMobileComponent {
   @Output() challengeEdited = new EventEmitter<ChallengeEditedEvent>();
   @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
   @Output() reorderRequested = new EventEmitter<ReorderRequestedEvent>();
+  @Output() editModeChanged = new EventEmitter<boolean>();
 
   readonly editMode = signal(false);
   editingIndex: number | null = null;
@@ -122,7 +116,9 @@ export class EditableBoardMobileComponent {
     if (this.editMode() && this.editingIndex !== null) {
       this.saveAndExit(this.editingIndex, this._challenges[this.editingIndex]);
     }
-    this.editMode.update(v => !v);
+    const nextMode = !this.editMode();
+    this.editMode.set(nextMode);
+    this.editModeChanged.emit(nextMode);
   }
 
   moveUp(i: number): void {

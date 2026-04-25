@@ -68,12 +68,22 @@ import { QuarterNavComponent } from '../../molecules/quarter-nav/quarter-nav.com
     }
     @media (max-width: 768px) {
       :host {
-        grid-template-columns: 1fr;
-        justify-items: center;
+        grid-template-columns: auto 1fr auto;
+        gap: 0.45rem;
       }
+
       .toolbar-left,
       .toolbar-end {
-        display: none;
+        display: flex;
+      }
+
+      .toolbar-left kq-button,
+      .toolbar-end kq-button {
+        opacity: 1;
+      }
+
+      .toolbar-center {
+        min-width: 0;
       }
     }
   `]

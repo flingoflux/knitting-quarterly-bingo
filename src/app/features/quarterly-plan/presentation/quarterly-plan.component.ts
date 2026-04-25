@@ -11,6 +11,7 @@ import { IconComponent } from '../../../shared/ui';
 import { ButtonComponent } from '../../../shared/ui';
 import { PageToolbarComponent } from '../../../shared/ui';
 import { PageContainerComponent } from '../../../shared/ui';
+import { FeatureHeaderComponent } from '../../../shared/ui';
 import type { ImageChangedEvent } from '../../../shared/ui';
 import { QuarterClock } from '../../../core/domain';
 import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
@@ -23,7 +24,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 @Component({
   selector: 'app-quarterly-plan',
   standalone: true,
-  imports: [CommonModule, QuarterlyPlanDesktopComponent, EditableBoardMobileComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent, PageContainerComponent],
+  imports: [CommonModule, QuarterlyPlanDesktopComponent, EditableBoardMobileComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent, PageContainerComponent, FeatureHeaderComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -41,12 +42,21 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
       </kq-page-toolbar>
 
       @if (layoutMode.isMobile()) {
+        <kq-feature-header
+          eyebrow="Knitting Quarterly - Board Studio"
+          title="Challenges und Projekte planen"
+          titleTestId="page-quarterly-plan-title"
+          [subtitle]="mobileSubtitle()"
+          [compact]="true"
+        />
+
         <app-mobile-editable-board
           #mobileEditableBoard
           [challenges]="challenges"
           (challengeEdited)="onChallengeEdited($event)"
           (cardDetailOpened)="onCardDetailOpen($event)"
           (reorderRequested)="onReorderRequested($event)"
+          (editModeChanged)="onMobileEditModeChanged($event)"
         />
       } @else {
         <app-quarterly-plan-desktop
@@ -94,6 +104,12 @@ export class QuarterlyPlanComponent implements OnInit {
     return this.displayedQuarterId() !== nextQuarterId;
   });
   readonly canGoToPreviousQuarter = computed(() => true);
+  readonly mobileEditMode = signal(false);
+  readonly mobileSubtitle = computed(() =>
+    this.mobileEditMode()
+      ? 'Du kannst jetzt Projekte umbenennen, die Reihenfolge anpassen und Fotos bearbeiten.'
+      : 'Tippe auf eine Karte, um sie umzudrehen.'
+  );
 
   ngOnInit(): void {
     this.route.queryParamMap
@@ -132,6 +148,10 @@ export class QuarterlyPlanComponent implements OnInit {
   onModeChange(mode: BoardViewMode): void {
     this.viewMode = mode;
     this.userSettings.persistBoardViewMode(mode);
+  }
+
+  onMobileEditModeChanged(isEditing: boolean): void {
+    this.mobileEditMode.set(isEditing);
   }
 
   onBingoStarted(): void {

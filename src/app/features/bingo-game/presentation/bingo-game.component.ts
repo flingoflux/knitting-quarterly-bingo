@@ -11,6 +11,7 @@ import { IconComponent } from '../../../shared/ui';
 import { ButtonComponent } from '../../../shared/ui';
 import { PageToolbarComponent } from '../../../shared/ui';
 import { PageContainerComponent } from '../../../shared/ui';
+import { FeatureHeaderComponent } from '../../../shared/ui';
 import type { ImageChangedEvent } from '../../../shared/ui';
 import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
 import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
@@ -23,7 +24,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 @Component({
   selector: 'app-bingo-game',
   standalone: true,
-  imports: [CommonModule, BingoGameDesktopComponent, BingoBoardMobileComponent, ProjectComparisonDialogComponent, PageToolbarComponent, IconComponent, ButtonComponent, PageContainerComponent],
+  imports: [CommonModule, BingoGameDesktopComponent, BingoBoardMobileComponent, ProjectComparisonDialogComponent, PageToolbarComponent, IconComponent, ButtonComponent, PageContainerComponent, FeatureHeaderComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -45,6 +46,14 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
       </div>
 
       @if (layoutMode.isMobile()) {
+        <kq-feature-header
+          eyebrow="Knitting Quarterly - Bingo"
+          title="Happy crafting"
+          titleTestId="page-bingo-title"
+          [subtitle]="mobileSubtitle()"
+          [compact]="true"
+        />
+
         <app-mobile-bingo-board
           #mobileBingoBoard
           [challenges]="challenges"
@@ -52,6 +61,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
           [bingoCells]="bingoCells"
           (toggled)="onToggle($event)"
           (cardDetailOpened)="onCardDetailOpen($event)"
+          (editModeChanged)="onMobileEditModeChanged($event)"
         />
       } @else {
         <app-bingo-game-desktop
@@ -116,6 +126,12 @@ export class BingoGameComponent implements OnInit {
     return this.displayedQuarterId() !== nextQuarterId;
   });
   readonly canGoToPreviousQuarter = computed(() => true);
+  readonly mobileEditMode = signal(false);
+  readonly mobileSubtitle = computed(() =>
+    this.mobileEditMode()
+      ? 'Tippe auf eine Zeile zum Abhaken. Mit dem Kamera-Icon kannst du dein Fortschrittsfoto verwalten.'
+      : 'Tippe auf eine Karte, um sie umzudrehen.'
+  );
 
   ngOnInit(): void {
     this.route.queryParamMap
@@ -185,6 +201,10 @@ export class BingoGameComponent implements OnInit {
   onModeChange(mode: BoardViewMode): void {
     this.viewMode = mode;
     this.userSettings.persistBoardViewMode(mode);
+  }
+
+  onMobileEditModeChanged(isEditing: boolean): void {
+    this.mobileEditMode.set(isEditing);
   }
 
   onCardDetailOpen(event: { index: number; challenge: ChallengeProgress }): void {

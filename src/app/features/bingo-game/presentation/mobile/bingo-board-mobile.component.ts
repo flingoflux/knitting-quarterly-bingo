@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { EditCardMobileComponent } from './edit-card-mobile.component';
-import { MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent } from '../../../../shared/ui';
+import { MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent } from '../../../../shared/ui';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -13,7 +13,7 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-mobile-bingo-board',
   standalone: true,
-  imports: [CommonModule, EditCardMobileComponent, MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent],
+  imports: [CommonModule, EditCardMobileComponent, MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent],
   template: `
     <!-- Read-only Grid (4×4 Miniatur-Polaroids) -->
     @if (!editMode()) {
@@ -31,7 +31,7 @@ interface CardDetailOpenedEvent {
 
     <!-- Edit-Liste (eine Karte pro Zeile) -->
     @if (editMode()) {
-      <div class="edit-list">
+      <kq-edit-list-mobile>
         @for (p of challenges; track p.name; let i = $index) {
           <app-mobile-edit-card
             [name]="p.name"
@@ -42,7 +42,7 @@ interface CardDetailOpenedEvent {
             (cameraClicked)="openDetail(i, p, $event)"
           />
         }
-      </div>
+      </kq-edit-list-mobile>
     }
 
     <!-- FAB: Edit-Modus umschalten -->
@@ -57,13 +57,6 @@ interface CardDetailOpenedEvent {
       display: block;
       position: relative;
     }
-
-    .edit-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-
   `],
 })
 export class BingoBoardMobileComponent {
@@ -82,6 +75,7 @@ export class BingoBoardMobileComponent {
 
   @Output() toggled = new EventEmitter<number>();
   @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
+  @Output() editModeChanged = new EventEmitter<boolean>();
 
   readonly editMode = signal(false);
 
@@ -108,7 +102,9 @@ export class BingoBoardMobileComponent {
   }
 
   toggleEditMode(): void {
-    this.editMode.update(v => !v);
+    const nextMode = !this.editMode();
+    this.editMode.set(nextMode);
+    this.editModeChanged.emit(nextMode);
   }
 
   onToggle(i: number): void {
