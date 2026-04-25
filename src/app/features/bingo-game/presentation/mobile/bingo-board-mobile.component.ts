@@ -24,6 +24,7 @@ interface CardDetailOpenedEvent {
             [imageUrl]="getImage(p.progressImageId ?? p.planningImageId)"
             [done]="completed[i]"
             [inBingo]="isCellInBingo(i)"
+            (longPressed)="onToggle(i)"
           />
         }
       </kq-board-grid-mobile>

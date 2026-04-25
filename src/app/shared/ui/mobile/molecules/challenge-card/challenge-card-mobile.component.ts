@@ -1,7 +1,9 @@
-import { Component, Input, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BadgeComponent } from '../../../common/atoms/badge/badge.component';
 import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.component';
+
+const LONG_PRESS_DURATION_MS = 450;
 
 @Component({
   selector: 'kq-challenge-card-mobile',
@@ -18,7 +20,12 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
         class="mini-card__button"
         [class.mini-card__button--flipped]="isFlipped()"
         [attr.aria-label]="isFlipped() ? 'Karte umdrehen: Foto anzeigen' : 'Karte umdrehen: Titel anzeigen'"
-        (click)="toggleFlip()"
+        (click)="onCardClick()"
+        (pointerdown)="onPressStart($event)"
+        (pointerup)="onPressEnd()"
+        (pointerleave)="onPressEnd()"
+        (pointercancel)="onPressEnd()"
+        (contextmenu)="onContextMenu($event)"
       >
         <span class="mini-card__face mini-card__face--front">
           <span class="mini-card__photo">
@@ -116,7 +123,7 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
     }
   `],
 })
-export class ChallengeCardMobileComponent {
+export class ChallengeCardMobileComponent implements OnDestroy {
   readonly isFlipped = signal(false);
 
   @Input({ required: true }) name!: string;
@@ -134,7 +141,53 @@ export class ChallengeCardMobileComponent {
   @Input() done = false;
   @Input() inBingo = false;
 
+  @Output() longPressed = new EventEmitter<void>();
+
+  private pressTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private suppressClickOnce = false;
+
+  onCardClick(): void {
+    if (this.suppressClickOnce) {
+      this.suppressClickOnce = false;
+      return;
+    }
+    this.toggleFlip();
+  }
+
+  onPressStart(event: PointerEvent): void {
+    if (!event.isPrimary || event.button > 0) {
+      return;
+    }
+
+    this.clearPressTimeout();
+    this.pressTimeoutId = setTimeout(() => {
+      this.suppressClickOnce = true;
+      this.longPressed.emit();
+      this.pressTimeoutId = null;
+    }, LONG_PRESS_DURATION_MS);
+  }
+
+  onPressEnd(): void {
+    this.clearPressTimeout();
+  }
+
+  onContextMenu(event: MouseEvent): void {
+    event.preventDefault();
+  }
+
   toggleFlip(): void {
     this.isFlipped.update(v => !v);
+  }
+
+  ngOnDestroy(): void {
+    this.clearPressTimeout();
+  }
+
+  private clearPressTimeout(): void {
+    if (this.pressTimeoutId === null) {
+      return;
+    }
+    clearTimeout(this.pressTimeoutId);
+    this.pressTimeoutId = null;
   }
 }
