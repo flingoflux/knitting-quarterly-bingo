@@ -19,11 +19,10 @@ interface CardDetailOpenedEvent {
   imports: [CommonModule, PlayableBoardDesktopComponent, BoardToolbarDesktopComponent, StatusMiniGridComponent, FeatureHeaderComponent],
   template: `
     <kq-feature-header
-      eyebrow="Knitting Quarterly - Bingo"
+      eyebrow="Bingo"
       title="Happy crafting"
       titleTestId="page-bingo-title"
       subtitle="Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen."
-      [compact]="viewMode === 'kompakt'"
     />
 
     <kq-board-toolbar-desktop

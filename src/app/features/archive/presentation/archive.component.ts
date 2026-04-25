@@ -9,6 +9,7 @@ import { IconComponent } from '../../../shared/ui';
 import { StatusMiniGridComponent } from '../../../shared/ui';
 import { PageContainerComponent } from '../../../shared/ui';
 import { FeatureHeaderComponent } from '../../../shared/ui';
+import { LayoutModeService } from '../../../shared/utils/layout-mode.service';
 
 @Component({
   selector: 'app-archive',
@@ -30,10 +31,11 @@ import { FeatureHeaderComponent } from '../../../shared/ui';
 
       <div class="feature-shell">
       <kq-feature-header
-        eyebrow="Knitting Quarterly - Archiv"
+        eyebrow="Archiv"
         title="Bisher erledigte Runden"
         titleTestId="page-archive-title"
         subtitle="Miniübersicht abgeschlossener Bingo-Boards."
+        [compact]="layoutMode.isMobile()"
       >
         <p class="prototype-note" *ngIf="isShowingPrototype()">
           Vorschau mit Beispiel-Boards, bis echte Quartale archiviert wurden.
@@ -67,7 +69,7 @@ import { FeatureHeaderComponent } from '../../../shared/ui';
       max-width: none;
       width: 100%;
       margin: 0;
-      padding: 1.4rem 1.1rem 2rem;
+      padding: 0 1.1rem 2rem;
       color: var(--kq-text);
     }
 
@@ -127,12 +129,19 @@ import { FeatureHeaderComponent } from '../../../shared/ui';
       text-align: center;
       color: var(--kq-muted);
     }
+
+    @media (max-width: 640px) {
+      .feature-shell {
+        padding: 0 1rem 2rem;
+      }
+    }
   `],
 })
 export class ArchiveComponent {
   private readonly state = inject(SHOW_ARCHIVE_OVERVIEW_IN_PORT);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  readonly layoutMode = inject(LayoutModeService);
 
   readonly entries = this.state.entries;
   readonly hasEntries = this.state.hasEntries;

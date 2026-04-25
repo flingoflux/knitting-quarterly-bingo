@@ -47,7 +47,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 
       @if (layoutMode.isMobile()) {
         <kq-feature-header
-          eyebrow="Knitting Quarterly - Bingo"
+          eyebrow="Bingo"
           title="Happy crafting"
           titleTestId="page-bingo-title"
           [subtitle]="mobileSubtitle()"

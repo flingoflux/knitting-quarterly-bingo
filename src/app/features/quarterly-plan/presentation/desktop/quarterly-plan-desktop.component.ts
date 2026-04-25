@@ -22,11 +22,10 @@ interface CardDetailOpenedEvent {
   imports: [CommonModule, EditableBoardDesktopComponent, BoardToolbarDesktopComponent, FeatureHeaderComponent, IconComponent, ButtonComponent],
   template: `
     <kq-feature-header
-      eyebrow="Knitting Quarterly - Moodboard"
+      eyebrow="Moodboard"
       title="Challenges planen"
       titleTestId="page-quarterly-plan-title"
-      [subtitle]="viewMode === 'polaroid' ? 'Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden.' : undefined"
-      [compact]="viewMode === 'kompakt'"
+      subtitle="Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden."
     />
 
     <kq-board-toolbar-desktop

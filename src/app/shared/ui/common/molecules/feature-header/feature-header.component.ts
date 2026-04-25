@@ -12,7 +12,7 @@ import { EyebrowComponent } from '../../atoms/eyebrow/eyebrow.component';
  *     title="Happy crafting"
  *     subtitle="Klicke auf die Felder..."
  *     titleTestId="page-bingo-title"
- *     [compact]="viewMode === 'kompakt'"
+ *     [compact]="isMobile"
  *   />
  *
  * Für Feature-spezifischen Inhalt nach der Subtitle steht <ng-content> zur Verfügung.
