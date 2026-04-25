@@ -49,6 +49,9 @@ Die Anwendung unterstützt zwei Phasen:
 
 - Betrieb als statische Webanwendung (via Docker / nginx oder direkt aus `dist/`)
 - Keine Benutzerkonten, kein Login – alle Daten bleiben lokal im Browser
+- **Lizenzierung**:
+  - Quellcode: Apache License 2.0 (siehe LICENSE im Repository-Root)
+  - Nicht-Code-Inhalte (Dokumentation, Diagramme, Bilder/Medien): CC BY-NC-ND 4.0
 
 ---
 

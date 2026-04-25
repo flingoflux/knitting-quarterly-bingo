@@ -120,3 +120,21 @@ Die Smoke-Suite deckt die Kernfluesse Start, Navigation, Quartalswechsel, Help/H
 - `src/app/core/` – zentrale Services, z.B. für Datenhaltung
 - `src/app/features/` – Feature-Module und Komponenten
 - `src/app/shared/` – geteilte Komponenten, Pipes, etc.
+
+## Lizenz
+
+Der Quellcode dieses Projekts steht unter der **Apache License 2.0**.
+Siehe [LICENSE](LICENSE) im Repository-Root.
+
+Inhalte, die keine Quellcode-Dateien sind (insbesondere Dokumentation unter `docs/`, Diagramme, Bilder und sonstige Medien/Assets), stehen unter der **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International Lizenz (CC BY-NC-ND 4.0)**:
+<https://creativecommons.org/licenses/by-nc-nd/4.0/>
+
+### Verwendete Drittkomponenten
+
+Dieses Projekt verwendet folgende Open-Source-Komponenten:
+
+- **Angular Framework** – MIT License (<https://angular.io>)
+- **Feather Icons** – MIT License (<https://feathericons.com>) – SVG-Icon-Pfade als Inline-Definitionen
+- Weitere Dependencies siehe `package.json` – alle unter MIT oder Apache 2.0
+
+Drittanbieter-Abhängigkeiten behalten ihre jeweiligen eigenen Lizenzen.
