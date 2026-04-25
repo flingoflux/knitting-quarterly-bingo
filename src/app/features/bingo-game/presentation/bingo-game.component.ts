@@ -36,11 +36,6 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         (previousQuarterClicked)="goToPreviousQuarter()"
         (nextQuarterClicked)="goToNextQuarter()"
       >
-        @if (!layoutMode.isMobile()) {
-          <kq-button toolbar-actions testId="action-toolbar-print" variant="icon" (click)="onPrintClick()" title="Drucken" ariaLabel="Board drucken">
-            <kq-icon name="print" [size]="24"/>
-          </kq-button>
-        }
         <kq-button toolbar-actions testId="action-toolbar-help" variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
           <kq-icon name="question" [size]="24"/>
         </kq-button>
