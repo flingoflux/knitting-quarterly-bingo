@@ -63,8 +63,7 @@ import { CardPhotoComponent } from '../../../../shared/ui';
     }
 
     .edit-card--bingo {
-      border-color: var(--kq-done);
-      box-shadow: 0 0 0 2px var(--kq-done)33;
+      box-shadow: 0 0 0 2px var(--kq-done);
     }
 
     .edit-card__photo {
