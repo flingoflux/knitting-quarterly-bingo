@@ -123,11 +123,10 @@ Die Smoke-Suite deckt die Kernfluesse Start, Navigation, Quartalswechsel, Help/H
 
 ## Lizenz
 
-Der Quellcode dieses Projekts steht unter der **Apache License 2.0**.
+Dieses Projekt steht unter der **Apache License 2.0**.
 Siehe [LICENSE](LICENSE) im Repository-Root.
 
-Inhalte, die keine Quellcode-Dateien sind (insbesondere Dokumentation unter `docs/`, Diagramme, Bilder und sonstige Medien/Assets), stehen unter der **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International Lizenz (CC BY-NC-ND 4.0)**:
-<https://creativecommons.org/licenses/by-nc-nd/4.0/>
+**Ausnahme:** Das Logo und andere Markenzeichen (`assets/logo.svg`, `assets/flower.svg`, `assets/crown.svg`) sind urheberrechtlich geschützt und von der Apache-Lizenzierung ausgenommen. Alle Rechte vorbehalten. Eine Nutzung außerhalb des Projektkontexts erfordert ausdrückliche Genehmigung.
 
 ### Verwendete Drittkomponenten
 
