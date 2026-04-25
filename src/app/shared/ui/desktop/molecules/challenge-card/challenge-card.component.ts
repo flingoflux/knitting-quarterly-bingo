@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IconComponent } from '../../atoms/icon/icon.component';
-import { BadgeComponent } from '../../atoms/badge/badge.component';
+import { IconComponent } from '../../../atoms/icon/icon.component';
+import { BadgeComponent } from '../../../atoms/badge/badge.component';
 
 export type KqCardMode = 'polaroid' | 'kompakt';
 

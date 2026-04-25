@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PLAY_BINGO_IN_PORT } from '../application/ports/in/play-bingo.in-port';
 import { BoardViewMode, isBoardViewMode } from '../../user-settings/domain/board-view-mode';
-import { BoardGridComponent } from '../../../shared/ui/organisms/board-grid/board-grid.component';
+import { PrintBoardGridComponent } from '../../../shared/ui/print/organisms/print-board-grid/print-board-grid.component';
 import { PrintChallengeCardComponent } from './print-challenge-card.component';
 import { IMAGE_REPOSITORY, ImageRepository } from '../../../shared/ports/image-repository';
 import { KnittingQuarterly, QuarterClock } from '../../../core/domain';
@@ -12,7 +12,7 @@ import { KnittingQuarterly, QuarterClock } from '../../../core/domain';
 @Component({
   selector: 'app-print-bingo-board',
   standalone: true,
-  imports: [CommonModule, BoardGridComponent, PrintChallengeCardComponent],
+  imports: [CommonModule, PrintBoardGridComponent, PrintChallengeCardComponent],
   template: `
     <main class="print-view" [class.mode-kompakt]="mode() === 'kompakt'" [class.mode-polaroid]="mode() === 'polaroid'">
       <header class="print-header">
@@ -24,7 +24,7 @@ import { KnittingQuarterly, QuarterClock } from '../../../core/domain';
         </div>
       </header>
 
-      <kq-board-grid [mode]="mode()">
+      <kq-print-board-grid [mode]="mode()">
         <kq-print-challenge-card
           *ngFor="let challenge of challenges(); let i = index"
           [name]="challenge.name"
@@ -33,7 +33,7 @@ import { KnittingQuarterly, QuarterClock } from '../../../core/domain';
           [done]="completed()[i]"
           [inBingo]="isCellInBingo(i)"
         />
-      </kq-board-grid>
+      </kq-print-board-grid>
     </main>
   `,
   styles: [`
@@ -54,7 +54,7 @@ import { KnittingQuarterly, QuarterClock } from '../../../core/domain';
       max-width: 52rem;
     }
 
-    .print-view.mode-polaroid kq-board-grid {
+    .print-view.mode-polaroid kq-print-board-grid {
       max-width: 40rem;
     }
 
@@ -136,11 +136,8 @@ import { KnittingQuarterly, QuarterClock } from '../../../core/domain';
         padding-top: 0;
       }
 
-      .print-view.mode-polaroid kq-board-grid,
-      .print-view.mode-kompakt kq-board-grid {
+      .print-view.mode-polaroid kq-print-board-grid {
         max-width: none;
-        width: 100%;
-        margin-top: 0;
       }
 
       .print-view.mode-polaroid .print-header {

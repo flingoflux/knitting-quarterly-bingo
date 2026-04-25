@@ -1,0 +1,73 @@
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-plan-mobile-mini-card',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <div class="mini-card">
+      <div class="mini-card__photo">
+        <img *ngIf="imageUrl" [src]="imageUrl" [alt]="name" class="mini-card__img" draggable="false" />
+        <div *ngIf="!imageUrl" class="mini-card__placeholder">
+          <img src="assets/crown.svg" alt="" class="mini-card__logo" draggable="false" />
+        </div>
+      </div>
+      <div class="mini-card__label">{{ name }}</div>
+    </div>
+  `,
+  styles: [`
+    .mini-card {
+      background: #fff;
+      border-radius: 3px;
+      padding: 4px 4px 0;
+      border: 1px solid #d8cec2;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 1px 3px rgba(60, 30, 10, 0.1);
+    }
+
+    .mini-card__photo {
+      position: relative;
+      background: #f2e8d8;
+      aspect-ratio: 1 / 1;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .mini-card__img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .mini-card__placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mini-card__logo {
+      width: 40%;
+      max-width: 28px;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .mini-card__label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #4a2d1c;
+      text-align: center;
+      padding: 0.2rem 0.1rem 0.3rem;
+      line-height: 1.2;
+    }
+  `],
+})
+export class PlanMobileMiniCardComponent {
+  @Input({ required: true }) name!: string;
+  @Input() imageUrl: string | null = null;
+}

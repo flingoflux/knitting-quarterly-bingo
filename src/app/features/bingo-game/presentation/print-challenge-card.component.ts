@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { KqCardMode } from '../../../shared/ui/molecules/challenge-card/challenge-card.component';
+import { KqCardMode } from '../../../shared/ui/desktop/molecules/challenge-card/challenge-card.component';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 
 /**

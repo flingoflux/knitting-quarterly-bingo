@@ -1,39 +1,30 @@
 import { Component, HostBinding, Input } from '@angular/core';
 
+/**
+ * Print-only 4×4 board grid.
+ * Kein responsives Layout, keine Screen-Breakpoints.
+ * Stets 4 Spalten – optimiert für A4-Druck.
+ */
 @Component({
-  selector: 'kq-board-grid',
+  selector: 'kq-print-board-grid',
   standalone: true,
   template: `<ng-content />`,
   styles: [`
     :host {
       display: grid;
-      gap: 0.6rem;
-      margin: 0.5rem auto 0;
-    }
-    :host(.mode-polaroid) {
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      max-width: 52rem;
+      gap: 0.5rem;
+      width: 100%;
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
     :host(.mode-kompakt) {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      max-width: 58rem;
       gap: 0.4rem;
-    }
-    @media (max-width: 900px) {
-      :host(.mode-polaroid),
-      :host(.mode-kompakt) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-    @media (max-width: 520px) {
-      :host(.mode-polaroid),
-      :host(.mode-kompakt) {
-        grid-template-columns: 1fr;
-      }
     }
   `]
 })
-export class BoardGridComponent {
+export class PrintBoardGridComponent {
   @Input() set mode(value: 'polaroid' | 'kompakt') {
     this._mode = value;
   }

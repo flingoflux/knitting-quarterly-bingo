@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
+import { MobileMiniCardComponent } from './mobile-mini-card.component';
+import { MobileEditCardComponent } from './mobile-edit-card.component';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -12,26 +14,18 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-mobile-bingo-board',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, MobileMiniCardComponent, MobileEditCardComponent],
   template: `
     <!-- Read-only Grid (4×4 Miniatur-Polaroids) -->
     @if (!editMode()) {
       <div class="mini-grid">
         @for (p of challenges; track p.name; let i = $index) {
-          <div
-            class="mini-card"
-            [class.mini-card--done]="completed[i]"
-            [class.mini-card--bingo]="isCellInBingo(i)"
-          >
-            <div class="mini-card__photo">
-              <img *ngIf="getImage(p.progressImageId ?? p.planningImageId)" [src]="getImage(p.progressImageId ?? p.planningImageId)" [alt]="p.name" class="mini-card__img" draggable="false" />
-              <div *ngIf="!getImage(p.progressImageId ?? p.planningImageId)" class="mini-card__placeholder">
-                <img src="assets/crown.svg" alt="" class="mini-card__logo" draggable="false" />
-              </div>
-              <div *ngIf="completed[i]" class="mini-card__done-badge">✓</div>
-            </div>
-            <div class="mini-card__label">{{ p.name }}</div>
-          </div>
+          <app-mobile-mini-card
+            [name]="p.name"
+            [imageUrl]="getImage(p.progressImageId ?? p.planningImageId)"
+            [done]="completed[i]"
+            [inBingo]="isCellInBingo(i)"
+          />
         }
       </div>
     }
@@ -40,35 +34,14 @@ interface CardDetailOpenedEvent {
     @if (editMode()) {
       <div class="edit-list">
         @for (p of challenges; track p.name; let i = $index) {
-          <div
-            class="edit-card"
-            [class.edit-card--done]="completed[i]"
-            [class.edit-card--bingo]="isCellInBingo(i)"
-            (click)="onToggle(i)"
-          >
-            <div class="edit-card__photo">
-              <img *ngIf="getImage(p.progressImageId ?? p.planningImageId)" [src]="getImage(p.progressImageId ?? p.planningImageId)" [alt]="p.name" class="edit-card__img" draggable="false" />
-              <div *ngIf="!getImage(p.progressImageId ?? p.planningImageId)" class="edit-card__placeholder">
-                <img src="assets/crown.svg" alt="" class="edit-card__logo" draggable="false" />
-              </div>
-              <div *ngIf="completed[i]" class="edit-card__done-badge"><kq-icon name="x-done" [size]="14" [strokeWidth]="2.2"/></div>
-              <div *ngIf="isCellInBingo(i) && !completed[i]" class="edit-card__bingo-badge">★</div>
-              <button
-                type="button"
-                class="edit-card__camera-hint"
-                title="Foto ansehen / hochladen"
-                aria-label="Foto ansehen oder hochladen"
-                (click)="openDetail(i, p, $event)"
-              >
-                <kq-icon name="camera" [size]="16"/>
-              </button>
-            </div>
-            <div class="edit-card__body">
-              <span class="edit-card__name">{{ p.name }}</span>
-              <span class="edit-card__hint" *ngIf="completed[i]">Erledigt</span>
-              <span class="edit-card__hint" *ngIf="!completed[i]">Tippen zum Abhaken</span>
-            </div>
-          </div>
+          <app-mobile-edit-card
+            [name]="p.name"
+            [imageUrl]="getImage(p.progressImageId ?? p.planningImageId)"
+            [done]="completed[i]"
+            [inBingo]="isCellInBingo(i)"
+            (toggled)="onToggle(i)"
+            (cameraClicked)="openDetail(i, p, $event)"
+          />
         }
       </div>
     }
@@ -91,7 +64,6 @@ interface CardDetailOpenedEvent {
       position: relative;
     }
 
-    /* ── Mini-Grid (read-only) ── */
     .mini-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -99,218 +71,10 @@ interface CardDetailOpenedEvent {
       margin: 0 auto;
     }
 
-    .mini-card {
-      background: #fff;
-      border-radius: 3px;
-      padding: 4px 4px 0;
-      border: 1px solid #d8cec2;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 1px 3px rgba(60, 30, 10, 0.1);
-    }
-
-    .mini-card--bingo {
-      box-shadow: 0 0 0 2px #145906;
-    }
-
-    .mini-card--done .mini-card__photo {
-      opacity: 0.7;
-    }
-
-    .mini-card__photo {
-      position: relative;
-      background: #f2e8d8;
-      aspect-ratio: 1 / 1;
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .mini-card__img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .mini-card__placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .mini-card__logo {
-      width: 40%;
-      max-width: 28px;
-      height: auto;
-      object-fit: contain;
-    }
-
-    .mini-card__done-badge {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      background: rgba(255,255,255,0.85);
-      border-radius: 50%;
-      width: 14px;
-      height: 14px;
-      font-size: 9px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #7a1010;
-      line-height: 1;
-    }
-
-    .mini-card__label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      color: #4a2d1c;
-      text-align: center;
-      padding: 0.2rem 0.1rem 0.3rem;
-      line-height: 1.2;
-    }
-
-    /* ── Edit-Liste ── */
     .edit-list {
       display: flex;
       flex-direction: column;
       gap: 0.6rem;
-    }
-
-    .edit-card {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      background: #fff;
-      border: 1px solid #d8cec2;
-      border-radius: 8px;
-      padding: 0.6rem;
-      min-height: 8rem;
-      box-shadow: 0 1px 4px rgba(60, 30, 10, 0.1);
-      cursor: pointer;
-      transition: background 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    .edit-card:active {
-      background: #fff7ec;
-    }
-
-    .edit-card--done {
-      background: #f8f4ef;
-      opacity: 0.85;
-    }
-
-    .edit-card--bingo {
-      border-color: #145906;
-      box-shadow: 0 0 0 2px #14590633;
-    }
-
-    .edit-card__photo {
-      position: relative;
-      width: 108px;
-      height: 108px;
-      flex-shrink: 0;
-      background: #f2e8d8;
-      border-radius: 6px;
-      overflow: hidden;
-    }
-
-    .edit-card__img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .edit-card__placeholder {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .edit-card__logo {
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
-    }
-
-    .edit-card__done-badge {
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      background: #fffef8;
-      border: 1px solid #c9b49a;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #7a1010;
-    }
-
-    .edit-card__bingo-badge {
-      position: absolute;
-      top: 3px;
-      right: 3px;
-      background: #b8860b;
-      border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      font-size: 11px;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .edit-card__body {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.15rem;
-      overflow: hidden;
-    }
-
-    .edit-card__name {
-      font-weight: 700;
-      font-size: 1rem;
-      color: #3f2a1d;
-      line-height: 1.3;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    }
-
-    .edit-card__hint {
-      font-size: 0.85rem;
-      color: #9c7a64;
-    }
-
-    .edit-card__camera-hint {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background: rgba(255,255,255,0.75);
-      backdrop-filter: blur(2px);
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #7b3b22;
-      border-top-left-radius: 4px;
-      border: none;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      padding: 0;
     }
 
     /* ── FAB ── */

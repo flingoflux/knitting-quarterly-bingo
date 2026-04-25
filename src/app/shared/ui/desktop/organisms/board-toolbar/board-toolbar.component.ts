@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
-import { IconComponent } from '../../atoms/icon/icon.component';
+import { IconComponent } from '../../../atoms/icon/icon.component';
 
 @Component({
   selector: 'kq-board-toolbar',

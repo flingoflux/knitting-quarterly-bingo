@@ -2,8 +2,8 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } fro
 import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
-import { ChallengeCardComponent } from '../../../../shared/ui/molecules/challenge-card/challenge-card.component';
-import { BoardGridComponent } from '../../../../shared/ui/organisms/board-grid/board-grid.component';
+import { ChallengeCardComponent } from '../../../../shared/ui/desktop/molecules/challenge-card/challenge-card.component';
+import { BoardGridComponent } from '../../../../shared/ui/desktop/organisms/board-grid/board-grid.component';
 
 interface CardDetailOpenedEvent {
   index: number;

@@ -13,7 +13,7 @@ import { ButtonComponent } from '../../../shared/ui/atoms/button/button.componen
 import { StatusMiniGridComponent } from '../../../shared/ui/atoms/status-mini-grid/status-mini-grid.component';
 import { FeatureHeaderComponent } from '../../../shared/ui/molecules/feature-header/feature-header.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
-import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
+import { BoardToolbarComponent } from '../../../shared/ui/desktop/organisms/board-toolbar/board-toolbar.component';
 import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
 import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
 import { BoardViewMode } from '../../user-settings/domain/board-view-mode';

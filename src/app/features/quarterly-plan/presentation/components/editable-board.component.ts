@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Challenge } from '../../../../shared/domain/challenge';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
-import { ChallengeCardComponent } from '../../../../shared/ui/molecules/challenge-card/challenge-card.component';
-import { BoardGridComponent } from '../../../../shared/ui/organisms/board-grid/board-grid.component';
+import { ChallengeCardComponent } from '../../../../shared/ui/desktop/molecules/challenge-card/challenge-card.component';
+import { BoardGridComponent } from '../../../../shared/ui/desktop/organisms/board-grid/board-grid.component';
 
 interface ChallengeEditedEvent {
   index: number;
