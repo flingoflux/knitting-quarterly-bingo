@@ -93,10 +93,10 @@ import { LayoutModeService } from '../../../../shared/utils/layout-mode.service'
         <section id="settings" class="section settings-section" aria-labelledby="howto-settings-title">
           <h2 id="howto-settings-title" class="section-title"><kq-icon name="settings-feather" [size]="18"/>Einstellungen</h2>
           <p class="settings-intro">
-            Passe die Board-Ansicht an oder setze lokale Daten zurück.
+            Passe die Ansicht an oder setze lokale Daten zurück.
           </p>
           <div class="settings-subsection board-view-subsection">
-            <h3>Board-Ansicht</h3>
+            <h3>Desktop-Board-Ansicht</h3>
             <p class="view-mode-note">
               Wähle einen Modus. Er gilt sofort für Spielen und Planen.
             </p>
