@@ -32,7 +32,7 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
       </div>
 
       <div class="card__caption">
-        <div class="card__title">{{ name }}</div>
+        <div class="card__title" data-testid="card-title">{{ name }}</div>
       </div>
     </div>
   `,

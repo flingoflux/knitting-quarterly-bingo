@@ -28,7 +28,7 @@ import { CardPhotoComponent } from '../../../../shared/ui';
             placeholder="Projektname"
           />
         } @else {
-          <span class="edit-card__name">{{ name }}</span>
+          <span class="edit-card__name" data-testid="card-title">{{ name }}</span>
         }
       </div>
 

@@ -160,3 +160,104 @@ test('should open print view popup with quarter and mode query params', async ({
   await expect(popup).toHaveURL(/\/quarterly-print\?quarter=\d{4}-Q[1-4]&mode=polaroid/);
   await popup.close();
 });
+
+test.describe('plan → bingo → print (desktop, polaroid)', () => {
+  test('should reflect edited challenge names in bingo and print view', async ({ page }) => {
+    const newNames = ['E2E-Karte-1', 'E2E-Karte-2', 'E2E-Karte-3'];
+
+    // Navigate to planning view
+    await page.goto('/');
+    await page.getByTestId('action-start-plan').click();
+    await expect(page.getByTestId('page-quarterly-plan-title')).toBeVisible();
+
+    // Edit the first 3 challenge cards
+    const editButtons = page.getByRole('button', { name: 'Projekt bearbeiten' });
+    for (let i = 0; i < 3; i++) {
+      await editButtons.nth(i).click();
+      const input = page.locator('.title-input');
+      await input.clear();
+      await input.fill(newNames[i]);
+      await input.press('Enter');
+    }
+
+    // Start bingo (accept confirm dialog)
+    page.on('dialog', dialog => dialog.accept());
+    await page.getByRole('button', { name: 'Neues Bingo mit diesem Plan starten' }).click();
+    await expect(page.getByTestId('page-bingo-title')).toBeVisible();
+
+    // Verify edited card names appear in bingo view
+    const cardTitles = page.locator('[data-testid="card-title"]');
+    for (const name of newNames) {
+      await expect(cardTitles.filter({ hasText: name }).first()).toBeVisible();
+    }
+
+    // Open print popup and verify card names are identical
+    const popupPromise = page.waitForEvent('popup');
+    await page.getByRole('button', { name: 'Board drucken' }).click();
+    const popup = await popupPromise;
+    await popup.waitForURL(/\/quarterly-print\?/);
+
+    const printCardTitles = popup.locator('[data-testid="card-title"]');
+    for (const name of newNames) {
+      await expect(printCardTitles.filter({ hasText: name }).first()).toBeVisible();
+    }
+
+    await popup.close();
+  });
+});
+
+test.describe('plan → bingo → print (mobile)', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test('should reflect edited challenge names in bingo and print view', async ({ page }) => {
+    const newNames = ['Mobile-Karte-1', 'Mobile-Karte-2', 'Mobile-Karte-3'];
+
+    // Navigate to planning view
+    await page.goto('/');
+    await page.getByTestId('action-start-plan').click();
+    await expect(page.getByTestId('page-quarterly-plan-title')).toBeVisible();
+
+    // Open FAB and switch to edit mode
+    await page.getByRole('button', { name: 'Aktionen anzeigen' }).click();
+    await page.getByRole('button', { name: 'Bearbeiten' }).click();
+
+    // Edit the first 3 challenge cards in the edit list
+    const editToggles = page.getByRole('button', { name: 'Projekt umbenennen' });
+    for (let i = 0; i < 3; i++) {
+      await editToggles.nth(i).click();
+      const input = page.locator('.edit-card__input');
+      await input.clear();
+      await input.fill(newNames[i]);
+      await input.press('Enter');
+    }
+
+    // Exit edit mode via the X close button
+    await page.getByRole('button', { name: 'Bearbeitungsmodus beenden' }).click();
+
+    // Start bingo (accept confirm dialog)
+    page.on('dialog', dialog => dialog.accept());
+    await page.getByRole('button', { name: 'Aktionen anzeigen' }).click();
+    await page.getByRole('button', { name: 'Bingo starten' }).click();
+    await expect(page.getByTestId('page-bingo-title')).toBeVisible();
+
+    // Verify edited card names appear in mobile bingo grid
+    const cardTitles = page.locator('[data-testid="card-title"]');
+    for (const name of newNames) {
+      await expect(cardTitles.filter({ hasText: name }).first()).toBeVisible();
+    }
+
+    // Open print popup via FAB and verify card names are identical
+    const popupPromise = page.waitForEvent('popup');
+    await page.getByRole('button', { name: 'Aktionen anzeigen' }).click();
+    await page.getByRole('button', { name: 'Drucken' }).click();
+    const popup = await popupPromise;
+    await popup.waitForURL(/\/quarterly-print\?/);
+
+    const printCardTitles = popup.locator('[data-testid="card-title"]');
+    for (const name of newNames) {
+      await expect(printCardTitles.filter({ hasText: name }).first()).toBeVisible();
+    }
+
+    await popup.close();
+  });
+});

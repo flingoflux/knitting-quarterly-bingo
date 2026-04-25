@@ -39,7 +39,7 @@ const LONG_PRESS_DURATION_MS = 450;
           <span class="mini-card__back-badge" *ngIf="done">
             <kq-badge variant="done" [compact]="true"/>
           </span>
-          <span class="mini-card__label">{{ name }}</span>
+          <span class="mini-card__label" data-testid="card-title">{{ name }}</span>
         </span>
       </button>
     </div>

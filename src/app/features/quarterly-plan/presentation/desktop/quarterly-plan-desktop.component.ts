@@ -34,7 +34,7 @@ interface CardDetailOpenedEvent {
       <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
         <kq-icon name="shuffle" [size]="22"/>
       </kq-button>
-      <kq-button variant="icon" (click)="startBingo()" title="Neues Bingo mit diesem Plan starten" ariaLabel="Neues Bingo mit diesem Plan starten">
+      <kq-button data-testid="action-plan-start-bingo" variant="icon" (click)="startBingo()" title="Neues Bingo mit diesem Plan starten" ariaLabel="Neues Bingo mit diesem Plan starten">
         <kq-icon name="play" [size]="20"/>
       </kq-button>
     </kq-board-toolbar-desktop>

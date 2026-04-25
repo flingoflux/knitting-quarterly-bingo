@@ -58,7 +58,7 @@ export type KqCardMode = 'polaroid' | 'kompakt';
       <div class="card__caption">
         <ng-content select="[slot=caption-action]"/>
         <ng-content select="[slot=caption-title]">
-          <div class="card__title">{{ name }}</div>
+          <div class="card__title" data-testid="card-title">{{ name }}</div>
         </ng-content>
       </div>
     </div>
