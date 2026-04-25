@@ -43,8 +43,8 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 
       @if (layoutMode.isMobile()) {
         <kq-feature-header
-          eyebrow="Knitting Quarterly - Board Studio"
-          title="Challenges und Projekte planen"
+          eyebrow="Knitting Quarterly - Moodboard"
+          title="Challenges planen"
           titleTestId="page-quarterly-plan-title"
           [subtitle]="mobileSubtitle()"
           [compact]="true"

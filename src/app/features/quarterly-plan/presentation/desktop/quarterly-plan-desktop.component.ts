@@ -22,8 +22,8 @@ interface CardDetailOpenedEvent {
   imports: [CommonModule, EditableBoardDesktopComponent, BoardToolbarDesktopComponent, FeatureHeaderComponent, IconComponent, ButtonComponent],
   template: `
     <kq-feature-header
-      eyebrow="Knitting Quarterly - Board Studio"
-      title="Challenges und Projekte planen"
+      eyebrow="Knitting Quarterly - Moodboard"
+      title="Challenges planen"
       titleTestId="page-quarterly-plan-title"
       [subtitle]="viewMode === 'polaroid' ? 'Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden.' : undefined"
       [compact]="viewMode === 'kompakt'"
