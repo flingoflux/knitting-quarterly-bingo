@@ -36,6 +36,11 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         (previousQuarterClicked)="goToPreviousQuarter()"
         (nextQuarterClicked)="goToNextQuarter()"
       >
+        @if (layoutMode.isMobile()) {
+          <kq-button toolbar-actions testId="action-toolbar-play" variant="icon" (click)="onBingoStarted()" title="Bingo spielen" ariaLabel="Bingo spielen">
+            <kq-icon name="play" [size]="24"/>
+          </kq-button>
+        }
         <kq-button toolbar-actions testId="action-toolbar-help" variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
           <kq-icon name="question" [size]="24"/>
         </kq-button>
