@@ -59,7 +59,7 @@ import { KnittingQuarterly, QuarterClock } from '../../../../core/domain';
 
     .print-view.mode-polaroid .print-header {
       max-width: 40rem;
-      margin-left: auto;
+      margin-left: 0;
       margin-right: auto;
     }
 
