@@ -120,7 +120,17 @@ export class ChallengeCardMobileComponent {
   readonly isFlipped = signal(false);
 
   @Input({ required: true }) name!: string;
-  @Input() imageUrl: string | null = null;
+  private _imageUrl: string | null = null;
+
+  @Input() set imageUrl(value: string | null) {
+    this._imageUrl = value;
+    // Without a photo we start on the text side; with a photo we show the photo side.
+    this.isFlipped.set(!value);
+  }
+  get imageUrl(): string | null {
+    return this._imageUrl;
+  }
+
   @Input() done = false;
   @Input() inBingo = false;
 
