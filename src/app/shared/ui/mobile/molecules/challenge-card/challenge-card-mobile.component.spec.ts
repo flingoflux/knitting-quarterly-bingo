@@ -26,4 +26,14 @@ describe('ChallengeCardMobileComponent regression', () => {
     expect(source).toContain('(click)="onCardClick()"');
     expect(source).toContain('this.toggleFlip();');
   });
+
+  it('should render done badge on the back side as well', () => {
+    const source = readFileSync(
+      resolve(process.cwd(), 'src/app/shared/ui/mobile/molecules/challenge-card/challenge-card-mobile.component.ts'),
+      'utf-8'
+    );
+
+    expect(source).toContain('<span class="mini-card__back-badge" *ngIf="done">');
+    expect(source).toContain('<kq-badge variant="done" [compact]="true"/>');
+  });
 });

@@ -36,6 +36,9 @@ const LONG_PRESS_DURATION_MS = 450;
           </span>
         </span>
         <span class="mini-card__face mini-card__face--back">
+          <span class="mini-card__back-badge" *ngIf="done">
+            <kq-badge variant="done" [compact]="true"/>
+          </span>
           <span class="mini-card__label">{{ name }}</span>
         </span>
       </button>
@@ -63,7 +66,7 @@ const LONG_PRESS_DURATION_MS = 450;
 
     .mini-card__button {
       width: 100%;
-      aspect-ratio: 1 / 1;
+      aspect-ratio: 0.92 / 1;
       display: block;
       position: relative;
       border: 0;
@@ -73,6 +76,9 @@ const LONG_PRESS_DURATION_MS = 450;
       cursor: pointer;
       transform-style: preserve-3d;
       transition: transform 220ms ease;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
     }
 
     .mini-card__button--flipped {
@@ -87,6 +93,7 @@ const LONG_PRESS_DURATION_MS = 450;
     .mini-card__face {
       position: absolute;
       inset: 0;
+      display: block;
       border-radius: 2px;
       overflow: hidden;
       backface-visibility: hidden;
@@ -104,10 +111,20 @@ const LONG_PRESS_DURATION_MS = 450;
     .mini-card__face--back {
       display: grid;
       place-items: center;
+      position: relative;
+      width: 100%;
+      height: 100%;
       background: linear-gradient(180deg, #fff7ed 0%, #fff1df 100%);
       border: 1px dashed var(--kq-card-border-soft);
       transform: rotateY(180deg);
       padding: 0.35rem;
+    }
+
+    .mini-card__back-badge {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
     }
 
     .mini-card__label {
@@ -116,6 +133,8 @@ const LONG_PRESS_DURATION_MS = 450;
       color: var(--kq-text-warm);
       text-align: center;
       line-height: 1.1;
+      user-select: none;
+      -webkit-user-select: none;
       overflow: hidden;
       display: -webkit-box;
       -webkit-box-orient: vertical;
