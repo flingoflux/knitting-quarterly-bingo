@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { KqCardMode } from '../../../shared/ui/molecules/challenge-card/challenge-card.component';
+import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 
 /**
  * Druckoptimierte Bingo-Karte.
@@ -10,7 +11,7 @@ import { KqCardMode } from '../../../shared/ui/molecules/challenge-card/challeng
 @Component({
   selector: 'kq-print-challenge-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   template: `
     <div
       class="card"
@@ -31,7 +32,9 @@ import { KqCardMode } from '../../../shared/ui/molecules/challenge-card/challeng
           <img src="assets/crown.svg" class="card__logo-placeholder" alt="" draggable="false" />
         </div>
 
-        <div *ngIf="done" class="card__badge card__badge--done">✓</div>
+        <div *ngIf="done" class="card__badge card__badge--done">
+          <kq-icon name="x-done" [size]="14" [strokeWidth]="2.2" />
+        </div>
         <div *ngIf="inBingo && !done" class="card__badge card__badge--bingo">★</div>
         <div *ngIf="!done && !inBingo" class="card__badge card__badge--empty"></div>
       </div>
@@ -100,8 +103,9 @@ import { KqCardMode } from '../../../shared/ui/molecules/challenge-card/challeng
     }
     .card__badge--done {
       left: 4px;
-      background: #3a7d44;
-      color: #fff;
+      background: #fffef8;
+      border: 0.35mm solid #c9b49a;
+      color: #7a1010;
     }
     .card__badge--bingo {
       right: 4px;
