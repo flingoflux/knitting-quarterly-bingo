@@ -74,6 +74,9 @@ interface ReorderRequestedEvent {
   `],
 })
 export class EditableBoardMobileComponent {
+  static readonly overviewSubtitle = 'Tippe auf eine Karte, um sie umzudrehen.';
+  static readonly editSubtitle = 'Du kannst jetzt Projekte umbenennen, die Reihenfolge anpassen und Fotos bearbeiten.';
+
   private readonly el = inject(ElementRef);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);

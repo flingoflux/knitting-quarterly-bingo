@@ -61,6 +61,9 @@ interface CardDetailOpenedEvent {
   `],
 })
 export class BingoBoardMobileComponent {
+  static readonly overviewSubtitle = 'Tippen dreht um, langes Drücken hakt ab.';
+  static readonly editSubtitle = 'Tippe auf eine Zeile zum Abhaken. Kamera für dein Fortschrittsfoto.';
+
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
   private readonly cdr = inject(ChangeDetectorRef);
 

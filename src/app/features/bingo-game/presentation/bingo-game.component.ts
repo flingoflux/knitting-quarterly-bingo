@@ -129,8 +129,8 @@ export class BingoGameComponent implements OnInit {
   readonly mobileEditMode = signal(false);
   readonly mobileSubtitle = computed(() =>
     this.mobileEditMode()
-      ? 'Tippe auf eine Zeile zum Abhaken. Kamera für dein Fortschrittsfoto.'
-      : 'Tippen dreht um, langes Drücken hakt ab.'
+      ? BingoBoardMobileComponent.editSubtitle
+      : BingoBoardMobileComponent.overviewSubtitle
   );
 
   ngOnInit(): void {

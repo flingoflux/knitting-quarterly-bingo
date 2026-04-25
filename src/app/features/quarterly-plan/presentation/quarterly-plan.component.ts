@@ -107,8 +107,8 @@ export class QuarterlyPlanComponent implements OnInit {
   readonly mobileEditMode = signal(false);
   readonly mobileSubtitle = computed(() =>
     this.mobileEditMode()
-      ? 'Du kannst jetzt Projekte umbenennen, die Reihenfolge anpassen und Fotos bearbeiten.'
-      : 'Tippe auf eine Karte, um sie umzudrehen.'
+      ? EditableBoardMobileComponent.editSubtitle
+      : EditableBoardMobileComponent.overviewSubtitle
   );
 
   ngOnInit(): void {
