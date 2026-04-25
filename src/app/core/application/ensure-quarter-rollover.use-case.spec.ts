@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Injector, runInInjectionContext } from '@angular/core';
 import { DEFAULT_CHALLENGES } from '../../shared/domain/default-challenges';
 import { ARCHIVE_REPOSITORY } from '../../features/archive/domain/archive.repository';
@@ -7,6 +7,7 @@ import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER, QuarterlyPlanData } from 
 import { BINGO_GAME_REPOSITORY } from '../../features/bingo-game/domain/bingo-game.repository';
 import { BingoGameProgress } from '../../features/bingo-game/domain/bingo-game';
 import { Result } from '../../shared/domain/result';
+import { IMAGE_REPOSITORY } from '../../shared/ports/image-repository';
 import { EnsureQuarterRolloverUseCase } from './ensure-quarter-rollover.use-case';
 import { QuarterId } from '../domain';
 
@@ -70,18 +71,28 @@ class MockBingoGameRepository {
   }
 }
 
+class MockImageRepository {
+  deleteImage = vi.fn().mockResolvedValue(undefined);
+  listAllImageIds = vi.fn().mockResolvedValue([]);
+  getImage = vi.fn().mockResolvedValue(null);
+  saveImage = vi.fn().mockResolvedValue(undefined);
+}
+
 function createService(deps: {
   boardReader: MockBoardReader;
   archiveRepository: MockArchiveRepository;
   boardWriter: MockBoardWriter;
   bingoGameRepository: MockBingoGameRepository;
+  imageRepository?: MockImageRepository;
 }): EnsureQuarterRolloverUseCase {
+  const imageRepository = deps.imageRepository ?? new MockImageRepository();
   const injector = Injector.create({
     providers: [
       { provide: QUARTERLY_PLAN_READER, useValue: deps.boardReader },
       { provide: ARCHIVE_REPOSITORY, useValue: deps.archiveRepository },
       { provide: QUARTERLY_PLAN_WRITER, useValue: deps.boardWriter },
       { provide: BINGO_GAME_REPOSITORY, useValue: deps.bingoGameRepository },
+      { provide: IMAGE_REPOSITORY, useValue: imageRepository },
     ],
   });
 
@@ -173,6 +184,78 @@ describe('EnsureQuarterRolloverUseCase', () => {
     expect(boardWriter.savedPlans).toHaveLength(1);
     expect(boardWriter.savedPlans[0]?.quarterId).toBe('2026-Q3');
     expect(bingoGameRepository.clearCalls).toBe(1);
+  });
+
+  it('should delete planning and progress images from active game during rollover', async () => {
+    // given
+    const boardReader = new MockBoardReader();
+    const archiveRepository = new MockArchiveRepository();
+    const boardWriter = new MockBoardWriter();
+    const bingoGameRepository = new MockBingoGameRepository();
+    const imageRepository = new MockImageRepository();
+    bingoGameRepository.progress = {
+      quarterId: '2026-Q1',
+      planSignature: 'sig',
+      startedAt: '2026-01-05T00:00:00.000Z',
+      challenges: [
+        { name: 'A', completed: true, planningImageId: 'plan-img-1', progressImageId: 'prog-img-1' },
+        { name: 'B', completed: false, planningImageId: 'plan-img-2' },
+        { name: 'C', completed: false },
+      ],
+    };
+    const service = createService({ boardReader, archiveRepository, boardWriter, bingoGameRepository, imageRepository });
+
+    // when
+    service.persistQuarterRollover(new Date('2026-04-01T08:00:00.000Z'));
+    await vi.waitFor(() => expect(imageRepository.deleteImage).toHaveBeenCalledTimes(3));
+
+    // then
+    expect(imageRepository.deleteImage).toHaveBeenCalledWith('plan-img-1');
+    expect(imageRepository.deleteImage).toHaveBeenCalledWith('prog-img-1');
+    expect(imageRepository.deleteImage).toHaveBeenCalledWith('plan-img-2');
+  });
+
+  it('should delete plan images even when no active game exists during rollover', async () => {
+    // given
+    const boardReader = new MockBoardReader();
+    boardReader.set('2026-Q1', {
+      quarterId: '2026-Q1',
+      challenges: [
+        { name: 'A', imageId: 'plan-img-only-1' },
+        { name: 'B', imageId: 'plan-img-only-2' },
+        { name: 'C' },
+      ],
+    });
+    const archiveRepository = new MockArchiveRepository();
+    const boardWriter = new MockBoardWriter();
+    const bingoGameRepository = new MockBingoGameRepository();
+    const imageRepository = new MockImageRepository();
+    const service = createService({ boardReader, archiveRepository, boardWriter, bingoGameRepository, imageRepository });
+
+    // when
+    service.persistQuarterRollover(new Date('2026-04-01T08:00:00.000Z'));
+    await vi.waitFor(() => expect(imageRepository.deleteImage).toHaveBeenCalledTimes(2));
+
+    // then
+    expect(imageRepository.deleteImage).toHaveBeenCalledWith('plan-img-only-1');
+    expect(imageRepository.deleteImage).toHaveBeenCalledWith('plan-img-only-2');
+  });
+
+  it('should not call deleteImage when no rollover is needed', () => {
+    // given
+    const boardReader = new MockBoardReader();
+    boardReader.set('2026-Q2', { quarterId: '2026-Q2', challenges: [] });
+    const archiveRepository = new MockArchiveRepository();
+    const boardWriter = new MockBoardWriter();
+    const bingoGameRepository = new MockBingoGameRepository();
+    const imageRepository = new MockImageRepository();
+    const service = createService({ boardReader, archiveRepository, boardWriter, bingoGameRepository, imageRepository });
+
+    // when
+    service.persistQuarterRollover(new Date('2026-05-02T10:00:00.000Z'));
+
+    // then
+    expect(imageRepository.deleteImage).not.toHaveBeenCalled();
   });
 });
 

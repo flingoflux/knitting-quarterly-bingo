@@ -2,7 +2,9 @@ import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { EnsureQuarterRolloverUseCase } from './core/application/ensure-quarter-rollover.use-case';
+import { CleanupOrphanImagesUseCase } from './core/application/cleanup-orphan-images.use-case';
 import { ENSURE_QUARTER_ROLLOVER_IN_PORT } from './core/application/ports/in/ensure-quarter-rollover.in-port';
+import { CLEANUP_ORPHAN_IMAGES_IN_PORT } from './core/application/ports/in/cleanup-orphan-images.in-port';
 import { LocalStorageQuarterlyPlanRepository } from './features/quarterly-plan/infrastructure/local-storage-quarterly-plan.repository';
 import { QUARTERLY_PLAN_READER, QUARTERLY_PLAN_WRITER } from './features/quarterly-plan/domain/quarterly-plan.repository';
 import { LOAD_QUARTERLY_PLAN_OUT_PORT } from './features/quarterly-plan/application/ports/out/load-quarterly-plan.out-port';
@@ -29,6 +31,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     { provide: ENSURE_QUARTER_ROLLOVER_IN_PORT, useExisting: EnsureQuarterRolloverUseCase },
+    { provide: CLEANUP_ORPHAN_IMAGES_IN_PORT, useExisting: CleanupOrphanImagesUseCase },
     { provide: QUARTERLY_PLAN_READER, useExisting: LocalStorageQuarterlyPlanRepository },
     { provide: QUARTERLY_PLAN_WRITER, useExisting: LocalStorageQuarterlyPlanRepository },
     { provide: LOAD_QUARTERLY_PLAN_OUT_PORT, useExisting: LocalStorageQuarterlyPlanRepository },

@@ -50,6 +50,15 @@ export class IndexedDbImageRepository implements ImageRepository {
     });
   }
 
+  async listAllImageIds(): Promise<string[]> {
+    const db = await this.getDb();
+    return new Promise((resolve, reject) => {
+      const req = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).getAllKeys();
+      req.onsuccess = () => resolve((req.result as string[]));
+      req.onerror = () => reject(req.error);
+    });
+  }
+
   clearAllImages(): Promise<void> {
     this.dbPromise = null;
     return new Promise((resolve, reject) => {

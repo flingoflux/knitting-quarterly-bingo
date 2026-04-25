@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ButtonComponent } from '../../../shared/ui';
 import { SHOW_QUARTERLY_PROGRESS_IN_PORT } from '../application/ports/in/show-quarterly-progress.in-port';
+import { CLEANUP_ORPHAN_IMAGES_IN_PORT } from '../../../core/application/ports/in/cleanup-orphan-images.in-port';
 import { ENSURE_QUARTER_ROLLOVER_IN_PORT } from '../../../core/application/ports/in/ensure-quarter-rollover.in-port';
 import { QuarterClock } from '../../../core/domain';
 
@@ -165,6 +166,7 @@ import { QuarterClock } from '../../../core/domain';
 export class StartPageComponent {
   private readonly quarterlyProgress = inject(SHOW_QUARTERLY_PROGRESS_IN_PORT);
   private readonly quarterRollover = inject(ENSURE_QUARTER_ROLLOVER_IN_PORT);
+  private readonly imageCleanup = inject(CLEANUP_ORPHAN_IMAGES_IN_PORT);
   private readonly quarterClock = new QuarterClock();
 
   readonly daysUntilNextQuarterly = this.quarterlyProgress.daysUntilNextQuarter;
@@ -176,6 +178,7 @@ export class StartPageComponent {
 
   constructor(private router: Router) {
     this.quarterRollover.persistQuarterRollover();
+    this.imageCleanup.cleanupOrphanImages();
   }
 
   goToEdit() {
