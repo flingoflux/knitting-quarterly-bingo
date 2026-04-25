@@ -134,12 +134,12 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
       align-items: stretch;
       border: 0.3mm solid var(--kq-card-border-soft);
       border-radius: 2px;
-      height: 3.8rem;
+      height: 6.5rem;
       --kq-card-title-lines: var(--kq-card-title-lines-kompakt, 3);
     }
     .card--kompakt .card__photo {
-      width: 3.8rem;
-      height: 3.8rem;
+      width: 6.5rem;
+      height: 6.5rem;
       aspect-ratio: unset;
       flex-shrink: 0;
     }
@@ -151,7 +151,7 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
       overflow: hidden;
     }
     .card--kompakt .card__title {
-      font-size: 0.6rem;
+      font-size: 0.82rem;
       text-align: left;
     }
   `],
