@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { EditCardMobileComponent } from './edit-card-mobile.component';
-import { MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent } from '../../../../shared/ui';
+import { FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent } from '../../../../shared/ui';
+import type { FabGroupAction } from '../../../../shared/ui';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -13,7 +14,7 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-mobile-bingo-board',
   standalone: true,
-  imports: [CommonModule, EditCardMobileComponent, MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent],
+  imports: [CommonModule, EditCardMobileComponent, FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent],
   template: `
     <!-- Read-only Grid (4×4 Miniatur-Polaroids) -->
     @if (!editMode()) {
@@ -46,11 +47,11 @@ interface CardDetailOpenedEvent {
       </kq-edit-list-mobile>
     }
 
-    <!-- FAB: Edit-Modus umschalten -->
-    <kq-fab-mobile
-      [active]="editMode()"
-      inactiveLabel="Felder abhaken"
-      (clicked)="toggleEditMode()"
+    <!-- FAB-Gruppe: Aktionen -->
+    <kq-fab-group-mobile
+      [actions]="fabActions()"
+      [closeAction]="fabCloseAction()"
+      (actionClicked)="onFabAction($event)"
     />
   `,
   styles: [`
@@ -80,8 +81,18 @@ export class BingoBoardMobileComponent {
   @Output() toggled = new EventEmitter<number>();
   @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
   @Output() editModeChanged = new EventEmitter<boolean>();
+  @Output() printClicked = new EventEmitter<void>();
 
   readonly editMode = signal(false);
+  readonly fabActions = computed<FabGroupAction[]>(() =>
+    this.editMode() ? [] : [
+      { icon: 'edit', label: 'Bearbeiten' },
+      { icon: 'print', label: 'Drucken' }
+    ]
+  );
+  readonly fabCloseAction = computed<string | null>(() =>
+    this.editMode() ? 'Bearbeitungsmodus beenden' : null
+  );
 
   private readonly imageCache = new Map<string, string>();
 
@@ -103,6 +114,12 @@ export class BingoBoardMobileComponent {
 
   isCellInBingo(i: number): boolean {
     return this.bingoCells.has(i);
+  }
+
+  onFabAction(index: number): void {
+    if (index === -1) this.toggleEditMode(); // closeAction
+    if (index === 0) this.toggleEditMode();  // 'Felder abhaken'
+    if (index === 1) this.printClicked.emit();
   }
 
   toggleEditMode(): void {

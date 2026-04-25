@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, Output, inject, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, Output, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Challenge } from '../../../../shared/domain/challenge';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { PlanEditCardMobileComponent } from './plan-edit-card-mobile.component';
-import { MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent } from '../../../../shared/ui';
+import { FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent } from '../../../../shared/ui';
+import type { FabGroupAction } from '../../../../shared/ui';
 
 interface ChallengeEditedEvent {
   index: number;
@@ -23,7 +24,7 @@ interface ReorderRequestedEvent {
 @Component({
   selector: 'app-mobile-editable-board',
   standalone: true,
-  imports: [CommonModule, PlanEditCardMobileComponent, MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent],
+  imports: [CommonModule, PlanEditCardMobileComponent, FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent],
   template: `
     <!-- Read-only Mini-Grid (4×4 Polaroids) -->
     @if (!editMode()) {
@@ -59,11 +60,11 @@ interface ReorderRequestedEvent {
       </kq-edit-list-mobile>
     }
 
-    <!-- FAB: Edit-Modus umschalten -->
-    <kq-fab-mobile
-      [active]="editMode()"
-      inactiveLabel="Board bearbeiten"
-      (clicked)="toggleEditMode()"
+    <!-- FAB-Gruppe: Aktionen -->
+    <kq-fab-group-mobile
+      [actions]="fabActions()"
+      [closeAction]="fabCloseAction()"
+      (actionClicked)="onFabAction($event)"
     />
   `,
   styles: [`
@@ -92,8 +93,18 @@ export class EditableBoardMobileComponent {
   @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
   @Output() reorderRequested = new EventEmitter<ReorderRequestedEvent>();
   @Output() editModeChanged = new EventEmitter<boolean>();
+  @Output() bingoStarted = new EventEmitter<void>();
 
   readonly editMode = signal(false);
+  readonly fabActions = computed<FabGroupAction[]>(() =>
+    this.editMode() ? [] : [
+      { icon: 'edit', label: 'Bearbeiten' },
+      { icon: 'play', label: 'Bingo starten' }
+    ]
+  );
+  readonly fabCloseAction = computed<string | null>(() =>
+    this.editMode() ? 'Bearbeitungsmodus beenden' : null
+  );
   editingIndex: number | null = null;
 
   private readonly imageCache = new Map<string, string>();
@@ -113,6 +124,12 @@ export class EditableBoardMobileComponent {
       this.imageCache.delete(imageId);
     }
     this.cdr.markForCheck();
+  }
+
+  onFabAction(index: number): void {
+    if (index === -1) this.toggleEditMode(); // closeAction
+    if (index === 0) this.toggleEditMode();  // 'Bearbeiten'
+    if (index === 1) this.bingoStarted.emit();
   }
 
   toggleEditMode(): void {
