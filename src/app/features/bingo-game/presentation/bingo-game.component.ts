@@ -51,7 +51,6 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
           title="Happy crafting"
           titleTestId="page-bingo-title"
           [subtitle]="mobileSubtitle()"
-          [compact]="true"
         />
 
         <app-mobile-bingo-board

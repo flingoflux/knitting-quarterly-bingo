@@ -33,7 +33,6 @@ import { LayoutModeService } from '../../../../shared/utils/layout-mode.service'
           eyebrow="How-to"
           title="Wie funktioniert Knitting Quarterly Bingo?"
           titleTestId="page-howto-title"
-          [compact]="layoutMode.isMobile()"
         />
 
         <div class="content">
@@ -186,7 +185,7 @@ import { LayoutModeService } from '../../../../shared/utils/layout-mode.service'
       max-width: none;
       width: 100%;
       margin: 0;
-      padding: 0 1.1rem 2rem;
+      padding: var(--kq-feature-shell-padding);
     }
 
     .content {
@@ -402,7 +401,7 @@ import { LayoutModeService } from '../../../../shared/utils/layout-mode.service'
 
     @media (max-width: 640px) {
       .feature-shell {
-        padding: 0 1rem 2rem;
+        padding: var(--kq-feature-shell-mobile-padding);
       }
 
       .content {

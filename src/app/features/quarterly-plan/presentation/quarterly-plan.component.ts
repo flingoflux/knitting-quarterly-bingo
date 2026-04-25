@@ -47,7 +47,6 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
           title="Challenges planen"
           titleTestId="page-quarterly-plan-title"
           [subtitle]="mobileSubtitle()"
-          [compact]="true"
         />
 
         <app-mobile-editable-board

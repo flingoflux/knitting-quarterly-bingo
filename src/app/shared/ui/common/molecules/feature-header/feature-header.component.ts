@@ -1,6 +1,7 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EyebrowComponent } from '../../atoms/eyebrow/eyebrow.component';
+import { LayoutModeService } from '../../../../utils/layout-mode.service';
 
 /**
  * Molecule: Seitenheader-Block aus Eyebrow, Überschrift und optionaler Subline.
@@ -12,7 +13,6 @@ import { EyebrowComponent } from '../../atoms/eyebrow/eyebrow.component';
  *     title="Happy crafting"
  *     subtitle="Klicke auf die Felder..."
  *     titleTestId="page-bingo-title"
- *     [compact]="isMobile"
  *   />
  *
  * Für Feature-spezifischen Inhalt nach der Subtitle steht <ng-content> zur Verfügung.
@@ -22,7 +22,7 @@ import { EyebrowComponent } from '../../atoms/eyebrow/eyebrow.component';
   standalone: true,
   imports: [CommonModule, EyebrowComponent],
   template: `
-    <div class="feature-header" [class.feature-header--compact]="compact">
+    <div class="feature-header" [class.feature-header--mobile]="layoutMode.isMobile()">
       <kq-eyebrow>{{ eyebrow }}</kq-eyebrow>
       <h2 [attr.data-testid]="titleTestId ?? null">{{ title }}</h2>
       <p class="subtitle" *ngIf="subtitle">{{ subtitle }}</p>
@@ -32,13 +32,13 @@ import { EyebrowComponent } from '../../atoms/eyebrow/eyebrow.component';
   styles: [`
     .feature-header {
       text-align: center;
-      margin-bottom: 1.1rem;
-      padding: 0.6rem 0.4rem;
+        margin-bottom: var(--kq-feature-header-margin-bottom);
+        padding: var(--kq-feature-header-padding);
     }
 
-    .feature-header--compact {
-      padding: 0.2rem 0.4rem 0.4rem;
-      margin-bottom: 0.5rem;
+    .feature-header--mobile {
+        padding: var(--kq-feature-header-mobile-padding);
+        margin-bottom: var(--kq-feature-header-mobile-margin-bottom);
     }
 
     h2 {
@@ -57,9 +57,10 @@ import { EyebrowComponent } from '../../atoms/eyebrow/eyebrow.component';
   `],
 })
 export class FeatureHeaderComponent {
+  readonly layoutMode = inject(LayoutModeService);
+
   @Input() eyebrow = '';
   @Input() title = '';
   @Input() titleTestId?: string;
   @Input() subtitle?: string;
-  @Input() compact = false;
 }
