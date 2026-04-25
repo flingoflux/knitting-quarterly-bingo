@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PLAN_QUARTERLY_IN_PORT } from '../application/ports/in/plan-quarterly.in-port';
 import { START_BINGO_FROM_PLAN_IN_PORT } from '../../bingo-game/application/ports/in/start-bingo-from-plan.in-port';
 import { EditableBoardComponent } from './components/editable-board.component';
+import { MobileEditableBoardComponent } from './components/mobile-editable-board.component';
 import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-detail-dialog.component';
 import { shuffleArray } from '../../../shared/utils/array-utils';
 import { Challenge } from '../../../shared/domain/challenge';
@@ -17,6 +18,7 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
 import { QuarterClock } from '../../../core/domain';
 import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
 import { MANAGE_USER_SETTINGS_IN_PORT } from '../../user-settings/application/ports/in/manage-user-settings.in-port';
+import { LayoutModeService } from '../../../shared/utils/layout-mode.service';
 
 const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
 const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
@@ -24,7 +26,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 @Component({
   selector: 'app-quarterly-plan',
   standalone: true,
-  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, FeatureHeaderComponent, PageToolbarComponent, BoardToolbarComponent, PageContainerComponent],
+  imports: [CommonModule, EditableBoardComponent, MobileEditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, FeatureHeaderComponent, PageToolbarComponent, BoardToolbarComponent, PageContainerComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -49,30 +51,42 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         [compact]="viewMode === 'kompakt'"
       />
 
-      <kq-board-toolbar
-        [mode]="viewMode"
-        (modeChange)="onModeChange($event)"
-      >
-        <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
-          <kq-icon name="shuffle" [size]="22"/>
-        </kq-button>
-        <kq-button variant="icon" (click)="startBingo()" title="Neues Bingo mit diesem Plan starten" ariaLabel="Neues Bingo mit diesem Plan starten">
-          <kq-icon name="play" [size]="20"/>
-        </kq-button>
-      </kq-board-toolbar>
+      @if (!layoutMode.isMobile()) {
+        <kq-board-toolbar
+          [mode]="viewMode"
+          (modeChange)="onModeChange($event)"
+        >
+          <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
+            <kq-icon name="shuffle" [size]="22"/>
+          </kq-button>
+          <kq-button variant="icon" (click)="startBingo()" title="Neues Bingo mit diesem Plan starten" ariaLabel="Neues Bingo mit diesem Plan starten">
+            <kq-icon name="play" [size]="20"/>
+          </kq-button>
+        </kq-board-toolbar>
+      }
 
-      <app-editable-board
-        #editableBoard
-        [challenges]="challenges"
-        [dragTargetIndex]="dragTargetIndex"
-        [mode]="viewMode"
-        (dragStarted)="onDragStart($event)"
-        (dragOverCell)="onDragOver($event)"
-        (dragLeftCell)="onDragLeave($event)"
-        (droppedOnCell)="onDrop($event)"
-        (challengeEdited)="onChallengeEdited($event)"
-        (cardDetailOpened)="onCardDetailOpen($event)"
-      ></app-editable-board>
+      @if (layoutMode.isMobile()) {
+        <app-mobile-editable-board
+          #mobileEditableBoard
+          [challenges]="challenges"
+          (challengeEdited)="onChallengeEdited($event)"
+          (cardDetailOpened)="onCardDetailOpen($event)"
+          (reorderRequested)="onReorderRequested($event)"
+        />
+      } @else {
+        <app-editable-board
+          #editableBoard
+          [challenges]="challenges"
+          [dragTargetIndex]="dragTargetIndex"
+          [mode]="viewMode"
+          (dragStarted)="onDragStart($event)"
+          (dragOverCell)="onDragOver($event)"
+          (dragLeftCell)="onDragLeave($event)"
+          (droppedOnCell)="onDrop($event)"
+          (challengeEdited)="onChallengeEdited($event)"
+          (cardDetailOpened)="onCardDetailOpen($event)"
+        ></app-editable-board>
+      }
 
       <app-card-detail-dialog #detailDialog (imageChanged)="onImageChanged($event)"></app-card-detail-dialog>
     </kq-page-container>
@@ -87,13 +101,15 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 })
 export class QuarterlyPlanComponent implements OnInit {
   @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
-  @ViewChild('editableBoard') private readonly editableBoardRef!: EditableBoardComponent;
+  @ViewChild('editableBoard') private readonly editableBoardRef?: EditableBoardComponent;
+  @ViewChild('mobileEditableBoard') private readonly mobileEditableBoardRef?: MobileEditableBoardComponent;
   state = inject(PLAN_QUARTERLY_IN_PORT);
   private readonly startBingoFromPlanService = inject(START_BINGO_FROM_PLAN_IN_PORT);
   router = inject(Router);
   route = inject(ActivatedRoute);
   private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
   private readonly destroyRef = inject(DestroyRef);
+  readonly layoutMode = inject(LayoutModeService);
 
   readonly PAGE_TOOLBAR_WIDTH_MOBILE = PAGE_TOOLBAR_WIDTH_MOBILE;
   readonly PAGE_TOOLBAR_WIDTH_HORIZONTAL = PAGE_TOOLBAR_WIDTH_HORIZONTAL;
@@ -214,7 +230,12 @@ export class QuarterlyPlanComponent implements OnInit {
     if (challenge && challenge.imageId !== event.imageId) {
       this.state.persistUpdatedChallenge(this._openCardIndex, { ...challenge, imageId: event.imageId ?? undefined });
     }
-    void this.editableBoardRef.refreshImage(event.imageId);
+    void this.editableBoardRef?.refreshImage(event.imageId);
+    void this.mobileEditableBoardRef?.refreshImage(event.imageId);
+  }
+
+  onReorderRequested(event: { from: number; to: number }): void {
+    this.state.persistSwappedChallenges(event.from, event.to);
   }
 
   private _openCardIndex: number | null = null;
