@@ -3,20 +3,20 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PLAY_BINGO_IN_PORT } from '../application/ports/in/play-bingo.in-port';
-import { PlayableBoardComponent } from './components/playable-board.component';
-import { ProjectComparisonDialogComponent } from './components/project-comparison-dialog.component';
-import { ImageChangedEvent } from '../../quarterly-plan/presentation/components/card-detail-dialog.component';
+import { BingoGameDesktopComponent } from './desktop/bingo-game-desktop.component';
+import { BingoBoardMobileComponent } from './mobile/bingo-board-mobile.component';
+import { ProjectComparisonDialogComponent } from './common/project-comparison-dialog.component';
 import { ChallengeProgress } from '../domain/bingo-game';
-import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
-import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
-import { StatusMiniGridComponent } from '../../../shared/ui/atoms/status-mini-grid/status-mini-grid.component';
-import { FeatureHeaderComponent } from '../../../shared/ui/molecules/feature-header/feature-header.component';
-import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
-import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
-import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
+import { IconComponent } from '../../../shared/ui';
+import { ButtonComponent } from '../../../shared/ui';
+import { PageToolbarComponent } from '../../../shared/ui';
+import { PageContainerComponent } from '../../../shared/ui';
+import { FeatureHeaderComponent } from '../../../shared/ui';
+import type { ImageChangedEvent } from '../../../shared/ui';
 import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
 import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
 import { MANAGE_USER_SETTINGS_IN_PORT } from '../../user-settings/application/ports/in/manage-user-settings.in-port';
+import { LayoutModeService } from '../../../shared/utils/layout-mode.service';
 
 const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
 const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
@@ -24,7 +24,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 @Component({
   selector: 'app-bingo-game',
   standalone: true,
-  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent, BoardToolbarComponent, IconComponent, ButtonComponent, StatusMiniGridComponent, FeatureHeaderComponent, PageContainerComponent],
+  imports: [CommonModule, BingoGameDesktopComponent, BingoBoardMobileComponent, ProjectComparisonDialogComponent, PageToolbarComponent, IconComponent, ButtonComponent, PageContainerComponent, FeatureHeaderComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -45,63 +45,51 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         💡 Du schaust dir das <strong>{{ displayedQuarterId() }}</strong> an. Fortschritt wird hier nicht gespeichert.
       </div>
 
-      <kq-feature-header
-        eyebrow="Knitting Quarterly - Bingo"
-        title="Happy crafting"
-        titleTestId="page-bingo-title"
-        subtitle="Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen."
-        [compact]="viewMode === 'kompakt'"
-      />
+      @if (layoutMode.isMobile()) {
+        <kq-feature-header
+          eyebrow="Knitting Quarterly - Bingo"
+          title="Happy crafting"
+          titleTestId="page-bingo-title"
+          [subtitle]="mobileSubtitle()"
+          [compact]="true"
+        />
 
-      <kq-board-toolbar
-        [mode]="viewMode"
-        [showPrintButton]="true"
-        (modeChange)="onModeChange($event)"
-        (printClicked)="onPrintClick()"
-      >
-        <kq-status-mini-grid
+        <app-mobile-bingo-board
+          #mobileBingoBoard
+          [challenges]="challenges"
           [completed]="completed"
           [bingoCells]="bingoCells"
-          [challengeNames]="challengeNames"
+          (toggled)="onToggle($event)"
+          (cardDetailOpened)="onCardDetailOpen($event)"
+          (editModeChanged)="onMobileEditModeChanged($event)"
         />
-      </kq-board-toolbar>
-
-      <app-playable-board
-        #playableBoard
-        [challenges]="challenges"
-        [completed]="completed"
-        [bingoCells]="bingoCells"
-        [mode]="viewMode"
-        (toggled)="onToggle($event)"
-        (cardDetailOpened)="onCardDetailOpen($event)"
-      ></app-playable-board>
+      } @else {
+        <app-bingo-game-desktop
+          #desktopView
+          [viewMode]="viewMode"
+          (modeChanged)="onModeChange($event)"
+          (printClicked)="onPrintClick()"
+          (cardDetailOpened)="onCardDetailOpen($event)"
+        />
+      }
 
       <app-project-comparison-dialog #comparisonDialog (imageChanged)="onImageChanged($event)"></app-project-comparison-dialog>
     </kq-page-container>
   `,
   styles: [
     `
-    .feature-shell {
-      max-width: none;
-      width: 100%;
-      margin: 0;
-      padding: 1.4rem 1.1rem 2rem;
-    }
     .preview-banner {
-      background: #fff7ec;
+      background: var(--kq-bg-warm);
       border: 1px solid #c79362;
       border-radius: 0.5rem;
       padding: 0.9rem 1.1rem;
       margin-bottom: 1.1rem;
-      color: #5a2d1a;
+      color: var(--kq-text-heading);
       font-size: 0.95rem;
       font-weight: 500;
     }
 
     @media (max-width: 640px) {
-      .feature-shell {
-        padding: 1rem 0.75rem 1.4rem;
-      }
       kq-page-toolbar {
         justify-content: center;
       }
@@ -110,12 +98,15 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 })
 export class BingoGameComponent implements OnInit {
   @ViewChild('comparisonDialog') private readonly comparisonDialog!: ProjectComparisonDialogComponent;
-  @ViewChild('playableBoard') private readonly playableBoardRef!: PlayableBoardComponent;
-  state = inject(PLAY_BINGO_IN_PORT);
-  router = inject(Router);
-  route = inject(ActivatedRoute);
+  @ViewChild('desktopView') private readonly desktopViewRef?: BingoGameDesktopComponent;
+  @ViewChild('mobileBingoBoard') private readonly mobileBingoBoardRef?: BingoBoardMobileComponent;
+
+  private readonly state = inject(PLAY_BINGO_IN_PORT);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
   private readonly destroyRef = inject(DestroyRef);
+  readonly layoutMode = inject(LayoutModeService);
 
   readonly PAGE_TOOLBAR_WIDTH_MOBILE = PAGE_TOOLBAR_WIDTH_MOBILE;
   readonly PAGE_TOOLBAR_WIDTH_HORIZONTAL = PAGE_TOOLBAR_WIDTH_HORIZONTAL;
@@ -135,6 +126,12 @@ export class BingoGameComponent implements OnInit {
     return this.displayedQuarterId() !== nextQuarterId;
   });
   readonly canGoToPreviousQuarter = computed(() => true);
+  readonly mobileEditMode = signal(false);
+  readonly mobileSubtitle = computed(() =>
+    this.mobileEditMode()
+      ? 'Tippe auf eine Zeile zum Abhaken. Mit dem Kamera-Icon kannst du dein Fortschrittsfoto verwalten.'
+      : 'Tippe auf eine Karte, um sie umzudrehen.'
+  );
 
   ngOnInit(): void {
     this.route.queryParamMap
@@ -163,28 +160,20 @@ export class BingoGameComponent implements OnInit {
     return this.state.bingoCells();
   }
 
-  get challengeNames(): string[] {
-    return this.challenges.map(c => c.name);
+  goHome(): void {
+    void this.router.navigate(['/']);
   }
 
-  goHome() {
-    this.router.navigate(['/']);
+  goToHelp(): void {
+    void this.router.navigate(['/how-it-works']);
   }
 
-  goToHelp() {
-    this.router.navigate(['/how-it-works']);
-  }
-
-  goToSettings() {
-    void this.router.navigate(['/how-it-works'], { fragment: 'settings' });
-  }
-
-  goToNextQuarter() {
+  goToNextQuarter(): void {
     const nextQuarter = this.quarterClock.getNextQuarterIdFromQuarterId(this.displayedQuarterId());
     void this.router.navigate(['/quarterly'], { queryParams: { quarter: nextQuarter } });
   }
 
-  goToPreviousQuarter() {
+  goToPreviousQuarter(): void {
     const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
     void this.router.navigate(['/quarterly'], { queryParams: { quarter: previousQuarter } });
   }
@@ -205,7 +194,7 @@ export class BingoGameComponent implements OnInit {
     }
   }
 
-  onToggle(i: number) {
+  onToggle(i: number): void {
     this.state.persistToggledChallenge(i);
   }
 
@@ -214,7 +203,11 @@ export class BingoGameComponent implements OnInit {
     this.userSettings.persistBoardViewMode(mode);
   }
 
-  onCardDetailOpen(event: { index: number; challenge: ChallengeProgress }) {
+  onMobileEditModeChanged(isEditing: boolean): void {
+    this.mobileEditMode.set(isEditing);
+  }
+
+  onCardDetailOpen(event: { index: number; challenge: ChallengeProgress }): void {
     this._openCardIndex = event.index;
     void this.comparisonDialog.open(
       event.challenge.name,
@@ -227,7 +220,8 @@ export class BingoGameComponent implements OnInit {
     if (this._openCardIndex !== null) {
       this.state.persistProgressImage(this._openCardIndex, event.imageId ?? undefined);
     }
-    void this.playableBoardRef.refreshImage(event.imageId);
+    void this.desktopViewRef?.refreshImage(event.imageId);
+    void this.mobileBingoBoardRef?.refreshImage(event.imageId);
   }
 
   private _openCardIndex: number | null = null;

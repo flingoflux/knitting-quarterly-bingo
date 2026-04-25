@@ -1,4 +1,4 @@
-import { StartPageComponent } from './features/start-page/presentation/pages/start-page.component';
+import { StartPageComponent } from './features/start-page/presentation/start-page.component';
 import { Routes } from '@angular/router';
 import { PLAY_BINGO_IN_PORT } from './features/bingo-game/application/ports/in/play-bingo.in-port';
 import { PlayBingoUseCase } from './features/bingo-game/application/play-bingo.use-case';
@@ -8,10 +8,16 @@ import { START_BINGO_FROM_PLAN_IN_PORT } from './features/bingo-game/application
 import { StartBingoFromPlanUseCase } from './features/bingo-game/application/start-bingo-from-plan.use-case';
 import { SHOW_ARCHIVE_OVERVIEW_IN_PORT } from './features/archive/application/ports/in/show-archive-overview.in-port';
 import { ShowArchiveOverviewUseCase } from './features/archive/application/show-archive-overview.use-case';
+import { ShowQuarterlyProgressUseCase } from './features/start-page/application/show-quarterly-progress.use-case';
+import { SHOW_QUARTERLY_PROGRESS_IN_PORT } from './features/start-page/application/ports/in/show-quarterly-progress.in-port';
 
 export const routes: Routes = [
   {
     path: '',
+    providers: [
+      ShowQuarterlyProgressUseCase,
+      { provide: SHOW_QUARTERLY_PROGRESS_IN_PORT, useExisting: ShowQuarterlyProgressUseCase },
+    ],
     component: StartPageComponent,
   },
   {
@@ -24,7 +30,7 @@ export const routes: Routes = [
       StartBingoFromPlanUseCase,
       { provide: START_BINGO_FROM_PLAN_IN_PORT, useExisting: StartBingoFromPlanUseCase },
     ],
-    loadComponent: () => import('./features/quarter-lifecycle/presentation/pages/quarterly-view-page.component').then(m => m.QuarterlyViewPageComponent),
+    loadComponent: () => import('./features/quarter-lifecycle/presentation/quarterly-view-page.component').then(m => m.QuarterlyViewPageComponent),
   },
   {
     path: 'quarterly-print',
@@ -32,7 +38,7 @@ export const routes: Routes = [
       PlayBingoUseCase,
       { provide: PLAY_BINGO_IN_PORT, useExisting: PlayBingoUseCase },
     ],
-    loadComponent: () => import('./features/bingo-game/presentation/print-bingo-board.component').then(m => m.PrintBingoBoardComponent),
+    loadComponent: () => import('./features/bingo-game/presentation/print/bingo-board-print.component').then(m => m.BingoBoardPrintComponent),
   },
   {
     path: 'quarterly/print',

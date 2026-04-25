@@ -3,20 +3,20 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PLAN_QUARTERLY_IN_PORT } from '../application/ports/in/plan-quarterly.in-port';
-import { START_BINGO_FROM_PLAN_IN_PORT } from '../../bingo-game/application/ports/in/start-bingo-from-plan.in-port';
-import { EditableBoardComponent } from './components/editable-board.component';
-import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-detail-dialog.component';
-import { shuffleArray } from '../../../shared/utils/array-utils';
+import { QuarterlyPlanDesktopComponent } from './desktop/quarterly-plan-desktop.component';
+import { EditableBoardMobileComponent } from './mobile/editable-board-mobile.component';
+import { CardDetailDialogComponent } from './common/card-detail-dialog.component';
 import { Challenge } from '../../../shared/domain/challenge';
-import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
-import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
-import { FeatureHeaderComponent } from '../../../shared/ui/molecules/feature-header/feature-header.component';
-import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
-import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
-import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
+import { IconComponent } from '../../../shared/ui';
+import { ButtonComponent } from '../../../shared/ui';
+import { PageToolbarComponent } from '../../../shared/ui';
+import { PageContainerComponent } from '../../../shared/ui';
+import { FeatureHeaderComponent } from '../../../shared/ui';
+import type { ImageChangedEvent } from '../../../shared/ui';
 import { QuarterClock } from '../../../core/domain';
 import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
 import { MANAGE_USER_SETTINGS_IN_PORT } from '../../user-settings/application/ports/in/manage-user-settings.in-port';
+import { LayoutModeService } from '../../../shared/utils/layout-mode.service';
 
 const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
 const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
@@ -24,7 +24,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 @Component({
   selector: 'app-quarterly-plan',
   standalone: true,
-  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, FeatureHeaderComponent, PageToolbarComponent, BoardToolbarComponent, PageContainerComponent],
+  imports: [CommonModule, QuarterlyPlanDesktopComponent, EditableBoardMobileComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent, PageContainerComponent, FeatureHeaderComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -41,38 +41,33 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         </kq-button>
       </kq-page-toolbar>
 
-      <kq-feature-header
-        eyebrow="Knitting Quarterly - Board Studio"
-        title="Challenges und Projekte planen"
-        titleTestId="page-quarterly-plan-title"
-        [subtitle]="viewMode === 'polaroid' ? 'Hier kannst du dein pers\u00f6nliches Bingo-Board f\u00fcr das n\u00e4chste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden.' : undefined"
-        [compact]="viewMode === 'kompakt'"
-      />
+      @if (layoutMode.isMobile()) {
+        <kq-feature-header
+          eyebrow="Knitting Quarterly - Board Studio"
+          title="Challenges und Projekte planen"
+          titleTestId="page-quarterly-plan-title"
+          [subtitle]="mobileSubtitle()"
+          [compact]="true"
+        />
 
-      <kq-board-toolbar
-        [mode]="viewMode"
-        (modeChange)="onModeChange($event)"
-      >
-        <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
-          <kq-icon name="shuffle" [size]="22"/>
-        </kq-button>
-        <kq-button variant="icon" (click)="startBingo()" title="Neues Bingo mit diesem Plan starten" ariaLabel="Neues Bingo mit diesem Plan starten">
-          <kq-icon name="play" [size]="20"/>
-        </kq-button>
-      </kq-board-toolbar>
-
-      <app-editable-board
-        #editableBoard
-        [challenges]="challenges"
-        [dragTargetIndex]="dragTargetIndex"
-        [mode]="viewMode"
-        (dragStarted)="onDragStart($event)"
-        (dragOverCell)="onDragOver($event)"
-        (dragLeftCell)="onDragLeave($event)"
-        (droppedOnCell)="onDrop($event)"
-        (challengeEdited)="onChallengeEdited($event)"
-        (cardDetailOpened)="onCardDetailOpen($event)"
-      ></app-editable-board>
+        <app-mobile-editable-board
+          #mobileEditableBoard
+          [challenges]="challenges"
+          (challengeEdited)="onChallengeEdited($event)"
+          (cardDetailOpened)="onCardDetailOpen($event)"
+          (reorderRequested)="onReorderRequested($event)"
+          (editModeChanged)="onMobileEditModeChanged($event)"
+        />
+      } @else {
+        <app-quarterly-plan-desktop
+          #desktopView
+          [viewMode]="viewMode"
+          [quarterId]="displayedQuarterId()"
+          (modeChanged)="onModeChange($event)"
+          (cardDetailOpened)="onCardDetailOpen($event)"
+          (bingoStarted)="onBingoStarted()"
+        />
+      }
 
       <app-card-detail-dialog #detailDialog (imageChanged)="onImageChanged($event)"></app-card-detail-dialog>
     </kq-page-container>
@@ -87,13 +82,15 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 })
 export class QuarterlyPlanComponent implements OnInit {
   @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
-  @ViewChild('editableBoard') private readonly editableBoardRef!: EditableBoardComponent;
-  state = inject(PLAN_QUARTERLY_IN_PORT);
-  private readonly startBingoFromPlanService = inject(START_BINGO_FROM_PLAN_IN_PORT);
-  router = inject(Router);
-  route = inject(ActivatedRoute);
+  @ViewChild('desktopView') private readonly desktopViewRef?: QuarterlyPlanDesktopComponent;
+  @ViewChild('mobileEditableBoard') private readonly mobileEditableBoardRef?: EditableBoardMobileComponent;
+
+  private readonly state = inject(PLAN_QUARTERLY_IN_PORT);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
   private readonly destroyRef = inject(DestroyRef);
+  readonly layoutMode = inject(LayoutModeService);
 
   readonly PAGE_TOOLBAR_WIDTH_MOBILE = PAGE_TOOLBAR_WIDTH_MOBILE;
   readonly PAGE_TOOLBAR_WIDTH_HORIZONTAL = PAGE_TOOLBAR_WIDTH_HORIZONTAL;
@@ -107,8 +104,12 @@ export class QuarterlyPlanComponent implements OnInit {
     return this.displayedQuarterId() !== nextQuarterId;
   });
   readonly canGoToPreviousQuarter = computed(() => true);
-  dragTargetIndex: number | null = null;
-  dragStartIndex: number | null = null;
+  readonly mobileEditMode = signal(false);
+  readonly mobileSubtitle = computed(() =>
+    this.mobileEditMode()
+      ? 'Du kannst jetzt Projekte umbenennen, die Reihenfolge anpassen und Fotos bearbeiten.'
+      : 'Tippe auf eine Karte, um sie umzudrehen.'
+  );
 
   ngOnInit(): void {
     this.route.queryParamMap
@@ -126,54 +127,22 @@ export class QuarterlyPlanComponent implements OnInit {
     return this.state.challenges();
   }
 
-  goHome() {
-    this.router.navigate(['/']);
+  goHome(): void {
+    void this.router.navigate(['/']);
   }
 
-  goToHelp() {
-    this.router.navigate(['/how-it-works']);
+  goToHelp(): void {
+    void this.router.navigate(['/how-it-works']);
   }
 
-  goToSettings() {
-    void this.router.navigate(['/how-it-works'], { fragment: 'settings' });
-  }
-
-  goToNextQuarter() {
+  goToNextQuarter(): void {
     const nextQuarter = this.quarterClock.getNextQuarterIdFromQuarterId(this.displayedQuarterId());
     void this.router.navigate(['/quarterly'], { queryParams: { quarter: nextQuarter } });
   }
 
-  goToPreviousQuarter() {
+  goToPreviousQuarter(): void {
     const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
     void this.router.navigate(['/quarterly'], { queryParams: { quarter: previousQuarter } });
-  }
-
-  shuffle() {
-    const challenges = this.challenges;
-    const shuffled = shuffleArray(challenges);
-    this.state.persistChallenges(shuffled as Challenge[]);
-  }
-
-  resetToDefaultBoard() {
-    this.state.persistDefaultChallengesWithoutImages();
-  }
-
-  startBingo() {
-    const confirmed = window.confirm(
-      `Dein Board startet automatisch mit dem ${this.displayedQuarterId()} 🧶\n\n` +
-      `Möchtest du schon jetzt damit spielen? Das überschreibt das aktuelle Bingo – ` +
-      `inklusive deinem Fortschritt und allen Fotos.`,
-    );
-    if (!confirmed) return;
-    const started = this.startBingoFromPlanService.startBingoFromPlan(this.displayedQuarterId());
-    if (started) {
-      void this.router.navigate(['/quarterly'], { queryParams: { quarter: this.actualCurrentQuarterId } });
-    }
-  }
-
-  onDragStart(i: number) {
-    this.dragStartIndex = i;
-    this.dragTargetIndex = i;
   }
 
   onModeChange(mode: BoardViewMode): void {
@@ -181,29 +150,19 @@ export class QuarterlyPlanComponent implements OnInit {
     this.userSettings.persistBoardViewMode(mode);
   }
 
-  onDragOver(i: number) {
-    if (this.dragStartIndex !== null) {
-      this.dragTargetIndex = i;
-    }
+  onMobileEditModeChanged(isEditing: boolean): void {
+    this.mobileEditMode.set(isEditing);
   }
 
-  onDragLeave(_i: number) {
-    this.dragTargetIndex = null;
+  onBingoStarted(): void {
+    void this.router.navigate(['/quarterly'], { queryParams: { quarter: this.actualCurrentQuarterId } });
   }
 
-  onDrop(i: number) {
-    if (this.dragStartIndex !== null && this.dragStartIndex !== i) {
-      this.state.persistSwappedChallenges(this.dragStartIndex, i);
-    }
-    this.dragStartIndex = null;
-    this.dragTargetIndex = null;
-  }
-
-  onChallengeEdited(event: { index: number; challenge: Challenge }) {
+  onChallengeEdited(event: { index: number; challenge: Challenge }): void {
     this.state.persistUpdatedChallenge(event.index, event.challenge);
   }
 
-  onCardDetailOpen(event: { index: number; challenge: Challenge }) {
+  onCardDetailOpen(event: { index: number; challenge: Challenge }): void {
     this._openCardIndex = event.index;
     this.detailDialog.open(event.challenge.imageId ?? null, event.challenge.name);
   }
@@ -214,7 +173,12 @@ export class QuarterlyPlanComponent implements OnInit {
     if (challenge && challenge.imageId !== event.imageId) {
       this.state.persistUpdatedChallenge(this._openCardIndex, { ...challenge, imageId: event.imageId ?? undefined });
     }
-    void this.editableBoardRef.refreshImage(event.imageId);
+    void this.desktopViewRef?.refreshImage(event.imageId);
+    void this.mobileEditableBoardRef?.refreshImage(event.imageId);
+  }
+
+  onReorderRequested(event: { from: number; to: number }): void {
+    this.state.persistSwappedChallenges(event.from, event.to);
   }
 
   private _openCardIndex: number | null = null;

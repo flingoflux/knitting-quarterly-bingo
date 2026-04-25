@@ -1,14 +1,16 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { PageToolbarComponent } from '../../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
-import { PageContainerComponent } from '../../../../shared/ui/templates/page-container/page-container.component';
-import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
-import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
-import { FeatureHeaderComponent } from '../../../../shared/ui/molecules/feature-header/feature-header.component';
+import { PageToolbarComponent } from '../../../../shared/ui/common/organisms/page-toolbar/page-toolbar.component';
+import { PageContainerComponent } from '../../../../shared/ui/common/templates/page-container/page-container.component';
+import { IconComponent } from '../../../../shared/ui/common/atoms/icon/icon.component';
+import { ButtonComponent } from '../../../../shared/ui/common/atoms/button/button.component';
+import { FeatureHeaderComponent } from '../../../../shared/ui/common/molecules/feature-header/feature-header.component';
 import { BoardViewMode } from '../../../user-settings/domain/board-view-mode';
+import { LayoutMode } from '../../../user-settings/domain/layout-mode';
 import { MANAGE_USER_SETTINGS_IN_PORT } from '../../../user-settings/application/ports/in/manage-user-settings.in-port';
 import { StorageService } from '../../../../core/infrastructure/storage.service';
 import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexed-db-image-repository.service';
+import { LayoutModeService } from '../../../../shared/utils/layout-mode.service';
 
 @Component({
   selector: 'app-how-to',
@@ -37,13 +39,12 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
         <section class="section">
           <h2 class="section-title"><kq-icon name="target" [size]="18"/>Das Konzept</h2>
           <p>
-            Knitting Quarterly Bingo ist Gamification fürs Stricken. Alle 3 Monate startet ein neues
-            Quartal mit einem Board aus 16 Challenges — Strickprojekten, die dich inspirieren und motivieren sollen.
+            Knitting Quarterly Bingo bringt spielerische Struktur in dein Strickquartal:
+            Alle 3 Monate startet ein neues Board mit 16 Challenges, die dich motivieren und inspirieren.
           </p>
           <p>
-            Das Ziel ist nicht, möglichst viele Projekte abzuhaken. Es geht darum, durch das Spiel
-            in Bewegung zu kommen. Ein einziges Bingo wäre schon ein Erfolg — aber auch wer keins schafft,
-            hat trotzdem Projekte fertiggestellt, auf die man stolz sein kann.
+            Es geht nicht um Masse, sondern um Momentum. Schon ein Bingo ist ein Erfolg -
+            und auch ohne Bingo bleiben fertige Projekte, auf die du stolz sein kannst.
           </p>
         </section>
 
@@ -53,23 +54,22 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
             <div class="phase">
               <div class="phase-name">1. Planen</div>
               <p>
-                Richte dein Board ein — fast wie ein Moodboard. Wähle Challenges aus, auf die du Lust hast,
-                und suche dir passende Patterns, Wolle oder UFOs heraus. Ordne die Felder per
-                Drag &amp; Drop an oder würfle sie zufällig. Zu jeder Challenge kannst du
-                optional ein Inspirationsfoto hinterlegen.
+                Richte dein Board wie ein Moodboard ein: Wähle Challenges, suche passende Patterns,
+                Wolle oder UFOs und ordne die Felder per Drag &amp; Drop oder Zufall neu.
+                Zu jeder Challenge kannst du optional ein Inspirationsfoto speichern.
               </p>
               <p>
-                Dein Board startet automatisch mit dem nächsten Quartal. Wenn du aber nicht warten möchtest:
-                Mit dem <strong>Play-Button</strong> ▶ kannst du das Board direkt als Bingo starten —
-                das überschreibt dann das aktuelle Spiel und seinen Fortschritt.
+                Standardmäßig startet dein Board mit dem nächsten Quartal.
+                Mit dem <strong>Play-Button</strong> ▶ kannst du sofort loslegen -
+                dabei wird das aktuelle Spiel inklusive Fortschritt überschrieben.
               </p>
             </div>
             <div class="phase">
               <div class="phase-name">2. Spielen</div>
               <p>
-                Stricke und hake Challenges ab. Per Klick auf ein Feld markierst du es als erledigt.
-                Per Langklick öffnet sich die Detailansicht, wo du ein Fortschrittsfoto hochladen und
-                mit dem Planungsfoto vergleichen kannst.
+                Stricke und hake Challenges ab. Ein Klick auf ein Feld markiert es als erledigt.
+                Über die Detailansicht kannst du ein Fortschrittsfoto hochladen und mit deinem
+                Planungsfoto vergleichen.
               </p>
             </div>
             <div class="phase">
@@ -79,15 +79,6 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
               </p>
             </div>
           </div>
-        </section>
-
-        <section class="section">
-          <h2 class="section-title"><kq-icon name="award" [size]="18"/>Bingo gewinnen</h2>
-          <p>
-            Ein <strong>Bingo</strong> entsteht, wenn du alle 4 Projekte einer vollständigen
-            Reihe, Spalte oder Diagonale abschließt. Es gibt insgesamt <strong>10 mögliche Bingo-Linien</strong>:
-            4 Reihen + 4 Spalten + 2 Diagonalen.
-          </p>
         </section>
 
         <section class="section">
@@ -131,6 +122,47 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
               >
                 <span class="mode-option-title"><kq-icon name="horizontal" [size]="16"/>Kompakt</span>
                 <span class="mode-option-copy">Zeigt mehr Felder gleichzeitig für schnellen Überblick.</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="settings-subsection">
+            <h3>Darstellungsmodus</h3>
+            <p class="view-mode-note">
+              Wähle, ob das Board-Layout automatisch nach Bildschirmgröße, immer als Desktop- oder immer als Mobile-Ansicht angezeigt werden soll.
+            </p>
+            <div class="mode-options layout-mode-options" role="group" aria-label="Darstellungsmodus wählen">
+              <button
+                type="button"
+                class="mode-option"
+                [class.active]="layoutMode.layoutMode() === 'auto'"
+                [attr.aria-pressed]="layoutMode.layoutMode() === 'auto'"
+                (click)="onLayoutModeChange('auto')"
+              >
+                <span class="mode-option-title"><kq-icon name="target" [size]="16"/>Auto</span>
+                <span class="mode-option-copy">Smartphone → Mobile, größere Bildschirme → Desktop.</span>
+              </button>
+
+              <button
+                type="button"
+                class="mode-option"
+                [class.active]="layoutMode.layoutMode() === 'desktop'"
+                [attr.aria-pressed]="layoutMode.layoutMode() === 'desktop'"
+                (click)="onLayoutModeChange('desktop')"
+              >
+                <span class="mode-option-title"><kq-icon name="horizontal" [size]="16"/>Desktop</span>
+                <span class="mode-option-copy">Immer die Desktop-Ansicht — auch auf kleinen Screens.</span>
+              </button>
+
+              <button
+                type="button"
+                class="mode-option"
+                [class.active]="layoutMode.layoutMode() === 'mobile'"
+                [attr.aria-pressed]="layoutMode.layoutMode() === 'mobile'"
+                (click)="onLayoutModeChange('mobile')"
+              >
+                <span class="mode-option-title"><kq-icon name="polaroid" [size]="16"/>Mobile</span>
+                <span class="mode-option-copy">Immer die Mobile-Ansicht — auch auf Desktop.</span>
               </button>
             </div>
           </div>
@@ -396,6 +428,7 @@ export class HowItWorksComponent {
   private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
   private readonly storage = inject(StorageService);
   private readonly imageRepo = inject(IndexedDbImageRepository);
+  readonly layoutMode = inject(LayoutModeService);
 
   readonly pageToolbarWidth = '52rem';
   viewMode: BoardViewMode = this.userSettings.loadBoardViewMode();
@@ -415,6 +448,10 @@ export class HowItWorksComponent {
   onModeChange(mode: BoardViewMode): void {
     this.viewMode = mode;
     this.userSettings.persistBoardViewMode(mode);
+  }
+
+  onLayoutModeChange(mode: LayoutMode): void {
+    this.layoutMode.persistLayoutMode(mode);
   }
 
   async clearAllData(): Promise<void> {

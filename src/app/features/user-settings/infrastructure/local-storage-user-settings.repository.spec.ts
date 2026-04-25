@@ -36,4 +36,20 @@ describe('LocalStorageUserSettingsRepository', () => {
 
     expect(repository.loadBoardViewMode()).toBe('polaroid');
   });
+
+  it('should return auto as default layout mode when no setting exists', () => {
+    expect(repository.loadLayoutMode()).toBe('auto');
+  });
+
+  it('should persist selected layout mode', () => {
+    repository.persistLayoutMode('mobile');
+
+    expect(repository.loadLayoutMode()).toBe('mobile');
+  });
+
+  it('should reset invalid layout mode to default', () => {
+    storage.setItem('kq-bingo-user-setting-layout-mode-v1', 'tablet');
+
+    expect(repository.loadLayoutMode()).toBe('auto');
+  });
 });

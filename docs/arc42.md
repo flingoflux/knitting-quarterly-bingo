@@ -129,6 +129,26 @@ Namensregel: siehe ADR-005 (Kapitel 9) fuer die verbindliche Benennung von InPor
 | core / quarter-lifecycle | `EnsureQuarterRolloverInPort` | `EnsureQuarterRolloverUseCase` | nutzt aktuell `QUARTERLY_PLAN_READER`/`QUARTERLY_PLAN_WRITER` und `BINGO_GAME_REPOSITORY` (Migration auf OutPorts folgt) | kein eigener Storage-Adapter | `QuarterClock`, `QuarterId` |
 | shared image storage | n/a (derzeit) | n/a (derzeit) | `ImageRepository` | `IndexedDbImageRepository` | Bild-UUID-Referenzen |
 
+### 5.3.1 Referenzregeln fuer Presentation-Komponenten
+
+Die Presentation-Schicht folgt einer klaren Referenzmatrix. Ziel ist eine strikte Trennung von view-spezifischen Komponenten und die Vermeidung von Cross-Feature-Coupling.
+
+| Quelle | Darf referenzieren | Darf nicht referenzieren |
+| --- | --- | --- |
+| `features/<feature>/presentation/<feature>.component.ts` (Container) | `./common/*`, `./desktop/*`, `./mobile/*`, `./print/*` desselben Features; `shared/ui`; `shared/utils`; Feature-Application-Ports | Presentation-Dateien anderer Features |
+| `features/<feature>/presentation/common/*` | `shared/ui/common/*` (ueber Barrel), `shared/utils`, feature-interne `common/*` | `desktop/*`, `mobile/*`, `print/*`; Presentation-Dateien anderer Features |
+| `features/<feature>/presentation/desktop/*` | feature-interne `common/*`; `shared/ui/desktop/*` und `shared/ui/common/*` (ueber Barrel); `shared/utils` | `shared/ui/mobile/*`, `shared/ui/print/*`; Presentation-Dateien anderer Features |
+| `features/<feature>/presentation/mobile/*` | feature-interne `common/*`; `shared/ui/mobile/*` und `shared/ui/common/*` (ueber Barrel); `shared/utils` | `shared/ui/desktop/*`, `shared/ui/print/*`; Presentation-Dateien anderer Features |
+| `features/<feature>/presentation/print/*` | feature-interne `common/*`; `shared/ui/print/*` und `shared/ui/common/*` (ueber Barrel); `shared/utils` | `shared/ui/desktop/*`, `shared/ui/mobile/*`; Presentation-Dateien anderer Features |
+
+Verbindliche Regeln:
+
+- Keine direkten Imports zwischen `presentation`-Ordnern unterschiedlicher Features.
+- Ausnahme: `features/quarter-lifecycle/presentation/quarterly-view-page.component.ts` darf als Orchestrator die Feature-Container `bingo-game` und `quarterly-plan` referenzieren.
+- Feature-uebergreifend genutzte UI-Events/Typen liegen unter `shared` als Contract (nicht in einem Feature-Presentation-Ordner).
+- View-spezifische Komponenten tragen den Suffix `Desktop`, `Mobile` oder `Print` und liegen im gleichnamigen Ordner.
+- Selektoren bleiben bei Verschiebungen stabil, damit Templates und E2E-Selektoren unveraendert bleiben.
+
 ### 5.4 Ebene 3 – Feature-spezifische Hexagon-Sichten
 
 #### 5.4.1 quarterly-plan
@@ -906,6 +926,26 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 - Primäre Adapter (Presentation/Guards) koppeln an `InPort` statt an konkrete Klassen.
 - UseCases bleiben austauschbar und testbar; Outbound-Abhaengigkeiten bleiben ueber `OutPort` entkoppelt.
 - Migrationsaufwand entsteht durch schrittweises Umbenennen bestehender Services/Ports; empfohlen ist eine inkrementelle Migration pro Feature.
+
+### ADR-006: View-Mode-Trennung durch Unterordner und einheitliches Dateinamen-Suffix
+
+**Kontext:** View-mode-spezifische UI-Komponenten (Desktop, Mobile, Print) waren bisher gemischt benannt: teilweise mit View-Mode als Präfix im Dateinamen (`mobile-bingo-board.component.ts`, `print-bingo-board.component.ts`), teilweise als Suffix (`bingo-game-desktop.component.ts`), teilweise als Infix (`plan-mobile-mini-card.component.ts`). Dadurch war die Zugehörigkeit eines Files zu einem View-Mode nicht auf den ersten Blick erkennbar.
+
+**Entscheidung:**
+
+- Der View-Mode wird **immer als Suffix** im Dateinamen angehängt: `*-desktop`, `*-mobile`, `*-print`.
+- View-mode-spezifische Komponenten werden in eigene **Unterordner** des gleichen Namens verschoben: `desktop/`, `mobile/`, `print/`.
+- Die **Klassenbezeichnung** folgt demselben Muster: Suffix `Desktop`, `Mobile` oder `Print` am Ende, z. B. `BingoBoardMobileComponent`, `BoardGridDesktopComponent`.
+- **Selektoren** folgen demselben Muster: Suffix `-desktop`, `-mobile` oder `-print` am Ende, z. B. `kq-board-grid-desktop`, `kq-challenge-card-mobile`. Geteilte Komponenten in `shared/ui/` verwenden dieses Schema konsequent; Feature-interne Komponenten (`app-*`) behalten ihren Selektor, solange sie nicht in `shared/ui/` leben.
+- View-mode-agnostische Komponenten verbleiben in `common/` ohne Modussuffix.
+- Alle geteilten UI-Komponenten leben in `src/app/shared/ui/` strukturiert nach Modus (`common/`, `desktop/`, `mobile/`, `print/`) und werden über Barrel-Exports (`index.ts`) bereitgestellt.
+
+**Konsequenzen:**
+
+- Die Ordnerstruktur spiegelt die view-mode-Zugehörigkeit direkt wider: ein `ls desktop/` zeigt alle Desktop-Komponenten eines Features.
+- Neue view-mode-spezifische Komponenten in `shared/ui/` müssen zwingend dem Muster `<fachname>-<modus>.component.ts` im passenden Unterordner folgen und den Modus-Suffix im Selektor tragen.
+- Imports auf umbenannte Klassen müssen bei Refactorings entsprechend nachgezogen werden.
+- Imports aus `shared/ui/` erfolgen ausschließlich über den zentralen Barrel `../../../../shared/ui`.
 
 ---
 
