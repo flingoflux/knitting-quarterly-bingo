@@ -27,7 +27,7 @@ interface CardDetailOpenedEvent {
 
     <kq-board-toolbar-desktop
       [mode]="viewMode"
-      [showPrintButton]="true"
+      [showPrintButton]="false"
       (modeChange)="modeChanged.emit($event)"
       (printClicked)="printClicked.emit()"
     >
