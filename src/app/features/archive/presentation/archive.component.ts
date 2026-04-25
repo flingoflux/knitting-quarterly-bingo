@@ -6,12 +6,14 @@ import { ArchiveEntry } from '../domain/archive-entry';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
+import { EyebrowComponent } from '../../../shared/ui/atoms/eyebrow/eyebrow.component';
+import { StatusMiniGridComponent } from '../../../shared/ui/atoms/status-mini-grid/status-mini-grid.component';
 import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
 
 @Component({
   selector: 'app-archive',
   standalone: true,
-  imports: [CommonModule, PageToolbarComponent, IconComponent, ButtonComponent, PageContainerComponent],
+  imports: [CommonModule, PageToolbarComponent, IconComponent, ButtonComponent, EyebrowComponent, StatusMiniGridComponent, PageContainerComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -28,7 +30,7 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
 
       <div class="feature-shell">
       <section class="archive-header">
-        <p class="eyebrow">Knitting Quarterly - Archiv</p>
+        <kq-eyebrow>Knitting Quarterly - Archiv</kq-eyebrow>
         <h2 data-testid="page-archive-title">Bisher erledigte Runden</h2>
         <p class="subtitle">Miniübersicht abgeschlossener Bingo-Boards.</p>
         <p class="prototype-note" *ngIf="isShowingPrototype()">
@@ -38,14 +40,11 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
 
       <section *ngIf="hasEntries(); else emptyState" class="archive-list" aria-label="Archivierte Quartale">
         <article class="archive-card" *ngFor="let entry of entries()">
-          <div class="status-grid" [attr.aria-label]="'Bingo Status: ' + entry.completedCount + ' von ' + entry.totalCount">
-            <div
-              *ngFor="let d of entry.completed; let i = index"
-              class="status-cell"
-              [class.done]="d"
-              [class.bingo]="isCellInBingo(i, entry.bingoCells)"
-            ></div>
-          </div>
+          <kq-status-mini-grid
+              [completed]="entry.completed"
+              [bingoCells]="entry.bingoCells"
+              [ariaLabel]="'Bingo Status: ' + entry.completedCount + ' von ' + entry.totalCount"
+            />
           <div class="card-content">
             <h3>{{ entry.quarterId }}</h3>
             <p class="meta">{{ entry.completedCount }}/{{ entry.totalCount }} Challenges geschafft</p>
@@ -67,7 +66,7 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
       width: 100%;
       margin: 0;
       padding: 1.4rem 1.1rem 2rem;
-      color: #412a22;
+      color: var(--kq-text);
     }
 
 
@@ -77,25 +76,17 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
       margin-bottom: 1rem;
     }
 
-    .eyebrow {
-      margin: 0;
-      color: #8f3b22;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      font-weight: 700;
-    }
 
     h2 {
       margin: 0.4rem 0 0;
       font-size: clamp(1.4rem, 2.5vw, 2rem);
-      color: #5a2d1a;
+      color: var(--kq-text-heading);
       text-wrap: balance;
     }
 
     .subtitle {
       margin: 0.55rem auto 0;
-      color: #6c5445;
+      color: var(--kq-muted);
       font-size: 0.98rem;
       max-width: 36rem;
     }
@@ -140,48 +131,21 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
       margin: 0;
       font-size: 1rem;
       line-height: 1.2;
-      color: #5a2d1a;
-    }
-
-    .status-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 14px);
-      grid-template-rows: repeat(4, 8px);
-      gap: 3px;
-      margin-top: 0.15rem;
-    }
-
-    .status-cell {
-      width: 14px;
-      height: 8px;
-      border-radius: 2px;
-      background: #fff;
-      border: 1.5px solid #d0b08a;
-      transition: background 0.2s ease, border-color 0.2s ease;
-    }
-
-    .status-cell.done {
-      background: #145906;
-      border-color: #145906;
-    }
-
-    .status-cell.bingo {
-      background: #145906;
-      border-color: #145906;
+      color: var(--kq-text-heading);
     }
 
     .meta {
       margin: 0;
       font-size: 0.86rem;
       line-height: 1.35;
-      color: #8a7766;
+      color: var(--kq-muted);
     }
 
     .empty-state {
       margin: 1rem auto 0;
       max-width: 52rem;
       text-align: center;
-      color: #6c5445;
+      color: var(--kq-muted);
     }
   `],
 })
@@ -207,9 +171,5 @@ export class ArchiveComponent {
 
   goToCurrentQuarter(): void {
     void this.router.navigate([this.returnTarget === 'edit' ? '/edit' : '/play']);
-  }
-
-  isCellInBingo(index: number, bingoCells: number[]): boolean {
-    return bingoCells.includes(index);
   }
 }

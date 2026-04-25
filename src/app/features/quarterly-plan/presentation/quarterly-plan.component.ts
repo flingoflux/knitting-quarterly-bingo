@@ -10,6 +10,7 @@ import { shuffleArray } from '../../../shared/utils/array-utils';
 import { Challenge } from '../../../shared/domain/challenge';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
+import { FeatureHeaderComponent } from '../../../shared/ui/molecules/feature-header/feature-header.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
 import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
@@ -23,7 +24,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 @Component({
   selector: 'app-quarterly-plan',
   standalone: true,
-  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent, BoardToolbarComponent, PageContainerComponent],
+  imports: [CommonModule, EditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, FeatureHeaderComponent, PageToolbarComponent, BoardToolbarComponent, PageContainerComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -40,11 +41,13 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         </kq-button>
       </kq-page-toolbar>
 
-      <div class="edit-board-header" [class.compact-header]="viewMode === 'kompakt'">
-        <p class="eyebrow">Knitting Quarterly - Board Studio</p>
-        <h2 data-testid="page-quarterly-plan-title">Challenges und Projekte planen</h2>
-        <p class="subtitle" *ngIf="viewMode === 'polaroid'">Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden.</p>
-      </div>
+      <kq-feature-header
+        eyebrow="Knitting Quarterly - Board Studio"
+        title="Challenges und Projekte planen"
+        titleTestId="page-quarterly-plan-title"
+        [subtitle]="viewMode === 'polaroid' ? 'Hier kannst du dein pers\u00f6nliches Bingo-Board f\u00fcr das n\u00e4chste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden.' : undefined"
+        [compact]="viewMode === 'kompakt'"
+      />
 
       <kq-board-toolbar
         [mode]="viewMode"
@@ -75,45 +78,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
     </kq-page-container>
   `,
   styles: [`
-    .feature-shell {
-      max-width: none;
-      width: 100%;
-      margin: 0;
-      padding: 1.4rem 1.1rem 2rem;
-    }
-    .edit-board-header {
-      text-align: center;
-      margin-bottom: 1.1rem;
-      padding: 0.6rem 0.4rem;
-    }
-    .edit-board-header.compact-header {
-      padding: 0.2rem 0.4rem 0.4rem;
-      margin-bottom: 0.5rem;
-    }
-    .eyebrow {
-      margin: 0;
-      color: #8f3b22;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      font-weight: 700;
-    }
-    h2 {
-      margin: 0.4rem 0 0;
-      font-size: clamp(1.6rem, 2.6vw, 2.2rem);
-      color: #5a2d1a;
-      text-wrap: balance;
-    }
-    .edit-board-header .subtitle {
-      color: #6c5445;
-      font-size: 1.03rem;
-      max-width: 44rem;
-      margin: 0.55rem auto 0;
-    }
     @media (max-width: 640px) {
-      .feature-shell {
-        padding: 1rem 0.75rem 1.4rem;
-      }
       kq-page-toolbar {
         justify-content: center;
       }

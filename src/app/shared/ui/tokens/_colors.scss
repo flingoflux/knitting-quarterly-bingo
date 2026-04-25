@@ -21,4 +21,16 @@
 
   // Schatten
   --kq-shadow: 0 12px 28px rgba(96, 58, 30, 0.14);
+
+  // Überschriften
+  --kq-text-heading: #5a2d1a;
+
+  // Status-Zellen (Mini-Grid, Bingo-Erkennung)
+  --kq-done: #145906;
+  --kq-status-cell-border: #d0b08a;
+
+  // Bild-Platzhalter
+  --kq-placeholder-bg: #fff3e4;
+  --kq-placeholder-border: #d0ab86;
+  --kq-placeholder-text: #b08060;
 }

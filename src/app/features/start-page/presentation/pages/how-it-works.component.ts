@@ -4,6 +4,7 @@ import { PageToolbarComponent } from '../../../../shared/ui/organisms/page-toolb
 import { PageContainerComponent } from '../../../../shared/ui/templates/page-container/page-container.component';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
+import { FeatureHeaderComponent } from '../../../../shared/ui/molecules/feature-header/feature-header.component';
 import { BoardViewMode } from '../../../user-settings/domain/board-view-mode';
 import { MANAGE_USER_SETTINGS_IN_PORT } from '../../../user-settings/application/ports/in/manage-user-settings.in-port';
 import { StorageService } from '../../../../core/infrastructure/storage.service';
@@ -12,7 +13,7 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
 @Component({
   selector: 'app-how-to',
   standalone: true,
-  imports: [PageToolbarComponent, PageContainerComponent, IconComponent, ButtonComponent],
+  imports: [PageToolbarComponent, PageContainerComponent, IconComponent, ButtonComponent, FeatureHeaderComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -26,10 +27,11 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
       </kq-page-toolbar>
 
       <div class="feature-shell">
-        <div class="how-it-works-header">
-          <p class="eyebrow">How-to</p>
-          <h1 data-testid="page-howto-title">Wie funktioniert Knitting Quarterly Bingo?</h1>
-        </div>
+        <kq-feature-header
+          eyebrow="How-to"
+          title="Wie funktioniert Knitting Quarterly Bingo?"
+          titleTestId="page-howto-title"
+        />
 
         <div class="content">
         <section class="section">
@@ -153,27 +155,6 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
       width: 100%;
       margin: 0;
       padding: 1.4rem 1.1rem 2rem;
-    }
-
-    .how-it-works-header {
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-
-    .eyebrow {
-      margin: 0 0 0.5rem 0;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #c7936a;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 2rem;
-      color: #7b371f;
-      font-weight: 700;
     }
 
     .content {

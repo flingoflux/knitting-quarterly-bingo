@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { ImageChangedEvent } from '../../../quarterly-plan/presentation/components/card-detail-dialog.component';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
+import { DialogShellComponent } from '../../../../shared/ui/organisms/dialog-shell/dialog-shell.component';
 
 interface CropState {
   imgSrc: string;
@@ -22,15 +23,9 @@ interface CropState {
 @Component({
   selector: 'app-project-comparison-dialog',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, DialogShellComponent],
   template: `
-    <dialog #dialog (click)="onDialogClick($event)">
-      <div class="panel">
-        <button class="close-btn" type="button" (click)="close()" aria-label="Dialog schließen">
-          <kq-icon name="close" [size]="18" [strokeWidth]="2.5"/>
-        </button>
-
-        <h3 class="card-title">{{ title }}</h3>
+    <kq-dialog-shell #shell [title]="title" maxWidth="min(94vw, 680px)" (closed)="onShellClosed()">
 
         <!-- Crop-Modus -->
         <ng-container *ngIf="cropState">
@@ -101,61 +96,9 @@ interface CropState {
 
           </div>
         </ng-container>
-      </div>
-    </dialog>
+    </kq-dialog-shell>
   `,
   styles: [`
-    dialog {
-      border: none;
-      border-radius: 20px;
-      padding: 0;
-      background: transparent;
-      max-width: min(94vw, 680px);
-      width: 100%;
-      box-shadow: 0 24px 56px rgba(60, 30, 10, 0.28);
-    }
-    dialog::backdrop {
-      background: rgba(40, 20, 8, 0.45);
-      backdrop-filter: blur(2px);
-    }
-    .panel {
-      background: #fffaf2;
-      border-radius: 20px;
-      padding: 2rem 1.6rem 1.6rem;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      gap: 1.2rem;
-    }
-    .close-btn {
-      position: absolute;
-      top: 0.9rem;
-      right: 0.9rem;
-      border: 1px solid #d9b998;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      background: #fff4e6;
-      color: #7b3b22;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.18s, color 0.18s;
-    }
-    .close-btn:hover {
-      background: #ffe8cd;
-      color: #532615;
-    }
-    .card-title {
-      margin: 0;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: #4a2d1c;
-      text-align: center;
-      padding-right: 2rem;
-      text-wrap: balance;
-    }
     .comparison-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -334,7 +277,7 @@ interface CropState {
   `],
 })
 export class ProjectComparisonDialogComponent {
-  @ViewChild('dialog') private readonly dialogEl!: ElementRef<HTMLDialogElement>;
+  @ViewChild('shell') private readonly shell!: DialogShellComponent;
   @ViewChild('cropCanvas') private readonly cropCanvasEl?: ElementRef<HTMLCanvasElement>;
 
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
@@ -362,7 +305,7 @@ export class ProjectComparisonDialogComponent {
     this.cropState = null;
     this.loadingDefinition = !!definitionImageId;
     this.loadingGame = !!gameImageId;
-    this.dialogEl.nativeElement.showModal();
+    this.shell.open();
     this.cdr.markForCheck();
 
     const [defUrl, gameUrl] = await Promise.all([
@@ -377,14 +320,11 @@ export class ProjectComparisonDialogComponent {
   }
 
   close(): void {
-    this.cropState = null;
-    this.dialogEl.nativeElement.close();
+    this.shell.close();
   }
 
-  onDialogClick(event: MouseEvent): void {
-    if (event.target === this.dialogEl.nativeElement) {
-      this.close();
-    }
+  onShellClosed(): void {
+    this.cropState = null;
   }
 
   async onFileSelected(event: Event): Promise<void> {

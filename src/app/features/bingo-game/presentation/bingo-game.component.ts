@@ -9,6 +9,8 @@ import { ImageChangedEvent } from '../../quarterly-plan/presentation/components/
 import { ChallengeProgress } from '../domain/bingo-game';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
+import { StatusMiniGridComponent } from '../../../shared/ui/atoms/status-mini-grid/status-mini-grid.component';
+import { FeatureHeaderComponent } from '../../../shared/ui/molecules/feature-header/feature-header.component';
 import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
 import { BoardToolbarComponent } from '../../../shared/ui/organisms/board-toolbar/board-toolbar.component';
 import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
@@ -22,7 +24,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 @Component({
   selector: 'app-bingo-game',
   standalone: true,
-  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent, BoardToolbarComponent, IconComponent, ButtonComponent, PageContainerComponent],
+  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent, BoardToolbarComponent, IconComponent, ButtonComponent, StatusMiniGridComponent, FeatureHeaderComponent, PageContainerComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -43,11 +45,13 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         💡 Du schaust dir das <strong>{{ displayedQuarterId() }}</strong> an. Fortschritt wird hier nicht gespeichert.
       </div>
 
-      <div class="play-bingo-header" [class.compact-header]="viewMode === 'kompakt'">
-        <p class="eyebrow">Knitting Quarterly - Bingo</p>
-        <h2 data-testid="page-bingo-title">Happy crafting</h2>
-        <p class="subtitle">Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen.</p>
-      </div>
+      <kq-feature-header
+        eyebrow="Knitting Quarterly - Bingo"
+        title="Happy crafting"
+        titleTestId="page-bingo-title"
+        subtitle="Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen."
+        [compact]="viewMode === 'kompakt'"
+      />
 
       <kq-board-toolbar
         [mode]="viewMode"
@@ -55,15 +59,11 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         (modeChange)="onModeChange($event)"
         (printClicked)="onPrintClick()"
       >
-        <div class="status-grid" aria-label="Fortschritt">
-          <div
-            *ngFor="let d of completed; let i = index"
-            class="status-cell"
-            [class.done]="d"
-            [class.bingo]="isCellInBingo(i)"
-            [attr.title]="challenges[i]?.name"
-          ></div>
-        </div>
+        <kq-status-mini-grid
+          [completed]="completed"
+          [bingoCells]="bingoCells"
+          [challengeNames]="challengeNames"
+        />
       </kq-board-toolbar>
 
       <app-playable-board
@@ -97,58 +97,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
       font-size: 0.95rem;
       font-weight: 500;
     }
-    .status-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 14px);
-      grid-template-rows: repeat(4, 8px);
-      gap: 3px;
-      margin: 0;
-    }
-    .status-cell {
-      width: 14px;
-      height: 8px;
-      border-radius: 2px;
-      background: #fff;
-      border: 1.5px solid #d0b08a;
-      transition: background 0.2s ease, border-color 0.2s ease;
-    }
-    .status-cell.done {
-      background: #145906;
-      border-color: #145906;
-    }
-    .status-cell.bingo {
-      background: #145906;
-      border-color: #145906;
-    }
-    .play-bingo-header {
-      text-align: center;
-      margin-bottom: 1.1rem;
-      padding: 0.6rem 0.4rem;
-    }
-    .play-bingo-header.compact-header {
-      padding: 0.2rem 0.4rem 0.4rem;
-      margin-bottom: 0.5rem;
-    }
-    .eyebrow {
-      margin: 0;
-      color: #8f3b22;
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      font-weight: 700;
-    }
-    h2 {
-      margin: 0.4rem 0 0;
-      font-size: clamp(1.6rem, 2.6vw, 2.2rem);
-      color: #5a2d1a;
-      text-wrap: balance;
-    }
-    .play-bingo-header .subtitle {
-      color: #6c5445;
-      font-size: 1.03rem;
-      max-width: 44rem;
-      margin: 0.55rem auto 0;
-    }
+
     @media (max-width: 640px) {
       .feature-shell {
         padding: 1rem 0.75rem 1.4rem;
@@ -214,8 +163,8 @@ export class BingoGameComponent implements OnInit {
     return this.state.bingoCells();
   }
 
-  isCellInBingo(i: number): boolean {
-    return this.state.bingoCells().has(i);
+  get challengeNames(): string[] {
+    return this.challenges.map(c => c.name);
   }
 
   goHome() {
