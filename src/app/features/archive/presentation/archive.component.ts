@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SHOW_ARCHIVE_OVERVIEW_IN_PORT } from '../application/ports/in/show-archive-overview.in-port';
 import { ArchiveEntry } from '../domain/archive-entry';
-import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
-import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
-import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
-import { StatusMiniGridComponent } from '../../../shared/ui/atoms/status-mini-grid/status-mini-grid.component';
-import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
-import { FeatureHeaderComponent } from '../../../shared/ui/molecules/feature-header/feature-header.component';
+import { PageToolbarComponent } from '../../../shared/ui';
+import { ButtonComponent } from '../../../shared/ui';
+import { IconComponent } from '../../../shared/ui';
+import { StatusMiniGridComponent } from '../../../shared/ui';
+import { PageContainerComponent } from '../../../shared/ui';
+import { FeatureHeaderComponent } from '../../../shared/ui';
 
 @Component({
   selector: 'app-archive',
@@ -86,7 +86,7 @@ import { FeatureHeaderComponent } from '../../../shared/ui/molecules/feature-hea
     .archive-list {
       display: grid;
       gap: 0.75rem;
-      max-width: 52rem;
+      max-width: var(--kq-shell-max-width);
       margin: 0 auto;
     }
 
@@ -123,7 +123,7 @@ import { FeatureHeaderComponent } from '../../../shared/ui/molecules/feature-hea
 
     .empty-state {
       margin: 1rem auto 0;
-      max-width: 52rem;
+      max-width: var(--kq-shell-max-width);
       text-align: center;
       color: var(--kq-muted);
     }

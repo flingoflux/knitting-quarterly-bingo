@@ -2,9 +2,8 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject, sign
 import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
-import { MiniCardMobileComponent } from './mini-card-mobile.component';
 import { EditCardMobileComponent } from './edit-card-mobile.component';
-import { MobileFabComponent } from '../../../../shared/ui/mobile/atoms/fab/fab-mobile.component';
+import { MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent } from '../../../../shared/ui';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -14,20 +13,20 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-mobile-bingo-board',
   standalone: true,
-  imports: [CommonModule, MiniCardMobileComponent, EditCardMobileComponent, MobileFabComponent],
+  imports: [CommonModule, EditCardMobileComponent, MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent],
   template: `
     <!-- Read-only Grid (4×4 Miniatur-Polaroids) -->
     @if (!editMode()) {
-      <div class="mini-grid">
+      <kq-board-grid-mobile>
         @for (p of challenges; track p.name; let i = $index) {
-          <app-mobile-mini-card
+          <kq-challenge-card-mobile
             [name]="p.name"
             [imageUrl]="getImage(p.progressImageId ?? p.planningImageId)"
             [done]="completed[i]"
             [inBingo]="isCellInBingo(i)"
           />
         }
-      </div>
+      </kq-board-grid-mobile>
     }
 
     <!-- Edit-Liste (eine Karte pro Zeile) -->
@@ -57,13 +56,6 @@ interface CardDetailOpenedEvent {
     :host {
       display: block;
       position: relative;
-    }
-
-    .mini-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.4rem;
-      margin: 0 auto;
     }
 
     .edit-list {

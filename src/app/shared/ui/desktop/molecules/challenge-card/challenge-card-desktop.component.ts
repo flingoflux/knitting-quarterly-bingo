@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IconComponent } from '../../../atoms/icon/icon.component';
-import { BadgeComponent } from '../../../atoms/badge/badge.component';
-import { CardPhotoComponent } from '../../../atoms/card-photo/card-photo.component';
+import { IconComponent } from '../../../common/atoms/icon/icon.component';
+import { BadgeComponent } from '../../../common/atoms/badge/badge.component';
+import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.component';
 
 export type KqCardMode = 'polaroid' | 'kompakt';
 
@@ -22,7 +22,7 @@ export type KqCardMode = 'polaroid' | 'kompakt';
  *  - cameraClicked: Kamera-Button wurde geklickt
  */
 @Component({
-  selector: 'kq-challenge-card',
+  selector: 'kq-challenge-card-desktop',
   standalone: true,
   imports: [CommonModule, IconComponent, BadgeComponent, CardPhotoComponent],
   template: `
@@ -83,16 +83,16 @@ export type KqCardMode = 'polaroid' | 'kompakt';
       box-shadow: 0 6px 14px rgba(60, 30, 10, 0.18), 0 16px 32px rgba(60, 30, 10, 0.13);
     }
     .card--bingo {
-      box-shadow: 0 0 0 3px #145906, 0 8px 22px rgba(20, 89, 6, 0.22);
+      box-shadow: 0 0 0 3px var(--kq-done), 0 8px 22px rgba(20, 89, 6, 0.22);
     }
     .card--bingo:hover {
-      box-shadow: 0 0 0 3px #145906, 0 8px 22px rgba(20, 89, 6, 0.22);
+      box-shadow: 0 0 0 3px var(--kq-done), 0 8px 22px rgba(20, 89, 6, 0.22);
     }
 
     /* ── Foto-Bereich ── */
     .card__photo {
       position: relative;
-      background: #f2e8d8;
+      background: var(--kq-photo-bg);
       overflow: hidden;
       flex-shrink: 0;
     }
@@ -112,7 +112,7 @@ export type KqCardMode = 'polaroid' | 'kompakt';
       background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
-      color: #5a2d1a;
+      color: var(--kq-text-heading);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -140,7 +140,7 @@ export type KqCardMode = 'polaroid' | 'kompakt';
     }
     .card__title {
       font-weight: 700;
-      color: #4a2d1c;
+      color: var(--kq-text-warm);
       line-height: 1.25;
       text-wrap: balance;
     }

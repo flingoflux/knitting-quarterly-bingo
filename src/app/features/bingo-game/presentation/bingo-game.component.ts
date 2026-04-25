@@ -5,13 +5,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PLAY_BINGO_IN_PORT } from '../application/ports/in/play-bingo.in-port';
 import { BingoGameDesktopComponent } from './desktop/bingo-game-desktop.component';
 import { BingoBoardMobileComponent } from './mobile/bingo-board-mobile.component';
-import { ProjectComparisonDialogComponent } from './components/project-comparison-dialog.component';
-import { ImageChangedEvent } from '../../quarterly-plan/presentation/components/card-detail-dialog.component';
+import { ProjectComparisonDialogComponent } from './common/project-comparison-dialog.component';
+import { ImageChangedEvent } from '../../quarterly-plan/presentation/common/card-detail-dialog.component';
 import { ChallengeProgress } from '../domain/bingo-game';
-import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
-import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
-import { PageToolbarComponent } from '../../../shared/ui/organisms/page-toolbar/page-toolbar.component';
-import { PageContainerComponent } from '../../../shared/ui/templates/page-container/page-container.component';
+import { IconComponent } from '../../../shared/ui';
+import { ButtonComponent } from '../../../shared/ui';
+import { PageToolbarComponent } from '../../../shared/ui';
+import { PageContainerComponent } from '../../../shared/ui';
 import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
 import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
 import { MANAGE_USER_SETTINGS_IN_PORT } from '../../user-settings/application/ports/in/manage-user-settings.in-port';
@@ -69,12 +69,12 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
   styles: [
     `
     .preview-banner {
-      background: #fff7ec;
+      background: var(--kq-bg-warm);
       border: 1px solid #c79362;
       border-radius: 0.5rem;
       padding: 0.9rem 1.1rem;
       margin-bottom: 1.1rem;
-      color: #5a2d1a;
+      color: var(--kq-text-heading);
       font-size: 0.95rem;
       font-weight: 500;
     }

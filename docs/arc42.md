@@ -916,14 +916,16 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 - Der View-Mode wird **immer als Suffix** im Dateinamen angehängt: `*-desktop`, `*-mobile`, `*-print`.
 - View-mode-spezifische Komponenten werden in eigene **Unterordner** des gleichen Namens verschoben: `desktop/`, `mobile/`, `print/`.
 - Die **Klassenbezeichnung** folgt demselben Muster: Suffix `Desktop`, `Mobile` oder `Print` am Ende, z. B. `BingoBoardMobileComponent`, `BoardGridDesktopComponent`.
-- **Selektoren werden nicht umbenannt** – sie stellen HTML-API-Verträge dar und würden alle Templates betreffen.
-- View-mode-agnostische Komponenten verbleiben in `components/` ohne Modussuffix.
+- **Selektoren** folgen demselben Muster: Suffix `-desktop`, `-mobile` oder `-print` am Ende, z. B. `kq-board-grid-desktop`, `kq-challenge-card-mobile`. Geteilte Komponenten in `shared/ui/` verwenden dieses Schema konsequent; Feature-interne Komponenten (`app-*`) behalten ihren Selektor, solange sie nicht in `shared/ui/` leben.
+- View-mode-agnostische Komponenten verbleiben in `common/` ohne Modussuffix.
+- Alle geteilten UI-Komponenten leben in `src/app/shared/ui/` strukturiert nach Modus (`common/`, `desktop/`, `mobile/`, `print/`) und werden über Barrel-Exports (`index.ts`) bereitgestellt.
 
 **Konsequenzen:**
 
 - Die Ordnerstruktur spiegelt die view-mode-Zugehörigkeit direkt wider: ein `ls desktop/` zeigt alle Desktop-Komponenten eines Features.
-- Neue view-mode-spezifische Komponenten müssen zwingend dem Muster `<fachname>-<modus>.component.ts` im passenden Unterordner folgen.
+- Neue view-mode-spezifische Komponenten in `shared/ui/` müssen zwingend dem Muster `<fachname>-<modus>.component.ts` im passenden Unterordner folgen und den Modus-Suffix im Selektor tragen.
 - Imports auf umbenannte Klassen müssen bei Refactorings entsprechend nachgezogen werden.
+- Imports aus `shared/ui/` erfolgen ausschließlich über den zentralen Barrel `../../../../shared/ui`.
 
 ---
 

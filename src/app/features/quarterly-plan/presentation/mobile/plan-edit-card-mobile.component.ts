@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
-import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-photo.component';
+import { IconComponent } from '../../../../shared/ui';
+import { CardPhotoComponent } from '../../../../shared/ui';
 
 @Component({
   selector: 'app-plan-mobile-edit-card',
@@ -72,7 +72,7 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
       align-items: center;
       gap: 0.75rem;
       background: #fff;
-      border: 1px solid #d8cec2;
+      border: 1px solid var(--kq-card-border-soft);
       border-radius: 8px;
       padding: 0.6rem;
       min-height: 8rem;
@@ -84,7 +84,7 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
       width: 108px;
       height: 108px;
       flex-shrink: 0;
-      background: #f2e8d8;
+      background: var(--kq-photo-bg);
       border-radius: 6px;
       overflow: hidden;
       cursor: pointer;
@@ -104,7 +104,7 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #7b3b22;
+      color: var(--kq-primary-dark);
       border-top-left-radius: 4px;
     }
 
@@ -116,7 +116,7 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
     .edit-card__name {
       font-size: 1rem;
       font-weight: 600;
-      color: #3f2a1d;
+      color: var(--kq-text);
       line-height: 1.3;
       display: block;
       overflow: hidden;
@@ -127,11 +127,11 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
 
     .edit-card__input {
       width: 100%;
-      border: 1px solid #d0ab86;
+      border: 1px solid var(--kq-placeholder-border);
       border-radius: 6px;
       padding: 0.3rem 0.45rem;
-      background: #fffdf9;
-      color: #3f2a1d;
+      background: var(--kq-bg-ultra-soft);
+      color: var(--kq-text);
       font-weight: 600;
       font-size: 1rem;
       box-sizing: border-box;
@@ -155,7 +155,7 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
       border: 1px solid #e0c8ac;
       border-radius: 6px;
       background: #fffaf4;
-      color: #7b3b22;
+      color: var(--kq-primary-dark);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -169,8 +169,8 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
     }
 
     .icon-btn--active {
-      background: linear-gradient(135deg, #8f3b22 0%, #c46e35 100%);
-      color: #fff7ec;
+      background: linear-gradient(135deg, var(--kq-primary) 0%, var(--kq-primary-2) 100%);
+      color: var(--kq-bg-warm);
       border-color: transparent;
     }
 

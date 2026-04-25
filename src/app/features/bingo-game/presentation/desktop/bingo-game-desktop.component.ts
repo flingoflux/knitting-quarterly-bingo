@@ -1,11 +1,11 @@
 import { Component, EventEmitter, Input, Output, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PLAY_BINGO_IN_PORT } from '../../application/ports/in/play-bingo.in-port';
-import { PlayableBoardComponent } from '../components/playable-board.component';
+import { PlayableBoardComponent } from '../common/playable-board.component';
 import { ChallengeProgress } from '../../domain/bingo-game';
-import { StatusMiniGridComponent } from '../../../../shared/ui/atoms/status-mini-grid/status-mini-grid.component';
-import { FeatureHeaderComponent } from '../../../../shared/ui/molecules/feature-header/feature-header.component';
-import { BoardToolbarDesktopComponent } from '../../../../shared/ui/desktop/organisms/board-toolbar/board-toolbar-desktop.component';
+import { StatusMiniGridComponent } from '../../../../shared/ui';
+import { FeatureHeaderComponent } from '../../../../shared/ui';
+import { BoardToolbarDesktopComponent } from '../../../../shared/ui';
 import { BoardViewMode } from '../../../user-settings/domain/board-view-mode';
 
 interface CardDetailOpenedEvent {
@@ -26,7 +26,7 @@ interface CardDetailOpenedEvent {
       [compact]="viewMode === 'kompakt'"
     />
 
-    <kq-board-toolbar
+    <kq-board-toolbar-desktop
       [mode]="viewMode"
       [showPrintButton]="true"
       (modeChange)="modeChanged.emit($event)"
@@ -37,7 +37,7 @@ interface CardDetailOpenedEvent {
         [bingoCells]="bingoCells"
         [challengeNames]="challengeNames"
       />
-    </kq-board-toolbar>
+    </kq-board-toolbar-desktop>
 
     <app-playable-board
       #playableBoard

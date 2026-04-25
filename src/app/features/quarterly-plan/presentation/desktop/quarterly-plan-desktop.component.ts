@@ -2,12 +2,12 @@ import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewC
 import { CommonModule } from '@angular/common';
 import { PLAN_QUARTERLY_IN_PORT } from '../../application/ports/in/plan-quarterly.in-port';
 import { START_BINGO_FROM_PLAN_IN_PORT } from '../../../bingo-game/application/ports/in/start-bingo-from-plan.in-port';
-import { EditableBoardComponent } from '../components/editable-board.component';
+import { EditableBoardComponent } from '../common/editable-board.component';
 import { Challenge } from '../../../../shared/domain/challenge';
-import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
-import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
-import { FeatureHeaderComponent } from '../../../../shared/ui/molecules/feature-header/feature-header.component';
-import { BoardToolbarDesktopComponent } from '../../../../shared/ui/desktop/organisms/board-toolbar/board-toolbar-desktop.component';
+import { IconComponent } from '../../../../shared/ui';
+import { ButtonComponent } from '../../../../shared/ui';
+import { FeatureHeaderComponent } from '../../../../shared/ui';
+import { BoardToolbarDesktopComponent } from '../../../../shared/ui';
 import { BoardViewMode } from '../../../user-settings/domain/board-view-mode';
 import { shuffleArray } from '../../../../shared/utils/array-utils';
 
@@ -29,7 +29,7 @@ interface CardDetailOpenedEvent {
       [compact]="viewMode === 'kompakt'"
     />
 
-    <kq-board-toolbar
+    <kq-board-toolbar-desktop
       [mode]="viewMode"
       (modeChange)="modeChanged.emit($event)"
     >
@@ -39,7 +39,7 @@ interface CardDetailOpenedEvent {
       <kq-button variant="icon" (click)="startBingo()" title="Neues Bingo mit diesem Plan starten" ariaLabel="Neues Bingo mit diesem Plan starten">
         <kq-icon name="play" [size]="20"/>
       </kq-button>
-    </kq-board-toolbar>
+    </kq-board-toolbar-desktop>
 
     <app-editable-board
       #editableBoard

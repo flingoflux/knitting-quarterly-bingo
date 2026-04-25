@@ -2,9 +2,8 @@ import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, I
 import { CommonModule } from '@angular/common';
 import { Challenge } from '../../../../shared/domain/challenge';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
-import { PlanMiniCardMobileComponent } from './plan-mini-card-mobile.component';
 import { PlanEditCardMobileComponent } from './plan-edit-card-mobile.component';
-import { MobileFabComponent } from '../../../../shared/ui/mobile/atoms/fab/fab-mobile.component';
+import { MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent } from '../../../../shared/ui';
 
 interface ChallengeEditedEvent {
   index: number;
@@ -24,18 +23,18 @@ interface ReorderRequestedEvent {
 @Component({
   selector: 'app-mobile-editable-board',
   standalone: true,
-  imports: [CommonModule, PlanMiniCardMobileComponent, PlanEditCardMobileComponent, MobileFabComponent],
+  imports: [CommonModule, PlanEditCardMobileComponent, MobileFabComponent, ChallengeCardMobileComponent, BoardGridMobileComponent],
   template: `
     <!-- Read-only Mini-Grid (4×4 Polaroids) -->
     @if (!editMode()) {
-      <div class="mini-grid">
+      <kq-board-grid-mobile>
         @for (p of challenges; track p.name; let i = $index) {
-          <app-plan-mobile-mini-card
+          <kq-challenge-card-mobile
             [name]="p.name"
             [imageUrl]="getImage(p.imageId)"
           />
         }
-      </div>
+      </kq-board-grid-mobile>
     }
 
     <!-- Edit-Liste mit Umbenennungs-, Foto- und Sortierfunktion -->
@@ -71,13 +70,6 @@ interface ReorderRequestedEvent {
     :host {
       display: block;
       position: relative;
-    }
-
-    .mini-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.4rem;
-      margin: 0 auto;
     }
 
     .edit-list {

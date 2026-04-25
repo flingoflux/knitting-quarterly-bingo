@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
-import { IconComponent } from '../../../atoms/icon/icon.component';
+import { IconComponent } from '../../../common/atoms/icon/icon.component';
 
 @Component({
-  selector: 'kq-board-toolbar',
+  selector: 'kq-board-toolbar-desktop',
   standalone: true,
   imports: [CommonModule, IconComponent],
   template: `
@@ -53,7 +53,7 @@ import { IconComponent } from '../../../atoms/icon/icon.component';
       align-items: center;
       margin-bottom: 1rem;
       gap: 1rem;
-      max-width: 52rem;
+      max-width: var(--kq-shell-max-width);
       margin-left: auto;
       margin-right: auto;
     }
@@ -71,8 +71,8 @@ import { IconComponent } from '../../../atoms/icon/icon.component';
     }
 
     .action-btn {
-      background: #fff7ec;
-      color: #7b371f;
+      background: var(--kq-bg-warm);
+      color: var(--kq-primary-dark);
       border: 1px solid var(--kq-outline, #c79362);
       border-radius: 999px;
       width: 42px;
@@ -86,8 +86,8 @@ import { IconComponent } from '../../../atoms/icon/icon.component';
 
     .action-btn:hover {
       transform: translateY(-1px);
-      background: #fff0db;
-      box-shadow: 0 8px 14px rgba(96, 58, 30, 0.16);
+      background: var(--kq-bg-highlight);
+      box-shadow: var(--kq-shadow-card);
     }
 
     .action-btn:focus-visible {
@@ -104,8 +104,8 @@ import { IconComponent } from '../../../atoms/icon/icon.component';
     }
 
     .mode-btn {
-      background: #fff7ec;
-      color: #7b371f;
+      background: var(--kq-bg-warm);
+      color: var(--kq-primary-dark);
       border: none;
       cursor: pointer;
       width: 42px;
@@ -121,12 +121,12 @@ import { IconComponent } from '../../../atoms/icon/icon.component';
     }
 
     .mode-btn:hover:not(.active) {
-      background: #fff0db;
+      background: var(--kq-bg-highlight);
     }
 
     .mode-btn.active {
-      background: linear-gradient(135deg, #8f3b22 0%, #c46e35 100%);
-      color: #fff7ec;
+      background: linear-gradient(135deg, var(--kq-primary) 0%, var(--kq-primary-2) 100%);
+      color: var(--kq-bg-warm);
     }
 
     .mode-btn:focus-visible {

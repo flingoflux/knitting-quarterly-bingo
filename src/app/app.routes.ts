@@ -1,4 +1,4 @@
-import { StartPageComponent } from './features/start-page/presentation/pages/start-page.component';
+import { StartPageComponent } from './features/start-page/presentation/start-page.component';
 import { Routes } from '@angular/router';
 import { PLAY_BINGO_IN_PORT } from './features/bingo-game/application/ports/in/play-bingo.in-port';
 import { PlayBingoUseCase } from './features/bingo-game/application/play-bingo.use-case';
@@ -30,7 +30,7 @@ export const routes: Routes = [
       StartBingoFromPlanUseCase,
       { provide: START_BINGO_FROM_PLAN_IN_PORT, useExisting: StartBingoFromPlanUseCase },
     ],
-    loadComponent: () => import('./features/quarter-lifecycle/presentation/pages/quarterly-view-page.component').then(m => m.QuarterlyViewPageComponent),
+    loadComponent: () => import('./features/quarter-lifecycle/presentation/quarterly-view-page.component').then(m => m.QuarterlyViewPageComponent),
   },
   {
     path: 'quarterly-print',
@@ -65,6 +65,6 @@ export const routes: Routes = [
   },
   {
     path: 'how-it-works',
-    loadComponent: () => import('./features/start-page/presentation/pages/how-it-works.component').then(m => m.HowItWorksComponent),
+    loadComponent: () => import('./features/start-page/presentation/how-it-works.component').then(m => m.HowItWorksComponent),
   },
 ];

@@ -5,22 +5,39 @@
   // Hintergründe
   --kq-bg: #f9f1e7;
   --kq-bg-soft: #fff8ef;
+  --kq-bg-warm: #fff7ec;
+  --kq-bg-tint: #fde8df;
+  --kq-bg-highlight: #fff0db;
+  --kq-bg-ultra-soft: #fffdf9;
 
   // Text
   --kq-text: #3f2a1d;
+  --kq-text-warm: #4a2d1c;
   --kq-muted: #6c5445;
+  --kq-muted-warm: #a07850;
 
   // Primärfarben
   --kq-primary: #8f3b22;
   --kq-primary-2: #c46e35;
+  --kq-primary-dark: #7b3b22;
+  --kq-primary-hover: #9b3a22;
 
   // Rahmen & Karten
   --kq-outline: #c79362;
+  --kq-outline-light: #d0ab86;
   --kq-card: #fffaf2;
   --kq-card-border: #d9b998;
+  --kq-card-border-soft: #d8cec2;
+  --kq-border-warm: #d9a088;
+  --kq-border-section: #ead8cb;
+
+  // Foto-Bereich
+  --kq-photo-bg: #f2e8d8;
 
   // Schatten
   --kq-shadow: 0 12px 28px rgba(96, 58, 30, 0.14);
+  --kq-shadow-card: 0 8px 14px rgba(96, 58, 30, 0.16);
+  --kq-shadow-dialog: 0 24px 56px rgba(60, 30, 10, 0.28);
 
   // Überschriften
   --kq-text-heading: #5a2d1a;

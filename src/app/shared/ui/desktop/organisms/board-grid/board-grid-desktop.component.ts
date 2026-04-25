@@ -1,7 +1,7 @@
 import { Component, HostBinding, Input } from '@angular/core';
 
 @Component({
-  selector: 'kq-board-grid',
+  selector: 'kq-board-grid-desktop',
   standalone: true,
   template: `<ng-content />`,
   styles: [`
@@ -12,11 +12,11 @@ import { Component, HostBinding, Input } from '@angular/core';
     }
     :host(.mode-polaroid) {
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      max-width: 52rem;
+      max-width: var(--kq-shell-max-width);
     }
     :host(.mode-kompakt) {
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      max-width: 58rem;
+      max-width: var(--kq-toolbar-max-width-horizontal);
       gap: 0.4rem;
     }
     @media (max-width: 900px) {

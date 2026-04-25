@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BadgeComponent } from '../../../../shared/ui/atoms/badge/badge.component';
-import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
-import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-photo.component';
+import { BadgeComponent } from '../../../../shared/ui';
+import { IconComponent } from '../../../../shared/ui';
+import { CardPhotoComponent } from '../../../../shared/ui';
 
 @Component({
   selector: 'app-mobile-edit-card',
@@ -43,7 +43,7 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
       align-items: center;
       gap: 0.75rem;
       background: #fff;
-      border: 1px solid #d8cec2;
+      border: 1px solid var(--kq-card-border-soft);
       border-radius: 8px;
       padding: 0.6rem;
       min-height: 8rem;
@@ -54,7 +54,7 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
     }
 
     .edit-card:active {
-      background: #fff7ec;
+      background: var(--kq-bg-warm);
     }
 
     .edit-card--done {
@@ -63,8 +63,8 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
     }
 
     .edit-card--bingo {
-      border-color: #145906;
-      box-shadow: 0 0 0 2px #14590633;
+      border-color: var(--kq-done);
+      box-shadow: 0 0 0 2px var(--kq-done)33;
     }
 
     .edit-card__photo {
@@ -72,7 +72,7 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
       width: 108px;
       height: 108px;
       flex-shrink: 0;
-      background: #f2e8d8;
+      background: var(--kq-photo-bg);
       border-radius: 6px;
       overflow: hidden;
       --kq-card-photo-logo-size: 40px;
@@ -90,7 +90,7 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
     .edit-card__name {
       font-weight: 700;
       font-size: 1rem;
-      color: #3f2a1d;
+      color: var(--kq-text);
       line-height: 1.3;
       overflow: hidden;
       display: -webkit-box;
@@ -114,7 +114,7 @@ import { CardPhotoComponent } from '../../../../shared/ui/atoms/card-photo/card-
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #7b3b22;
+      color: var(--kq-primary-dark);
       border-top-left-radius: 4px;
       border: none;
       cursor: pointer;

@@ -4,8 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PLAY_BINGO_IN_PORT } from '../../application/ports/in/play-bingo.in-port';
 import { BoardViewMode, isBoardViewMode } from '../../../user-settings/domain/board-view-mode';
-import { BoardGridPrintComponent } from '../../../../shared/ui/print/organisms/board-grid-print/board-grid-print.component';
-import { ChallengeCardPrintComponent } from './challenge-card-print.component';
+import { BoardGridPrintComponent, ChallengeCardPrintComponent } from '../../../../shared/ui';
 import { IMAGE_REPOSITORY, ImageRepository } from '../../../../shared/ports/image-repository';
 import { KnittingQuarterly, QuarterClock } from '../../../../core/domain';
 
@@ -46,12 +45,12 @@ import { KnittingQuarterly, QuarterClock } from '../../../../core/domain';
     }
 
     .print-view {
-      max-width: 58rem;
+      max-width: var(--kq-toolbar-max-width-horizontal);
       margin: 0 auto;
     }
 
     .print-view.mode-polaroid {
-      max-width: 52rem;
+      max-width: var(--kq-shell-max-width);
     }
 
     .print-view.mode-polaroid kq-print-board-grid {
@@ -90,7 +89,7 @@ import { KnittingQuarterly, QuarterClock } from '../../../../core/domain';
 
     .print-eyebrow {
       margin: 0;
-      color: #8f3b22;
+      color: var(--kq-primary);
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.14em;
@@ -100,7 +99,7 @@ import { KnittingQuarterly, QuarterClock } from '../../../../core/domain';
     h1 {
       margin: 0.35rem 0 0;
       font-size: 1.8rem;
-      color: #5a2d1a;
+      color: var(--kq-text-heading);
     }
 
     .print-subtitle {

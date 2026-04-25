@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { IconComponent } from '../../../atoms/icon/icon.component';
+import { IconComponent } from '../../../common/atoms/icon/icon.component';
 
 /**
  * Atom: Floating Action Button für Mobile-Ansichten.
@@ -30,8 +30,8 @@ import { IconComponent } from '../../../atoms/icon/icon.component';
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #8f3b22 0%, #c46e35 100%);
-      color: #fff7ec;
+      background: linear-gradient(135deg, var(--kq-primary) 0%, var(--kq-primary-2) 100%);
+      color: var(--kq-bg-warm);
       border: none;
       display: flex;
       align-items: center;
@@ -47,7 +47,7 @@ import { IconComponent } from '../../../atoms/icon/icon.component';
     }
 
     .fab--active {
-      background: #5a2d1a;
+      background: var(--kq-text-heading);
     }
   `],
 })
