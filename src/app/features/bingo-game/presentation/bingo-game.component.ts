@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PLAY_BINGO_IN_PORT } from '../application/ports/in/play-bingo.in-port';
 import { PlayableBoardComponent } from './components/playable-board.component';
+import { MobileBingoBoardComponent } from './components/mobile-bingo-board.component';
 import { ProjectComparisonDialogComponent } from './components/project-comparison-dialog.component';
 import { ImageChangedEvent } from '../../quarterly-plan/presentation/components/card-detail-dialog.component';
 import { ChallengeProgress } from '../domain/bingo-game';
@@ -17,6 +18,7 @@ import { PageContainerComponent } from '../../../shared/ui/templates/page-contai
 import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
 import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
 import { MANAGE_USER_SETTINGS_IN_PORT } from '../../user-settings/application/ports/in/manage-user-settings.in-port';
+import { LayoutModeService } from '../../../shared/utils/layout-mode.service';
 
 const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
 const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
@@ -24,7 +26,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 @Component({
   selector: 'app-bingo-game',
   standalone: true,
-  imports: [CommonModule, PlayableBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent, BoardToolbarComponent, IconComponent, ButtonComponent, StatusMiniGridComponent, FeatureHeaderComponent, PageContainerComponent],
+  imports: [CommonModule, PlayableBoardComponent, MobileBingoBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent, BoardToolbarComponent, IconComponent, ButtonComponent, StatusMiniGridComponent, FeatureHeaderComponent, PageContainerComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -53,28 +55,41 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
         [compact]="viewMode === 'kompakt'"
       />
 
-      <kq-board-toolbar
-        [mode]="viewMode"
-        [showPrintButton]="true"
-        (modeChange)="onModeChange($event)"
-        (printClicked)="onPrintClick()"
-      >
-        <kq-status-mini-grid
+      @if (!layoutMode.isMobile()) {
+        <kq-board-toolbar
+          [mode]="viewMode"
+          [showPrintButton]="true"
+          (modeChange)="onModeChange($event)"
+          (printClicked)="onPrintClick()"
+        >
+          <kq-status-mini-grid
+            [completed]="completed"
+            [bingoCells]="bingoCells"
+            [challengeNames]="challengeNames"
+          />
+        </kq-board-toolbar>
+      }
+
+      @if (layoutMode.isMobile()) {
+        <app-mobile-bingo-board
+          #mobileBingoBoard
+          [challenges]="challenges"
           [completed]="completed"
           [bingoCells]="bingoCells"
-          [challengeNames]="challengeNames"
+          (toggled)="onToggle($event)"
+          (cardDetailOpened)="onCardDetailOpen($event)"
         />
-      </kq-board-toolbar>
-
-      <app-playable-board
-        #playableBoard
-        [challenges]="challenges"
-        [completed]="completed"
-        [bingoCells]="bingoCells"
-        [mode]="viewMode"
-        (toggled)="onToggle($event)"
-        (cardDetailOpened)="onCardDetailOpen($event)"
-      ></app-playable-board>
+      } @else {
+        <app-playable-board
+          #playableBoard
+          [challenges]="challenges"
+          [completed]="completed"
+          [bingoCells]="bingoCells"
+          [mode]="viewMode"
+          (toggled)="onToggle($event)"
+          (cardDetailOpened)="onCardDetailOpen($event)"
+        ></app-playable-board>
+      }
 
       <app-project-comparison-dialog #comparisonDialog (imageChanged)="onImageChanged($event)"></app-project-comparison-dialog>
     </kq-page-container>
@@ -110,12 +125,14 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 })
 export class BingoGameComponent implements OnInit {
   @ViewChild('comparisonDialog') private readonly comparisonDialog!: ProjectComparisonDialogComponent;
-  @ViewChild('playableBoard') private readonly playableBoardRef!: PlayableBoardComponent;
+  @ViewChild('playableBoard') private readonly playableBoardRef?: PlayableBoardComponent;
+  @ViewChild('mobileBingoBoard') private readonly mobileBingoBoardRef?: MobileBingoBoardComponent;
   state = inject(PLAY_BINGO_IN_PORT);
   router = inject(Router);
   route = inject(ActivatedRoute);
   private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
   private readonly destroyRef = inject(DestroyRef);
+  readonly layoutMode = inject(LayoutModeService);
 
   readonly PAGE_TOOLBAR_WIDTH_MOBILE = PAGE_TOOLBAR_WIDTH_MOBILE;
   readonly PAGE_TOOLBAR_WIDTH_HORIZONTAL = PAGE_TOOLBAR_WIDTH_HORIZONTAL;
@@ -227,7 +244,8 @@ export class BingoGameComponent implements OnInit {
     if (this._openCardIndex !== null) {
       this.state.persistProgressImage(this._openCardIndex, event.imageId ?? undefined);
     }
-    void this.playableBoardRef.refreshImage(event.imageId);
+    void this.playableBoardRef?.refreshImage(event.imageId);
+    void this.mobileBingoBoardRef?.refreshImage(event.imageId);
   }
 
   private _openCardIndex: number | null = null;
