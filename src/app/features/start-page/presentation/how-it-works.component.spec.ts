@@ -7,7 +7,7 @@ describe('HowItWorksComponent template regression', () => {
     // given
     const componentPath = resolve(
       process.cwd(),
-      'src/app/features/start-page/presentation/how-it-works.component.ts'
+      'src/app/features/start-page/presentation/pages/how-it-works.component.ts'
     // when
     );
     const source = readFileSync(componentPath, 'utf-8');
@@ -20,7 +20,7 @@ describe('HowItWorksComponent template regression', () => {
     // given
     const componentPath = resolve(
       process.cwd(),
-      'src/app/features/start-page/presentation/how-it-works.component.ts'
+      'src/app/features/start-page/presentation/pages/how-it-works.component.ts'
     );
 
     // when

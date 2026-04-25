@@ -67,9 +67,9 @@ import { LayoutModeService } from '../../../../shared/utils/layout-mode.service'
             <div class="phase">
               <div class="phase-name">2. Spielen</div>
               <p>
-                Stricke und hake Challenges ab. Per Klick auf ein Feld markierst du es als erledigt.
-                Per Langklick öffnet sich die Detailansicht, wo du ein Fortschrittsfoto hochladen und
-                mit dem Planungsfoto vergleichen kannst.
+                Stricke und hake Challenges ab. Ein Klick auf ein Feld markiert es als erledigt.
+                Über die Detailansicht kannst du ein Fortschrittsfoto hochladen und mit deinem
+                Planungsfoto vergleichen.
               </p>
             </div>
             <div class="phase">

@@ -65,6 +65,6 @@ export const routes: Routes = [
   },
   {
     path: 'how-it-works',
-    loadComponent: () => import('./features/start-page/presentation/how-it-works.component').then(m => m.HowItWorksComponent),
+    loadComponent: () => import('./features/start-page/presentation/pages/how-it-works.component').then(m => m.HowItWorksComponent),
   },
 ];
