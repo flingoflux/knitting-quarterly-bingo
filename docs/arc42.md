@@ -126,7 +126,8 @@ Namensregel: siehe ADR-005 (Kapitel 9) fuer die verbindliche Benennung von InPor
 | bingo-game | `PlayBingoInPort` | `PlayBingoUseCase` | `LoadBingoProgressOutPort`, `PersistBingoProgressOutPort`, Nutzung von `LoadQuarterlyPlanOutPort` | `LocalStorageBingoGameRepository`; Presentation inkl. `PrintBingoBoardComponent` | `BingoGame`, `ChallengeProgress` |
 | bingo-game (Start) | `StartBingoFromPlanInPort` | `StartBingoFromPlanUseCase` | `LoadQuarterlyPlanOutPort`, `PersistQuarterlyPlanOutPort`, `PersistBingoProgressOutPort` | – (nutzt bestehende Adapter) | QuarterId-Mapping, Cross-Quarter-Persistenz |
 | archive | `ShowArchiveOverviewInPort` | `ShowArchiveOverviewUseCase` | `LoadArchiveEntriesOutPort` | `LocalStorageArchiveRepository` | `ArchiveEntry` |
-| core / quarter-lifecycle | `EnsureQuarterRolloverInPort` | `EnsureQuarterRolloverUseCase` | nutzt aktuell `QUARTERLY_PLAN_READER`/`QUARTERLY_PLAN_WRITER`, `BINGO_GAME_REPOSITORY` und `ARCHIVE_REPOSITORY` (Migration auf OutPorts folgt) | kein eigener Storage-Adapter; nutzt `LocalStorageArchiveRepository` | `QuarterClock`, `QuarterId` |
+| core / quarter-lifecycle | `EnsureQuarterRolloverInPort` | `EnsureQuarterRolloverUseCase` | nutzt aktuell `QUARTERLY_PLAN_READER`/`QUARTERLY_PLAN_WRITER`, `BINGO_GAME_REPOSITORY`, `ARCHIVE_REPOSITORY` und `IMAGE_REPOSITORY` (Migration auf OutPorts folgt) | kein eigener Storage-Adapter; nutzt `LocalStorageArchiveRepository` | `QuarterClock`, `QuarterId` |
+| core / image-cleanup | `CleanupOrphanImagesInPort` | `CleanupOrphanImagesUseCase` | `IMAGE_REPOSITORY`, `QUARTERLY_PLAN_READER`, `BINGO_GAME_REPOSITORY` | `IndexedDbImageRepository` (geliehen) | Bild-UUID-Referenzen |
 | start-page | `ShowQuarterlyProgressInPort` | `ShowQuarterlyProgressUseCase` | `LoadBingoProgressOutPort` (geliehen von bingo-game) | `LocalStorageBingoGameRepository` (geliehen) | Fortschrittsanzeige pro Quartal |
 | user-settings | `ManageUserSettingsInPort` | `ManageUserSettingsUseCase` | `LoadBoardViewModeOutPort`, `PersistBoardViewModeOutPort`, `LoadLayoutModeOutPort`, `PersistLayoutModeOutPort` | `LocalStorageUserSettingsRepository` | Board-Ansicht, Layout-Modus |
 | shared image storage | n/a (derzeit) | n/a (derzeit) | `ImageRepository` | `IndexedDbImageRepository` | Bild-UUID-Referenzen |
@@ -301,6 +302,7 @@ sequenceDiagram
   participant QPW as QUARTERLY_PLAN_WRITER
   participant BGR as BINGO_GAME_REPOSITORY
   participant AR as ARCHIVE_REPOSITORY
+  participant IR as IMAGE_REPOSITORY
   participant LocalStorage
 
   SPC->>RUC: persistQuarterRollover(now)
@@ -315,18 +317,51 @@ sequenceDiagram
     LocalStorage-->>QPR: kein Eintrag
     QPR-->>RUC: Result.err
     RUC->>RUC: previousQuarterId = QuarterId.parse(currentQuarterId).previous()
+    RUC->>QPR: load(previousQuarterId)
+    QPR-->>RUC: plan (oder err)
+    Note over RUC: imageIds aus Plan sammeln (challenge.imageId)
     RUC->>BGR: load(previousQuarterId)
     alt Altes Spiel vorhanden
       BGR-->>RUC: BingoGameProgress
+      Note over RUC: imageIds aus Game sammeln<br/>(planningImageId, progressImageId)
       RUC->>RUC: createArchiveEntry(...)
       RUC->>AR: append(entry)
     end
     RUC->>BGR: clear(previousQuarterId)
+    RUC->>IR: deleteImage(id) [fire-and-forget, für jede gesammelte imageId]
     RUC->>QPW: save(currentQuarterId, defaultPlan)
   end
 ```
 
 **Entscheidung:** Kein separater `QuarterRolloverCursor` nötig – die Abwesenheit eines Boards für das aktuelle Quartal ist die natürliche Invariante dafür, dass ein Rollover noch aussteht.
+
+### Szenario 1c: GC-Scan beim App-Start
+
+Parallel zum Rollover bereinigt der `CleanupOrphanImagesUseCase` Bilder, die nach vorherigen Quartalen ohne Rollover (z. B. direkt gelöschte Challenges) als Waisen in IndexedDB verblieben sind.
+
+```mermaid
+sequenceDiagram
+  participant SPC as StartPageComponent
+  participant CUC as CleanupOrphanImagesUseCase
+  participant QPR as QUARTERLY_PLAN_READER
+  participant BGR as BINGO_GAME_REPOSITORY
+  participant IR as IMAGE_REPOSITORY
+
+  SPC->>CUC: cleanupOrphanImages()
+  Note over CUC: async, fire-and-forget
+  CUC->>CUC: currentQuarterId, nextQuarterId bestimmen
+  CUC->>QPR: load(currentQuarterId)
+  CUC->>QPR: load(nextQuarterId)
+  CUC->>BGR: load(currentQuarterId)
+  CUC->>BGR: load(nextQuarterId)
+  Note over CUC: Alle referenzierten imageIds sammeln
+  CUC->>IR: listAllImageIds()
+  IR-->>CUC: alle gespeicherten IDs
+  CUC->>CUC: orphanIds = stored - referenced
+  CUC->>IR: deleteImage(id) [fire-and-forget, für jede orphanId]
+```
+
+**Scope „aktiv":** current + next quarter. Bilder aus laufendem Spiel und bereits vorgeplantem nächsten Quartal bleiben erhalten.
 
 ### Szenario 2: Plan bearbeiten
 
@@ -842,8 +877,46 @@ classDiagram
 
 Strukturdaten liegen in LocalStorage. Bilddaten liegen in IndexedDB und werden ueber UUIDs referenziert.
 
-### 8.11 Teststrategie (Unit + E2E)
+### 8.11 Bild-Garbage-Collection
 
+Bilder werden als Data-URLs in IndexedDB gespeichert und über UUIDs referenziert. Ohne aktives Cleanup würden Bilder nach dem Quartalsabschluss als Waisen in IndexedDB verbleiben.
+
+**Zweistufiger Ansatz (Hybrid):**
+
+**Stufe 1 – Eager Deletion beim Rollover** (`EnsureQuarterRolloverUseCase`)  
+Beim Quartalswechsel werden alle `imageId`-Werte aus Plan und Game des abgelaufenen Quartals gesammelt und unmittelbar nach dem Archivieren fire-and-forget aus IndexedDB gelöscht. Dies verhindert das Entstehen neuer Waisen.
+
+**Stufe 2 – GC-Scan beim App-Start** (`CleanupOrphanImagesUseCase`)  
+Beim Laden der Startseite wird asynchron ein Scan durchgeführt:
+1. Referenzierte imageIds aus current + next quarter (Plan + Game) werden gesammelt.
+2. `listAllImageIds()` liefert alle aktuell in IndexedDB gespeicherten IDs.
+3. Die Differenz (nicht referenzierte IDs) wird fire-and-forget gelöscht.
+
+**Warum current + next quarter?**  
+Der nächste Quartal kann bereits geplant und mit Inspiriationsbildern befüllt sein. Diese Bilder dürfen nicht als Waisen erkannt werden.
+
+**fire-and-forget:**  
+Beide Stufen blockieren den UI-Thread nicht. Fehler bei `deleteImage()` werden stillschweigend ignoriert (`catch(() => {})`). Das ist bewusst: Bild-Cleanup ist best-effort; ein fehlschlagender Delete ist kein kritischer Fehler.
+
+**`listAllImageIds()` im `ImageRepository`-Port:**  
+Für den GC-Scan wurde der `ImageRepository`-Port um `listAllImageIds(): Promise<string[]>` erweitert. Die IndexedDB-Implementierung nutzt `getAllKeys()` auf dem `card-images` ObjectStore.
+
+```
+Bild-Lebenszyklus:
+
+  Planungsphase          Spielphase              Quartalswechsel
+  ─────────────────────────────────────────────────────────────
+  saveImage(uuid)        updateProgressImage()    deleteImage(uuid)  ← Stufe 1
+  Challenge.imageId=uuid ChallengeProgress        (für alle imageIds
+                         .progressImageId=uuid     aus Plan + Game)
+                                                  
+  App-Start (jederzeit)
+  ──────────────────────
+  CleanupOrphanImagesUseCase  ← Stufe 2
+  listAllImageIds() → Differenz → deleteImage(uuid)
+```
+
+### 8.12 Teststrategie (Unit + E2E)
 Die Testpyramide wird in diesem Projekt wie folgt umgesetzt:
 
 - Unit-Tests mit Vitest (`pnpm test`) fuer Domain- und UseCase-Logik
@@ -915,7 +988,7 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 
 **Kontext:** Bilder (als Data-URLs) können mehrere MB groß sein; LocalStorage hat ein Limit von ~5 MB.  
 **Entscheidung:** Nur UUIDs werden in LocalStorage referenziert; Binärdaten landen in IndexedDB.  
-**Konsequenzen:** Zwei verschiedene Storage-APIs müssen verwaltet werden. Beim Löschen von Challenges müssen referenzierte Bilder-UUIDs nicht zwingend aus IndexedDB entfernt werden (kein referenzielles Delete implementiert – akzeptiertes Tech Debt).
+**Konsequenzen:** Zwei verschiedene Storage-APIs müssen verwaltet werden. Referenzielles Delete ist über einen zweistufigen Garbage-Collection-Mechanismus implementiert (siehe ADR-007 und Abschnitt 8.12).
 
 ### ADR-004: ChallengeProgress als Value Object statt paralleler Arrays
 
@@ -963,9 +1036,26 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 - Imports auf umbenannte Klassen müssen bei Refactorings entsprechend nachgezogen werden.
 - Imports aus `shared/ui/` erfolgen ausschließlich über den zentralen Barrel `../../../../shared/ui`.
 
----
+### ADR-007: Zweistufige Bild-Garbage-Collection
 
-## 10. Qualitätsszenarien
+**Kontext:** Bilder in IndexedDB werden über UUIDs referenziert, die in `Challenge.imageId`, `ChallengeProgress.planningImageId` und `ChallengeProgress.progressImageId` gespeichert sind. Nach einem Quartalswechsel oder beim manuellen Löschen einer Challenge bleiben Bilder ohne Referenz als Waisen zurück. Da IndexedDB kein automatisches referenzielles Delete kennt, muss die App selbst aufräumen.
+
+**Entscheidung:** Hybrider Ansatz mit zwei Stufen:
+
+1. **Eager Deletion beim Rollover** (`EnsureQuarterRolloverUseCase`): Beim Quartalswechsel werden alle imageIds aus Plan und Game des abgelaufenen Quartals sofort fire-and-forget gelöscht. Verhindert das Entstehen neuer Waisen.
+2. **GC-Scan beim App-Start** (`CleanupOrphanImagesUseCase`): Beim Laden der Startseite werden alle gespeicherten IDs gegen die referenzierten IDs (current + next quarter) abgeglichen. Nicht referenzierte IDs werden fire-and-forget gelöscht. Bereinigt auch historisch aufgelaufene Waisen.
+
+Beide Stufen verwenden fire-and-forget (`catch(() => {})`): Cleanup ist best-effort, ein fehlschlagender Delete ist kein kritischer Fehler und soll den Hauptfluss nicht blockieren.
+
+**Konsequenzen:**
+
+- `ImageRepository`-Port erhält `listAllImageIds(): Promise<string[]>` als neue Methode.
+- Der `EnsureQuarterRolloverUseCase` bezieht `IMAGE_REPOSITORY` als zusätzliche Abhängigkeit.
+- `CleanupOrphanImagesUseCase` ist ein neuer UseCase in `core/application` mit `CleanupOrphanImagesInPort`.
+- `StartPageComponent` ruft `cleanupOrphanImages()` im Constructor auf.
+- Scope „aktiv" = current + next quarter. Bilder in zukünftigen Plänen (Vorausplanung) gelten nicht als Waisen.
+
+---
 
 | ID | Szenario | Messung |
 | --- | --- | --- |
@@ -984,7 +1074,6 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 
 | Risiko / Tech Debt | Beschreibung | Schwere |
 | --- | --- | --- |
-| Kein Bild-Garbage-Collection | Gelöschte Challenges hinterlassen Bilder-UUIDs in IndexedDB ohne Referenz | Niedrig |
 | Kein Multi-Device-Sync | Daten sind lokal im Browser; kein Export/Import | Mittel |
 | LocalStorage-Limit | Bei sehr vielen Challenges mit langen Namen könnte das 5 MB-Limit erreicht werden | Niedrig |
 | Kein Dark-Mode | UI hat keinen Dark-Mode-Support | Niedrig |
