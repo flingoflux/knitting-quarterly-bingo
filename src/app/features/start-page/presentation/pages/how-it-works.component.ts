@@ -6,9 +6,11 @@ import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
 import { FeatureHeaderComponent } from '../../../../shared/ui/molecules/feature-header/feature-header.component';
 import { BoardViewMode } from '../../../user-settings/domain/board-view-mode';
+import { LayoutMode } from '../../../user-settings/domain/layout-mode';
 import { MANAGE_USER_SETTINGS_IN_PORT } from '../../../user-settings/application/ports/in/manage-user-settings.in-port';
 import { StorageService } from '../../../../core/infrastructure/storage.service';
 import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexed-db-image-repository.service';
+import { LayoutModeService } from '../../../../shared/utils/layout-mode.service';
 
 @Component({
   selector: 'app-how-to',
@@ -131,6 +133,47 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
               >
                 <span class="mode-option-title"><kq-icon name="horizontal" [size]="16"/>Kompakt</span>
                 <span class="mode-option-copy">Zeigt mehr Felder gleichzeitig für schnellen Überblick.</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="settings-subsection">
+            <h3>Darstellungsmodus</h3>
+            <p class="view-mode-note">
+              Wähle, ob das Board-Layout automatisch nach Bildschirmgröße, immer als Desktop- oder immer als Mobile-Ansicht angezeigt werden soll.
+            </p>
+            <div class="mode-options layout-mode-options" role="group" aria-label="Darstellungsmodus wählen">
+              <button
+                type="button"
+                class="mode-option"
+                [class.active]="layoutMode.layoutMode() === 'auto'"
+                [attr.aria-pressed]="layoutMode.layoutMode() === 'auto'"
+                (click)="onLayoutModeChange('auto')"
+              >
+                <span class="mode-option-title"><kq-icon name="target" [size]="16"/>Auto</span>
+                <span class="mode-option-copy">Smartphone → Mobile, größere Bildschirme → Desktop.</span>
+              </button>
+
+              <button
+                type="button"
+                class="mode-option"
+                [class.active]="layoutMode.layoutMode() === 'desktop'"
+                [attr.aria-pressed]="layoutMode.layoutMode() === 'desktop'"
+                (click)="onLayoutModeChange('desktop')"
+              >
+                <span class="mode-option-title"><kq-icon name="horizontal" [size]="16"/>Desktop</span>
+                <span class="mode-option-copy">Immer die Desktop-Ansicht — auch auf kleinen Screens.</span>
+              </button>
+
+              <button
+                type="button"
+                class="mode-option"
+                [class.active]="layoutMode.layoutMode() === 'mobile'"
+                [attr.aria-pressed]="layoutMode.layoutMode() === 'mobile'"
+                (click)="onLayoutModeChange('mobile')"
+              >
+                <span class="mode-option-title"><kq-icon name="polaroid" [size]="16"/>Mobile</span>
+                <span class="mode-option-copy">Immer die Mobile-Ansicht — auch auf Desktop.</span>
               </button>
             </div>
           </div>
@@ -396,6 +439,7 @@ export class HowItWorksComponent {
   private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
   private readonly storage = inject(StorageService);
   private readonly imageRepo = inject(IndexedDbImageRepository);
+  readonly layoutMode = inject(LayoutModeService);
 
   readonly pageToolbarWidth = '52rem';
   viewMode: BoardViewMode = this.userSettings.loadBoardViewMode();
@@ -415,6 +459,10 @@ export class HowItWorksComponent {
   onModeChange(mode: BoardViewMode): void {
     this.viewMode = mode;
     this.userSettings.persistBoardViewMode(mode);
+  }
+
+  onLayoutModeChange(mode: LayoutMode): void {
+    this.layoutMode.persistLayoutMode(mode);
   }
 
   async clearAllData(): Promise<void> {
