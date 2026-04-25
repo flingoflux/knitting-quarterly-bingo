@@ -95,8 +95,7 @@ import { LayoutModeService } from '../../../../shared/utils/layout-mode.service'
           <p class="settings-intro">
             Passe die Board-Ansicht an oder setze lokale Daten zurück.
           </p>
-
-          <div class="settings-subsection">
+          <div class="settings-subsection board-view-subsection">
             <h3>Board-Ansicht</h3>
             <p class="view-mode-note">
               Wähle einen Modus. Er gilt sofort für Spielen und Planen.
@@ -407,6 +406,10 @@ import { LayoutModeService } from '../../../../shared/utils/layout-mode.service'
 
       .content {
         padding: 1.5rem;
+      }
+
+      .board-view-subsection {
+        display: none;
       }
 
       .mode-options {
