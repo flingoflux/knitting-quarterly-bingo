@@ -32,7 +32,7 @@ export const routes: Routes = [
       PlayBingoUseCase,
       { provide: PLAY_BINGO_IN_PORT, useExisting: PlayBingoUseCase },
     ],
-    loadComponent: () => import('./features/bingo-game/presentation/print-bingo-board.component').then(m => m.PrintBingoBoardComponent),
+    loadComponent: () => import('./features/bingo-game/presentation/print/bingo-board-print.component').then(m => m.BingoBoardPrintComponent),
   },
   {
     path: 'quarterly/print',

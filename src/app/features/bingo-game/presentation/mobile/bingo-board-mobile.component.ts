@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
-import { MobileMiniCardComponent } from './mobile-mini-card.component';
-import { MobileEditCardComponent } from './mobile-edit-card.component';
+import { MiniCardMobileComponent } from './mini-card-mobile.component';
+import { EditCardMobileComponent } from './edit-card-mobile.component';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -14,7 +14,7 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-mobile-bingo-board',
   standalone: true,
-  imports: [CommonModule, IconComponent, MobileMiniCardComponent, MobileEditCardComponent],
+  imports: [CommonModule, IconComponent, MiniCardMobileComponent, EditCardMobileComponent],
   template: `
     <!-- Read-only Grid (4×4 Miniatur-Polaroids) -->
     @if (!editMode()) {
@@ -107,7 +107,7 @@ interface CardDetailOpenedEvent {
     }
   `],
 })
-export class MobileBingoBoardComponent {
+export class BingoBoardMobileComponent {
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
   private readonly cdr = inject(ChangeDetectorRef);
 

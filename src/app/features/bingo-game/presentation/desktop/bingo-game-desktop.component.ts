@@ -1,12 +1,12 @@
 import { Component, EventEmitter, Input, Output, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PLAY_BINGO_IN_PORT } from '../application/ports/in/play-bingo.in-port';
-import { PlayableBoardComponent } from './components/playable-board.component';
-import { ChallengeProgress } from '../domain/bingo-game';
-import { StatusMiniGridComponent } from '../../../shared/ui/atoms/status-mini-grid/status-mini-grid.component';
-import { FeatureHeaderComponent } from '../../../shared/ui/molecules/feature-header/feature-header.component';
-import { BoardToolbarComponent } from '../../../shared/ui/desktop/organisms/board-toolbar/board-toolbar.component';
-import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
+import { PLAY_BINGO_IN_PORT } from '../../application/ports/in/play-bingo.in-port';
+import { PlayableBoardComponent } from '../components/playable-board.component';
+import { ChallengeProgress } from '../../domain/bingo-game';
+import { StatusMiniGridComponent } from '../../../../shared/ui/atoms/status-mini-grid/status-mini-grid.component';
+import { FeatureHeaderComponent } from '../../../../shared/ui/molecules/feature-header/feature-header.component';
+import { BoardToolbarDesktopComponent } from '../../../../shared/ui/desktop/organisms/board-toolbar/board-toolbar-desktop.component';
+import { BoardViewMode } from '../../../user-settings/domain/board-view-mode';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -16,7 +16,7 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-bingo-game-desktop',
   standalone: true,
-  imports: [CommonModule, PlayableBoardComponent, BoardToolbarComponent, StatusMiniGridComponent, FeatureHeaderComponent],
+  imports: [CommonModule, PlayableBoardComponent, BoardToolbarDesktopComponent, StatusMiniGridComponent, FeatureHeaderComponent],
   template: `
     <kq-feature-header
       eyebrow="Knitting Quarterly - Bingo"

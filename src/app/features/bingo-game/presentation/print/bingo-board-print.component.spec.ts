@@ -2,10 +2,10 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-describe('PrintBingoBoardComponent regression', () => {
+describe('BingoBoardPrintComponent regression', () => {
   it('should map query mode via isBoardViewMode with polaroid fallback', () => {
     const source = readFileSync(
-      resolve(process.cwd(), 'src/app/features/bingo-game/presentation/print-bingo-board.component.ts'),
+      resolve(process.cwd(), 'src/app/features/bingo-game/presentation/print/bingo-board-print.component.ts'),
       'utf-8'
     );
 
@@ -14,7 +14,7 @@ describe('PrintBingoBoardComponent regression', () => {
 
   it('should use landscape orientation for kompakt and portrait otherwise', () => {
     const source = readFileSync(
-      resolve(process.cwd(), 'src/app/features/bingo-game/presentation/print-bingo-board.component.ts'),
+      resolve(process.cwd(), 'src/app/features/bingo-game/presentation/print/bingo-board-print.component.ts'),
       'utf-8'
     );
 
@@ -24,7 +24,7 @@ describe('PrintBingoBoardComponent regression', () => {
 
   it('should clean up orientation style after print', () => {
     const source = readFileSync(
-      resolve(process.cwd(), 'src/app/features/bingo-game/presentation/print-bingo-board.component.ts'),
+      resolve(process.cwd(), 'src/app/features/bingo-game/presentation/print/bingo-board-print.component.ts'),
       'utf-8'
     );
 

@@ -2,8 +2,8 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } fro
 import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
-import { ChallengeCardComponent } from '../../../../shared/ui/desktop/molecules/challenge-card/challenge-card.component';
-import { BoardGridComponent } from '../../../../shared/ui/desktop/organisms/board-grid/board-grid.component';
+import { ChallengeCardDesktopComponent } from '../../../../shared/ui/desktop/molecules/challenge-card/challenge-card-desktop.component';
+import { BoardGridDesktopComponent } from '../../../../shared/ui/desktop/organisms/board-grid/board-grid-desktop.component';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -13,7 +13,7 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-playable-board',
   standalone: true,
-  imports: [CommonModule, ChallengeCardComponent, BoardGridComponent],
+  imports: [CommonModule, ChallengeCardDesktopComponent, BoardGridDesktopComponent],
   template: `
     <kq-board-grid [mode]="mode">
       <kq-challenge-card

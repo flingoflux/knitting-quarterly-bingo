@@ -3,8 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PLAN_QUARTERLY_IN_PORT } from '../application/ports/in/plan-quarterly.in-port';
-import { QuarterlyPlanDesktopComponent } from './quarterly-plan-desktop.component';
-import { MobileEditableBoardComponent } from './components/mobile-editable-board.component';
+import { QuarterlyPlanDesktopComponent } from './desktop/quarterly-plan-desktop.component';
+import { EditableBoardMobileComponent } from './mobile/editable-board-mobile.component';
 import { CardDetailDialogComponent, ImageChangedEvent } from './components/card-detail-dialog.component';
 import { Challenge } from '../../../shared/domain/challenge';
 import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
@@ -22,7 +22,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 @Component({
   selector: 'app-quarterly-plan',
   standalone: true,
-  imports: [CommonModule, QuarterlyPlanDesktopComponent, MobileEditableBoardComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent, PageContainerComponent],
+  imports: [CommonModule, QuarterlyPlanDesktopComponent, EditableBoardMobileComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent, PageContainerComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -72,7 +72,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 export class QuarterlyPlanComponent implements OnInit {
   @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
   @ViewChild('desktopView') private readonly desktopViewRef?: QuarterlyPlanDesktopComponent;
-  @ViewChild('mobileEditableBoard') private readonly mobileEditableBoardRef?: MobileEditableBoardComponent;
+  @ViewChild('mobileEditableBoard') private readonly mobileEditableBoardRef?: EditableBoardMobileComponent;
 
   private readonly state = inject(PLAN_QUARTERLY_IN_PORT);
   private readonly router = inject(Router);

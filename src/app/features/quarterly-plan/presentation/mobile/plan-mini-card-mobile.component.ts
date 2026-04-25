@@ -67,7 +67,7 @@ import { CommonModule } from '@angular/common';
     }
   `],
 })
-export class PlanMobileMiniCardComponent {
+export class PlanMiniCardMobileComponent {
   @Input({ required: true }) name!: string;
   @Input() imageUrl: string | null = null;
 }

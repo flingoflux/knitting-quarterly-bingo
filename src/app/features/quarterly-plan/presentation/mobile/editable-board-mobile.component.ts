@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Challenge } from '../../../../shared/domain/challenge';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
-import { PlanMobileMiniCardComponent } from './plan-mobile-mini-card.component';
-import { PlanMobileEditCardComponent } from './plan-mobile-edit-card.component';
+import { PlanMiniCardMobileComponent } from './plan-mini-card-mobile.component';
+import { PlanEditCardMobileComponent } from './plan-edit-card-mobile.component';
 
 interface ChallengeEditedEvent {
   index: number;
@@ -24,7 +24,7 @@ interface ReorderRequestedEvent {
 @Component({
   selector: 'app-mobile-editable-board',
   standalone: true,
-  imports: [CommonModule, IconComponent, PlanMobileMiniCardComponent, PlanMobileEditCardComponent],
+  imports: [CommonModule, IconComponent, PlanMiniCardMobileComponent, PlanEditCardMobileComponent],
   template: `
     <!-- Read-only Mini-Grid (4×4 Polaroids) -->
     @if (!editMode()) {
@@ -121,7 +121,7 @@ interface ReorderRequestedEvent {
     }
   `],
 })
-export class MobileEditableBoardComponent {
+export class EditableBoardMobileComponent {
   private readonly el = inject(ElementRef);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);

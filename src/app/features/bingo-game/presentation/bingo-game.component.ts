@@ -3,8 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PLAY_BINGO_IN_PORT } from '../application/ports/in/play-bingo.in-port';
-import { BingoGameDesktopComponent } from './bingo-game-desktop.component';
-import { MobileBingoBoardComponent } from './components/mobile-bingo-board.component';
+import { BingoGameDesktopComponent } from './desktop/bingo-game-desktop.component';
+import { BingoBoardMobileComponent } from './mobile/bingo-board-mobile.component';
 import { ProjectComparisonDialogComponent } from './components/project-comparison-dialog.component';
 import { ImageChangedEvent } from '../../quarterly-plan/presentation/components/card-detail-dialog.component';
 import { ChallengeProgress } from '../domain/bingo-game';
@@ -23,7 +23,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 @Component({
   selector: 'app-bingo-game',
   standalone: true,
-  imports: [CommonModule, BingoGameDesktopComponent, MobileBingoBoardComponent, ProjectComparisonDialogComponent, PageToolbarComponent, IconComponent, ButtonComponent, PageContainerComponent],
+  imports: [CommonModule, BingoGameDesktopComponent, BingoBoardMobileComponent, ProjectComparisonDialogComponent, PageToolbarComponent, IconComponent, ButtonComponent, PageContainerComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -89,7 +89,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 export class BingoGameComponent implements OnInit {
   @ViewChild('comparisonDialog') private readonly comparisonDialog!: ProjectComparisonDialogComponent;
   @ViewChild('desktopView') private readonly desktopViewRef?: BingoGameDesktopComponent;
-  @ViewChild('mobileBingoBoard') private readonly mobileBingoBoardRef?: MobileBingoBoardComponent;
+  @ViewChild('mobileBingoBoard') private readonly mobileBingoBoardRef?: BingoBoardMobileComponent;
 
   private readonly state = inject(PLAY_BINGO_IN_PORT);
   private readonly router = inject(Router);

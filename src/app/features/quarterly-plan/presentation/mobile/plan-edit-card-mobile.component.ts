@@ -200,7 +200,7 @@ import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
     }
   `],
 })
-export class PlanMobileEditCardComponent {
+export class PlanEditCardMobileComponent {
   @Input({ required: true }) name!: string;
   @Input() imageUrl: string | null = null;
   @Input() isEditing = false;

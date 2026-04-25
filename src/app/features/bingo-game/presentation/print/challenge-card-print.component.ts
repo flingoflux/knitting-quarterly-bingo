@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { KqCardMode } from '../../../shared/ui/desktop/molecules/challenge-card/challenge-card.component';
-import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
+import { KqCardMode } from '../../../../shared/ui/desktop/molecules/challenge-card/challenge-card-desktop.component';
+import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
 
 /**
  * Druckoptimierte Bingo-Karte.
@@ -181,7 +181,7 @@ import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
     }
   `],
 })
-export class PrintChallengeCardComponent {
+export class ChallengeCardPrintComponent {
   @Input({ required: true }) name!: string;
   @Input() imageUrl: string | null = null;
   @Input() mode: KqCardMode = 'polaroid';

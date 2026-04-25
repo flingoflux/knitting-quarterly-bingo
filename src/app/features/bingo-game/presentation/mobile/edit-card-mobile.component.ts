@@ -143,7 +143,7 @@ import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
     }
   `],
 })
-export class MobileEditCardComponent {
+export class EditCardMobileComponent {
   @Input({ required: true }) name!: string;
   @Input() imageUrl: string | null = null;
   @Input() done = false;

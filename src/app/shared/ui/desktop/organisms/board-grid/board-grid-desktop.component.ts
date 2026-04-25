@@ -33,7 +33,7 @@ import { Component, HostBinding, Input } from '@angular/core';
     }
   `]
 })
-export class BoardGridComponent {
+export class BoardGridDesktopComponent {
   @Input() set mode(value: 'polaroid' | 'kompakt') {
     this._mode = value;
   }

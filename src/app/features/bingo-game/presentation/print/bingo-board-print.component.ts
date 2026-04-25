@@ -2,17 +2,17 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, HostListener, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { PLAY_BINGO_IN_PORT } from '../application/ports/in/play-bingo.in-port';
-import { BoardViewMode, isBoardViewMode } from '../../user-settings/domain/board-view-mode';
-import { PrintBoardGridComponent } from '../../../shared/ui/print/organisms/print-board-grid/print-board-grid.component';
-import { PrintChallengeCardComponent } from './print-challenge-card.component';
-import { IMAGE_REPOSITORY, ImageRepository } from '../../../shared/ports/image-repository';
-import { KnittingQuarterly, QuarterClock } from '../../../core/domain';
+import { PLAY_BINGO_IN_PORT } from '../../application/ports/in/play-bingo.in-port';
+import { BoardViewMode, isBoardViewMode } from '../../../user-settings/domain/board-view-mode';
+import { BoardGridPrintComponent } from '../../../../shared/ui/print/organisms/board-grid-print/board-grid-print.component';
+import { ChallengeCardPrintComponent } from './challenge-card-print.component';
+import { IMAGE_REPOSITORY, ImageRepository } from '../../../../shared/ports/image-repository';
+import { KnittingQuarterly, QuarterClock } from '../../../../core/domain';
 
 @Component({
   selector: 'app-print-bingo-board',
   standalone: true,
-  imports: [CommonModule, PrintBoardGridComponent, PrintChallengeCardComponent],
+  imports: [CommonModule, BoardGridPrintComponent, ChallengeCardPrintComponent],
   template: `
     <main class="print-view" [class.mode-kompakt]="mode() === 'kompakt'" [class.mode-polaroid]="mode() === 'polaroid'">
       <header class="print-header">
@@ -152,7 +152,7 @@ import { KnittingQuarterly, QuarterClock } from '../../../core/domain';
     }
   `],
 })
-export class PrintBingoBoardComponent {
+export class BingoBoardPrintComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly state = inject(PLAY_BINGO_IN_PORT);
   private readonly quarterClock = new QuarterClock();

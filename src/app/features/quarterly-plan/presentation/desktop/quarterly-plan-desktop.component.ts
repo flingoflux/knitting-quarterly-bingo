@@ -1,15 +1,15 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { PLAN_QUARTERLY_IN_PORT } from '../application/ports/in/plan-quarterly.in-port';
-import { START_BINGO_FROM_PLAN_IN_PORT } from '../../bingo-game/application/ports/in/start-bingo-from-plan.in-port';
-import { EditableBoardComponent } from './components/editable-board.component';
-import { Challenge } from '../../../shared/domain/challenge';
-import { IconComponent } from '../../../shared/ui/atoms/icon/icon.component';
-import { ButtonComponent } from '../../../shared/ui/atoms/button/button.component';
-import { FeatureHeaderComponent } from '../../../shared/ui/molecules/feature-header/feature-header.component';
-import { BoardToolbarComponent } from '../../../shared/ui/desktop/organisms/board-toolbar/board-toolbar.component';
-import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
-import { shuffleArray } from '../../../shared/utils/array-utils';
+import { PLAN_QUARTERLY_IN_PORT } from '../../application/ports/in/plan-quarterly.in-port';
+import { START_BINGO_FROM_PLAN_IN_PORT } from '../../../bingo-game/application/ports/in/start-bingo-from-plan.in-port';
+import { EditableBoardComponent } from '../components/editable-board.component';
+import { Challenge } from '../../../../shared/domain/challenge';
+import { IconComponent } from '../../../../shared/ui/atoms/icon/icon.component';
+import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
+import { FeatureHeaderComponent } from '../../../../shared/ui/molecules/feature-header/feature-header.component';
+import { BoardToolbarDesktopComponent } from '../../../../shared/ui/desktop/organisms/board-toolbar/board-toolbar-desktop.component';
+import { BoardViewMode } from '../../../user-settings/domain/board-view-mode';
+import { shuffleArray } from '../../../../shared/utils/array-utils';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -19,7 +19,7 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-quarterly-plan-desktop',
   standalone: true,
-  imports: [CommonModule, EditableBoardComponent, BoardToolbarComponent, FeatureHeaderComponent, IconComponent, ButtonComponent],
+  imports: [CommonModule, EditableBoardComponent, BoardToolbarDesktopComponent, FeatureHeaderComponent, IconComponent, ButtonComponent],
   template: `
     <kq-feature-header
       eyebrow="Knitting Quarterly - Board Studio"

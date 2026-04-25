@@ -135,7 +135,7 @@ import { IconComponent } from '../../../atoms/icon/icon.component';
     }
   `]
 })
-export class BoardToolbarComponent {
+export class BoardToolbarDesktopComponent {
   @Input() mode: 'polaroid' | 'kompakt' = 'polaroid';
   @Input() showPrintButton = false;
   @Output() modeChange = new EventEmitter<'polaroid' | 'kompakt'>();

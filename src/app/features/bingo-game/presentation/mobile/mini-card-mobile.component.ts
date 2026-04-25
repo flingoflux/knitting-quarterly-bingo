@@ -78,7 +78,7 @@ import { BadgeComponent } from '../../../../shared/ui/atoms/badge/badge.componen
     }
   `],
 })
-export class MobileMiniCardComponent {
+export class MiniCardMobileComponent {
   @Input({ required: true }) name!: string;
   @Input() imageUrl: string | null = null;
   @Input() done = false;

@@ -236,7 +236,7 @@ export type KqCardMode = 'polaroid' | 'kompakt';
     }
   `],
 })
-export class ChallengeCardComponent {
+export class ChallengeCardDesktopComponent {
   @Input({ required: true }) name!: string;
   @Input() imageUrl: string | null = null;
   @Input() mode: KqCardMode = 'polaroid';
