@@ -53,21 +53,21 @@ interface CardDetailOpenedEvent {
               </div>
               <div *ngIf="completed[i]" class="edit-card__done-badge"><kq-icon name="x-done" [size]="14" [strokeWidth]="2.2"/></div>
               <div *ngIf="isCellInBingo(i) && !completed[i]" class="edit-card__bingo-badge">★</div>
+              <button
+                type="button"
+                class="edit-card__camera-hint"
+                title="Foto ansehen / hochladen"
+                aria-label="Foto ansehen oder hochladen"
+                (click)="openDetail(i, p, $event)"
+              >
+                <kq-icon name="camera" [size]="16"/>
+              </button>
             </div>
             <div class="edit-card__body">
               <span class="edit-card__name">{{ p.name }}</span>
-              <span class="edit-card__hint" *ngIf="completed[i]">Abgehakt</span>
+              <span class="edit-card__hint" *ngIf="completed[i]">Erledigt</span>
               <span class="edit-card__hint" *ngIf="!completed[i]">Tippen zum Abhaken</span>
             </div>
-            <button
-              type="button"
-              class="edit-card__camera"
-              title="Foto ansehen / hochladen"
-              aria-label="Foto ansehen oder hochladen"
-              (click)="openDetail(i, p, $event)"
-            >
-              <kq-icon name="camera" [size]="18"/>
-            </button>
           </div>
         }
       </div>
@@ -165,16 +165,12 @@ interface CardDetailOpenedEvent {
     }
 
     .mini-card__label {
-      font-size: 0.52rem;
+      font-size: 0.68rem;
       font-weight: 700;
       color: #4a2d1c;
       text-align: center;
-      padding: 0.2rem 0.1rem 0.25rem;
+      padding: 0.2rem 0.1rem 0.3rem;
       line-height: 1.2;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
     }
 
     /* ── Edit-Liste ── */
@@ -191,7 +187,8 @@ interface CardDetailOpenedEvent {
       background: #fff;
       border: 1px solid #d8cec2;
       border-radius: 8px;
-      padding: 0.5rem;
+      padding: 0.6rem;
+      min-height: 8rem;
       box-shadow: 0 1px 4px rgba(60, 30, 10, 0.1);
       cursor: pointer;
       transition: background 0.15s;
@@ -214,8 +211,8 @@ interface CardDetailOpenedEvent {
 
     .edit-card__photo {
       position: relative;
-      width: 60px;
-      height: 60px;
+      width: 108px;
+      height: 108px;
       flex-shrink: 0;
       background: #f2e8d8;
       border-radius: 6px;
@@ -238,8 +235,8 @@ interface CardDetailOpenedEvent {
     }
 
     .edit-card__logo {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       object-fit: contain;
     }
 
@@ -283,9 +280,9 @@ interface CardDetailOpenedEvent {
 
     .edit-card__name {
       font-weight: 700;
-      font-size: 0.9rem;
+      font-size: 1rem;
       color: #3f2a1d;
-      line-height: 1.25;
+      line-height: 1.3;
       overflow: hidden;
       display: -webkit-box;
       -webkit-line-clamp: 2;
@@ -293,27 +290,27 @@ interface CardDetailOpenedEvent {
     }
 
     .edit-card__hint {
-      font-size: 0.72rem;
+      font-size: 0.85rem;
       color: #9c7a64;
     }
 
-    .edit-card__camera {
-      flex-shrink: 0;
-      width: 40px;
-      height: 40px;
-      border: 1px solid #d8cec2;
-      border-radius: 50%;
-      background: #fff7ec;
-      color: #7b3b22;
+    .edit-card__camera-hint {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(2px);
+      width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: #7b3b22;
+      border-top-left-radius: 4px;
+      border: none;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-    }
-
-    .edit-card__camera:active {
-      background: #ffe8cd;
+      padding: 0;
     }
 
     /* ── FAB ── */

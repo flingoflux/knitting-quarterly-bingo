@@ -24,18 +24,18 @@ interface ReorderRequestedEvent {
   standalone: true,
   imports: [CommonModule, IconComponent],
   template: `
-    <!-- Read-only Kompakt-Liste -->
+    <!-- Read-only Mini-Grid (4×4 Polaroids) -->
     @if (!editMode()) {
-      <div class="compact-list">
+      <div class="mini-grid">
         @for (p of challenges; track p.name; let i = $index) {
-          <div class="compact-card">
-            <div class="compact-card__photo">
-              <img *ngIf="getImage(p.imageId)" [src]="getImage(p.imageId)" [alt]="p.name" class="compact-card__img" draggable="false" />
-              <div *ngIf="!getImage(p.imageId)" class="compact-card__placeholder">
-                <img src="assets/crown.svg" alt="" class="compact-card__logo" draggable="false" />
+          <div class="mini-card">
+            <div class="mini-card__photo">
+              <img *ngIf="getImage(p.imageId)" [src]="getImage(p.imageId)" [alt]="p.name" class="mini-card__img" draggable="false" />
+              <div *ngIf="!getImage(p.imageId)" class="mini-card__placeholder">
+                <img src="assets/crown.svg" alt="" class="mini-card__logo" draggable="false" />
               </div>
             </div>
-            <span class="compact-card__name">{{ p.name }}</span>
+            <div class="mini-card__label">{{ p.name }}</div>
           </div>
         }
       </div>
@@ -126,42 +126,40 @@ interface ReorderRequestedEvent {
       position: relative;
     }
 
-    /* ── Kompakt-Liste (read-only) ── */
-    .compact-list {
+    /* ── Mini-Grid (read-only) ── */
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.4rem;
+      margin: 0 auto;
+    }
+
+    .mini-card {
+      background: #fff;
+      border-radius: 3px;
+      padding: 4px 4px 0;
+      border: 1px solid #d8cec2;
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      box-shadow: 0 1px 3px rgba(60, 30, 10, 0.1);
     }
 
-    .compact-card {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
-      background: #fff;
-      border: 1px solid #d8cec2;
-      border-radius: 6px;
-      padding: 0.4rem 0.55rem;
-      box-shadow: 0 1px 3px rgba(60, 30, 10, 0.08);
-    }
-
-    .compact-card__photo {
-      width: 40px;
-      height: 40px;
-      flex-shrink: 0;
-      background: #f2e8d8;
-      border-radius: 4px;
-      overflow: hidden;
+    .mini-card__photo {
       position: relative;
+      background: #f2e8d8;
+      aspect-ratio: 1 / 1;
+      border-radius: 2px;
+      overflow: hidden;
     }
 
-    .compact-card__img {
+    .mini-card__img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
 
-    .compact-card__placeholder {
+    .mini-card__placeholder {
       width: 100%;
       height: 100%;
       display: flex;
@@ -169,46 +167,45 @@ interface ReorderRequestedEvent {
       justify-content: center;
     }
 
-    .compact-card__logo {
-      width: 24px;
-      height: 24px;
+    .mini-card__logo {
+      width: 40%;
+      max-width: 28px;
+      height: auto;
       object-fit: contain;
     }
 
-    .compact-card__name {
-      flex: 1;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #3f2a1d;
-      line-height: 1.25;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+    .mini-card__label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #4a2d1c;
+      text-align: center;
+      padding: 0.2rem 0.1rem 0.3rem;
+      line-height: 1.2;
     }
 
     /* ── Edit-Liste ── */
     .edit-list {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.6rem;
     }
 
     .edit-card {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
+      gap: 0.75rem;
       background: #fff;
       border: 1px solid #d8cec2;
       border-radius: 8px;
-      padding: 0.5rem;
+      padding: 0.6rem;
+      min-height: 8rem;
       box-shadow: 0 1px 4px rgba(60, 30, 10, 0.1);
     }
 
     .edit-card__photo {
       position: relative;
-      width: 56px;
-      height: 56px;
+      width: 108px;
+      height: 108px;
       flex-shrink: 0;
       background: #f2e8d8;
       border-radius: 6px;
@@ -233,8 +230,8 @@ interface ReorderRequestedEvent {
     }
 
     .edit-card__logo {
-      width: 30px;
-      height: 30px;
+      width: 40px;
+      height: 40px;
       object-fit: contain;
     }
 
@@ -259,7 +256,7 @@ interface ReorderRequestedEvent {
     }
 
     .edit-card__name {
-      font-size: 0.88rem;
+      font-size: 1rem;
       font-weight: 600;
       color: #3f2a1d;
       line-height: 1.3;
@@ -278,7 +275,7 @@ interface ReorderRequestedEvent {
       background: #fffdf9;
       color: #3f2a1d;
       font-weight: 600;
-      font-size: 0.88rem;
+      font-size: 1rem;
       box-sizing: border-box;
     }
 

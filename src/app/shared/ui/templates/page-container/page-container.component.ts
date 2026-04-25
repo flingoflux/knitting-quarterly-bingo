@@ -14,6 +14,13 @@ import { Component } from '@angular/core';
       margin-right: auto;
       padding-top: 1rem;
     }
+
+    @media (max-width: 640px) {
+      :host {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+    }
     `,
   ],
 })
