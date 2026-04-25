@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PLAY_BINGO_IN_PORT } from '../../application/ports/in/play-bingo.in-port';
-import { PlayableBoardComponent } from '../common/playable-board.component';
+import { PlayableBoardDesktopComponent } from './playable-board-desktop.component';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { StatusMiniGridComponent } from '../../../../shared/ui';
 import { FeatureHeaderComponent } from '../../../../shared/ui';
@@ -16,7 +16,7 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-bingo-game-desktop',
   standalone: true,
-  imports: [CommonModule, PlayableBoardComponent, BoardToolbarDesktopComponent, StatusMiniGridComponent, FeatureHeaderComponent],
+  imports: [CommonModule, PlayableBoardDesktopComponent, BoardToolbarDesktopComponent, StatusMiniGridComponent, FeatureHeaderComponent],
   template: `
     <kq-feature-header
       eyebrow="Knitting Quarterly - Bingo"
@@ -53,7 +53,7 @@ interface CardDetailOpenedEvent {
 export class BingoGameDesktopComponent {
   private readonly state = inject(PLAY_BINGO_IN_PORT);
 
-  @ViewChild('playableBoard') private readonly playableBoardRef?: PlayableBoardComponent;
+  @ViewChild('playableBoard') private readonly playableBoardRef?: PlayableBoardDesktopComponent;
 
   @Input() viewMode: BoardViewMode = 'polaroid';
 

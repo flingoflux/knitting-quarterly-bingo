@@ -168,7 +168,7 @@ interface CardDetailOpenedEvent {
 
   `]
 })
-export class EditableBoardComponent {
+export class EditableBoardDesktopComponent {
   private readonly el = inject(ElementRef);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);

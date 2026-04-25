@@ -3,10 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { IconComponent } from '../../../../shared/ui';
 import { DialogShellComponent } from '../../../../shared/ui';
-
-export interface ImageChangedEvent {
-  imageId: string | null;
-}
+import type { ImageChangedEvent } from '../../../../shared/ui';
 
 interface CropState {
   imgSrc: string;

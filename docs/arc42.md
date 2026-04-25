@@ -129,6 +129,26 @@ Namensregel: siehe ADR-005 (Kapitel 9) fuer die verbindliche Benennung von InPor
 | core / quarter-lifecycle | `EnsureQuarterRolloverInPort` | `EnsureQuarterRolloverUseCase` | nutzt aktuell `QUARTERLY_PLAN_READER`/`QUARTERLY_PLAN_WRITER` und `BINGO_GAME_REPOSITORY` (Migration auf OutPorts folgt) | kein eigener Storage-Adapter | `QuarterClock`, `QuarterId` |
 | shared image storage | n/a (derzeit) | n/a (derzeit) | `ImageRepository` | `IndexedDbImageRepository` | Bild-UUID-Referenzen |
 
+### 5.3.1 Referenzregeln fuer Presentation-Komponenten
+
+Die Presentation-Schicht folgt einer klaren Referenzmatrix. Ziel ist eine strikte Trennung von view-spezifischen Komponenten und die Vermeidung von Cross-Feature-Coupling.
+
+| Quelle | Darf referenzieren | Darf nicht referenzieren |
+| --- | --- | --- |
+| `features/<feature>/presentation/<feature>.component.ts` (Container) | `./common/*`, `./desktop/*`, `./mobile/*`, `./print/*` desselben Features; `shared/ui`; `shared/utils`; Feature-Application-Ports | Presentation-Dateien anderer Features |
+| `features/<feature>/presentation/common/*` | `shared/ui/common/*` (ueber Barrel), `shared/utils`, feature-interne `common/*` | `desktop/*`, `mobile/*`, `print/*`; Presentation-Dateien anderer Features |
+| `features/<feature>/presentation/desktop/*` | feature-interne `common/*`; `shared/ui/desktop/*` und `shared/ui/common/*` (ueber Barrel); `shared/utils` | `shared/ui/mobile/*`, `shared/ui/print/*`; Presentation-Dateien anderer Features |
+| `features/<feature>/presentation/mobile/*` | feature-interne `common/*`; `shared/ui/mobile/*` und `shared/ui/common/*` (ueber Barrel); `shared/utils` | `shared/ui/desktop/*`, `shared/ui/print/*`; Presentation-Dateien anderer Features |
+| `features/<feature>/presentation/print/*` | feature-interne `common/*`; `shared/ui/print/*` und `shared/ui/common/*` (ueber Barrel); `shared/utils` | `shared/ui/desktop/*`, `shared/ui/mobile/*`; Presentation-Dateien anderer Features |
+
+Verbindliche Regeln:
+
+- Keine direkten Imports zwischen `presentation`-Ordnern unterschiedlicher Features.
+- Ausnahme: `features/quarter-lifecycle/presentation/quarterly-view-page.component.ts` darf als Orchestrator die Feature-Container `bingo-game` und `quarterly-plan` referenzieren.
+- Feature-uebergreifend genutzte UI-Events/Typen liegen unter `shared` als Contract (nicht in einem Feature-Presentation-Ordner).
+- View-spezifische Komponenten tragen den Suffix `Desktop`, `Mobile` oder `Print` und liegen im gleichnamigen Ordner.
+- Selektoren bleiben bei Verschiebungen stabil, damit Templates und E2E-Selektoren unveraendert bleiben.
+
 ### 5.4 Ebene 3 – Feature-spezifische Hexagon-Sichten
 
 #### 5.4.1 quarterly-plan

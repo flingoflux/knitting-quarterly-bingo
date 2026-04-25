@@ -13,3 +13,5 @@ export { PageToolbarComponent } from './organisms/page-toolbar/page-toolbar.comp
 
 export { PageContainerComponent } from './templates/page-container/page-container.component';
 export { QuarterlyViewTemplateComponent } from './templates/quarterly-view/quarterly-view.component';
+
+export type { ImageChangedEvent } from './contracts/image-changed-event';

@@ -16,7 +16,7 @@ interface CardDetailOpenedEvent {
   imports: [CommonModule, ChallengeCardDesktopComponent, BoardGridDesktopComponent],
   template: `
     <kq-board-grid-desktop [mode]="mode">
-      <kq-challenge-card
+      <kq-challenge-card-desktop
         *ngFor="let p of challenges; let i = index"
         [name]="p.name"
         [imageUrl]="getImage(p.progressImageId ?? p.planningImageId)"
@@ -31,7 +31,7 @@ interface CardDetailOpenedEvent {
     </kq-board-grid-desktop>
   `
 })
-export class PlayableBoardComponent {
+export class PlayableBoardDesktopComponent {
   private readonly imageRepo = inject<ImageRepository>(IMAGE_REPOSITORY);
   private readonly cdr = inject(ChangeDetectorRef);
 

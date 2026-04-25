@@ -2,7 +2,7 @@ import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewC
 import { CommonModule } from '@angular/common';
 import { PLAN_QUARTERLY_IN_PORT } from '../../application/ports/in/plan-quarterly.in-port';
 import { START_BINGO_FROM_PLAN_IN_PORT } from '../../../bingo-game/application/ports/in/start-bingo-from-plan.in-port';
-import { EditableBoardComponent } from '../common/editable-board.component';
+import { EditableBoardDesktopComponent } from './editable-board-desktop.component';
 import { Challenge } from '../../../../shared/domain/challenge';
 import { IconComponent } from '../../../../shared/ui';
 import { ButtonComponent } from '../../../../shared/ui';
@@ -19,7 +19,7 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-quarterly-plan-desktop',
   standalone: true,
-  imports: [CommonModule, EditableBoardComponent, BoardToolbarDesktopComponent, FeatureHeaderComponent, IconComponent, ButtonComponent],
+  imports: [CommonModule, EditableBoardDesktopComponent, BoardToolbarDesktopComponent, FeatureHeaderComponent, IconComponent, ButtonComponent],
   template: `
     <kq-feature-header
       eyebrow="Knitting Quarterly - Board Studio"
@@ -59,7 +59,7 @@ export class QuarterlyPlanDesktopComponent {
   private readonly state = inject(PLAN_QUARTERLY_IN_PORT);
   private readonly startBingoFromPlanService = inject(START_BINGO_FROM_PLAN_IN_PORT);
 
-  @ViewChild('editableBoard') private readonly editableBoardRef?: EditableBoardComponent;
+  @ViewChild('editableBoard') private readonly editableBoardRef?: EditableBoardDesktopComponent;
 
   @Input() viewMode: BoardViewMode = 'polaroid';
   @Input() quarterId = '';
