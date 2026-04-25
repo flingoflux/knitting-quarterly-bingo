@@ -1,7 +1,6 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PLAN_QUARTERLY_IN_PORT } from '../../application/ports/in/plan-quarterly.in-port';
-import { START_BINGO_FROM_PLAN_IN_PORT } from '../../../bingo-game/application/ports/in/start-bingo-from-plan.in-port';
 import { EditableBoardDesktopComponent } from './editable-board-desktop.component';
 import { Challenge } from '../../../../shared/domain/challenge';
 import { IconComponent } from '../../../../shared/ui';
@@ -56,7 +55,6 @@ interface CardDetailOpenedEvent {
 })
 export class QuarterlyPlanDesktopComponent {
   private readonly state = inject(PLAN_QUARTERLY_IN_PORT);
-  private readonly startBingoFromPlanService = inject(START_BINGO_FROM_PLAN_IN_PORT);
 
   @ViewChild('editableBoard') private readonly editableBoardRef?: EditableBoardDesktopComponent;
 
@@ -78,16 +76,7 @@ export class QuarterlyPlanDesktopComponent {
   }
 
   startBingo(): void {
-    const confirmed = window.confirm(
-      `Dein Board startet automatisch mit dem ${this.quarterId} 🧶\n\n` +
-      `Möchtest du schon jetzt damit spielen? Das überschreibt das aktuelle Bingo – ` +
-      `inklusive deinem Fortschritt und allen Fotos.`,
-    );
-    if (!confirmed) return;
-    const started = this.startBingoFromPlanService.startBingoFromPlan(this.quarterId);
-    if (started) {
-      this.bingoStarted.emit();
-    }
+    this.bingoStarted.emit();
   }
 
   onDragStart(i: number): void {

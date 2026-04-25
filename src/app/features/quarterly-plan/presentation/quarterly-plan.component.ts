@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PLAN_QUARTERLY_IN_PORT } from '../application/ports/in/plan-quarterly.in-port';
+import { START_BINGO_FROM_PLAN_IN_PORT } from '../../bingo-game/application/ports/in/start-bingo-from-plan.in-port';
 import { QuarterlyPlanDesktopComponent } from './desktop/quarterly-plan-desktop.component';
 import { EditableBoardMobileComponent } from './mobile/editable-board-mobile.component';
 import { CardDetailDialogComponent } from './common/card-detail-dialog.component';
@@ -86,6 +87,7 @@ export class QuarterlyPlanComponent implements OnInit {
   @ViewChild('mobileEditableBoard') private readonly mobileEditableBoardRef?: EditableBoardMobileComponent;
 
   private readonly state = inject(PLAN_QUARTERLY_IN_PORT);
+  private readonly startBingoFromPlanService = inject(START_BINGO_FROM_PLAN_IN_PORT);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
@@ -155,7 +157,17 @@ export class QuarterlyPlanComponent implements OnInit {
   }
 
   onBingoStarted(): void {
-    void this.router.navigate(['/quarterly'], { queryParams: { quarter: this.actualCurrentQuarterId } });
+    const quarterId = this.displayedQuarterId();
+    const confirmed = window.confirm(
+      `Dein Board startet automatisch mit dem ${quarterId} 🧶\n\n` +
+      `Möchtest du schon jetzt damit spielen? Das überschreibt das aktuelle Bingo – ` +
+      `inklusive deinem Fortschritt und allen Fotos.`,
+    );
+    if (!confirmed) return;
+    const started = this.startBingoFromPlanService.startBingoFromPlan(quarterId);
+    if (started) {
+      void this.router.navigate(['/quarterly'], { queryParams: { quarter: this.actualCurrentQuarterId } });
+    }
   }
 
   onChallengeEdited(event: { index: number; challenge: Challenge }): void {
