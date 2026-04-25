@@ -16,6 +16,7 @@ import { Component, HostBinding, Input } from '@angular/core';
       gap: 0.5rem;
       width: 100%;
       box-sizing: border-box;
+      align-items: stretch;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }

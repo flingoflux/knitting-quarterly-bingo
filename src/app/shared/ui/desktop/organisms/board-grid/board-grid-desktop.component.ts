@@ -9,6 +9,7 @@ import { Component, HostBinding, Input } from '@angular/core';
       display: grid;
       gap: 0.6rem;
       margin: 0.5rem auto 0;
+      align-items: stretch;
     }
     :host(.mode-polaroid) {
       grid-template-columns: repeat(4, minmax(0, 1fr));

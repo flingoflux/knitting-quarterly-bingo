@@ -65,7 +65,8 @@ export type KqCardMode = 'polaroid' | 'kompakt';
   `,
   styles: [`
     :host {
-      display: contents;
+      display: block;
+      height: 100%;
     }
 
     /* ── Basis ── */
@@ -75,6 +76,7 @@ export type KqCardMode = 'polaroid' | 'kompakt';
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      height: 100%;
       box-shadow: 0 2px 5px rgba(60, 30, 10, 0.14), 0 8px 20px rgba(60, 30, 10, 0.10);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
@@ -143,12 +145,17 @@ export type KqCardMode = 'polaroid' | 'kompakt';
       color: var(--kq-text-warm);
       line-height: 1.25;
       text-wrap: balance;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: var(--kq-card-title-lines, 3);
     }
 
     /* ── Polaroid-Modus ── */
     .card--polaroid {
       padding: 7px 7px 0;
       border-radius: 5px;
+      --kq-card-title-lines: var(--kq-card-title-lines-polaroid, 3);
     }
     .card--polaroid .card__photo {
       width: 100%;
@@ -170,6 +177,7 @@ export type KqCardMode = 'polaroid' | 'kompakt';
       flex-direction: row;
       align-items: stretch;
       height: 4.8rem;
+      --kq-card-title-lines: var(--kq-card-title-lines-kompakt, 3);
     }
     .card--kompakt.card--hoverable:hover {
       transform: translateY(-2px) rotate(0deg);
@@ -197,10 +205,6 @@ export type KqCardMode = 'polaroid' | 'kompakt';
     .card--kompakt .card__title {
       font-size: 0.7rem;
       text-align: left;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
   `],
 })

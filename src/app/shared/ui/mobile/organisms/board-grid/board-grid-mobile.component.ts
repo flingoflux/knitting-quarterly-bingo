@@ -11,6 +11,7 @@ import { Component } from '@angular/core';
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0.4rem;
       margin: 0 auto;
+      align-items: stretch;
     }
   `],
 })

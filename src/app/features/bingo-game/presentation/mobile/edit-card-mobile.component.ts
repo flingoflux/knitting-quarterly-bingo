@@ -94,7 +94,7 @@ import { CardPhotoComponent } from '../../../../shared/ui';
       line-height: 1.3;
       overflow: hidden;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: var(--kq-card-title-lines, 3);
       -webkit-box-orient: vertical;
     }
 

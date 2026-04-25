@@ -38,13 +38,15 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
   `,
   styles: [`
     :host {
-      display: contents;
+      display: block;
+      height: 100%;
     }
 
     .card {
       background: #fff;
       display: flex;
       flex-direction: column;
+      height: 100%;
       break-inside: avoid;
     }
 
@@ -100,7 +102,7 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
       text-align: center;
       overflow: hidden;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: var(--kq-card-title-lines, 3);
       -webkit-box-orient: vertical;
     }
 
@@ -109,6 +111,7 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
       padding: 5px 5px 0;
       border: 0.3mm solid var(--kq-card-border-soft);
       border-radius: 2px;
+      --kq-card-title-lines: var(--kq-card-title-lines-polaroid, 3);
     }
     .card--polaroid .card__photo {
       width: 100%;
@@ -132,6 +135,7 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
       border: 0.3mm solid var(--kq-card-border-soft);
       border-radius: 2px;
       height: 3.8rem;
+      --kq-card-title-lines: var(--kq-card-title-lines-kompakt, 3);
     }
     .card--kompakt .card__photo {
       width: 3.8rem;

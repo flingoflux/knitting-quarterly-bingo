@@ -23,6 +23,11 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
     </div>
   `,
   styles: [`
+    :host {
+      display: block;
+      height: 100%;
+    }
+
     .mini-card {
       background: #fff;
       border-radius: 3px;
@@ -30,6 +35,8 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
       border: 1px solid var(--kq-card-border-soft);
       display: flex;
       flex-direction: column;
+      height: 100%;
+      --kq-card-title-lines: var(--kq-card-title-lines-mobile, 3);
       box-shadow: 0 1px 3px rgba(60, 30, 10, 0.1);
     }
 
@@ -52,6 +59,10 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
       text-align: center;
       padding: 0.2rem 0.1rem 0.3rem;
       line-height: 1.2;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: var(--kq-card-title-lines, 3);
     }
   `],
 })
