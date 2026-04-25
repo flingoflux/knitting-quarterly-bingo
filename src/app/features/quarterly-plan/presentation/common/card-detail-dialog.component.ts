@@ -307,7 +307,8 @@ export class CardDetailDialogComponent {
       // Canvas ist nach detectChanges verfügbar
       setTimeout(() => this.drawCrop(), 0);
     } else {
-      await this.saveImage(imgSrc);
+      const resizedUrl = await cropImageToSquare(imgSrc, 0, 0, naturalW, 800);
+      await this.saveImage(resizedUrl);
       input.value = '';
     }
   }
