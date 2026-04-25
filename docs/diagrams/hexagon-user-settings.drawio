@@ -1,0 +1,52 @@
+<mxfile host="65bd71144e">
+    <diagram name="user-settings" id="0">
+        <mxGraphModel dx="442" dy="449" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1050" pageHeight="620" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="core" value="ManageUserSettingsUseCase&#xa;+ Domain" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#fff8e6;strokeColor=#c08a2a;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="345" y="100" width="320" height="330" as="geometry"/>
+                </mxCell>
+                <mxCell id="ui" value="(keine eigene&#xa;Presentation-Komponente)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="234" width="165" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="inport" value="ManageUserSettingsInPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5b7db1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="260" y="239" width="153" height="36" as="geometry"/>
+                </mxCell>
+                <mxCell id="feature" value="user-settings" style="text;html=1;fontSize=11;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="440" y="110" width="120" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="out1" value="LoadBoardViewModeOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5b7db1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="628" y="145" width="190" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="out2" value="PersistBoardViewModeOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5b7db1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="628" y="188" width="190" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="out3" value="LoadLayoutModeOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5b7db1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="628" y="248" width="190" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="out4" value="PersistLayoutModeOutPort" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#5b7db1;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="628" y="291" width="190" height="34" as="geometry"/>
+                </mxCell>
+                <mxCell id="repo" value="LocalStorageUserSettingsRepository" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fb;strokeColor=#4f8b57;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="843" y="214" width="190" height="46" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-ui-in" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;endArrow=block;endFill=1;" parent="1" source="ui" target="inport" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-repo-out1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="repo" target="out1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-repo-out2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;" parent="1" source="repo" target="out2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-repo-out3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;" parent="1" source="repo" target="out3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-repo-out4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;dashed=1;endArrow=open;endFill=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="repo" target="out4" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

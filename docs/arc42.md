@@ -126,7 +126,9 @@ Namensregel: siehe ADR-005 (Kapitel 9) fuer die verbindliche Benennung von InPor
 | bingo-game | `PlayBingoInPort` | `PlayBingoUseCase` | `LoadBingoProgressOutPort`, `PersistBingoProgressOutPort`, Nutzung von `LoadQuarterlyPlanOutPort` | `LocalStorageBingoGameRepository`; Presentation inkl. `PrintBingoBoardComponent` | `BingoGame`, `ChallengeProgress` |
 | bingo-game (Start) | `StartBingoFromPlanInPort` | `StartBingoFromPlanUseCase` | `LoadQuarterlyPlanOutPort`, `PersistQuarterlyPlanOutPort`, `PersistBingoProgressOutPort` | – (nutzt bestehende Adapter) | QuarterId-Mapping, Cross-Quarter-Persistenz |
 | archive | `ShowArchiveOverviewInPort` | `ShowArchiveOverviewUseCase` | `LoadArchiveEntriesOutPort` | `LocalStorageArchiveRepository` | `ArchiveEntry` |
-| core / quarter-lifecycle | `EnsureQuarterRolloverInPort` | `EnsureQuarterRolloverUseCase` | nutzt aktuell `QUARTERLY_PLAN_READER`/`QUARTERLY_PLAN_WRITER` und `BINGO_GAME_REPOSITORY` (Migration auf OutPorts folgt) | kein eigener Storage-Adapter | `QuarterClock`, `QuarterId` |
+| core / quarter-lifecycle | `EnsureQuarterRolloverInPort` | `EnsureQuarterRolloverUseCase` | nutzt aktuell `QUARTERLY_PLAN_READER`/`QUARTERLY_PLAN_WRITER`, `BINGO_GAME_REPOSITORY` und `ARCHIVE_REPOSITORY` (Migration auf OutPorts folgt) | kein eigener Storage-Adapter; nutzt `LocalStorageArchiveRepository` | `QuarterClock`, `QuarterId` |
+| start-page | `ShowQuarterlyProgressInPort` | `ShowQuarterlyProgressUseCase` | `LoadBingoProgressOutPort` (geliehen von bingo-game) | `LocalStorageBingoGameRepository` (geliehen) | Fortschrittsanzeige pro Quartal |
+| user-settings | `ManageUserSettingsInPort` | `ManageUserSettingsUseCase` | `LoadBoardViewModeOutPort`, `PersistBoardViewModeOutPort`, `LoadLayoutModeOutPort`, `PersistLayoutModeOutPort` | `LocalStorageUserSettingsRepository` | Board-Ansicht, Layout-Modus |
 | shared image storage | n/a (derzeit) | n/a (derzeit) | `ImageRepository` | `IndexedDbImageRepository` | Bild-UUID-Referenzen |
 
 ### 5.3.1 Referenzregeln fuer Presentation-Komponenten
@@ -174,6 +176,20 @@ Verbindliche Regeln:
 > Diagramm-Quelle: [diagrams/hexagon-quarter-lifecycle.drawio](./diagrams/hexagon-quarter-lifecycle.drawio)
 
 ![quarter-lifecycle Hexagon](./diagrams/hexagon-quarter-lifecycle.png)
+
+Hinweis: `ArchiveRepository` (orange) wird aktuell als Domain-Token direkt injiziert; die Migration auf einen dedizierten OutPort ist analog zu den anderen Ports geplant.
+
+#### 5.4.5 start-page
+
+> Diagramm-Quelle: [diagrams/hexagon-start-page.drawio](./diagrams/hexagon-start-page.drawio)
+
+![start-page Hexagon](./diagrams/hexagon-start-page.png)
+
+#### 5.4.6 user-settings
+
+> Diagramm-Quelle: [diagrams/hexagon-user-settings.drawio](./diagrams/hexagon-user-settings.drawio)
+
+![user-settings Hexagon](./diagrams/hexagon-user-settings.png)
 
 ### 5.5 Domain-Modell
 
