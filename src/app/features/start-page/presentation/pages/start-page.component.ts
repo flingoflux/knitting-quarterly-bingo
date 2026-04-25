@@ -1,9 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { ButtonComponent } from '../../../../shared/ui/atoms/button/button.component';
-import { BINGO_GAME_REPOSITORY } from '../../../../features/bingo-game/domain/bingo-game.repository';
+import { SHOW_QUARTERLY_PROGRESS_IN_PORT } from '../../application/ports/in/show-quarterly-progress.in-port';
 import { ENSURE_QUARTER_ROLLOVER_IN_PORT } from '../../../../core/application/ports/in/ensure-quarter-rollover.in-port';
-import { QuarterClock, QuarterId } from '../../../../core/domain';
+import { QuarterClock } from '../../../../core/domain';
 
 @Component({
   selector: 'app-start-page',
@@ -163,12 +163,12 @@ import { QuarterClock, QuarterId } from '../../../../core/domain';
   `]
 })
 export class StartPageComponent {
-  private readonly bingoGameRepository = inject(BINGO_GAME_REPOSITORY);
+  private readonly quarterlyProgress = inject(SHOW_QUARTERLY_PROGRESS_IN_PORT);
   private readonly quarterRollover = inject(ENSURE_QUARTER_ROLLOVER_IN_PORT);
   private readonly quarterClock = new QuarterClock();
 
-  readonly daysUntilNextQuarterly = this.getDaysUntilNextQuarterly(new Date());
-  readonly hasBingo = this.hasAnyBingoFromStoredProgress();
+  readonly daysUntilNextQuarterly = this.quarterlyProgress.daysUntilNextQuarter;
+  readonly hasBingo = this.quarterlyProgress.hasBingoThisQuarter;
   readonly motivationText = this.getMotivationText(
     this.daysUntilNextQuarterly,
     this.hasBingo,
@@ -193,20 +193,6 @@ export class StartPageComponent {
     this.router.navigate(['/how-it-works']);
   }
 
-  private getDaysUntilNextQuarterly(today: Date): number {
-    const currentQuarter = Math.floor(today.getMonth() / 3);
-    const nextQuarterStart = new Date(today.getFullYear(), (currentQuarter + 1) * 3, 1);
-
-    const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
-    const nextQuarterUtc = Date.UTC(
-      nextQuarterStart.getFullYear(),
-      nextQuarterStart.getMonth(),
-      nextQuarterStart.getDate()
-    );
-
-    return Math.max(0, Math.ceil((nextQuarterUtc - todayUtc) / (1000 * 60 * 60 * 24)));
-  }
-
   private getMotivationText(daysUntilNextQuarterly: number, hasBingo: boolean): string {
     if (hasBingo) {
       return 'Glückwunsch, du hast schon ein Bingo geschafft!';
@@ -219,50 +205,5 @@ export class StartPageComponent {
     return `Noch ${daysUntilNextQuarterly} Tage Zeit: dranbleiben und Projekte eintragen. Du kannst noch ein Bingo schaffen.`;
   }
 
-  private hasAnyBingoFromStoredProgress(): boolean {
-    const currentQuarterId = QuarterId.parse(this.quarterClock.getQuarterId(new Date()));
-    const progress = this.bingoGameRepository.load(currentQuarterId);
-    if (progress === null) {
-      return false;
-    }
-
-    const completed = progress.challenges.map(challenge => Boolean(challenge.completed));
-    return this.hasBingoLine(completed);
-  }
-
-  private hasBingoLine(completed: readonly boolean[]): boolean {
-    const size = Math.sqrt(completed.length);
-    if (!Number.isInteger(size) || size < 2) {
-      return false;
-    }
-
-    for (let r = 0; r < size; r++) {
-      let rowComplete = true;
-      for (let c = 0; c < size; c++) {
-        rowComplete = rowComplete && completed[r * size + c];
-      }
-      if (rowComplete) {
-        return true;
-      }
-    }
-
-    for (let c = 0; c < size; c++) {
-      let columnComplete = true;
-      for (let r = 0; r < size; r++) {
-        columnComplete = columnComplete && completed[r * size + c];
-      }
-      if (columnComplete) {
-        return true;
-      }
-    }
-
-    let diagonalAComplete = true;
-    let diagonalBComplete = true;
-    for (let i = 0; i < size; i++) {
-      diagonalAComplete = diagonalAComplete && completed[i * size + i];
-      diagonalBComplete = diagonalBComplete && completed[i * size + (size - 1 - i)];
-    }
-
-    return diagonalAComplete || diagonalBComplete;
-  }
 }
+

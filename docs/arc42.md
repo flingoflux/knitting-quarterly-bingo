@@ -887,24 +887,6 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 **Entscheidung:** Persistenznahes Value Object `ChallengeProgress { name, planningImageId?, progressImageId?, completed }` fasst alle Daten einer Challenge im `BingoGame` zusammen.  
 **Konsequenzen:** Kein Index-Synchronisationsproblem mehr. Klare semantische Trennung zwischen Planungsbild und Fortschrittsfoto. LocalStorage-Migration v2→v3 notwendig.
 
-### ADR-006: View-Mode-Trennung durch Unterordner und einheitliches Dateinamen-Suffix
-
-**Kontext:** View-mode-spezifische UI-Komponenten (Desktop, Mobile, Print) waren bisher gemischt benannt: teilweise mit View-Mode als Präfix im Dateinamen (`mobile-bingo-board.component.ts`, `print-bingo-board.component.ts`), teilweise als Suffix (`bingo-game-desktop.component.ts`), teilweise als Infix (`plan-mobile-mini-card.component.ts`). Dadurch war die Zugehörigkeit eines Files zu einem View-Mode nicht auf den ersten Blick erkennbar.
-
-**Entscheidung:**
-
-- Der View-Mode wird **immer als Suffix** im Dateinamen angehängt: `*-desktop`, `*-mobile`, `*-print`.
-- View-mode-spezifische Komponenten werden in eigene **Unterordner** des gleichen Namens verschoben: `desktop/`, `mobile/`, `print/`.
-- Die **Klassenbezeichnung** folgt demselben Muster: Suffix `Desktop`, `Mobile` oder `Print` am Ende, z. B. `BingoBoardMobileComponent`, `BoardGridDesktopComponent`.
-- **Selektoren werden nicht umbenannt** – sie stellen HTML-API-Verträge dar und würden alle Templates betreffen.
-- View-mode-agnostische Komponenten verbleiben in `components/` ohne Modussuffix.
-
-**Konsequenzen:**
-
-- Die Ordnerstruktur spiegelt die view-mode-Zugehörigkeit direkt wider: ein `ls desktop/` zeigt alle Desktop-Komponenten eines Features.
-- Neue view-mode-spezifische Komponenten müssen zwingend dem Muster `<fachname>-<modus>.component.ts` im passenden Unterordner folgen.
-- Imports auf umbenannte Klassen müssen bei Refactorings entsprechend nachgezogen werden.
-
 ### ADR-005: Intentionale Port-/UseCase-Benennung und Persistenz-Semantik
 
 **Kontext:** Die bisherige Benennung mischt technische und fachliche Begriffe (z. B. `...Service`, `...Repository`, uneinheitliche Verben). Fuer Ports-and-Adapters soll die Absicht klar erkennbar sein und die Richtung (inbound/outbound) in Namen und Struktur sichtbar werden.
@@ -924,6 +906,24 @@ Regel: Neue kritische Navigationselemente und Kerninteraktionen erhalten bei der
 - Primäre Adapter (Presentation/Guards) koppeln an `InPort` statt an konkrete Klassen.
 - UseCases bleiben austauschbar und testbar; Outbound-Abhaengigkeiten bleiben ueber `OutPort` entkoppelt.
 - Migrationsaufwand entsteht durch schrittweises Umbenennen bestehender Services/Ports; empfohlen ist eine inkrementelle Migration pro Feature.
+
+### ADR-006: View-Mode-Trennung durch Unterordner und einheitliches Dateinamen-Suffix
+
+**Kontext:** View-mode-spezifische UI-Komponenten (Desktop, Mobile, Print) waren bisher gemischt benannt: teilweise mit View-Mode als Präfix im Dateinamen (`mobile-bingo-board.component.ts`, `print-bingo-board.component.ts`), teilweise als Suffix (`bingo-game-desktop.component.ts`), teilweise als Infix (`plan-mobile-mini-card.component.ts`). Dadurch war die Zugehörigkeit eines Files zu einem View-Mode nicht auf den ersten Blick erkennbar.
+
+**Entscheidung:**
+
+- Der View-Mode wird **immer als Suffix** im Dateinamen angehängt: `*-desktop`, `*-mobile`, `*-print`.
+- View-mode-spezifische Komponenten werden in eigene **Unterordner** des gleichen Namens verschoben: `desktop/`, `mobile/`, `print/`.
+- Die **Klassenbezeichnung** folgt demselben Muster: Suffix `Desktop`, `Mobile` oder `Print` am Ende, z. B. `BingoBoardMobileComponent`, `BoardGridDesktopComponent`.
+- **Selektoren werden nicht umbenannt** – sie stellen HTML-API-Verträge dar und würden alle Templates betreffen.
+- View-mode-agnostische Komponenten verbleiben in `components/` ohne Modussuffix.
+
+**Konsequenzen:**
+
+- Die Ordnerstruktur spiegelt die view-mode-Zugehörigkeit direkt wider: ein `ls desktop/` zeigt alle Desktop-Komponenten eines Features.
+- Neue view-mode-spezifische Komponenten müssen zwingend dem Muster `<fachname>-<modus>.component.ts` im passenden Unterordner folgen.
+- Imports auf umbenannte Klassen müssen bei Refactorings entsprechend nachgezogen werden.
 
 ---
 

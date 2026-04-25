@@ -8,10 +8,16 @@ import { START_BINGO_FROM_PLAN_IN_PORT } from './features/bingo-game/application
 import { StartBingoFromPlanUseCase } from './features/bingo-game/application/start-bingo-from-plan.use-case';
 import { SHOW_ARCHIVE_OVERVIEW_IN_PORT } from './features/archive/application/ports/in/show-archive-overview.in-port';
 import { ShowArchiveOverviewUseCase } from './features/archive/application/show-archive-overview.use-case';
+import { ShowQuarterlyProgressUseCase } from './features/start-page/application/show-quarterly-progress.use-case';
+import { SHOW_QUARTERLY_PROGRESS_IN_PORT } from './features/start-page/application/ports/in/show-quarterly-progress.in-port';
 
 export const routes: Routes = [
   {
     path: '',
+    providers: [
+      ShowQuarterlyProgressUseCase,
+      { provide: SHOW_QUARTERLY_PROGRESS_IN_PORT, useExisting: ShowQuarterlyProgressUseCase },
+    ],
     component: StartPageComponent,
   },
   {
