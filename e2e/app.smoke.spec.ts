@@ -48,6 +48,7 @@ test('should show core actions on the start page', async ({ page }) => {
   await expect(page.getByTestId('page-start-logo')).toBeVisible();
   await expect(page.getByTestId('action-start-play')).toBeVisible();
   await expect(page.getByTestId('action-start-plan')).toBeVisible();
+  await expect(page.getByTestId('action-start-notexistent')).toBeVisible();
   await expect(page.getByTestId('action-start-open-howto')).toBeVisible();
 });
 
@@ -59,7 +60,7 @@ test('should navigate to how-to from start page', async ({ page }) => {
   await page.getByTestId('action-start-open-howto').click();
 
   // then
-  await expect(page).toHaveURL('/how-it-works-wrong');
+  await expect(page).toHaveURL('/how-it-works');
   await expect(page.getByTestId('page-howto-title')).toBeVisible();
 });
 
