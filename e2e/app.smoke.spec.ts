@@ -59,7 +59,7 @@ test('should navigate to how-to from start page', async ({ page }) => {
   await page.getByTestId('action-start-open-howto').click();
 
   // then
-  await expect(page).toHaveURL('/how-it-works');
+  await expect(page).toHaveURL('/how-it-works-wrong');
   await expect(page.getByTestId('page-howto-title')).toBeVisible();
 });
 
