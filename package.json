@@ -21,6 +21,15 @@
     "rxjs": "^7.8.0",
     "zone.js": "^0.16.1"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "esbuild",
+      "lmdb",
+      "msgpackr-extract",
+      "unrs-resolver"
+    ]
+  },
   "devDependencies": {
     "@angular-devkit/build-angular": "^21.0.0",
     "@angular-eslint/builder": "^21.3.1",
