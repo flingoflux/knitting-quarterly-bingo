@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Challenge } from '../../../../shared/domain/challenge';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { PlanEditCardMobileComponent } from './plan-edit-card-mobile.component';
-import { FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent } from '../../../../shared/ui';
+import { FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridComponent, EditListMobileComponent } from '../../../../shared/ui';
 import type { FabGroupAction } from '../../../../shared/ui';
 
 interface ChallengeEditedEvent {
@@ -19,18 +19,18 @@ interface ReorderRequestedEvent {
 @Component({
   selector: 'app-mobile-editable-board',
   standalone: true,
-  imports: [CommonModule, PlanEditCardMobileComponent, FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent],
+  imports: [CommonModule, PlanEditCardMobileComponent, FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridComponent, EditListMobileComponent],
   template: `
     <!-- Read-only Mini-Grid (4×4 Polaroids) -->
     @if (!editMode()) {
-      <kq-board-grid-mobile>
+      <kq-board-grid mode="mobile">
         @for (p of challenges; track p.name; let i = $index) {
           <kq-challenge-card-mobile
             [name]="p.name"
             [imageUrl]="getImage(p.imageId)"
           />
         }
-      </kq-board-grid-mobile>
+      </kq-board-grid>
     }
 
     <!-- Edit-Liste mit Umbenennungs-, Foto- und Sortierfunktion -->

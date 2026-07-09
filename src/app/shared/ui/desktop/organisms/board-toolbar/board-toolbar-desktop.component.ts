@@ -1,23 +1,24 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
+import { ButtonComponent } from '../../../common/atoms/button/button.component';
 import { IconComponent } from '../../../common/atoms/icon/icon.component';
 
 @Component({
   selector: 'kq-board-toolbar-desktop',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, ButtonComponent, IconComponent],
   template: `
     <div class="toolbar-left">
-      <button
+      <kq-button
         *ngIf="showPrintButton"
-        class="action-btn"
+        variant="icon"
         type="button"
         (click)="printClicked.emit()"
         title="Drucken"
-        aria-label="Board drucken"
+        ariaLabel="Board drucken"
       >
         <kq-icon name="print" [size]="17"/>
-      </button>
+      </kq-button>
     </div>
 
     <div class="toolbar-right">
@@ -46,31 +47,6 @@ import { IconComponent } from '../../../common/atoms/icon/icon.component';
       display: flex;
       align-items: center;
       gap: 0.5rem;
-    }
-
-    .action-btn {
-      background: var(--kq-bg-warm);
-      color: var(--kq-primary-dark);
-      border: 1px solid var(--kq-outline, #c79362);
-      border-radius: 999px;
-      width: 42px;
-      height: 42px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
-    }
-
-    .action-btn:hover {
-      transform: translateY(-1px);
-      background: var(--kq-bg-highlight);
-      box-shadow: var(--kq-shadow-card);
-    }
-
-    .action-btn:focus-visible {
-      outline: 3px solid rgba(196, 110, 53, 0.3);
-      outline-offset: 2px;
     }
   `]
 })

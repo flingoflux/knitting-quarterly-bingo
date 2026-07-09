@@ -1,8 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Challenge } from '../../../../shared/domain/challenge';
-import { BoardGridDesktopComponent } from '../../../../shared/ui';
-import { PlanCardDesktopComponent } from '../../../../shared/ui';
+import { BoardGridComponent, PlanCardDesktopComponent } from '../../../../shared/ui';
 
 interface ChallengeEditedEvent {
   index: number;
@@ -12,9 +11,9 @@ interface ChallengeEditedEvent {
 @Component({
   selector: 'app-editable-board',
   standalone: true,
-  imports: [CommonModule, PlanCardDesktopComponent, BoardGridDesktopComponent],
+  imports: [CommonModule, PlanCardDesktopComponent, BoardGridComponent],
   template: `
-    <kq-board-grid-desktop>
+    <kq-board-grid>
       <div
         *ngFor="let p of challenges; let i = index"
         class="cell"
@@ -31,7 +30,7 @@ interface ChallengeEditedEvent {
           (valueCommitted)="saveChallenge(i, p)"
         />
       </div>
-    </kq-board-grid-desktop>
+    </kq-board-grid>
   `,
   styles: [`
     .cell {

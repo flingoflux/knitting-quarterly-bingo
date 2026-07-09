@@ -2,8 +2,7 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, Output, inject } fro
 import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
-import { ChallengeCardDesktopComponent } from '../../../../shared/ui';
-import { BoardGridDesktopComponent } from '../../../../shared/ui';
+import { ChallengeCardDesktopComponent, BoardGridComponent } from '../../../../shared/ui';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -13,9 +12,9 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-playable-board',
   standalone: true,
-  imports: [CommonModule, ChallengeCardDesktopComponent, BoardGridDesktopComponent],
+  imports: [CommonModule, ChallengeCardDesktopComponent, BoardGridComponent],
   template: `
-    <kq-board-grid-desktop>
+    <kq-board-grid>
       <kq-challenge-card-desktop
         *ngFor="let p of challenges; let i = index"
         [name]="p.name"
@@ -28,7 +27,7 @@ interface CardDetailOpenedEvent {
         (click)="onToggle(i)"
         (cameraClicked)="openDetail(i, p, $event)"
       />
-    </kq-board-grid-desktop>
+    </kq-board-grid>
   `
 })
 export class PlayableBoardDesktopComponent {

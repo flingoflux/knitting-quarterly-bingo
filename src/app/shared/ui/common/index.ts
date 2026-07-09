@@ -8,6 +8,7 @@ export { FeatureHeaderComponent } from './molecules/feature-header/feature-heade
 export { PlayPlanToggleComponent } from './molecules/play-plan-toggle/play-plan-toggle.component';
 export { StatusMiniGridComponent } from './molecules/status-mini-grid/status-mini-grid.component';
 
+export { BoardGridComponent } from './organisms/board-grid/board-grid.component';
 export { DialogShellComponent } from './organisms/dialog-shell/dialog-shell.component';
 export { PageToolbarComponent } from './organisms/page-toolbar/page-toolbar.component';
 

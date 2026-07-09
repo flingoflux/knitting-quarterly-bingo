@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ChallengeProgress } from '../../domain/bingo-game';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { EditCardMobileComponent } from './edit-card-mobile.component';
-import { FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent } from '../../../../shared/ui';
+import { FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridComponent, EditListMobileComponent } from '../../../../shared/ui';
 import type { FabGroupAction } from '../../../../shared/ui';
 
 interface CardDetailOpenedEvent {
@@ -14,11 +14,11 @@ interface CardDetailOpenedEvent {
 @Component({
   selector: 'app-mobile-bingo-board',
   standalone: true,
-  imports: [CommonModule, EditCardMobileComponent, FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent],
+  imports: [CommonModule, EditCardMobileComponent, FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridComponent, EditListMobileComponent],
   template: `
     <!-- Read-only Grid (4×4 Miniatur-Polaroids) -->
     @if (!editMode()) {
-      <kq-board-grid-mobile>
+      <kq-board-grid mode="mobile">
         @for (p of challenges; track p.name; let i = $index) {
           <kq-challenge-card-mobile
             [name]="p.name"
@@ -28,7 +28,7 @@ interface CardDetailOpenedEvent {
             (longPressed)="onToggle(i)"
           />
         }
-      </kq-board-grid-mobile>
+      </kq-board-grid>
     }
 
     <!-- Edit-Liste (eine Karte pro Zeile) -->
