@@ -30,7 +30,7 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
 
       @if (layoutMode.isMobile()) {
         <kq-feature-header
-          [eyebrow]="actualCurrentQuarterId"
+          [eyebrow]="nextQuarterId"
           title="Challenges planen"
           titleTestId="page-quarterly-plan-title"
           [subtitle]="mobileSubtitle()"
@@ -48,7 +48,7 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
       } @else {
         <app-quarterly-plan-desktop
           #desktopView
-          [quarterId]="actualCurrentQuarterId"
+          [quarterId]="nextQuarterId"
           (printRequested)="onPrintClick()"
           (bingoStarted)="onBingoStarted()"
         />
@@ -72,7 +72,7 @@ export class QuarterlyPlanComponent {
 
   readonly PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
   private readonly quarterClock = new QuarterClock();
-  readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
+  readonly nextQuarterId = this.quarterClock.getNextQuarterId(new Date());
   readonly mobileEditMode = signal(false);
   readonly mobileSubtitle = computed(() =>
     this.mobileEditMode()
@@ -83,7 +83,7 @@ export class QuarterlyPlanComponent {
   modeChanged = output<'play' | 'plan'>();
 
   constructor() {
-    this.state.setPreviewMode(false, this.actualCurrentQuarterId);
+    this.state.setPreviewMode(false, this.nextQuarterId);
   }
 
   get challenges(): Challenge[] {
@@ -107,7 +107,7 @@ export class QuarterlyPlanComponent {
   }
 
   onBingoStarted(): void {
-    const quarterId = this.actualCurrentQuarterId;
+    const quarterId = this.nextQuarterId;
     const confirmed = window.confirm(
       `Dein Board startet automatisch mit dem ${quarterId} 🧶\n\n` +
       `Möchtest du schon jetzt damit spielen? Das überschreibt das aktuelle Bingo – ` +
