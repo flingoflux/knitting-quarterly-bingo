@@ -6,6 +6,7 @@ export { IconComponent } from './atoms/icon/icon.component';
 export { StatusMiniGridComponent } from './atoms/status-mini-grid/status-mini-grid.component';
 
 export { FeatureHeaderComponent } from './molecules/feature-header/feature-header.component';
+export { PlayPlanToggleComponent } from './molecules/play-plan-toggle/play-plan-toggle.component';
 export { QuarterNavComponent } from './molecules/quarter-nav/quarter-nav.component';
 
 export { DialogShellComponent } from './organisms/dialog-shell/dialog-shell.component';

@@ -71,7 +71,7 @@ test('should navigate to the current quarter view when starting play', async ({ 
   await page.getByTestId('action-start-play').click();
 
   // then
-  await expect(page).toHaveURL(/\/quarterly\?quarter=\d{4}-Q[1-4]/);
+  await expect(page).toHaveURL('/play');
   await expect(page.getByTestId('page-bingo-title')).toBeVisible();
 });
 
@@ -83,37 +83,37 @@ test('should navigate to the planning view when starting planning', async ({ pag
   await page.getByTestId('action-start-plan').click();
 
   // then
-  await expect(page).toHaveURL(/\/quarterly\?quarter=\d{4}-Q[1-4]/);
+  await expect(page).toHaveURL('/plan');
   await expect(page.getByTestId('page-quarterly-plan-title')).toBeVisible();
 });
 
-test('should redirect to archive when opening a past quarter', async ({ page }) => {
+test('should show past quarter without redirect to archive', async ({ page }) => {
   // given
-  const current = currentQuarterId();
-  const pastQuarter = previousQuarterId(current);
-
   // when
-  await page.goto(`/quarterly?quarter=${pastQuarter}`);
+  await page.goto('/play');
 
   // then
-  await expect(page).toHaveURL(/\/archive/);
-  await expect(page.getByTestId('page-archive-title')).toBeVisible();
+  // Ensure play page loads correctly
+  await expect(page).toHaveURL('/play');
+  await expect(page.getByTestId('page-bingo-title')).toBeVisible();
 });
 
-test('should switch between play and plan views when navigating quarters', async ({ page }) => {
+test('should switch between play and plan modes using toggle button', async ({ page }) => {
   // given
   // when
   await page.goto('/');
 
   await page.getByTestId('action-start-play').click();
   // then
+  await expect(page).toHaveURL('/play');
   await expect(page.getByTestId('page-bingo-title')).toBeVisible();
 
-  await page.getByTestId('action-toolbar-quarter-next').click();
-  await expect(page).toHaveURL(/\/quarterly\?quarter=\d{4}-Q[1-4]/);
+  await page.getByRole('button', { name: 'Planen' }).click();
+  await expect(page).toHaveURL('/plan');
   await expect(page.getByTestId('page-quarterly-plan-title')).toBeVisible();
 
-  await page.getByTestId('action-toolbar-quarter-prev').click();
+  await page.getByRole('button', { name: 'Spielen' }).click();
+  await expect(page).toHaveURL('/play');
   await expect(page.getByTestId('page-bingo-title')).toBeVisible();
 });
 
@@ -132,7 +132,7 @@ test('should open help and return home when using toolbar actions', async ({ pag
   await expect(page.getByTestId('page-start-root')).toBeVisible();
 });
 
-test('should open print view popup with quarter and mode query params', async ({ page }) => {
+test('should open print view popup with mode query param', async ({ page }) => {
   // given
   await page.goto('/');
   await page.getByTestId('action-start-play').click();
@@ -143,8 +143,8 @@ test('should open print view popup with quarter and mode query params', async ({
   const popup = await popupPromise;
 
   // then
-  await popup.waitForURL(/\/quarterly-print\?quarter=\d{4}-Q[1-4]&mode=polaroid/);
-  await expect(popup).toHaveURL(/\/quarterly-print\?quarter=\d{4}-Q[1-4]&mode=polaroid/);
+  await popup.waitForURL(/\/quarterly-print\?mode=polaroid/);
+  await expect(popup).toHaveURL(/\/quarterly-print\?mode=polaroid/);
   await popup.close();
 });
 

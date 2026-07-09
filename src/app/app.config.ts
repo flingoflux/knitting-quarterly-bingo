@@ -13,9 +13,6 @@ import { LocalStorageBingoGameRepository } from './features/bingo-game/infrastru
 import { BINGO_GAME_REPOSITORY } from './features/bingo-game/domain/bingo-game.repository';
 import { LOAD_BINGO_PROGRESS_OUT_PORT } from './features/bingo-game/application/ports/out/load-bingo-progress.out-port';
 import { PERSIST_BINGO_PROGRESS_OUT_PORT } from './features/bingo-game/application/ports/out/persist-bingo-progress.out-port';
-import { ARCHIVE_REPOSITORY } from './features/archive/domain/archive.repository';
-import { LocalStorageArchiveRepository } from './features/archive/infrastructure/local-storage-archive.repository';
-import { LOAD_ARCHIVE_ENTRIES_OUT_PORT } from './features/archive/application/ports/out/load-archive-entries.out-port';
 import { IndexedDbImageRepository } from './core/infrastructure/indexed-db-image-repository.service';
 import { IMAGE_REPOSITORY } from './shared/ports/image-repository';
 import { LocalStorageUserSettingsRepository } from './features/user-settings/infrastructure/local-storage-user-settings.repository';
@@ -37,11 +34,7 @@ export const appConfig: ApplicationConfig = {
     { provide: BINGO_GAME_REPOSITORY, useExisting: LocalStorageBingoGameRepository },
     { provide: LOAD_BINGO_PROGRESS_OUT_PORT, useExisting: LocalStorageBingoGameRepository },
     { provide: PERSIST_BINGO_PROGRESS_OUT_PORT, useExisting: LocalStorageBingoGameRepository },
-    { provide: ARCHIVE_REPOSITORY, useExisting: LocalStorageArchiveRepository },
-    { provide: LOAD_ARCHIVE_ENTRIES_OUT_PORT, useExisting: LocalStorageArchiveRepository },
     { provide: IMAGE_REPOSITORY, useExisting: IndexedDbImageRepository },
-    { provide: USER_SETTINGS_REPOSITORY, useExisting: LocalStorageUserSettingsRepository },
-    { provide: LOAD_BOARD_VIEW_MODE_OUT_PORT, useExisting: LocalStorageUserSettingsRepository },
     { provide: PERSIST_BOARD_VIEW_MODE_OUT_PORT, useExisting: LocalStorageUserSettingsRepository },
     { provide: MANAGE_USER_SETTINGS_IN_PORT, useExisting: ManageUserSettingsUseCase },
   ],

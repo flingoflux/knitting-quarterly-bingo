@@ -1,19 +1,15 @@
-import { Component, ViewChild, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
+import { Component, ViewChild, inject, output, signal, computed, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { PLAY_BINGO_IN_PORT } from '../application/ports/in/play-bingo.in-port';
 import { BingoGameDesktopComponent } from './desktop/bingo-game-desktop.component';
 import { BingoBoardMobileComponent } from './mobile/bingo-board-mobile.component';
 import { ProjectComparisonDialogComponent } from './common/project-comparison-dialog.component';
 import { ChallengeProgress } from '../domain/bingo-game';
-import { IconComponent } from '../../../shared/ui';
-import { ButtonComponent } from '../../../shared/ui';
-import { PageToolbarComponent } from '../../../shared/ui';
-import { PageContainerComponent } from '../../../shared/ui';
-import { FeatureHeaderComponent } from '../../../shared/ui';
+import { IconComponent, ButtonComponent, PageToolbarComponent, PageContainerComponent, FeatureHeaderComponent, PlayPlanToggleComponent } from '../../../shared/ui';
 import type { ImageChangedEvent } from '../../../shared/ui';
-import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
+import { QuarterClock } from '../../../core/domain';
 import { LayoutModeService } from '../../../shared/utils/layout-mode.service';
 
 const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
@@ -21,26 +17,18 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
 @Component({
   selector: 'app-bingo-game',
   standalone: true,
-  imports: [CommonModule, BingoGameDesktopComponent, BingoBoardMobileComponent, ProjectComparisonDialogComponent, PageToolbarComponent, IconComponent, ButtonComponent, PageContainerComponent, FeatureHeaderComponent],
+  imports: [CommonModule, BingoGameDesktopComponent, BingoBoardMobileComponent, ProjectComparisonDialogComponent, PageToolbarComponent, IconComponent, ButtonComponent, PageContainerComponent, FeatureHeaderComponent, PlayPlanToggleComponent],
   template: `
     <kq-page-container>
-      <kq-page-toolbar
-        [maxWidth]="PAGE_TOOLBAR_WIDTH_MOBILE"
-        [quarterLabel]="displayedQuarterId()"
-        [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
-        [showNextButton]="canGoToNextQuarter()"
-        (homeClicked)="goHome()"
-        (previousQuarterClicked)="goToPreviousQuarter()"
-        (nextQuarterClicked)="goToNextQuarter()"
-      >
+      <kq-page-toolbar [maxWidth]="PAGE_TOOLBAR_WIDTH_MOBILE" (homeClicked)="goHome()">
+        <kq-play-plan-toggle 
+          activeMode="play"
+          (modeChanged)="onModeChanged($event)"
+        ></kq-play-plan-toggle>
         <kq-button toolbar-actions testId="action-toolbar-help" variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
           <kq-icon name="question" [size]="24"/>
         </kq-button>
       </kq-page-toolbar>
-
-      <div class="preview-banner" *ngIf="isPreviewMode()">
-        💡 Du schaust dir das <strong>{{ displayedQuarterId() }}</strong> an. Fortschritt wird hier nicht gespeichert.
-      </div>
 
       @if (layoutMode.isMobile()) {
         <kq-feature-header
@@ -73,17 +61,6 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
   `,
   styles: [
     `
-    .preview-banner {
-      background: var(--kq-bg-warm);
-      border: 1px solid #c79362;
-      border-radius: 0.5rem;
-      padding: 0.9rem 1.1rem;
-      margin-bottom: 1.1rem;
-      color: var(--kq-text-heading);
-      font-size: 0.95rem;
-      font-weight: 500;
-    }
-
     @media (max-width: 640px) {
       kq-page-toolbar {
         justify-content: center;
@@ -91,32 +68,18 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
     }
   `]
 })
-export class BingoGameComponent implements OnInit {
+export class BingoGameComponent {
   @ViewChild('comparisonDialog') private readonly comparisonDialog!: ProjectComparisonDialogComponent;
   @ViewChild('desktopView') private readonly desktopViewRef?: BingoGameDesktopComponent;
   @ViewChild('mobileBingoBoard') private readonly mobileBingoBoardRef?: BingoBoardMobileComponent;
 
   private readonly state = inject(PLAY_BINGO_IN_PORT);
   private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
-  private readonly destroyRef = inject(DestroyRef);
   readonly layoutMode = inject(LayoutModeService);
 
-  readonly PAGE_TOOLBAR_WIDTH_MOBILE = PAGE_TOOLBAR_WIDTH_MOBILE;
+  readonly PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
   private readonly quarterClock = new QuarterClock();
   readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
-  readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
-  readonly quarterly = computed(() =>
-    KnittingQuarterly.create({
-      quarterId: this.displayedQuarterId(),
-    })
-  );
-  readonly isPreviewMode = computed(() => this.quarterly().isFuturePreview(this.actualCurrentQuarterId));
-  readonly canGoToNextQuarter = computed(() => {
-    const nextQuarterId = this.quarterClock.getNextQuarterIdFromQuarterId(this.actualCurrentQuarterId);
-    return this.displayedQuarterId() !== nextQuarterId;
-  });
-  readonly canGoToPreviousQuarter = computed(() => true);
   readonly mobileEditMode = signal(false);
   readonly mobileSubtitle = computed(() =>
     this.mobileEditMode()
@@ -124,19 +87,10 @@ export class BingoGameComponent implements OnInit {
       : BingoBoardMobileComponent.overviewSubtitle
   );
 
-  ngOnInit(): void {
-    this.route.queryParamMap
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(queryParams => {
-        const quarterParam = queryParams.get('quarter');
-        if (quarterParam) {
-          this.displayedQuarterId.set(quarterParam);
-          this.state.setPreviewMode(this.quarterly().isFuturePreview(this.actualCurrentQuarterId), quarterParam);
-        } else {
-          this.displayedQuarterId.set(this.actualCurrentQuarterId);
-          this.state.setPreviewMode(false);
-        }
-      });
+  modeChanged = output<'play' | 'plan'>();
+
+  constructor() {
+    this.state.setPreviewMode(false);
   }
 
   get challenges(): ChallengeProgress[] {
@@ -159,20 +113,13 @@ export class BingoGameComponent implements OnInit {
     void this.router.navigate(['/how-it-works']);
   }
 
-  goToNextQuarter(): void {
-    const nextQuarter = this.quarterClock.getNextQuarterIdFromQuarterId(this.displayedQuarterId());
-    void this.router.navigate(['/quarterly'], { queryParams: { quarter: nextQuarter } });
-  }
-
-  goToPreviousQuarter(): void {
-    const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
-    void this.router.navigate(['/quarterly'], { queryParams: { quarter: previousQuarter } });
+  onModeChanged(mode: 'play' | 'plan'): void {
+    this.modeChanged.emit(mode);
   }
 
   onPrintClick(): void {
     const urlTree = this.router.createUrlTree(['/quarterly-print'], {
       queryParams: {
-        quarter: this.displayedQuarterId(),
         mode: 'polaroid',
       },
     });
