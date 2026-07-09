@@ -6,7 +6,6 @@ import { ChallengeProgress } from '../../domain/bingo-game';
 import { StatusMiniGridComponent } from '../../../../shared/ui';
 import { FeatureHeaderComponent } from '../../../../shared/ui';
 import { BoardToolbarDesktopComponent } from '../../../../shared/ui';
-import { BoardViewMode } from '../../../user-settings/domain/board-view-mode';
 
 interface CardDetailOpenedEvent {
   index: number;
@@ -26,9 +25,7 @@ interface CardDetailOpenedEvent {
     />
 
     <kq-board-toolbar-desktop
-      [mode]="viewMode"
       [showPrintButton]="true"
-      (modeChange)="modeChanged.emit($event)"
       (printClicked)="printClicked.emit()"
     >
       <kq-status-mini-grid
@@ -43,7 +40,7 @@ interface CardDetailOpenedEvent {
       [challenges]="challenges"
       [completed]="completed"
       [bingoCells]="bingoCells"
-      [mode]="viewMode"
+      mode="polaroid"
       (toggled)="onToggle($event)"
       (cardDetailOpened)="cardDetailOpened.emit($event)"
     />
@@ -54,9 +51,6 @@ export class BingoGameDesktopComponent {
 
   @ViewChild('playableBoard') private readonly playableBoardRef?: PlayableBoardDesktopComponent;
 
-  @Input() viewMode: BoardViewMode = 'polaroid';
-
-  @Output() modeChanged = new EventEmitter<BoardViewMode>();
   @Output() printClicked = new EventEmitter<void>();
   @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
 

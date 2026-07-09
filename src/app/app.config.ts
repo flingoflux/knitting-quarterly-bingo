@@ -24,8 +24,6 @@ import { LOAD_BOARD_VIEW_MODE_OUT_PORT } from './features/user-settings/applicat
 import { PERSIST_BOARD_VIEW_MODE_OUT_PORT } from './features/user-settings/application/ports/out/persist-board-view-mode.out-port';
 import { MANAGE_USER_SETTINGS_IN_PORT } from './features/user-settings/application/ports/in/manage-user-settings.in-port';
 import { ManageUserSettingsUseCase } from './features/user-settings/application/manage-user-settings.use-case';
-import { LOAD_LAYOUT_MODE_OUT_PORT } from './features/user-settings/application/ports/out/load-layout-mode.out-port';
-import { PERSIST_LAYOUT_MODE_OUT_PORT } from './features/user-settings/application/ports/out/persist-layout-mode.out-port';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -45,8 +43,6 @@ export const appConfig: ApplicationConfig = {
     { provide: USER_SETTINGS_REPOSITORY, useExisting: LocalStorageUserSettingsRepository },
     { provide: LOAD_BOARD_VIEW_MODE_OUT_PORT, useExisting: LocalStorageUserSettingsRepository },
     { provide: PERSIST_BOARD_VIEW_MODE_OUT_PORT, useExisting: LocalStorageUserSettingsRepository },
-    { provide: LOAD_LAYOUT_MODE_OUT_PORT, useExisting: LocalStorageUserSettingsRepository },
-    { provide: PERSIST_LAYOUT_MODE_OUT_PORT, useExisting: LocalStorageUserSettingsRepository },
     { provide: MANAGE_USER_SETTINGS_IN_PORT, useExisting: ManageUserSettingsUseCase },
   ],
 };

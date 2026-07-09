@@ -132,19 +132,6 @@ test('should open help and return home when using toolbar actions', async ({ pag
   await expect(page.getByTestId('page-start-root')).toBeVisible();
 });
 
-test('should allow switching to kompakt mode in play view', async ({ page }) => {
-  // given
-  await page.goto('/');
-  await page.getByTestId('action-start-play').click();
-
-  // when
-  const compactButton = page.getByRole('button', { name: 'Kompaktansicht' });
-  await compactButton.click();
-
-  // then
-  await expect(compactButton).toHaveClass(/active/);
-});
-
 test('should open print view popup with quarter and mode query params', async ({ page }) => {
   // given
   await page.goto('/');

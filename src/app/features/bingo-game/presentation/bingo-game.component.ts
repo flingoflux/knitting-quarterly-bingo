@@ -14,12 +14,9 @@ import { PageContainerComponent } from '../../../shared/ui';
 import { FeatureHeaderComponent } from '../../../shared/ui';
 import type { ImageChangedEvent } from '../../../shared/ui';
 import { QuarterClock, KnittingQuarterly } from '../../../core/domain';
-import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
-import { MANAGE_USER_SETTINGS_IN_PORT } from '../../user-settings/application/ports/in/manage-user-settings.in-port';
 import { LayoutModeService } from '../../../shared/utils/layout-mode.service';
 
 const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
-const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 
 @Component({
   selector: 'app-bingo-game',
@@ -28,7 +25,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
   template: `
     <kq-page-container>
       <kq-page-toolbar
-        [maxWidth]="viewMode === 'kompakt' ? PAGE_TOOLBAR_WIDTH_HORIZONTAL : PAGE_TOOLBAR_WIDTH_MOBILE"
+        [maxWidth]="PAGE_TOOLBAR_WIDTH_MOBILE"
         [quarterLabel]="displayedQuarterId()"
         [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
         [showNextButton]="canGoToNextQuarter()"
@@ -66,8 +63,6 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
       } @else {
         <app-bingo-game-desktop
           #desktopView
-          [viewMode]="viewMode"
-          (modeChanged)="onModeChange($event)"
           (printClicked)="onPrintClick()"
           (cardDetailOpened)="onCardDetailOpen($event)"
         />
@@ -104,14 +99,10 @@ export class BingoGameComponent implements OnInit {
   private readonly state = inject(PLAY_BINGO_IN_PORT);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
   private readonly destroyRef = inject(DestroyRef);
   readonly layoutMode = inject(LayoutModeService);
 
   readonly PAGE_TOOLBAR_WIDTH_MOBILE = PAGE_TOOLBAR_WIDTH_MOBILE;
-  readonly PAGE_TOOLBAR_WIDTH_HORIZONTAL = PAGE_TOOLBAR_WIDTH_HORIZONTAL;
-
-  viewMode: BoardViewMode = this.userSettings.loadBoardViewMode();
   private readonly quarterClock = new QuarterClock();
   readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
   readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
@@ -182,7 +173,7 @@ export class BingoGameComponent implements OnInit {
     const urlTree = this.router.createUrlTree(['/quarterly-print'], {
       queryParams: {
         quarter: this.displayedQuarterId(),
-        mode: this.viewMode,
+        mode: 'polaroid',
       },
     });
 
@@ -196,11 +187,6 @@ export class BingoGameComponent implements OnInit {
 
   onToggle(i: number): void {
     this.state.persistToggledChallenge(i);
-  }
-
-  onModeChange(mode: BoardViewMode): void {
-    this.viewMode = mode;
-    this.userSettings.persistBoardViewMode(mode);
   }
 
   onMobileEditModeChanged(isEditing: boolean): void {

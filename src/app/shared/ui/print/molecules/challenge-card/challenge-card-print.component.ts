@@ -15,9 +15,7 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
   imports: [CommonModule, IconComponent, CardPhotoComponent],
   template: `
     <div
-      class="card"
-      [class.card--polaroid]="mode === 'polaroid'"
-      [class.card--kompakt]="mode === 'kompakt'"
+      class="card card--polaroid"
       [class.card--done]="done"
       [class.card--bingo]="inBingo"
     >

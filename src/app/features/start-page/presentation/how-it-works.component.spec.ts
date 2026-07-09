@@ -16,7 +16,7 @@ describe('HowItWorksComponent template regression', () => {
     expect(source).toContain('titleTestId="page-howto-title"');
   });
 
-  it('should use kompakt mode toggle and not horizontal', () => {
+  it('should not render desktop mode toggle settings', () => {
     // given
     const componentPath = resolve(
       process.cwd(),
@@ -27,11 +27,12 @@ describe('HowItWorksComponent template regression', () => {
     const source = readFileSync(componentPath, 'utf-8');
 
     // then
-    expect(source).toContain("(click)=\"onModeChange('kompakt')\"");
-    expect(source).not.toContain("(click)=\"onModeChange('horizontal')\"");
+    expect(source).not.toContain('Desktop-Board-Ansicht');
+    expect(source).not.toContain("(click)=\"onModeChange('polaroid')\"");
+    expect(source).not.toContain("(click)=\"onModeChange('kompakt')\"");
   });
 
-  it('should hide board view settings on mobile breakpoint', () => {
+  it('should keep settings section without board-view subsection', () => {
     // given
     const componentPath = resolve(
       process.cwd(),
@@ -42,10 +43,8 @@ describe('HowItWorksComponent template regression', () => {
     const source = readFileSync(componentPath, 'utf-8');
 
     // then
-    expect(source).toContain('class="settings-subsection board-view-subsection"');
-    expect(source).toContain('@media (max-width: 640px)');
-    expect(source).toContain('.board-view-subsection');
+    expect(source).toContain('id="howto-settings-title"');
+    expect(source).not.toContain('board-view-subsection');
     expect(source).not.toContain('.layout-mode-subsection');
-    expect(source).toContain('display: none;');
   });
 });

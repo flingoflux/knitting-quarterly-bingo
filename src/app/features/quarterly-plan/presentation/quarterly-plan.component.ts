@@ -15,12 +15,9 @@ import { PageContainerComponent } from '../../../shared/ui';
 import { FeatureHeaderComponent } from '../../../shared/ui';
 import type { ImageChangedEvent } from '../../../shared/ui';
 import { QuarterClock } from '../../../core/domain';
-import { BoardViewMode } from '../../user-settings/domain/board-view-mode';
-import { MANAGE_USER_SETTINGS_IN_PORT } from '../../user-settings/application/ports/in/manage-user-settings.in-port';
 import { LayoutModeService } from '../../../shared/utils/layout-mode.service';
 
 const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
-const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
 
 @Component({
   selector: 'app-quarterly-plan',
@@ -29,7 +26,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
   template: `
     <kq-page-container>
       <kq-page-toolbar
-        [maxWidth]="viewMode === 'kompakt' ? PAGE_TOOLBAR_WIDTH_HORIZONTAL : PAGE_TOOLBAR_WIDTH_MOBILE"
+        [maxWidth]="PAGE_TOOLBAR_WIDTH_MOBILE"
         [quarterLabel]="displayedQuarterId()"
         [canGoToPreviousQuarter]="canGoToPreviousQuarter()"
         [showNextButton]="canGoToNextQuarter()"
@@ -62,9 +59,7 @@ const PAGE_TOOLBAR_WIDTH_HORIZONTAL = '58rem';
       } @else {
         <app-quarterly-plan-desktop
           #desktopView
-          [viewMode]="viewMode"
           [quarterId]="displayedQuarterId()"
-          (modeChanged)="onModeChange($event)"
           (cardDetailOpened)="onCardDetailOpen($event)"
           (bingoStarted)="onBingoStarted()"
         />
@@ -90,14 +85,10 @@ export class QuarterlyPlanComponent implements OnInit {
   private readonly startBingoFromPlanService = inject(START_BINGO_FROM_PLAN_IN_PORT);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
   private readonly destroyRef = inject(DestroyRef);
   readonly layoutMode = inject(LayoutModeService);
 
   readonly PAGE_TOOLBAR_WIDTH_MOBILE = PAGE_TOOLBAR_WIDTH_MOBILE;
-  readonly PAGE_TOOLBAR_WIDTH_HORIZONTAL = PAGE_TOOLBAR_WIDTH_HORIZONTAL;
-
-  viewMode: BoardViewMode = this.userSettings.loadBoardViewMode();
   private readonly quarterClock = new QuarterClock();
   readonly actualCurrentQuarterId = this.quarterClock.getQuarterId(new Date());
   readonly displayedQuarterId = signal(this.actualCurrentQuarterId);
@@ -145,11 +136,6 @@ export class QuarterlyPlanComponent implements OnInit {
   goToPreviousQuarter(): void {
     const previousQuarter = this.quarterClock.getPreviousQuarterIdFromQuarterId(this.displayedQuarterId());
     void this.router.navigate(['/quarterly'], { queryParams: { quarter: previousQuarter } });
-  }
-
-  onModeChange(mode: BoardViewMode): void {
-    this.viewMode = mode;
-    this.userSettings.persistBoardViewMode(mode);
   }
 
   onMobileEditModeChanged(isEditing: boolean): void {

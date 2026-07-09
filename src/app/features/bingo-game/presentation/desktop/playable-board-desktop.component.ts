@@ -15,7 +15,7 @@ interface CardDetailOpenedEvent {
   standalone: true,
   imports: [CommonModule, ChallengeCardDesktopComponent, BoardGridDesktopComponent],
   template: `
-    <kq-board-grid-desktop [mode]="mode">
+    <kq-board-grid-desktop>
       <kq-challenge-card-desktop
         *ngFor="let p of challenges; let i = index"
         [name]="p.name"
@@ -44,7 +44,7 @@ export class PlayableBoardDesktopComponent {
 
   @Input() completed: boolean[] = [];
   @Input() bingoCells: Set<number> = new Set<number>();
-  @Input() mode: 'polaroid' | 'kompakt' = 'polaroid';
+  @Input() mode: 'polaroid' = 'polaroid';
   @Output() toggled = new EventEmitter<number>();
   @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
 

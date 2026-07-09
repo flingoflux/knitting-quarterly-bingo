@@ -6,12 +6,12 @@ describe('BoardViewMode', () => {
     expect(DEFAULT_BOARD_VIEW_MODE).toBe('polaroid');
   });
 
-  it('should accept polaroid and kompakt', () => {
+  it('should accept polaroid', () => {
     expect(isBoardViewMode('polaroid')).toBe(true);
-    expect(isBoardViewMode('kompakt')).toBe(true);
   });
 
-  it('should reject horizontal and unknown values', () => {
+  it('should reject kompakt and unknown values', () => {
+    expect(isBoardViewMode('kompakt')).toBe(false);
     expect(isBoardViewMode('horizontal')).toBe(false);
     expect(isBoardViewMode('')).toBe(false);
     expect(isBoardViewMode(null)).toBe(false);

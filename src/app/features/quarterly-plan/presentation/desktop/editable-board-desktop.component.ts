@@ -21,7 +21,7 @@ interface CardDetailOpenedEvent {
   standalone: true,
   imports: [CommonModule, IconComponent, ChallengeCardDesktopComponent, BoardGridDesktopComponent],
   template: `
-    <kq-board-grid-desktop [mode]="mode">
+    <kq-board-grid-desktop>
       <div
         *ngFor="let p of challenges; let i = index"
         class="cell"
@@ -146,26 +146,6 @@ interface CardDetailOpenedEvent {
       margin-top: 0.25rem;
     }
 
-    /* ── Kompakt-Grid ── */
-    .grid.editable.mode-kompakt {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      max-width: var(--kq-toolbar-max-width-horizontal);
-      gap: 0.4rem;
-    }
-    .mode-kompakt .title {
-      font-size: 0.7rem;
-      text-align: left;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .mode-kompakt .title-input {
-      width: calc(100% - 0.5rem);
-      font-size: 0.72rem;
-      padding: 0.2rem 0.4rem;
-    }
-
   `]
 })
 export class EditableBoardDesktopComponent {
@@ -180,7 +160,7 @@ export class EditableBoardDesktopComponent {
   }
   get challenges(): Challenge[] { return this._challenges; }
 
-  @Input() mode: 'polaroid' | 'kompakt' = 'polaroid';
+  @Input() mode: 'polaroid' = 'polaroid';
   @Input() dragTargetIndex!: number | null;
   @Output() dragStarted = new EventEmitter<number>();
   @Output() dragOverCell = new EventEmitter<number>();

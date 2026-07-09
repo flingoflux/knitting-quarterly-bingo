@@ -7,7 +7,6 @@ import { IconComponent } from '../../../../shared/ui';
 import { ButtonComponent } from '../../../../shared/ui';
 import { FeatureHeaderComponent } from '../../../../shared/ui';
 import { BoardToolbarDesktopComponent } from '../../../../shared/ui';
-import { BoardViewMode } from '../../../user-settings/domain/board-view-mode';
 import { shuffleArray } from '../../../../shared/utils/array-utils';
 
 interface CardDetailOpenedEvent {
@@ -28,8 +27,6 @@ interface CardDetailOpenedEvent {
     />
 
     <kq-board-toolbar-desktop
-      [mode]="viewMode"
-      (modeChange)="modeChanged.emit($event)"
     >
       <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
         <kq-icon name="shuffle" [size]="22"/>
@@ -43,7 +40,7 @@ interface CardDetailOpenedEvent {
       #editableBoard
       [challenges]="challenges"
       [dragTargetIndex]="dragTargetIndex"
-      [mode]="viewMode"
+      mode="polaroid"
       (dragStarted)="onDragStart($event)"
       (dragOverCell)="onDragOver($event)"
       (dragLeftCell)="onDragLeave($event)"
@@ -58,10 +55,8 @@ export class QuarterlyPlanDesktopComponent {
 
   @ViewChild('editableBoard') private readonly editableBoardRef?: EditableBoardDesktopComponent;
 
-  @Input() viewMode: BoardViewMode = 'polaroid';
   @Input() quarterId = '';
 
-  @Output() modeChanged = new EventEmitter<BoardViewMode>();
   @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
   @Output() bingoStarted = new EventEmitter<void>();
 
