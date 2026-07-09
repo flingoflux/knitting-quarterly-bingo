@@ -1,4 +1,4 @@
-import { Component, ViewChild, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -6,14 +6,12 @@ import { PLAN_QUARTERLY_IN_PORT } from '../application/ports/in/plan-quarterly.i
 import { START_BINGO_FROM_PLAN_IN_PORT } from '../../bingo-game/application/ports/in/start-bingo-from-plan.in-port';
 import { QuarterlyPlanDesktopComponent } from './desktop/quarterly-plan-desktop.component';
 import { EditableBoardMobileComponent } from './mobile/editable-board-mobile.component';
-import { CardDetailDialogComponent } from './common/card-detail-dialog.component';
 import { Challenge } from '../../../shared/domain/challenge';
 import { IconComponent } from '../../../shared/ui';
 import { ButtonComponent } from '../../../shared/ui';
 import { PageToolbarComponent } from '../../../shared/ui';
 import { PageContainerComponent } from '../../../shared/ui';
 import { FeatureHeaderComponent } from '../../../shared/ui';
-import type { ImageChangedEvent } from '../../../shared/ui';
 import { QuarterClock } from '../../../core/domain';
 import { LayoutModeService } from '../../../shared/utils/layout-mode.service';
 
@@ -22,7 +20,7 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
 @Component({
   selector: 'app-quarterly-plan',
   standalone: true,
-  imports: [CommonModule, QuarterlyPlanDesktopComponent, EditableBoardMobileComponent, CardDetailDialogComponent, IconComponent, ButtonComponent, PageToolbarComponent, PageContainerComponent, FeatureHeaderComponent],
+  imports: [CommonModule, QuarterlyPlanDesktopComponent, EditableBoardMobileComponent, IconComponent, ButtonComponent, PageToolbarComponent, PageContainerComponent, FeatureHeaderComponent],
   template: `
     <kq-page-container>
       <kq-page-toolbar
@@ -51,7 +49,6 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
           #mobileEditableBoard
           [challenges]="challenges"
           (challengeEdited)="onChallengeEdited($event)"
-          (cardDetailOpened)="onCardDetailOpen($event)"
           (reorderRequested)="onReorderRequested($event)"
           (editModeChanged)="onMobileEditModeChanged($event)"
           (bingoStarted)="onBingoStarted()"
@@ -60,12 +57,10 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
         <app-quarterly-plan-desktop
           #desktopView
           [quarterId]="displayedQuarterId()"
-          (cardDetailOpened)="onCardDetailOpen($event)"
           (bingoStarted)="onBingoStarted()"
         />
       }
 
-      <app-card-detail-dialog #detailDialog (imageChanged)="onImageChanged($event)"></app-card-detail-dialog>
     </kq-page-container>
   `,
   styles: [`
@@ -77,10 +72,6 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
   `],
 })
 export class QuarterlyPlanComponent implements OnInit {
-  @ViewChild('detailDialog') private readonly detailDialog!: CardDetailDialogComponent;
-  @ViewChild('desktopView') private readonly desktopViewRef?: QuarterlyPlanDesktopComponent;
-  @ViewChild('mobileEditableBoard') private readonly mobileEditableBoardRef?: EditableBoardMobileComponent;
-
   private readonly state = inject(PLAN_QUARTERLY_IN_PORT);
   private readonly startBingoFromPlanService = inject(START_BINGO_FROM_PLAN_IN_PORT);
   private readonly router = inject(Router);
@@ -160,24 +151,7 @@ export class QuarterlyPlanComponent implements OnInit {
     this.state.persistUpdatedChallenge(event.index, event.challenge);
   }
 
-  onCardDetailOpen(event: { index: number; challenge: Challenge }): void {
-    this._openCardIndex = event.index;
-    this.detailDialog.open(event.challenge.imageId ?? null, event.challenge.name);
-  }
-
-  onImageChanged(event: ImageChangedEvent): void {
-    if (this._openCardIndex === null) return;
-    const challenge = this.state.challenges()[this._openCardIndex];
-    if (challenge && challenge.imageId !== event.imageId) {
-      this.state.persistUpdatedChallenge(this._openCardIndex, { ...challenge, imageId: event.imageId ?? undefined });
-    }
-    void this.desktopViewRef?.refreshImage(event.imageId);
-    void this.mobileEditableBoardRef?.refreshImage(event.imageId);
-  }
-
   onReorderRequested(event: { from: number; to: number }): void {
     this.state.persistSwappedChallenges(event.from, event.to);
   }
-
-  private _openCardIndex: number | null = null;
 }

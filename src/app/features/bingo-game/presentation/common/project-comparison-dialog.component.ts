@@ -25,7 +25,7 @@ interface CropState {
   standalone: true,
   imports: [CommonModule, IconComponent, DialogShellComponent],
   template: `
-    <kq-dialog-shell #shell [title]="title" maxWidth="min(94vw, 680px)" (closed)="onShellClosed()">
+    <kq-dialog-shell #shell [title]="title" maxWidth="min(94vw, 360px)" (closed)="onShellClosed()">
 
         <!-- Crop-Modus -->
         <ng-container *ngIf="cropState">
@@ -53,26 +53,11 @@ interface CropState {
           </div>
         </ng-container>
 
-        <!-- Vergleichsansicht -->
+        <!-- Upload-Ansicht -->
         <ng-container *ngIf="!cropState">
           <div class="comparison-grid">
-
-            <!-- Plan-Spalte (nur lesen) -->
+            <!-- Quarterly-Spalte (editierbar) -->
             <div class="image-col">
-              <div class="col-label">Plan</div>
-              <div class="image-area">
-                <img *ngIf="definitionImageUrl" [src]="definitionImageUrl" class="preview-img" [alt]="title" />
-                <div *ngIf="!definitionImageUrl && !loadingDefinition" class="placeholder">
-                  <kq-icon name="camera" [size]="36" [strokeWidth]="1.3" class="placeholder-icon"/>
-                  <p class="placeholder-text">Kein Foto geplant</p>
-                </div>
-                <div *ngIf="loadingDefinition" class="loading">Lädt…</div>
-              </div>
-            </div>
-
-            <!-- Spiel-Spalte (editierbar) -->
-            <div class="image-col">
-              <div class="col-label">Quarterly</div>
               <div class="image-area">
                 <img *ngIf="gameImageUrl && !loadingGame" [src]="gameImageUrl" class="preview-img" [alt]="title" />
                 <div *ngIf="!gameImageUrl && !loadingGame" class="placeholder">
@@ -101,21 +86,13 @@ interface CropState {
   styles: [`
     .comparison-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 1rem;
     }
     .image-col {
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
-    }
-    .col-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #8f5c3a;
-      text-align: center;
     }
     .image-area {
       background: var(--kq-placeholder-bg);
@@ -286,9 +263,7 @@ export class ProjectComparisonDialogComponent {
   @Output() imageChanged = new EventEmitter<ImageChangedEvent>();
 
   title = '';
-  definitionImageUrl: string | null = null;
   gameImageUrl: string | null = null;
-  loadingDefinition = false;
   loadingGame = false;
   cropState: CropState | null = null;
 
@@ -300,21 +275,13 @@ export class ProjectComparisonDialogComponent {
     this.title = title;
     this.currentDefinitionImageId = definitionImageId;
     this.currentGameImageId = gameImageId;
-    this.definitionImageUrl = null;
     this.gameImageUrl = null;
     this.cropState = null;
-    this.loadingDefinition = !!definitionImageId;
     this.loadingGame = !!gameImageId;
     this.shell.open();
     this.cdr.markForCheck();
 
-    const [defUrl, gameUrl] = await Promise.all([
-      definitionImageId ? this.imageRepo.getImage(definitionImageId) : Promise.resolve(null),
-      gameImageId ? this.imageRepo.getImage(gameImageId) : Promise.resolve(null),
-    ]);
-    this.definitionImageUrl = defUrl;
-    this.gameImageUrl = gameUrl;
-    this.loadingDefinition = false;
+    this.gameImageUrl = gameImageId ? await this.imageRepo.getImage(gameImageId) : null;
     this.loadingGame = false;
     this.cdr.markForCheck();
   }

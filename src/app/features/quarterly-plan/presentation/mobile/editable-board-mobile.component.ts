@@ -11,11 +11,6 @@ interface ChallengeEditedEvent {
   challenge: Challenge;
 }
 
-interface CardDetailOpenedEvent {
-  index: number;
-  challenge: Challenge;
-}
-
 interface ReorderRequestedEvent {
   from: number;
   to: number;
@@ -49,7 +44,6 @@ interface ReorderRequestedEvent {
             [draftName]="getDraftName(i, p.name)"
             [isFirst]="i === 0"
             [isLast]="i === challenges.length - 1"
-            (cameraClicked)="openDetail(i, p, $event)"
             (editToggled)="startEditing(i, p, $event)"
             (editCancelled)="cancelEditing()"
             (movedUp)="moveUp(i)"
@@ -76,7 +70,7 @@ interface ReorderRequestedEvent {
 })
 export class EditableBoardMobileComponent {
   static readonly overviewSubtitle = 'Tippe auf eine Karte, um sie umzudrehen.';
-  static readonly editSubtitle = 'Du kannst jetzt Projekte umbenennen, die Reihenfolge anpassen und Fotos bearbeiten.';
+  static readonly editSubtitle = 'Du kannst jetzt Projekte umbenennen und die Reihenfolge anpassen.';
 
   private readonly el = inject(ElementRef);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -90,7 +84,6 @@ export class EditableBoardMobileComponent {
   get challenges(): Challenge[] { return this._challenges; }
 
   @Output() challengeEdited = new EventEmitter<ChallengeEditedEvent>();
-  @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
   @Output() reorderRequested = new EventEmitter<ReorderRequestedEvent>();
   @Output() editModeChanged = new EventEmitter<boolean>();
   @Output() bingoStarted = new EventEmitter<void>();
@@ -113,17 +106,6 @@ export class EditableBoardMobileComponent {
   getImage(imageId: string | undefined): string | null {
     if (!imageId) return null;
     return this.imageCache.get(imageId) ?? null;
-  }
-
-  async refreshImage(imageId: string | null): Promise<void> {
-    if (!imageId) return;
-    const url = await this.imageRepo.getImage(imageId);
-    if (url) {
-      this.imageCache.set(imageId, url);
-    } else {
-      this.imageCache.delete(imageId);
-    }
-    this.cdr.markForCheck();
   }
 
   onFabAction(index: number): void {
@@ -166,11 +148,6 @@ export class EditableBoardMobileComponent {
 
   cancelEditing(): void {
     this.editingIndex = null;
-  }
-
-  openDetail(i: number, challenge: Challenge, event: MouseEvent): void {
-    event.stopPropagation();
-    this.cardDetailOpened.emit({ index: i, challenge });
   }
 
   getDraftName(i: number, fallback: string): string {

@@ -157,14 +157,12 @@ test.describe('plan → bingo → print (desktop, polaroid)', () => {
     await page.getByTestId('action-start-plan').click();
     await expect(page.getByTestId('page-quarterly-plan-title')).toBeVisible();
 
-    // Edit the first 3 challenge cards
-    const editButtons = page.getByRole('button', { name: 'Projekt bearbeiten' });
+    // Edit the first 3 challenge cards directly via inline inputs
+    const planInputs = page.locator('[data-testid="plan-card-desktop"] .name-input');
     for (let i = 0; i < 3; i++) {
-      await editButtons.nth(i).click();
-      const input = page.locator('.title-input');
-      await input.clear();
+      const input = planInputs.nth(i);
       await input.fill(newNames[i]);
-      await input.press('Enter');
+      await input.press('Tab');
     }
 
     // Start bingo (accept confirm dialog)

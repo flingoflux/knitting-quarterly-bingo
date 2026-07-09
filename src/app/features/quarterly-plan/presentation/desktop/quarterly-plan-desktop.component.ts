@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PLAN_QUARTERLY_IN_PORT } from '../../application/ports/in/plan-quarterly.in-port';
 import { EditableBoardDesktopComponent } from './editable-board-desktop.component';
@@ -8,11 +8,6 @@ import { ButtonComponent } from '../../../../shared/ui';
 import { FeatureHeaderComponent } from '../../../../shared/ui';
 import { BoardToolbarDesktopComponent } from '../../../../shared/ui';
 import { shuffleArray } from '../../../../shared/utils/array-utils';
-
-interface CardDetailOpenedEvent {
-  index: number;
-  challenge: Challenge;
-}
 
 @Component({
   selector: 'app-quarterly-plan-desktop',
@@ -37,27 +32,21 @@ interface CardDetailOpenedEvent {
     </kq-board-toolbar-desktop>
 
     <app-editable-board
-      #editableBoard
       [challenges]="challenges"
       [dragTargetIndex]="dragTargetIndex"
-      mode="polaroid"
       (dragStarted)="onDragStart($event)"
       (dragOverCell)="onDragOver($event)"
       (dragLeftCell)="onDragLeave($event)"
       (droppedOnCell)="onDrop($event)"
       (challengeEdited)="onChallengeEdited($event)"
-      (cardDetailOpened)="cardDetailOpened.emit($event)"
     />
   `,
 })
 export class QuarterlyPlanDesktopComponent {
   private readonly state = inject(PLAN_QUARTERLY_IN_PORT);
 
-  @ViewChild('editableBoard') private readonly editableBoardRef?: EditableBoardDesktopComponent;
-
   @Input() quarterId = '';
 
-  @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
   @Output() bingoStarted = new EventEmitter<void>();
 
   dragTargetIndex: number | null = null;
@@ -99,9 +88,5 @@ export class QuarterlyPlanDesktopComponent {
 
   onChallengeEdited(event: { index: number; challenge: Challenge }): void {
     this.state.persistUpdatedChallenge(event.index, event.challenge);
-  }
-
-  async refreshImage(imageId: string | null): Promise<void> {
-    await this.editableBoardRef?.refreshImage(imageId);
   }
 }

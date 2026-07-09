@@ -9,11 +9,8 @@ import { CardPhotoComponent } from '../../../../shared/ui';
   imports: [CommonModule, IconComponent, CardPhotoComponent],
   template: `
     <div class="edit-card">
-      <div class="edit-card__photo" (click)="cameraClicked.emit($event)">
+      <div class="edit-card__photo">
         <kq-card-photo [imageUrl]="imageUrl" [alt]="name">
-          <div class="edit-card__camera-hint">
-            <kq-icon name="camera" [size]="16"/>
-          </div>
         </kq-card-photo>
       </div>
 
@@ -87,25 +84,10 @@ import { CardPhotoComponent } from '../../../../shared/ui';
       background: var(--kq-photo-bg);
       border-radius: 6px;
       overflow: hidden;
-      cursor: pointer;
+      cursor: default;
       -webkit-tap-highlight-color: transparent;
       --kq-card-photo-logo-size: 40px;
       --kq-card-photo-logo-max-size: 40px;
-    }
-
-    .edit-card__camera-hint {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      background: rgba(255,255,255,0.75);
-      backdrop-filter: blur(2px);
-      width: 22px;
-      height: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--kq-primary-dark);
-      border-top-left-radius: 4px;
     }
 
     .edit-card__body {
@@ -188,7 +170,6 @@ export class PlanEditCardMobileComponent {
   @Input() isFirst = false;
   @Input() isLast = false;
 
-  @Output() cameraClicked = new EventEmitter<MouseEvent>();
   @Output() editToggled = new EventEmitter<MouseEvent>();
   @Output() editCancelled = new EventEmitter<void>();
   @Output() movedUp = new EventEmitter<void>();
