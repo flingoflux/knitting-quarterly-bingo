@@ -53,20 +53,21 @@ import { KqCardMode } from '../../../desktop/molecules/challenge-card/challenge-
       align-items: center;
       justify-content: center;
     }
+    .card__img,
+    .card__placeholder {
+      width: calc(100% - 12px);
+      height: calc(100% - 12px);
+      border-radius: 2px;
+    }
     .card__img {
-      width: 100%;
-      height: 100%;
       object-fit: cover;
       display: block;
       -webkit-user-drag: none;
       user-select: none;
     }
     .card__placeholder {
-      width: calc(100% - 12px);
-      height: calc(100% - 12px);
       background: #fff;
       border: 0.5px solid #d7c7b5;
-      border-radius: 2px;
     }
 
     /* ── Caption ── */
