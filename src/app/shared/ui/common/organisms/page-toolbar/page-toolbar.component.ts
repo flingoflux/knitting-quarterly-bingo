@@ -1,12 +1,11 @@
 import { Component, EventEmitter, HostBinding, Input, Output } from '@angular/core';
 import { IconComponent } from '../../atoms/icon/icon.component';
 import { ButtonComponent } from '../../atoms/button/button.component';
-import { QuarterNavComponent } from '../../molecules/quarter-nav/quarter-nav.component';
 
 @Component({
   selector: 'kq-page-toolbar',
   standalone: true,
-  imports: [IconComponent, ButtonComponent, QuarterNavComponent],
+  imports: [IconComponent, ButtonComponent],
   template: `
     <div class="toolbar-left">
       <kq-button testId="action-toolbar-home" variant="icon" (click)="homeClicked.emit()" title="Zur Startseite" ariaLabel="Zur Startseite">
@@ -15,16 +14,6 @@ import { QuarterNavComponent } from '../../molecules/quarter-nav/quarter-nav.com
     </div>
 
     <div class="toolbar-center">
-      @if (showQuarterNav) {
-        <kq-quarter-nav
-          [label]="quarterLabel"
-          [canGoToPrevious]="canGoToPreviousQuarter"
-          [showPreviousButton]="showPreviousButton"
-          [showNextButton]="showNextButton"
-          (previousClicked)="previousQuarterClicked.emit()"
-          (nextClicked)="nextQuarterClicked.emit()"
-        />
-      }
       <ng-content />
     </div>
 
@@ -89,15 +78,8 @@ import { QuarterNavComponent } from '../../molecules/quarter-nav/quarter-nav.com
   `]
 })
 export class PageToolbarComponent {
-  @Input() quarterLabel: string | null = null;
-  @Input() canGoToPreviousQuarter = false;
-  @Input() showPreviousButton = true;
-  @Input() showNextButton = true;
-  @Input() showQuarterNav = true;
   @Input() maxWidth = '52rem';
   @Output() homeClicked = new EventEmitter<void>();
-  @Output() previousQuarterClicked = new EventEmitter<void>();
-  @Output() nextQuarterClicked = new EventEmitter<void>();
 
   @HostBinding('style.max-width')
   get hostMaxWidth(): string {

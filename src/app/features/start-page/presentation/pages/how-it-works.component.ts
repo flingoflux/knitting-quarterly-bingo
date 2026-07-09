@@ -16,7 +16,6 @@ import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexe
     <kq-page-container>
       <kq-page-toolbar
         [maxWidth]="pageToolbarWidth"
-        [showQuarterNav]="false"
         (homeClicked)="goHome()"
       >
         <kq-button toolbar-actions testId="action-toolbar-help" variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
