@@ -15,7 +15,7 @@ import { shuffleArray } from '../../../../shared/utils/array-utils';
   imports: [CommonModule, EditableBoardDesktopComponent, BoardToolbarDesktopComponent, FeatureHeaderComponent, IconComponent, ButtonComponent],
   template: `
     <kq-feature-header
-      eyebrow="Moodboard"
+      [eyebrow]="quarterId"
       title="Challenges planen"
       titleTestId="page-quarterly-plan-title"
       subtitle="Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden."
@@ -46,8 +46,7 @@ import { shuffleArray } from '../../../../shared/utils/array-utils';
 })
 export class QuarterlyPlanDesktopComponent {
   private readonly state = inject(PLAN_QUARTERLY_IN_PORT);
-
-  @Input() quarterId = '';
+  @Input() quarterId: string = '';
 
   @Output() printRequested = new EventEmitter<void>();
   @Output() bingoStarted = new EventEmitter<void>();

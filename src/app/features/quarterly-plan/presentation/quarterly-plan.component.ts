@@ -30,7 +30,7 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
 
       @if (layoutMode.isMobile()) {
         <kq-feature-header
-          eyebrow="Moodboard"
+          [eyebrow]="actualCurrentQuarterId"
           title="Challenges planen"
           titleTestId="page-quarterly-plan-title"
           [subtitle]="mobileSubtitle()"

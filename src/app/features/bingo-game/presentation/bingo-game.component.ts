@@ -32,7 +32,7 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
 
       @if (layoutMode.isMobile()) {
         <kq-feature-header
-          eyebrow="Bingo"
+          [eyebrow]="actualCurrentQuarterId"
           title="Happy crafting"
           titleTestId="page-bingo-title"
           [subtitle]="mobileSubtitle()"
@@ -51,6 +51,7 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
       } @else {
         <app-bingo-game-desktop
           #desktopView
+          [quarterId]="actualCurrentQuarterId"
           (printClicked)="onPrintClick()"
           (cardDetailOpened)="onCardDetailOpen($event)"
         />

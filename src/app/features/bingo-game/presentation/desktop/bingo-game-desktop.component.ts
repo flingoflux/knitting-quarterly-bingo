@@ -18,7 +18,7 @@ interface CardDetailOpenedEvent {
   imports: [CommonModule, PlayableBoardDesktopComponent, BoardToolbarDesktopComponent, StatusMiniGridComponent, FeatureHeaderComponent],
   template: `
     <kq-feature-header
-      eyebrow="Bingo"
+      [eyebrow]="quarterId"
       title="Happy crafting"
       titleTestId="page-bingo-title"
       subtitle="Klicke auf die Felder, um erledigte Projekte abzuhaken und ein Bingo zu erreichen."
@@ -48,6 +48,7 @@ interface CardDetailOpenedEvent {
 })
 export class BingoGameDesktopComponent {
   private readonly state = inject(PLAY_BINGO_IN_PORT);
+  @Input() quarterId: string = '';
 
   @ViewChild('playableBoard') private readonly playableBoardRef?: PlayableBoardDesktopComponent;
 
