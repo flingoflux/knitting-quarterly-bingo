@@ -31,8 +31,7 @@ export type PlayPlanMode = 'play' | 'plan';
     .play-plan-toggle {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      width: 100%;
-      max-width: min(24rem, 100%);
+      width: auto;
       border: 1px solid #be7759;
       border-radius: 999px;
       overflow: hidden;
@@ -46,7 +45,8 @@ export type PlayPlanMode = 'play' | 'plan';
       font: inherit;
       font-weight: 700;
       letter-spacing: 0.02em;
-      padding: 0.92rem 1rem;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
       cursor: pointer;
       transition: background 0.18s ease, color 0.18s ease;
     }
