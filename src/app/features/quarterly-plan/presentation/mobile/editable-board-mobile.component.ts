@@ -86,12 +86,14 @@ export class EditableBoardMobileComponent {
   @Output() challengeEdited = new EventEmitter<ChallengeEditedEvent>();
   @Output() reorderRequested = new EventEmitter<ReorderRequestedEvent>();
   @Output() editModeChanged = new EventEmitter<boolean>();
+  @Output() printRequested = new EventEmitter<void>();
   @Output() bingoStarted = new EventEmitter<void>();
 
   readonly editMode = signal(false);
   readonly fabActions = computed<FabGroupAction[]>(() =>
     this.editMode() ? [] : [
       { icon: 'edit', label: 'Bearbeiten' },
+      { icon: 'print', label: 'Drucken' },
       { icon: 'play', label: 'Bingo starten' }
     ]
   );
@@ -111,7 +113,8 @@ export class EditableBoardMobileComponent {
   onFabAction(index: number): void {
     if (index === -1) this.toggleEditMode(); // closeAction
     if (index === 0) this.toggleEditMode();  // 'Bearbeiten'
-    if (index === 1) this.bingoStarted.emit();
+    if (index === 1) this.printRequested.emit(); // 'Drucken'
+    if (index === 2) this.bingoStarted.emit(); // 'Bingo starten'
   }
 
   toggleEditMode(): void {

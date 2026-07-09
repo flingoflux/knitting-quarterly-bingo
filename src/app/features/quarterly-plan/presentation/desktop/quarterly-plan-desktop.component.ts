@@ -22,6 +22,8 @@ import { shuffleArray } from '../../../../shared/utils/array-utils';
     />
 
     <kq-board-toolbar-desktop
+      [showPrintButton]="true"
+      (printClicked)="printRequested.emit()"
     >
       <kq-button variant="icon" (click)="shuffle()" title="Felder würfeln" ariaLabel="Felder würfeln">
         <kq-icon name="shuffle" [size]="22"/>
@@ -47,6 +49,7 @@ export class QuarterlyPlanDesktopComponent {
 
   @Input() quarterId = '';
 
+  @Output() printRequested = new EventEmitter<void>();
   @Output() bingoStarted = new EventEmitter<void>();
 
   dragTargetIndex: number | null = null;

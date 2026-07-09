@@ -51,12 +51,14 @@ const PAGE_TOOLBAR_WIDTH_MOBILE = '52rem';
           (challengeEdited)="onChallengeEdited($event)"
           (reorderRequested)="onReorderRequested($event)"
           (editModeChanged)="onMobileEditModeChanged($event)"
+          (printRequested)="onPrintClick()"
           (bingoStarted)="onBingoStarted()"
         />
       } @else {
         <app-quarterly-plan-desktop
           #desktopView
           [quarterId]="displayedQuarterId()"
+          (printRequested)="onPrintClick()"
           (bingoStarted)="onBingoStarted()"
         />
       }
@@ -144,6 +146,22 @@ export class QuarterlyPlanComponent implements OnInit {
     const started = this.startBingoFromPlanService.startBingoFromPlan(quarterId);
     if (started) {
       void this.router.navigate(['/quarterly'], { queryParams: { quarter: this.actualCurrentQuarterId } });
+    }
+  }
+
+  onPrintClick(): void {
+    const urlTree = this.router.createUrlTree(['/quarterly-print'], {
+      queryParams: {
+        quarter: this.displayedQuarterId(),
+        mode: 'polaroid',
+      },
+    });
+
+    const printUrl = this.router.serializeUrl(urlTree);
+    const absoluteUrl = new URL(printUrl.replace(/^\//, ''), document.baseURI).toString();
+    const printWindow = window.open(absoluteUrl, '_blank');
+    if (printWindow) {
+      printWindow.opener = null;
     }
   }
 
