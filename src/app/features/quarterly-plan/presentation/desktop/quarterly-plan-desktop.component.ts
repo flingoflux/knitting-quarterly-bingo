@@ -18,7 +18,7 @@ import { shuffleArray } from '../../../../shared/utils/array-utils';
       [eyebrow]="quarterId"
       title="Challenges planen"
       titleTestId="page-quarterly-plan-title"
-      subtitle="Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten, Projekte anordnen und kreativ werden."
+      subtitle="Hier kannst du dein persönliches Bingo-Board für das nächste Knitting Quarterly gestalten."
     />
 
     <kq-board-toolbar-desktop
