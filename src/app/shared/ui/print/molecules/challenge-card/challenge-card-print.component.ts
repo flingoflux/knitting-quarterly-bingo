@@ -1,8 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { KqCardMode } from '../../../desktop/molecules/challenge-card/challenge-card-desktop.component';
-import { IconComponent } from '../../../common/atoms/icon/icon.component';
-import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.component';
 
 /**
  * Druckoptimierte Bingo-Karte.
@@ -12,23 +10,16 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
 @Component({
   selector: 'kq-print-challenge-card',
   standalone: true,
-  imports: [CommonModule, IconComponent, CardPhotoComponent],
+  imports: [CommonModule],
   template: `
     <div
-      class="card"
-      [class.card--polaroid]="mode === 'polaroid'"
-      [class.card--kompakt]="mode === 'kompakt'"
+      class="card card--polaroid"
       [class.card--done]="done"
       [class.card--bingo]="inBingo"
     >
       <div class="card__photo">
-        <kq-card-photo [imageUrl]="imageUrl" [alt]="name">
-          <div *ngIf="done" class="card__badge card__badge--done">
-            <kq-icon name="x-done" [size]="14" [strokeWidth]="2.2" />
-          </div>
-          <div *ngIf="inBingo && !done" class="card__badge card__badge--bingo">★</div>
-          <div *ngIf="!done && !inBingo" class="card__badge card__badge--empty"></div>
-        </kq-card-photo>
+        <img *ngIf="imageUrl" [src]="imageUrl" [alt]="name" class="card__img" draggable="false" />
+        <div *ngIf="!imageUrl" class="card__placeholder" aria-hidden="true"></div>
       </div>
 
       <div class="card__caption">
@@ -53,42 +44,30 @@ import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.
     /* ── Foto-Bereich ── */
     .card__photo {
       position: relative;
-      background: var(--kq-photo-bg);
+      background: #fff;
       overflow: hidden;
       flex-shrink: 0;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
-      --kq-card-photo-logo-max-size: 48px;
-    }
-    /* ── Badge ── */
-    .card__badge {
-      position: absolute;
-      top: 4px;
-      border-radius: 50%;
-      width: 18px;
-      height: 18px;
-      font-size: 10px;
-      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      line-height: 1;
     }
-    .card__badge--done {
-      left: 4px;
-      background: #fffef8;
-      border: 0.35mm solid #c9b49a;
-      color: #7a1010;
+    .card__img,
+    .card__placeholder {
+      width: calc(100% - 12px);
+      height: calc(100% - 12px);
+      border-radius: 2px;
     }
-    .card__badge--bingo {
-      right: 4px;
-      background: #b8860b;
-      color: #fff;
+    .card__img {
+      object-fit: cover;
+      display: block;
+      -webkit-user-drag: none;
+      user-select: none;
     }
-    .card__badge--empty {
-      left: 4px;
+    .card__placeholder {
       background: #fff;
-      border: 0.3mm solid #c9b49a;
+      border: 0.5px solid #d7c7b5;
     }
 
     /* ── Caption ── */

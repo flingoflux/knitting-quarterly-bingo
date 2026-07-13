@@ -6,8 +6,6 @@ import { PLAN_QUARTERLY_IN_PORT } from './features/quarterly-plan/application/po
 import { PlanQuarterlyUseCase } from './features/quarterly-plan/application/plan-quarterly.use-case';
 import { START_BINGO_FROM_PLAN_IN_PORT } from './features/bingo-game/application/ports/in/start-bingo-from-plan.in-port';
 import { StartBingoFromPlanUseCase } from './features/bingo-game/application/start-bingo-from-plan.use-case';
-import { SHOW_ARCHIVE_OVERVIEW_IN_PORT } from './features/archive/application/ports/in/show-archive-overview.in-port';
-import { ShowArchiveOverviewUseCase } from './features/archive/application/show-archive-overview.use-case';
 import { ShowQuarterlyProgressUseCase } from './features/start-page/application/show-quarterly-progress.use-case';
 import { SHOW_QUARTERLY_PROGRESS_IN_PORT } from './features/start-page/application/ports/in/show-quarterly-progress.in-port';
 
@@ -21,7 +19,19 @@ export const routes: Routes = [
     component: StartPageComponent,
   },
   {
-    path: 'quarterly',
+    path: 'play',
+    providers: [
+      PlayBingoUseCase,
+      { provide: PLAY_BINGO_IN_PORT, useExisting: PlayBingoUseCase },
+      PlanQuarterlyUseCase,
+      { provide: PLAN_QUARTERLY_IN_PORT, useExisting: PlanQuarterlyUseCase },
+      StartBingoFromPlanUseCase,
+      { provide: START_BINGO_FROM_PLAN_IN_PORT, useExisting: StartBingoFromPlanUseCase },
+    ],
+    loadComponent: () => import('./features/quarter-lifecycle/presentation/quarterly-view-page.component').then(m => m.QuarterlyViewPageComponent),
+  },
+  {
+    path: 'plan',
     providers: [
       PlayBingoUseCase,
       { provide: PLAY_BINGO_IN_PORT, useExisting: PlayBingoUseCase },
@@ -46,22 +56,14 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'play',
-    redirectTo: 'quarterly',
+    path: 'quarterly',
+    redirectTo: 'play',
     pathMatch: 'full',
   },
   {
     path: 'edit',
-    redirectTo: 'quarterly',
+    redirectTo: 'plan',
     pathMatch: 'full',
-  },
-  {
-    path: 'archive',
-    providers: [
-      ShowArchiveOverviewUseCase,
-      { provide: SHOW_ARCHIVE_OVERVIEW_IN_PORT, useExisting: ShowArchiveOverviewUseCase },
-    ],
-    loadComponent: () => import('./features/archive/presentation/archive.component').then(m => m.ArchiveComponent),
   },
   {
     path: 'how-it-works',

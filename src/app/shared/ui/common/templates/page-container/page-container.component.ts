@@ -13,6 +13,7 @@ import { Component } from '@angular/core';
       margin-left: auto;
       margin-right: auto;
       padding-top: 1rem;
+      padding-bottom: 2rem;
     }
 
     @media (max-width: 52rem) {

@@ -1,4 +1,4 @@
-import { Component, HostBinding, Input } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
 
 /**
  * Print-only 4×4 board grid.
@@ -20,18 +20,8 @@ import { Component, HostBinding, Input } from '@angular/core';
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-    :host(.mode-kompakt) {
-      gap: 0.4rem;
-    }
   `]
 })
 export class BoardGridPrintComponent {
-  @Input() set mode(value: 'polaroid' | 'kompakt') {
-    this._mode = value;
-  }
-  get mode(): 'polaroid' | 'kompakt' { return this._mode; }
-  private _mode: 'polaroid' | 'kompakt' = 'polaroid';
-
-  @HostBinding('class.mode-polaroid') get isPolaroid(): boolean { return this._mode === 'polaroid'; }
-  @HostBinding('class.mode-kompakt') get isKompakt(): boolean { return this._mode === 'kompakt'; }
+  @HostBinding('class.mode-polaroid') readonly isPolaroid = true;
 }

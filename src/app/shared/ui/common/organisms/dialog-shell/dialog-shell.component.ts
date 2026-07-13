@@ -84,7 +84,7 @@ import { IconComponent } from '../../atoms/icon/icon.component';
       font-weight: 700;
       color: var(--kq-text-heading, var(--kq-text-warm));
       text-align: center;
-      padding-right: 2rem;
+      padding-inline: 2rem;
       text-wrap: balance;
     }
 

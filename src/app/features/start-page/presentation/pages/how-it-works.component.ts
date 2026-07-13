@@ -5,12 +5,8 @@ import { PageContainerComponent } from '../../../../shared/ui/common/templates/p
 import { IconComponent } from '../../../../shared/ui/common/atoms/icon/icon.component';
 import { ButtonComponent } from '../../../../shared/ui/common/atoms/button/button.component';
 import { FeatureHeaderComponent } from '../../../../shared/ui/common/molecules/feature-header/feature-header.component';
-import { BoardViewMode } from '../../../user-settings/domain/board-view-mode';
-import { LayoutMode } from '../../../user-settings/domain/layout-mode';
-import { MANAGE_USER_SETTINGS_IN_PORT } from '../../../user-settings/application/ports/in/manage-user-settings.in-port';
 import { StorageService } from '../../../../core/infrastructure/storage.service';
 import { IndexedDbImageRepository } from '../../../../core/infrastructure/indexed-db-image-repository.service';
-import { LayoutModeService } from '../../../../shared/utils/layout-mode.service';
 
 @Component({
   selector: 'app-how-to',
@@ -20,7 +16,6 @@ import { LayoutModeService } from '../../../../shared/utils/layout-mode.service'
     <kq-page-container>
       <kq-page-toolbar
         [maxWidth]="pageToolbarWidth"
-        [showQuarterNav]="false"
         (homeClicked)="goHome()"
       >
         <kq-button toolbar-actions testId="action-toolbar-help" variant="icon" (click)="goToHelp()" title="Wie funktioniert Knitting Quarterly?" ariaLabel="Wie funktioniert Knitting Quarterly?">
@@ -93,78 +88,8 @@ import { LayoutModeService } from '../../../../shared/utils/layout-mode.service'
         <section id="settings" class="section settings-section" aria-labelledby="howto-settings-title">
           <h2 id="howto-settings-title" class="section-title"><kq-icon name="settings-feather" [size]="18"/>Einstellungen</h2>
           <p class="settings-intro">
-            Passe die Ansicht an oder setze lokale Daten zurück.
+            Desktop und Tablet nutzen die Polaroid-Ansicht. Auf Mobilgeräten ist der Stapelbutton aktiv.
           </p>
-          <div class="settings-subsection board-view-subsection">
-            <h3>Desktop-Board-Ansicht</h3>
-            <p class="view-mode-note">
-              Wähle einen Modus. Er gilt sofort für Spielen und Planen.
-            </p>
-            <div class="mode-options" role="group" aria-label="Board-Ansicht wählen">
-              <button
-                type="button"
-                class="mode-option"
-                [class.active]="viewMode === 'polaroid'"
-                [attr.aria-pressed]="viewMode === 'polaroid'"
-                (click)="onModeChange('polaroid')"
-              >
-                <span class="mode-option-title"><kq-icon name="polaroid" [size]="16"/>Polaroid</span>
-                <span class="mode-option-copy">Zeigt Karten im Polaroid-Look, wie auf einem Moodboard angeordnet.</span>
-              </button>
-
-              <button
-                type="button"
-                class="mode-option"
-                [class.active]="viewMode === 'kompakt'"
-                [attr.aria-pressed]="viewMode === 'kompakt'"
-                (click)="onModeChange('kompakt')"
-              >
-                <span class="mode-option-title"><kq-icon name="horizontal" [size]="16"/>Kompakt</span>
-                <span class="mode-option-copy">Zeigt mehr Felder gleichzeitig für schnellen Überblick.</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="settings-subsection">
-            <h3>Darstellungsmodus</h3>
-            <p class="view-mode-note">
-              Wähle, ob das Board-Layout automatisch nach Bildschirmgröße, immer als Desktop- oder immer als Mobile-Ansicht angezeigt werden soll.
-            </p>
-            <div class="mode-options layout-mode-options" role="group" aria-label="Darstellungsmodus wählen">
-              <button
-                type="button"
-                class="mode-option"
-                [class.active]="layoutMode.layoutMode() === 'auto'"
-                [attr.aria-pressed]="layoutMode.layoutMode() === 'auto'"
-                (click)="onLayoutModeChange('auto')"
-              >
-                <span class="mode-option-title"><kq-icon name="target" [size]="16"/>Auto</span>
-                <span class="mode-option-copy">Smartphone/Tablet → Mobile, große Bildschirme → Desktop.</span>
-              </button>
-
-              <button
-                type="button"
-                class="mode-option"
-                [class.active]="layoutMode.layoutMode() === 'desktop'"
-                [attr.aria-pressed]="layoutMode.layoutMode() === 'desktop'"
-                (click)="onLayoutModeChange('desktop')"
-              >
-                <span class="mode-option-title"><kq-icon name="horizontal" [size]="16"/>Desktop</span>
-                <span class="mode-option-copy">Immer die Desktop-Ansicht — auch auf kleinen Screens.</span>
-              </button>
-
-              <button
-                type="button"
-                class="mode-option"
-                [class.active]="layoutMode.layoutMode() === 'mobile'"
-                [attr.aria-pressed]="layoutMode.layoutMode() === 'mobile'"
-                (click)="onLayoutModeChange('mobile')"
-              >
-                <span class="mode-option-title"><kq-icon name="polaroid" [size]="16"/>Mobile</span>
-                <span class="mode-option-copy">Immer die Mobile-Ansicht — auch auf Desktop.</span>
-              </button>
-            </div>
-          </div>
 
           <div class="settings-subsection settings-subsection-danger">
             <h3 class="settings-danger-title">
@@ -408,10 +333,6 @@ import { LayoutModeService } from '../../../../shared/utils/layout-mode.service'
         padding: 1.5rem;
       }
 
-      .board-view-subsection {
-        display: none;
-      }
-
       .mode-options {
         grid-template-columns: 1fr;
       }
@@ -428,13 +349,10 @@ import { LayoutModeService } from '../../../../shared/utils/layout-mode.service'
 })
 export class HowItWorksComponent {
   private readonly router = inject(Router);
-  private readonly userSettings = inject(MANAGE_USER_SETTINGS_IN_PORT);
   private readonly storage = inject(StorageService);
   private readonly imageRepo = inject(IndexedDbImageRepository);
-  readonly layoutMode = inject(LayoutModeService);
 
   readonly pageToolbarWidth = '52rem';
-  viewMode: BoardViewMode = this.userSettings.loadBoardViewMode();
 
   goHome(): void {
     this.router.navigate(['/']);
@@ -446,15 +364,6 @@ export class HowItWorksComponent {
 
   goToSettings(): void {
     void this.router.navigate([], { fragment: 'settings' });
-  }
-
-  onModeChange(mode: BoardViewMode): void {
-    this.viewMode = mode;
-    this.userSettings.persistBoardViewMode(mode);
-  }
-
-  onLayoutModeChange(mode: LayoutMode): void {
-    this.layoutMode.persistLayoutMode(mode);
   }
 
   async clearAllData(): Promise<void> {

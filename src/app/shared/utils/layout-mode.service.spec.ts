@@ -7,35 +7,13 @@ const source = readFileSync(
   'utf-8'
 );
 
-describe('LayoutModeService – Auto iPad-Erkennung', () => {
-  it('Phone-Breakpoint ist auf max-width 767px gesetzt', () => {
+describe('LayoutModeService', () => {
+  it('nutzt nur den Phone-Breakpoint für den Mobile-Modus', () => {
     expect(source).toContain("PHONE_BREAKPOINT = '(max-width: 767px)'");
+    expect(source).toContain('window.matchMedia(PHONE_BREAKPOINT).matches');
   });
 
-  it('Tablet-Touch-Breakpoint erfasst iPads per any-pointer: coarse bis 1366px', () => {
-    expect(source).toContain("TABLET_TOUCH_BREAKPOINT = '(max-width: 1366px) and (any-pointer: coarse)'");
-  });
-
-  it('matchesAutoMobileQuery prüft beide Breakpoints per ODER-Verknüpfung', () => {
-    expect(source).toContain('matchMedia(PHONE_BREAKPOINT).matches');
-    expect(source).toContain('matchMedia(TABLET_TOUCH_BREAKPOINT).matches');
-  });
-
-  it('beide Queries werden im Konstruktor als Event-Listener registriert', () => {
-    expect(source).toContain("window.matchMedia(PHONE_BREAKPOINT)");
-    expect(source).toContain("window.matchMedia(TABLET_TOUCH_BREAKPOINT)");
-    expect(source).toContain("addEventListener('change', onChange)");
-  });
-
-  it('manueller Override "mobile" gibt true zurück unabhängig von System-Query', () => {
-    expect(source).toContain("if (mode === 'mobile') return true;");
-  });
-
-  it('manueller Override "desktop" gibt false zurück unabhängig von System-Query', () => {
-    expect(source).toContain("if (mode === 'desktop') return false;");
-  });
-
-  it('Auto-Modus delegiert an systemIsMobile', () => {
-    expect(source).toContain('return this.systemIsMobile();');
+  it('behandelt Tablet nicht mehr als Mobile per Touch-Breakpoint', () => {
+    expect(source).not.toContain('TABLET_TOUCH_BREAKPOINT');
   });
 });

@@ -4,7 +4,7 @@ import { IconComponent } from '../../../common/atoms/icon/icon.component';
 import { BadgeComponent } from '../../../common/atoms/badge/badge.component';
 import { CardPhotoComponent } from '../../../common/atoms/card-photo/card-photo.component';
 
-export type KqCardMode = 'polaroid' | 'kompakt';
+export type KqCardMode = 'polaroid';
 
 /**
  * Wiederverwendbare Bingo-Karte (Molecule).
@@ -27,18 +27,16 @@ export type KqCardMode = 'polaroid' | 'kompakt';
   imports: [CommonModule, IconComponent, BadgeComponent, CardPhotoComponent],
   template: `
     <div
-      class="card"
-      [class.card--polaroid]="mode === 'polaroid'"
-      [class.card--kompakt]="mode === 'kompakt'"
+      class="card card--polaroid"
       [class.card--done]="done"
       [class.card--bingo]="inBingo"
       [class.card--hoverable]="hoverable"
-      [style.--kq-card-photo-logo-max-size.px]="mode === 'kompakt' ? 24 : 58"
+      [style.--kq-card-photo-logo-max-size.px]="58"
     >
       <div class="card__photo" [class.card__photo--editing]="editing">
         <kq-card-photo [imageUrl]="imageUrl" [alt]="name">
-          <kq-badge *ngIf="done" variant="done" [compact]="mode === 'kompakt'"/>
-          <kq-badge *ngIf="inBingo" variant="bingo" [compact]="mode === 'kompakt'"/>
+          <kq-badge *ngIf="done" variant="done"/>
+          <kq-badge *ngIf="inBingo" variant="bingo"/>
 
           <button
             *ngIf="showCameraButton"
@@ -172,40 +170,6 @@ export type KqCardMode = 'polaroid' | 'kompakt';
       text-align: center;
     }
 
-    /* ── Kompakt-Modus ── */
-    .card--kompakt {
-      flex-direction: row;
-      align-items: stretch;
-      height: 4.8rem;
-      --kq-card-title-lines: var(--kq-card-title-lines-kompakt, 3);
-    }
-    .card--kompakt.card--hoverable:hover {
-      transform: translateY(-2px) rotate(0deg);
-    }
-    .card--kompakt .card__photo {
-      width: 4.8rem;
-      height: 4.8rem;
-      aspect-ratio: unset;
-      flex-shrink: 0;
-    }
-    .card--kompakt .card__camera-btn {
-      width: 22px;
-      height: 22px;
-      bottom: 4px;
-      right: 4px;
-    }
-    .card--kompakt .card__caption {
-      flex: 1;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 0.35rem 0.5rem 0.35rem 0.45rem;
-      min-height: unset;
-      overflow: hidden;
-    }
-    .card--kompakt .card__title {
-      font-size: 0.7rem;
-      text-align: left;
-    }
   `],
 })
 export class ChallengeCardDesktopComponent {

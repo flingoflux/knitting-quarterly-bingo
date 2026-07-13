@@ -1,10 +1,12 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { KnittingQuarterly, QuarterClock, type QuarterlyPhase } from '../../../core/domain';
+import { QuarterClock } from '../../../core/domain';
 import { BingoGameComponent } from '../../bingo-game/presentation/bingo-game.component';
 import { QuarterlyPlanComponent } from '../../quarterly-plan/presentation/quarterly-plan.component';
 import { QuarterlyViewTemplateComponent } from '../../../shared/ui';
+
+export type ViewMode = 'play' | 'plan';
 
 @Component({
   selector: 'app-quarterly-view-page',
@@ -12,10 +14,10 @@ import { QuarterlyViewTemplateComponent } from '../../../shared/ui';
   imports: [QuarterlyViewTemplateComponent, BingoGameComponent, QuarterlyPlanComponent],
   template: `
     <kq-quarterly-view-template>
-      @if (viewType() === 'play') {
-        <app-bingo-game />
-      } @else if (viewType() === 'edit') {
-        <app-quarterly-plan />
+      @if (viewMode() === 'play') {
+        <app-bingo-game (modeChanged)="onModeChanged($event)" />
+      } @else if (viewMode() === 'plan') {
+        <app-quarterly-plan (modeChanged)="onModeChanged($event)" />
       }
     </kq-quarterly-view-template>
   `,
@@ -24,53 +26,24 @@ export class QuarterlyViewPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly quarterClock = new QuarterClock();
 
-  private readonly resolvedQuarterId = signal<string | null>(null);
-  private readonly currentQuarterId = this.quarterClock.getQuarterId(new Date());
-
-  readonly viewType = computed<'play' | 'edit' | null>(() => {
-    const quarterId = this.resolvedQuarterId();
-    if (!quarterId) {
-      return null;
-    }
-
-    const phase = this.phaseForQuarter(quarterId);
-    if (phase === 'past') {
-      return null;
-    }
-
-    return phase === 'future' ? 'edit' : 'play';
-  });
+  readonly viewMode = signal<ViewMode>('play');
 
   constructor() {
-    this.route.queryParamMap
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(params => {
-        const quarterId = params.get('quarter');
-        if (!quarterId) {
-          void this.router.navigate(['/quarterly'], {
-            queryParams: {
-              ...this.route.snapshot.queryParams,
-              quarter: this.currentQuarterId,
-            },
-          });
-          return;
+    // Determine view mode from route path
+    effect(() => {
+      const url = this.route.url;
+      url.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(segments => {
+        if (segments.length > 0 && segments[0].path === 'plan') {
+          this.viewMode.set('plan');
+        } else {
+          this.viewMode.set('play');
         }
-
-        if (this.phaseForQuarter(quarterId) === 'past') {
-          void this.router.navigate(['/archive']);
-          return;
-        }
-
-        this.resolvedQuarterId.set(quarterId);
       });
+    });
   }
 
-  private phaseForQuarter(quarterId: string): QuarterlyPhase {
-    const quarterly = KnittingQuarterly.create({
-      quarterId,
-    });
-    return quarterly.phaseAt(this.currentQuarterId);
+  onModeChanged(mode: ViewMode): void {
+    void this.router.navigate([`/${mode}`]);
   }
 }

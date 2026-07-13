@@ -26,30 +26,14 @@ describe('LocalStorageUserSettingsRepository', () => {
   });
 
   it('should persist selected board view mode', () => {
-    repository.persistBoardViewMode('kompakt');
-
-    expect(repository.loadBoardViewMode()).toBe('kompakt');
-  });
-
-  it('should reset invalid persisted setting to default mode', () => {
-    storage.setItem('kq-bingo-user-setting-board-view-mode-v1', 'grid');
+    repository.persistBoardViewMode('polaroid');
 
     expect(repository.loadBoardViewMode()).toBe('polaroid');
   });
 
-  it('should return auto as default layout mode when no setting exists', () => {
-    expect(repository.loadLayoutMode()).toBe('auto');
-  });
+  it('should reset invalid persisted setting to default mode', () => {
+    storage.setItem('kq-bingo-user-setting-board-view-mode-v1', 'kompakt');
 
-  it('should persist selected layout mode', () => {
-    repository.persistLayoutMode('mobile');
-
-    expect(repository.loadLayoutMode()).toBe('mobile');
-  });
-
-  it('should reset invalid layout mode to default', () => {
-    storage.setItem('kq-bingo-user-setting-layout-mode-v1', 'tablet');
-
-    expect(repository.loadLayoutMode()).toBe('auto');
+    expect(repository.loadBoardViewMode()).toBe('polaroid');
   });
 });

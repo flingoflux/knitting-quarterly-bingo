@@ -13,7 +13,7 @@ import { KnittingQuarterly, QuarterClock } from '../../../../core/domain';
   standalone: true,
   imports: [CommonModule, BoardGridPrintComponent, ChallengeCardPrintComponent],
   template: `
-    <main class="print-view" [class.mode-kompakt]="mode() === 'kompakt'" [class.mode-polaroid]="mode() === 'polaroid'">
+    <main class="print-view mode-polaroid">
       <header class="print-header">
         <img class="print-logo" src="assets/logo.svg" alt="Knitting Quarterly Logo" />
         <div class="print-header-text">
@@ -23,12 +23,11 @@ import { KnittingQuarterly, QuarterClock } from '../../../../core/domain';
         </div>
       </header>
 
-      <kq-print-board-grid [mode]="mode()">
+      <kq-print-board-grid>
         <kq-print-challenge-card
           *ngFor="let challenge of challenges(); let i = index"
           [name]="challenge.name"
           [imageUrl]="getImage(challenge.progressImageId ?? challenge.planningImageId)"
-          [mode]="mode()"
           [done]="completed()[i]"
           [inBingo]="isCellInBingo(i)"
         />
@@ -238,7 +237,7 @@ export class BingoBoardPrintComponent {
   private applyOrientationStyle(): void {
     this.removeOrientationStyle();
 
-    const orientation = this.mode() === 'kompakt' ? 'landscape' : 'portrait';
+    const orientation = 'portrait';
     const styleElement = document.createElement('style');
     styleElement.setAttribute('data-kq-print-orientation', orientation);
     styleElement.textContent = `@page { size: A4 ${orientation}; margin: 12mm; }`;

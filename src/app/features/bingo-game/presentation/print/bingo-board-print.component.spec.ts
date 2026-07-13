@@ -12,14 +12,15 @@ describe('BingoBoardPrintComponent regression', () => {
     expect(source).toContain("const resolvedMode = isBoardViewMode(modeParam) ? modeParam : 'polaroid';");
   });
 
-  it('should use landscape orientation for kompakt and portrait otherwise', () => {
+  it('should always use portrait orientation', () => {
     const source = readFileSync(
       resolve(process.cwd(), 'src/app/features/bingo-game/presentation/print/bingo-board-print.component.ts'),
       'utf-8'
     );
 
-    expect(source).toContain("const orientation = this.mode() === 'kompakt' ? 'landscape' : 'portrait';");
-    expect(source).toContain("styleElement.textContent = `@page { size: A4 ${orientation}; margin: 12mm; }`;");
+    expect(source).toContain("const orientation = 'portrait';");
+    expect(source).toContain('styleElement.textContent = `@page { size: A4 ${orientation}; margin: 12mm; }`;');
+    expect(source).not.toContain("'kompakt'");
   });
 
   it('should clean up orientation style after print', () => {

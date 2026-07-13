@@ -3,15 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Challenge } from '../../../../shared/domain/challenge';
 import { ImageRepository, IMAGE_REPOSITORY } from '../../../../shared/ports/image-repository';
 import { PlanEditCardMobileComponent } from './plan-edit-card-mobile.component';
-import { FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent } from '../../../../shared/ui';
+import { FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridComponent, EditListMobileComponent } from '../../../../shared/ui';
 import type { FabGroupAction } from '../../../../shared/ui';
 
 interface ChallengeEditedEvent {
-  index: number;
-  challenge: Challenge;
-}
-
-interface CardDetailOpenedEvent {
   index: number;
   challenge: Challenge;
 }
@@ -24,18 +19,18 @@ interface ReorderRequestedEvent {
 @Component({
   selector: 'app-mobile-editable-board',
   standalone: true,
-  imports: [CommonModule, PlanEditCardMobileComponent, FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridMobileComponent, EditListMobileComponent],
+  imports: [CommonModule, PlanEditCardMobileComponent, FabGroupMobileComponent, ChallengeCardMobileComponent, BoardGridComponent, EditListMobileComponent],
   template: `
     <!-- Read-only Mini-Grid (4×4 Polaroids) -->
     @if (!editMode()) {
-      <kq-board-grid-mobile>
+      <kq-board-grid mode="mobile">
         @for (p of challenges; track p.name; let i = $index) {
           <kq-challenge-card-mobile
             [name]="p.name"
             [imageUrl]="getImage(p.imageId)"
           />
         }
-      </kq-board-grid-mobile>
+      </kq-board-grid>
     }
 
     <!-- Edit-Liste mit Umbenennungs-, Foto- und Sortierfunktion -->
@@ -49,7 +44,6 @@ interface ReorderRequestedEvent {
             [draftName]="getDraftName(i, p.name)"
             [isFirst]="i === 0"
             [isLast]="i === challenges.length - 1"
-            (cameraClicked)="openDetail(i, p, $event)"
             (editToggled)="startEditing(i, p, $event)"
             (editCancelled)="cancelEditing()"
             (movedUp)="moveUp(i)"
@@ -76,7 +70,7 @@ interface ReorderRequestedEvent {
 })
 export class EditableBoardMobileComponent {
   static readonly overviewSubtitle = 'Tippe auf eine Karte, um sie umzudrehen.';
-  static readonly editSubtitle = 'Du kannst jetzt Projekte umbenennen, die Reihenfolge anpassen und Fotos bearbeiten.';
+  static readonly editSubtitle = 'Du kannst jetzt Projekte umbenennen und die Reihenfolge anpassen.';
 
   private readonly el = inject(ElementRef);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -90,15 +84,16 @@ export class EditableBoardMobileComponent {
   get challenges(): Challenge[] { return this._challenges; }
 
   @Output() challengeEdited = new EventEmitter<ChallengeEditedEvent>();
-  @Output() cardDetailOpened = new EventEmitter<CardDetailOpenedEvent>();
   @Output() reorderRequested = new EventEmitter<ReorderRequestedEvent>();
   @Output() editModeChanged = new EventEmitter<boolean>();
+  @Output() printRequested = new EventEmitter<void>();
   @Output() bingoStarted = new EventEmitter<void>();
 
   readonly editMode = signal(false);
   readonly fabActions = computed<FabGroupAction[]>(() =>
     this.editMode() ? [] : [
       { icon: 'edit', label: 'Bearbeiten' },
+      { icon: 'print', label: 'Drucken' },
       { icon: 'play', label: 'Bingo starten' }
     ]
   );
@@ -115,21 +110,11 @@ export class EditableBoardMobileComponent {
     return this.imageCache.get(imageId) ?? null;
   }
 
-  async refreshImage(imageId: string | null): Promise<void> {
-    if (!imageId) return;
-    const url = await this.imageRepo.getImage(imageId);
-    if (url) {
-      this.imageCache.set(imageId, url);
-    } else {
-      this.imageCache.delete(imageId);
-    }
-    this.cdr.markForCheck();
-  }
-
   onFabAction(index: number): void {
     if (index === -1) this.toggleEditMode(); // closeAction
     if (index === 0) this.toggleEditMode();  // 'Bearbeiten'
-    if (index === 1) this.bingoStarted.emit();
+    if (index === 1) this.printRequested.emit(); // 'Drucken'
+    if (index === 2) this.bingoStarted.emit(); // 'Bingo starten'
   }
 
   toggleEditMode(): void {
@@ -166,11 +151,6 @@ export class EditableBoardMobileComponent {
 
   cancelEditing(): void {
     this.editingIndex = null;
-  }
-
-  openDetail(i: number, challenge: Challenge, event: MouseEvent): void {
-    event.stopPropagation();
-    this.cardDetailOpened.emit({ index: i, challenge });
   }
 
   getDraftName(i: number, fallback: string): string {
